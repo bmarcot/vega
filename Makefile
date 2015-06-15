@@ -9,7 +9,7 @@ CFLAGS = -mcpu=$(CPU) -mthumb
 LDFLAGS = -Tentry.ld
 
 SSRC = head.S
-CSRC = main.c
+CSRC = main.c uart.c
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
