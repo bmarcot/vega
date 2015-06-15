@@ -14,4 +14,4 @@ _start:				@ FIXME: rename as reset handler
 	mov	r0, #5		@ FIXME: dummy instructions...
 	mov	r1, #4
 	add	r2, r1, r0
-1:	b	1b		@ FIXME: branch to start_kernel()
+	b	start_kernel
