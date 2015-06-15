@@ -1,6 +1,6 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_start)
+ENTRY(cold_reset)
 
 MEMORY
 {
@@ -10,7 +10,15 @@ MEMORY
 
 SECTIONS
 {
-    .text : {
+    .vector.early : {
+    	*(.vector.early)
+    } > rom
+
+    .vector ALIGN(128) : {
+    	*(.vector)
+    } > rom
+
+    .text ALIGN(8) : {
         *(.text)
 	*(.text.*)
 	*(.rodata)
