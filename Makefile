@@ -16,7 +16,7 @@ OBJS += $(CSRC:.c=.o)
 all: entry.elf
 
 entry.elf: $(OBJS)
-	$(LD) -nostdlibs -nodefaultlibs -nostartfiles -o $@ $(LDFLAGS) $^
+	$(LD) -nostdlibs -nodefaultlibs -nostartfiles -Map entry.map -o $@ $(LDFLAGS) $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nodefaultlibs -nostartfiles $<
@@ -25,7 +25,7 @@ entry.elf: $(OBJS)
 	$(AS) -o $@ $(CFLAGS) $<
 
 clean:
-	rm -f *.o *~
+	rm -f *.o *~ entry.map
 
 distclean: clean
 	rm -f entry.elf
