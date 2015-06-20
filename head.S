@@ -71,9 +71,20 @@
 1:	.string	"\m"
 	.endm	/* early_fault */
 
+	.set	V7M_SCB_BASE, 0xe000ed00
+	.set	V7M_SHCSR, 0x24
+	.set    V7M_SHCSR_USGFAULTENA, (1 << 18)
+	.set    V7M_SHCSR_BUSFAULTENA, (1 << 17)
+	.set    V7M_SHCSR_MEMFAULTENA, (1 << 16)
+
 	.balign	8
 	.global	cold_reset
 cold_reset:
+	ldr     r0, =V7M_SCB_BASE
+	ldr   	r1, =(V7M_SHCSR_USGFAULTENA | V7M_SHCSR_BUSFAULTENA | V7M_SHCSR_MEMFAULTENA)
+	str   	r1, [r0, #V7M_SHCSR]
+	dsb	sy
+	isb	sy
 	b	start_kernel
 
 	.balign	8
