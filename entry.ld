@@ -15,6 +15,7 @@ SECTIONS
     } > rom
 
     .vector ALIGN(128) : {
+    	PROVIDE(vector_base = .);
     	*(.vector)
     } > rom
 

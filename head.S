@@ -55,7 +55,7 @@
 	.long	0				@ Debug Monitor
 	.long	0				@ Reserved
 	.long	0				@ PendSV
-	.long	0				@ SysTick
+	.long	(systick + THUMB_MODE)		@ SysTick
 	.long	0				@ External Interrupt
 	// FIXME: the other handlers for exceptions and external
 	// interrupts go here...
