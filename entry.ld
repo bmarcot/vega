@@ -35,4 +35,10 @@ SECTIONS
         *(.bss)
         *(COMMON)
     } > ram
+
+    .heap ALIGN(32) : {
+        PROVIDE(heap_base = .);
+        . += 4k;
+        PROVIDE(heap_limit = .);
+    } > ram
 }

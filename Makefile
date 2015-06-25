@@ -9,14 +9,14 @@ CFLAGS = -mcpu=$(CPU) -mthumb
 LDFLAGS = -Tentry.ld
 
 SSRC = head.S entry.S
-CSRC = main.c uart.c systick.c
+CSRC = main.c uart.c systick.c backend.c
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
 all: entry.elf
 
 entry.elf: $(OBJS)
-	$(LD) -nostdlibs -nodefaultlibs -nostartfiles -Map entry.map -o $@ $(LDFLAGS) $^
+	$(LD) -nodefaultlibs -nostartfiles -Map entry.map -o $@ $(LDFLAGS) $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nodefaultlibs -nostartfiles $<

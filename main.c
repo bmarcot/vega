@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "uart.h"
 #include "systick.h"
 
@@ -7,7 +9,8 @@ extern void set_vtor(void *);
 void start_kernel(void)
 {
     uart_enable();
-    uart_putstring("the k2 microkernel.\n");
+
+    printf("the k2 microkernel.\n");
 
     set_vtor(&vector_base);
 
