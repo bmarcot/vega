@@ -10,7 +10,7 @@ void start_kernel(void)
 {
     uart_enable();
 
-    printf("the k2 microkernel.\n");
+    printf("the k2 microkernel v%d.%d\n", 0, 1);
 
     set_vtor(&vector_base);
 

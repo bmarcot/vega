@@ -4,9 +4,9 @@ MACHINE= lm3s6965evb
 CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
 AS = $(CROSS)as
-LD = $(CROSS)ld
+# LD = $(CROSS)gcc
 CFLAGS = -mcpu=$(CPU) -mthumb
-LDFLAGS = -Tentry.ld
+LDFLAGS = -Wl,-Tentry.ld
 
 SSRC = head.S entry.S
 CSRC = main.c uart.c systick.c backend.c
@@ -16,10 +16,10 @@ OBJS += $(CSRC:.c=.o)
 all: entry.elf
 
 entry.elf: $(OBJS)
-	$(LD) -nodefaultlibs -nostartfiles -Map entry.map -o $@ $(LDFLAGS) $^
+	$(CC) -mthumb -march=armv7e-m -nostartfiles -Wl,-Map=entry.map $(LDFLAGS) -o $@ $^
 
 %.o: %.c
-	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nodefaultlibs -nostartfiles $<
+	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nostartfiles $<
 
 %.o: %.S
 	$(AS) -o $@ $(CFLAGS) $<
