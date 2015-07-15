@@ -41,4 +41,10 @@ SECTIONS
         . += 4k;
         PROVIDE(heap_limit = .);
     } > ram
+
+    .pgpool ALIGN(1k) : {
+        PROVIDE(pgpool_base = .);
+        . += 32k;
+        PROVIDE(pgpool_limit = .);
+    } > ram
 }
