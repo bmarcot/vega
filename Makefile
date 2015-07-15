@@ -6,7 +6,7 @@ CC = $(CROSS)gcc
 AS = $(CROSS)as
 # LD = $(CROSS)gcc
 CFLAGS = -mcpu=$(CPU) -mthumb
-LDFLAGS = -Wl,-Tentry.ld
+LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC = head.S entry.S
 CSRC = main.c uart.c systick.c backend.c
