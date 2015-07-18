@@ -7,7 +7,7 @@
 extern void *vector_base;
 extern void set_vtor(void *);
 
-void start_kernel(void)
+int start_kernel(void)
 {
     uart_enable();
 
@@ -23,6 +23,12 @@ void start_kernel(void)
     systick_init(0x227811);
     systick_enable();
 
+    return 0;
+}
+
+void cpu_locked(int errno)
+{
+    printf("%d: cpu locked\n", errno);
     for (;;)
-	;
+    	;
 }

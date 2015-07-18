@@ -11,6 +11,7 @@ MEMORY
 SECTIONS
 {
     .vector.early : {
+    	PROVIDE(vtor_early_base = .);
     	*(.vector.early)
     } > rom
 
@@ -34,6 +35,18 @@ SECTIONS
     .bss : {
         *(.bss)
         *(COMMON)
+    } > ram
+
+    /* 
+     * This vector is used as a trampoline to Handler_Mode
+     * and lives only for a few instructions. It should not
+     * allocate any physical memory for that purpose.
+     * Instead overlay that section and another, or reclaim
+     * that memory after kernel is started.
+     */
+    .vector.trampoline ALIGN(128) : {
+        PROVIDE(vtor_trampoline_base = .);
+        . += 64;
     } > ram
 
     .heap ALIGN(32) : {
