@@ -40,7 +40,7 @@ SECTIONS
     /* 
      * This vector is used as a trampoline to Handler_Mode
      * and lives only for a few instructions. It should not
-     * allocate any physical memory for that purpose.
+     * allocate/reserve any physical memory for that purpose.
      * Instead overlay that section and another, or reclaim
      * that memory after kernel is started.
      */
@@ -53,6 +53,13 @@ SECTIONS
         PROVIDE(heap_base = .);
         . += 4k;
         PROVIDE(heap_limit = .);
+    } > ram
+
+    /* same as .vector.trampoline */
+    .early.stack ALIGN(8) : {
+        PROVIDE(early_stack_limit = .);
+        . += 1k;
+        PROVIDE(early_stack_base = .);
     } > ram
 
     .pgpool ALIGN(1k) : {

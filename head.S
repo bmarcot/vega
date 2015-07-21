@@ -27,7 +27,7 @@
 
 	@ the early vector is naturally aligned on the bottom of the
 	@ ROM, also the VTOR is pointing to the early vector base
-	.long	0x20004000			@ FIXME: stack base on lm3s6965evb //FIXME: BUG..BUG.. set the stack to pgpool_limit, or OVERLAY
+	.long	early_stack_base		@ SP_main value
 	.long	(cold_reset + THUMB_MODE)	@ Reset (cold)
 	.long	0				@ Unused
 	.long	(early_hardfault + THUMB_MODE)	@ HardFault
@@ -40,8 +40,7 @@
 	@ the vector must be aligned on 128 bytes (see VTOR reserved
 	@ bits 6:0), alignment shall be handled in the linker script
 	@ note: the SP has been set by the early vector at this point
-	//.long	0				@ Unused
-	.long	0x20004000			@ FIXME: stack base on lm3s6965evb //FIXME: BUG..BUG.. set the stack to pgpool_limit, or OVERLAY
+	.long	early_stack_base		@ SP_main value
 	.long	(warm_reset + THUMB_MODE)	@ Reset (warm)
 	.long	0				@ NMI
 	.long	0				@ HardFault
