@@ -5,7 +5,7 @@ CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
 AS = $(CROSS)as
 # LD = $(CROSS)gcc
-CFLAGS = -mcpu=$(CPU) -mthumb
+CFLAGS = -mcpu=$(CPU) -mthumb -Iinclude
 LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC = head.S entry.S
