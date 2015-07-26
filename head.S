@@ -1,6 +1,8 @@
 	.syntax unified
 	.thumb
 
+	.include "macros.S"
+
 	.set	THUMB_MODE,	1
 
 	@ early vector is actually defined by the platform:
@@ -70,19 +72,6 @@
 0:	b	0b
 1:	.string	"\m"
 	.endm	/* early_fault */
-
-	@ context synchronization
-	.macro	sync
-	dsb	sy
-	isb	sy
-	.endm	/* sync */
-
-	//FIXME: dry! please move me to an include file.
-	@ movl	rd, imm32
-	.macro	movl r, v
-	movw	\r, #(\v & 0xffff)
-	movt	\r, #(\v >> 16)
-	.endm	/* movl */
 
 	.set	V7M_SCB_BASE, 0xe000ed00
 	.set	V7M_SHCSR, 0x24

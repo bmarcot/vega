@@ -1,13 +1,9 @@
 
+	.include "macros.S"
+
 	.set	V7M_SCB_BASE, 0xe000ed00
 	.set	SCB_VTOR, 8
 	.set	V7M_AIRCR, 0x0c
-
-	@ movl rd, imm32
-	.macro	movl r, v
-	movw	\r, #(\v & 0xffff)
-	movt	\r, #(\v >> 16)
-	.endm	/* movl */
 
 	@ void	set_vtor(void *addr)
 	.balign	8				//FIXME: move to linkage.h
