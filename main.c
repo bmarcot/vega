@@ -32,3 +32,10 @@ void cpu_locked(int errno)
     for (;;)
     	;
 }
+
+void cpu_idle(void)
+{
+    printf("cpu idle\n");
+    for (;;)
+	;
+}

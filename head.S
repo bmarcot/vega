@@ -123,8 +123,8 @@ cold_reset:
 	mov     r3, #0		@ sp+12 r3
 	mov     r4, #0		@ sp+16 r12
 	mov     r5, #0		@ sp+20 lr (todo: call to libc/userlib exit())
-	ldr     r6, =1f		@ sp+24 return_addr
-	//add	r6, #1		@ FIXME: no need to enable Thumb bit?
+	ldr     r6, =cpu_idle
+	add	r6, #1
 	ldr     r7, =XPSR_T	@ sp+28 xPSR
 	mov     r0, sp		@ force sp alignment to 8-byte
 	and     r0, #~7
