@@ -25,7 +25,7 @@ entry.elf: $(OBJS)
 	$(AS) -o $@ $(CFLAGS) $<
 
 clean:
-	rm -f *.o *~ entry.map
+	rm -f *.o test/*.o *~ entry.map
 
 distclean: clean
 	rm -f entry.elf
