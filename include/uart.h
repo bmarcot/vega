@@ -2,10 +2,10 @@
 #define UART_H
 
 struct uart {
-    unsigned int uartdr;
-    char pad[0x28];
-    unsigned int uartlcrh;
-    unsigned int uartctl;
+	unsigned int uartdr;
+	char pad[0x28];
+	unsigned int uartlcrh;
+	unsigned int uartctl;
 };
 
 void uart_enable(void);

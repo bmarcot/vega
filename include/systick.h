@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 struct systick {
-    volatile uint32_t syst_csr;
-    uint32_t syst_rvr;
-    volatile uint32_t syst_cvr;
-    uint32_t syst_calib;
+	volatile uint32_t syst_csr;
+	uint32_t syst_rvr;
+	volatile uint32_t syst_cvr;
+	uint32_t syst_calib;
 };
 
 #define SYST_CSR_CLKSOURCE (1 << 2)
@@ -24,14 +24,14 @@ static struct systick *const syst = (void *) 0xe000e010;
 
 static inline void systick_enable(void)
 {
-    syst->syst_csr |= SYST_CSR_ENABLE;
-    //FIXME: need synchronization?
+	syst->syst_csr |= SYST_CSR_ENABLE;
+	//FIXME: need synchronization?
 }
 
 static inline void systick_disable(void)
 {
-    syst->syst_csr &= ~SYST_CSR_ENABLE;
-    //FIXME: need synchronization?
+	syst->syst_csr &= ~SYST_CSR_ENABLE;
+	//FIXME: need synchronization?
 }
 
 #endif /* !SYSTICK_H */
