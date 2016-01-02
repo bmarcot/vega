@@ -3,10 +3,10 @@
 	.macro	sync
 	dsb	sy
 	isb	sy
-	.endm	/* sync */
+	.endm
 
 	@ movl	rd, imm32
-	.macro	movl r, v
-	movw	\r, #(\v & 0xffff)
-	movt	\r, #(\v >> 16)
-	.endm	/* movl */
+	.macro	movl rd, imm32
+	movw	\rd, #(\imm32 & 0xffff)
+	movt	\rd, #(\imm32 >> 16)
+	.endm
