@@ -3,11 +3,25 @@
 #include "uart.h"
 #include "systick.h"
 #include "page.h"
+#include "thread.h"
+#include "sched-rr.h"
 
 extern void *vector_base;
 extern void set_vtor(void *);
 
-int start_kernel(void)
+void *my_func(void *thread_id)
+{
+	for (;;) {
+		printf("in thread %d\n", (int) thread_id);
+		for (int i = 0; i < 1900000; i++)
+			;
+		/* pthread_yield(); */
+	}
+
+	return NULL;
+}
+
+struct thread_info *start_kernel(void)
 {
 	uart_enable();
 
@@ -22,9 +36,22 @@ int start_kernel(void)
 	set_vtor(&vector_base);
 
 	systick_init(0x227811);
-	systick_enable();
+	//systick_enable();
 
-	return 0;
+	struct thread_info *t1, *t2;
+	if ((t1 = thread_create(my_func, (void *) 1)) == NULL) {
+		printf("fatal error in thread new 1\n");
+	}
+	if ((t2 = thread_create(my_func, (void *) 2)) == NULL) {
+		printf("fatal error in thread new 2\n");
+	}
+	sched_rr_add(t1);
+	sched_rr_add(t2);
+
+	/* printf("thread created %p\n", t1); */
+	/* printf("thread created %p\n", t2); */
+
+	return t1;
 }
 
 void cpu_locked(int errno)

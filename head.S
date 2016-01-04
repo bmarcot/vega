@@ -1,5 +1,9 @@
+
 	.syntax unified
 	.thumb
+
+#include "arch-v7m.h"
+#include "linux/linkage.h"
 
 	.include "macros.S"
 
@@ -64,43 +68,18 @@
 
 	.text
 
-	.macro	early_fault f, m
-	.balign	8
-	.global	\f
-\f:	adr	r0, 1f
-	bl	uart_putstring
-0:	b	0b
-1:	.string	"\m"
-	.endm	/* early_fault */
-
-	.set	V7M_SCB_BASE, 0xe000ed00
-	.set	V7M_SHCSR, 0x24
-	.set    V7M_SHCSR_USGFAULTENA, (1 << 18)
-	.set    V7M_SHCSR_BUSFAULTENA, (1 << 17)
-	.set    V7M_SHCSR_MEMFAULTENA, (1 << 16)
-	.set	V7M_VTOR, 0x08
-	.set	V7M_VTOR_OFFSET_SVC, 44
-
-        .set    EXC_RETURN_HANDLER_MAIN, 0xfffffff1
-	.set    EXC_RETURN_THREAD_MAIN, 0xfffffff9
-	.set	EXC_RETURN_THREAD_PROCESS, 0xfffffffd
-
-	.set    XPSR_T, 1 << 24
-
-	.balign	8
-	.global	cold_reset
-cold_reset:
+ENTRY(cold_reset)
 	movl	r0, V7M_SCB_BASE
 
 	@ switch to Handler_Mode
 	ldr	r1, =vtor_trampoline_base
 	str	r1, [r0, #V7M_VTOR]
-	ldr	r2, =1f
+	ldr	r2, =0f
 	adds	r2, #1
 	str	r2, [r1, #V7M_VTOR_OFFSET_SVC]
 	sync
 	svc	#0
-1:
+0:
 
 	@ restore the early vector
 	ldr	r1, =vtor_early_base
@@ -111,36 +90,29 @@ cold_reset:
 	str   	r1, [r0, #V7M_SHCSR]
 	sync
 
+	@ The start_kernel function returns NULL or a pointer to the thread_info struct
+	@ of the first thread to run on the CPU. If the pointer is NULL the CPU is
+	@ software reseted (could be reseted differently). If the pointer is not NULL
+	@ the first thread context is kickstarted. 
 	bl	start_kernel	@ do the high-level kernel init
-	cmp	r0, #0
-	it	ne
-	blne	soft_reset	@ reset if the init failed
+	cmp	r0, #0		@ the proc returns the first thread to run
+	it	eq		@ compare to NULL
+	beq	soft_reset	@ reset if no threads to run
+	b	thread_restore
+ENDPROC(cold_reset)
 
-	@ craft the thread interrupt stackframe
-	mov     r0, #0		@  sp+0 r0
-	mov     r1, #0		@  sp+4 r1
-	mov     r2, #0		@  sp+8 r2
-	mov     r3, #0		@ sp+12 r3
-	mov     r4, #0		@ sp+16 r12
-	mov     r5, #0		@ sp+20 lr (todo: call to libc/userlib exit())
-	ldr     r6, =cpu_idle
-	add	r6, #1
-	ldr     r7, =XPSR_T	@ sp+28 xPSR
-	mov     r0, sp		@ force sp alignment to 8-byte
-	and     r0, #~7
-	mov	sp, r0
-	stmdb   sp!, {r0-r7}	@ push the stack to memory
-	mov	r0, sp
-	msr     psp, r0		@ initialize the SP_process
-
-	@ return from interrupt in Thread_Mode, SP_process (, Unprivileged (todo))
-	ldr     lr, =EXC_RETURN_THREAD_PROCESS
-	bx      lr
-2:	b	2b		@ the cpu should never get there
-
-	.balign	8
-warm_reset:
+ENTRY(warm_reset)
 	b	cold_reset
+ENDPROC(warm_reset)
+
+	.macro	early_fault f, m
+	.balign	8
+	.global	\f
+\f:	adr	r0, 1f
+	bl	uart_putstring
+0:	b	0b
+1:	.string	"\m"
+	.endm	/* early_fault */
 
 	early_fault early_hardfault, "early exception: HardFault\n"
 	early_fault early_memmanage, "early exception: MemManage\n"

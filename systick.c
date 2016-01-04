@@ -2,6 +2,7 @@
 
 #include "systick.h"
 #include "uart.h"
+#include "sched-rr.h"
 
 static volatile uint32_t overflow = 0;
 
@@ -11,6 +12,9 @@ void systick(void)
 	if (overflow == 0xff)
 		overflow = 0;
 	overflow++;
+
+	//FIXME: not a good place to call the scheduler...
+	sched_rr_elect();
 }
 
 void systick_init(uint32_t rvr)
