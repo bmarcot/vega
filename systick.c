@@ -3,8 +3,9 @@
 #include "systick.h"
 #include "uart.h"
 #include "sched-rr.h"
+#include "linux/types.h"
 
-static volatile uint32_t overflow = 0;
+static volatile u32 overflow = 0;
 
 void systick(void)
 {
@@ -17,7 +18,7 @@ void systick(void)
 	sched_rr_elect();
 }
 
-void systick_init(uint32_t rvr)
+void systick_init(u32 rvr)
 {
 	syst->syst_rvr = rvr;
 	syst->syst_cvr = 0;
@@ -25,11 +26,11 @@ void systick_init(uint32_t rvr)
 	//FIXME: need synchronization?
 }
 
-uint32_t gettick(void)
+u32 gettick(void)
 {
-	uint32_t of = overflow;
-	uint32_t val = syst->syst_cvr;
-	uint32_t new_of = overflow;
+	u32 of = overflow;
+	u32 val = syst->syst_cvr;
+	u32 new_of = overflow;
 
 	if (of != new_of) {
 		val = syst->syst_cvr;
