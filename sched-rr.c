@@ -1,5 +1,6 @@
-//FIXME: for debug purpose
+#ifdef DEBUG
 #include <stdio.h>
+#endif /* DEBUG */
 
 #include "thread.h"
 #include "linux/list.h"
@@ -26,10 +27,14 @@ void sched_rr_elect(void)
 	} else {
 		if (list_is_last(&current->ti_list, &rr_runq)) {
 			next = list_first_entry(&rr_runq, struct thread_info, ti_list);
+#ifdef DEBUG
 			printf("last thread\n");
+#endif /* DEBUG */
 		} else {
 			next = list_next_entry(current, ti_list);
+#ifdef DEBUG
 			printf("next thread is %p\n", next);
+#endif /* DEBUG */
 		}
 	}
 	if (next != current)
