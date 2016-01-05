@@ -6,11 +6,35 @@
 #include "linux/list.h"
 
 static LIST_HEAD(rr_runq);
-static struct thread_info thread_idle; //FIXME: implement the idle thread
+extern struct thread_info *thread_idle;
+
+static struct thread_info *find_next_thread(struct thread_info *thread)
+{
+	if (list_is_last(&thread->ti_list, &rr_runq))
+		return list_first_entry(&rr_runq, struct thread_info, ti_list);
+
+	return list_next_entry(thread, ti_list);
+}
 
 void sched_rr_add(struct thread_info *thread)
 {
 	list_add(&thread->ti_list, &rr_runq);
+}
+
+void sched_rr_del(struct thread_info *thread)
+{
+	CURRENT_THREAD_INFO(current);
+
+	if (current == thread) {
+		struct thread_info *next = thread_idle;
+		if (!list_is_singular(&rr_runq)) {
+			next = find_next_thread(current);
+		}
+		list_del(&thread->ti_list);
+		thread_restore(next); //FIXME: rename to switch_to_no_save
+	} else {
+		list_del(&thread->ti_list);
+	}
 }
 
 void sched_rr_elect(void)
@@ -23,19 +47,10 @@ void sched_rr_elect(void)
 #endif /* DEBUG */
 
 	if (list_empty(&rr_runq)) {
+		printf("-- go to thread idle\n");
 		next = &thread_idle;
 	} else {
-		if (list_is_last(&current->ti_list, &rr_runq)) {
-			next = list_first_entry(&rr_runq, struct thread_info, ti_list);
-#ifdef DEBUG
-			printf("last thread\n");
-#endif /* DEBUG */
-		} else {
-			next = list_next_entry(current, ti_list);
-#ifdef DEBUG
-			printf("next thread is %p\n", next);
-#endif /* DEBUG */
-		}
+		next = find_next_thread(current);
 	}
 	if (next != current)
 		switch_to(next, current);

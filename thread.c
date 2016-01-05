@@ -102,3 +102,13 @@ pthread_t thread_self(void)
 
 	return thread->ti_id;
 }
+
+void thread_exit(void *retval)
+{
+	CURRENT_THREAD_INFO(thread);
+
+	printf("in thread exit for id=%d\n", thread->ti_id);
+
+	//FIXME: this does not release the resource and create a zombie thread
+	sched_rr_del(thread);
+}

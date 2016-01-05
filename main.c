@@ -11,6 +11,7 @@ extern void set_vtor(void *);
 
 int sys_vect[8];
 void sc_null(void);
+void cpu_idle(void);
 
 int sc_null_1(void)
 {
@@ -23,16 +24,19 @@ int sc_null_1(void)
 
 void *my_func(void *arg0)
 {
-	for (;;) {
-		printf("in %s, id=%d\n", (int) arg0, (int) pthread_self());
+	for (int i = 0; i < 100; i++) {
+		printf("in %s, id=%d\n", arg0, (int) pthread_self());
 		/* sc_null(); */
-		for (int i = 0; i < 1900000; i++)
+		for (int i = 0; i < 900000; i++)
 			;
 		pthread_yield();
 	}
+	pthread_exit(NULL);
 
 	return NULL;
 }
+
+struct thread_info *thread_idle;
 
 struct thread_info *start_kernel(void)
 {
@@ -54,6 +58,7 @@ struct thread_info *start_kernel(void)
 	sys_vect[0] = (int) sc_null_1;
 	sys_vect[1] = (int) thread_yield;
 	sys_vect[2] = (int) thread_self;
+	sys_vect[3] = (int) thread_exit;
 
 	struct thread_info *t1, *t2;
 	char *s1 = "thread A";
@@ -66,6 +71,8 @@ struct thread_info *start_kernel(void)
 	}
 	sched_rr_add(t1);
 	sched_rr_add(t2);
+
+	thread_idle = thread_create(cpu_idle, NULL);
 
 	/* printf("thread created %p\n", t1); */
 	/* printf("thread created %p\n", t2); */

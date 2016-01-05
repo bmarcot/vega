@@ -134,3 +134,9 @@ ENTRY(pthread_self)
 	sc_no_params 2
 	bx	lr
 ENDPROC(pthread_self)
+
+	@ void pthread_exit(void *retval)
+ENTRY(pthread_exit)
+	sc_one_param 3
+	bx	lr
+ENDPROC(pthread_exit)

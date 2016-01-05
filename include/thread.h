@@ -89,6 +89,7 @@ void switch_to(struct thread_info *, struct thread_info *);
 struct thread_info *thread_create(void *(*)(void *), void *);
 int thread_yield(void);
 pthread_t thread_self(void);
+void thread_exit(void *);
 
 // move to assembler.h (no because it's not inlined) / entry.S ?
 struct thread_info *current_thread_info(void);
