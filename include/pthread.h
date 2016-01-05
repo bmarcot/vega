@@ -3,4 +3,6 @@
 
 typedef unsigned int pthread_t;
 
+int pthread_yield(void);
+
 #endif /* !PTHREAD_H */

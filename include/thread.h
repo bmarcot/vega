@@ -87,7 +87,7 @@ struct _thrd_stackframe {
 
 void switch_to(struct thread_info *, struct thread_info *);
 struct thread_info *thread_create(void *(*)(void *), void *);
-void thread_yield(void);
+int thread_yield(void);
 
 // move to assembler.h (no because it's not inlined) / entry.S ?
 struct thread_info *current_thread_info(void);

@@ -57,7 +57,7 @@
 	.long	0				@ Reserved
 	.long	0				@ Reserved
 	.long	0				@ Reserved
-	.long	0				@ SVCall
+	.long	(svcall + THUMB_MODE)		@ SVCall
 	.long	0				@ Debug Monitor
 	.long	0				@ Reserved
 	.long	0				@ PendSV

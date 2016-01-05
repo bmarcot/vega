@@ -88,10 +88,12 @@ struct thread_info *thread_create(void *(*entry)(void *), void *args)
 	return thread;
 }
 
-void thread_yield(void)
+int thread_yield(void)
 {
 	//FIXME: use a top-level function instead, like sched_elect()
 	sched_rr_elect();
+
+	return 0;
 }
 
 pthread_t thread_self(void)
