@@ -66,7 +66,10 @@ struct thread_info *start_kernel(void)
 	sched_rr_add(t1);
 	sched_rr_add(t2);
 
-	thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR);
+	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR)) == NULL) {
+		printf("fatal: Could not create the idle thread.\n");
+		return NULL;
+	}
 
 	/* printf("thread created %p\n", t1); */
 	/* printf("thread created %p\n", t2); */
