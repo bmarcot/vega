@@ -21,10 +21,10 @@ int sc_null_1(void)
 
 #include "pthread.h"
 
-void *my_func(void *thread_id)
+void *my_func(void *arg0)
 {
 	for (;;) {
-		printf("in thread %d\n", (int) thread_id);
+		printf("in %s, id=%d\n", (int) arg0, (int) pthread_self());
 		/* sc_null(); */
 		for (int i = 0; i < 1900000; i++)
 			;
@@ -53,12 +53,15 @@ struct thread_info *start_kernel(void)
 
 	sys_vect[0] = (int) sc_null_1;
 	sys_vect[1] = (int) thread_yield;
+	sys_vect[2] = (int) thread_self;
 
 	struct thread_info *t1, *t2;
-	if ((t1 = thread_create(my_func, (void *) 1)) == NULL) {
+	char *s1 = "thread A";
+	char *s2 = "thread B";
+	if ((t1 = thread_create(my_func, s1)) == NULL) {
 		printf("fatal error in thread new 1\n");
 	}
-	if ((t2 = thread_create(my_func, (void *) 2)) == NULL) {
+	if ((t2 = thread_create(my_func, s2)) == NULL) {
 		printf("fatal error in thread new 2\n");
 	}
 	sched_rr_add(t1);

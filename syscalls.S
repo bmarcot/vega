@@ -128,3 +128,9 @@ ENTRY(pthread_yield)
 	sc_no_params 1
 	bx	lr
 ENDPROC(pthread_yield)
+
+	@ pthread_t pthread_self(void)
+ENTRY(pthread_self)
+	sc_no_params 2
+	bx	lr
+ENDPROC(pthread_self)
