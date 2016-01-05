@@ -64,7 +64,8 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *
 	return ts;
 }
 
-struct thread_info *thread_create(void *(*entry)(void *), void *args)
+struct thread_info *thread_create(void *(*entry)(void *), void *args,
+				enum thread_privilege priv)
 {
 	struct thread_info *thread;
 	struct __intr_stackframe *is;
@@ -81,7 +82,7 @@ struct thread_info *thread_create(void *(*entry)(void *), void *args)
 	thread->ti_entry = entry;
 	thread->ti_args = args;
 	thread->ti_msp = is;
-	thread->ti_priv = THREAD_PRIV_USER;
+	thread->ti_priv = priv;
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */
 

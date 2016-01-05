@@ -63,16 +63,16 @@ struct thread_info *start_kernel(void)
 	struct thread_info *t1, *t2;
 	char *s1 = "thread A";
 	char *s2 = "thread B";
-	if ((t1 = thread_create(my_func, s1)) == NULL) {
+	if ((t1 = thread_create(my_func, s1, THREAD_PRIV_USER)) == NULL) {
 		printf("fatal error in thread new 1\n");
 	}
-	if ((t2 = thread_create(my_func, s2)) == NULL) {
+	if ((t2 = thread_create(my_func, s2, THREAD_PRIV_USER)) == NULL) {
 		printf("fatal error in thread new 2\n");
 	}
 	sched_rr_add(t1);
 	sched_rr_add(t2);
 
-	thread_idle = thread_create(cpu_idle, NULL);
+	thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR);
 
 	/* printf("thread created %p\n", t1); */
 	/* printf("thread created %p\n", t2); */
