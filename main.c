@@ -31,7 +31,7 @@ void *my_func(void *arg0)
 			;
 		pthread_yield();
 	}
-	pthread_exit(NULL);
+	pthread_exit((void *) 33);
 
 	return NULL;
 }

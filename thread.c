@@ -107,8 +107,8 @@ void thread_exit(void *retval)
 {
 	CURRENT_THREAD_INFO(thread);
 
-	printf("in thread exit for id=%d\n", thread->ti_id);
-
-	//FIXME: this does not release the resource and create a zombie thread
+	thread->ti_retval = retval;
+	printf("in thread exit for id=%d with retval=%d\n", thread->ti_id, (int) retval);
+	//FIXME: this does not release the resource, and creates a zombie thread
 	sched_rr_del(thread);
 }
