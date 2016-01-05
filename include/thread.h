@@ -69,14 +69,13 @@ enum thread_privilege {
  *   CPU. We initialize the task non-scratch registers to 0.
  */
 
-struct _intr_stackframe {
+struct __intr_stackframe {
 	u32 is_gprs[8];	/* task-context r4 to r11, zero-filled */
 	u32 is_lr;      /* loaded with EXC_RETURN value */
 };
 
-// '_' prefix because 'hidden' structure
 //struct basic_stackframe { // lazy pushed
-struct _thrd_stackframe {
+struct __thrd_stackframe {
 	u32 ts_gprs[5];	 /* thread-context r0 to r3, r12, zero-filled */
 	u32 ts_lr;	 /* this should be loaded with _exit() */
 	u32 ts_ret_addr; /* entry-point to the thread, usually main() */

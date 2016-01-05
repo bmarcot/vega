@@ -9,17 +9,17 @@
 #include "arch-v7m.h"
 #include "linux/types.h"
 
-static struct _intr_stackframe *build_intr_stack(void)
+static struct __intr_stackframe *build_intr_stack(void)
 {
 	void *memp;
-	struct _intr_stackframe *is;
+	struct __intr_stackframe *is;
 
 	/* We don't need a huge stack for interrupt handling, however we need the page
 	   to be aligned on a known value to retrieve the Thread Control Block that
 	   is stored at the bottom of the physical page.    */
 	if ((memp = page_alloc()) == NULL)
 		return NULL;
-	is = (void *)((u32) memp + PAGE_SIZE - sizeof (struct _intr_stackframe));
+	is = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __intr_stackframe));
 #ifndef DEBUG
 	memset(is->is_gprs, 0, 8 * sizeof (u32));
 #else
@@ -39,14 +39,14 @@ static struct _intr_stackframe *build_intr_stack(void)
 
 // pass user-supplied stack size - configure task stack size
 // note: detect stack overflow -> #memf && (SP_Process == MMFAR)
-static struct _thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *args)
+static struct __thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *args)
 {
 	void *memp;
-	struct _thrd_stackframe *ts;
+	struct __thrd_stackframe *ts;
 
 	if (NULL == (memp = page_alloc())) // this one does not need to be aligned - size configurable
 		return NULL;
-	ts = (void *)((u32) memp + PAGE_SIZE - sizeof (struct _thrd_stackframe));
+	ts = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __thrd_stackframe));
 	ts->ts_gprs[0] = (u32) args;
 #ifndef DEBUG
 	memset(&ts->ts_gprs[1], 0, 4 * sizeof (u32));
@@ -67,7 +67,7 @@ static struct _thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *a
 struct thread_info *thread_create(void *(*entry)(void *), void *args)
 {
 	struct thread_info *thread;
-	struct _intr_stackframe *is;
+	struct __intr_stackframe *is;
 	static int thread_count = 0;
 
 	if ((is = build_intr_stack()) == NULL)
