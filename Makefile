@@ -10,7 +10,7 @@ CFLAGS = -mcpu=$(CPU) -mthumb -Iinclude
 LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC = head.S entry.S syscalls.S
-CSRC = main.c uart.c systick.c backend.c page.c test/list.c thread.c sched-rr.c
+CSRC = main.c uart.c systick.c backend.c page.c test/list.c thread.c sched-rr.c sysvect.c
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 

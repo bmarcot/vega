@@ -9,7 +9,6 @@
 extern void *vector_base;
 extern void set_vtor(void *);
 
-int sys_vect[8];
 void sc_null(void);
 void cpu_idle(void);
 
@@ -54,11 +53,6 @@ struct thread_info *start_kernel(void)
 
 	systick_init(0x227811);
 	//systick_enable();
-
-	sys_vect[0] = (int) sc_null_1;
-	sys_vect[1] = (int) thread_yield;
-	sys_vect[2] = (int) thread_self;
-	sys_vect[3] = (int) thread_exit;
 
 	struct thread_info *t1, *t2;
 	char *s1 = "thread A";
