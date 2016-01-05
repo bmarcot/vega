@@ -85,6 +85,8 @@ struct __thrd_stackframe {
 /* forward declarations */
 
 void switch_to(struct thread_info *, struct thread_info *);
+void thread_restore(struct thread_info *); //FIXME: rename to switch_to_no_save ? meh..
+
 struct thread_info *thread_create(void *(*)(void *), void *);
 int thread_yield(void);
 pthread_t thread_self(void);

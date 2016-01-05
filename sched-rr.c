@@ -1,6 +1,5 @@
-#ifdef DEBUG
+//FIXME: for debug purpose..
 #include <stdio.h>
-#endif /* DEBUG */
 
 #include "thread.h"
 #include "linux/list.h"
@@ -48,7 +47,7 @@ void sched_rr_elect(void)
 
 	if (list_empty(&rr_runq)) {
 		printf("-- go to thread idle\n");
-		next = &thread_idle;
+		next = thread_idle;
 	} else {
 		next = find_next_thread(current);
 	}
