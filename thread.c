@@ -97,7 +97,7 @@ int thread_yield(void)
 	return 0;
 }
 
-pthread_t thread_self(void)
+int thread_self(void)
 {
 	CURRENT_THREAD_INFO(thread);
 

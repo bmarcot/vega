@@ -1,13 +1,10 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-
 #include <stdbool.h>
 
 #include "linux/types.h"
 #include "linux/list.h"
-
-#include "pthread.h"
 
 #define INTR_STACK_ORDER 10 // 0x400 = 1kB
 #define INTR_STACK_SIZE (1 << INTR_STACK_ORDER)
@@ -24,7 +21,7 @@ struct thread_info {
 	char ti_name[16];          /* unused - no name for threads, just ids */
 	//enum thread_privilege ti_priv;
 	int ti_prio;               /* unused */
-	pthread_t ti_id; //FIXME: retype to s32
+	int ti_id;
 
 	/* shared by scheduler runq and mutex waitq */
 	struct list_head ti_list; // global list of threads
@@ -89,7 +86,7 @@ void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_
 
 struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privilege);
 int thread_yield(void);
-pthread_t thread_self(void);
+int thread_self(void);
 void thread_exit(void *);
 
 // move to assembler.h (no because it's not inlined) / entry.S ?
