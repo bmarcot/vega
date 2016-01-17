@@ -25,17 +25,13 @@ struct thread_info *thread_idle;
 struct thread_info *start_kernel(void)
 {
 	uart_enable();
-
-	printf("the k2 microkernel v%d.%d\n", 0, 1);
-
 	set_vtor(&vector_base);
-
 	systick_init(0x227811);
 	/* systick_enable(); */
 
+	/* thread_main is the user entry point to the system */
 	struct thread_info *thread_main;
-	char *s1 = "user main()";
-	if ((thread_main = thread_create(main, s1, THREAD_PRIV_USER)) == NULL)
+	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
 		printf("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
 
