@@ -39,7 +39,8 @@ static struct __intr_stackframe *build_intr_stack(void)
 
 // pass user-supplied stack size - configure task stack size
 // note: detect stack overflow -> #memf && (SP_Process == MMFAR)
-static struct __thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *args)
+static struct __thrd_stackframe *build_thrd_stack(void *(*start_routine)(void *),
+						void *arg)
 {
 	void *memp;
 	struct __thrd_stackframe *ts;
@@ -47,7 +48,7 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *
 	if (NULL == (memp = page_alloc())) // this one does not need to be aligned - size configurable
 		return NULL;
 	ts = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __thrd_stackframe));
-	ts->ts_gprs[0] = (u32) args;
+	ts->ts_gprs[0] = (u32) arg;
 #ifndef DEBUG
 	memset(&ts->ts_gprs[1], 0, 4 * sizeof (u32));
 #else
@@ -58,13 +59,13 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*entry)(void *), void *
 	ts->ts_gprs[4] = 0xcafe0012;
 #endif /* !DEBUG */
 	ts->ts_lr = 0x14; //FIXME: address of syscall pthread_exit() - might need to be set at load time
-	ts->ts_ret_addr = (u32) entry & (u32) ~1;
+	ts->ts_ret_addr = (u32) start_routine & (u32) ~1;
 	ts->ts_xpsr = V7M_XPSR_T;
 
 	return ts;
 }
 
-struct thread_info *thread_create(void *(*entry)(void *), void *args,
+struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 				enum thread_privilege priv)
 {
 	struct thread_info *thread;
@@ -73,14 +74,11 @@ struct thread_info *thread_create(void *(*entry)(void *), void *args,
 
 	if ((is = build_intr_stack()) == NULL)
 		return NULL;
-	//printf("intr sp = %p\n", is);
 	thread = (struct thread_info *) align_lo((u32) is, PAGE_SIZE);
-	if ((thread->ti_psp = build_thrd_stack(entry, args)) == NULL) {
+	if ((thread->ti_psp = build_thrd_stack(start_routine, arg)) == NULL) {
 		//FIXME: free(is);
 		return NULL;
 	}
-	thread->ti_entry = entry;
-	thread->ti_args = args;
 	thread->ti_msp = is;
 	thread->ti_priv = priv;
 	thread->ti_id = thread_count++;

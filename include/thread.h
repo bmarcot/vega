@@ -16,10 +16,6 @@ struct thread_info {
 	u32 ti_priv;    // +8
 
 	/* thread description data */
-	void *(*ti_entry)(void *); //FIXME: not needed... unless we implement thread_reset()
-	void *ti_args;             //FIXME: not needed... unless we implement thread_reset()
-	char ti_name[16];          /* unused - no name for threads, just ids */
-	//enum thread_privilege ti_priv;
 	int ti_prio;               /* unused */
 	int ti_id;
 
