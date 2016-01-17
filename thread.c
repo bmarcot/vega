@@ -58,7 +58,9 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*start_routine)(void *)
 	ts->ts_gprs[3] = 0xcafe0003;
 	ts->ts_gprs[4] = 0xcafe0012;
 #endif /* !DEBUG */
-	ts->ts_lr = 0x14; //FIXME: address of syscall pthread_exit() - might need to be set at load time
+	/* Calls pthread_exit() on return keyword. This might need to be fixed at
+	   runtime in the future.    */
+	ts->ts_lr = (u32) pthread_exit /* & (u32) ~1 */;
 	ts->ts_ret_addr = (u32) start_routine & (u32) ~1;
 	ts->ts_xpsr = V7M_XPSR_T;
 
