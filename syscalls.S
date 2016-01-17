@@ -26,7 +26,7 @@
 
 	@ int sc_three_args(void *arg0, void *arg1,
 	@                   void *arg2)
-	.macro	syscall3 id
+	.macro	sc_three_args id
 	/* keep r0, r1, r2 untouched */
 	mov	r3, #\id
 	svc	#3
@@ -140,3 +140,9 @@ ENTRY(pthread_exit)
 	sc_one_param 3
 	bx	lr
 ENDPROC(pthread_exit)
+
+	@ int pthread_create(...)
+ENTRY(pthread_create)
+	sc_three_args 4
+	bx	lr
+ENDPROC(pthread_create)

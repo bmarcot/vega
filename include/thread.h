@@ -24,7 +24,7 @@ struct thread_info {
 	char ti_name[16];          /* unused - no name for threads, just ids */
 	//enum thread_privilege ti_priv;
 	int ti_prio;               /* unused */
-	pthread_t ti_id;
+	pthread_t ti_id; //FIXME: retype to s32
 
 	/* shared by scheduler runq and mutex waitq */
 	struct list_head ti_list; // global list of threads
@@ -85,7 +85,7 @@ struct __thrd_stackframe {
 /* forward declarations */
 
 void switch_to(struct thread_info *, struct thread_info *);
-void thread_restore(struct thread_info *); //FIXME: rename to switch_to_no_save ? meh..
+void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
 struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privilege);
 int thread_yield(void);

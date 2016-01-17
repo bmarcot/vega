@@ -21,6 +21,14 @@ int sc_null_1(void)
 
 #include "pthread.h"
 
+void *after(void *arg)
+{
+	printf("After action: %s\n", arg);
+	pthread_exit(0);
+
+	return NULL;
+}
+
 void *my_func(void *arg0)
 {
 	for (int i = 0; i < 100; i++) {
@@ -30,7 +38,10 @@ void *my_func(void *arg0)
 			;
 		pthread_yield();
 	}
-	pthread_exit((void *) 33);
+	pthread_t id;
+	pthread_create(&id, after, "after?\n");
+	printf("created thread after id=%d", (int) id);
+	pthread_exit((void *)(33 + (int) pthread_self()));
 
 	return NULL;
 }
@@ -55,8 +66,10 @@ struct thread_info *start_kernel(void)
 	//systick_enable();
 
 	struct thread_info *t1, *t2;
+	pthread_t t3;
 	char *s1 = "thread A";
 	char *s2 = "thread B";
+	char *s3 = "thread C";
 	if ((t1 = thread_create(my_func, s1, THREAD_PRIV_USER)) == NULL) {
 		printf("fatal error in thread new 1\n");
 	}
@@ -65,6 +78,7 @@ struct thread_info *start_kernel(void)
 	}
 	sched_rr_add(t1);
 	sched_rr_add(t2);
+	//pthread_create(&t3, my_func, s3); pas de syscall ici car on est en supervisor!
 
 	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR)) == NULL) {
 		printf("fatal: Could not create the idle thread.\n");

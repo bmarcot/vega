@@ -1,4 +1,5 @@
 #include "thread.h"
+#include "sys/pthread.h"
 
 int sc_null_1(void);
 
@@ -6,5 +7,6 @@ void *sys_vect[] = {
 	sc_null_1,
 	thread_yield,
 	thread_self,
-	thread_exit
+	thread_exit,
+	pthread_create_1
 };
