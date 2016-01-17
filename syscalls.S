@@ -117,32 +117,28 @@ do_syscall4:
 	pop	{r7, pc}
 ENDPROC(svcall)
 
-	@ int dummy_sc_no_args(void)
-ENTRY(sc_null)
-	sc_no_params 0
-	bx	lr
-ENDPROC(sc_null)
+	/* syscall definitions */
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
-	sc_no_params 1
+	sc_no_params 0
 	bx	lr
 ENDPROC(pthread_yield)
 
 	@ pthread_t pthread_self(void)
 ENTRY(pthread_self)
-	sc_no_params 2
+	sc_no_params 1
 	bx	lr
 ENDPROC(pthread_self)
 
 	@ void pthread_exit(void *retval)
 ENTRY(pthread_exit)
-	sc_one_param 3
+	sc_one_param 2
 	bx	lr
 ENDPROC(pthread_exit)
 
 	@ int pthread_create(...)
 ENTRY(pthread_create)
-	sc_three_args 4
+	sc_three_args 3
 	bx	lr
 ENDPROC(pthread_create)

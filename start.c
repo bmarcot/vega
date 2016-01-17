@@ -8,15 +8,7 @@
 extern void *vector_base;
 extern void set_vtor(void *);
 
-void sc_null(void);
 void *cpu_idle(void *);
-
-int sc_null_1(void)
-{
-	printf("in syscall\n");
-
-	return 0;
-}
 
 extern void *main(void *);
 
