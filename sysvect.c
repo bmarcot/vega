@@ -2,8 +2,8 @@
 #include "sys/pthread.h"
 
 void *sys_vect[] = {
-	thread_yield,
-	thread_self,
-	thread_exit,
+	pthread_yield_1,
+	pthread_self_1,
+	pthread_exit_1,
 	pthread_create_1
 };

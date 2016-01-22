@@ -2,6 +2,21 @@
 #include "pthread.h"
 #include "sched-rr.h"
 
+int pthread_yield_1(void)
+{
+	return thread_yield();
+}
+
+pthread_t pthread_self_1(void)
+{
+	return (pthread_t) thread_self();
+}
+
+void pthread_exit_1(void *retval)
+{
+	thread_exit(retval);
+}
+
 int pthread_create_1(/* __user */ pthread_t *thread, /* const pthread_attr_t *attr, */
 		void *(*start_routine)(void *), void *arg)
 {
