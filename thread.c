@@ -77,11 +77,11 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	if ((is = build_intr_stack()) == NULL)
 		return NULL;
 	thread = (struct thread_info *) align_lo((u32) is, PAGE_SIZE);
-	if ((thread->ti_psp = build_thrd_stack(start_routine, arg)) == NULL) {
+	if ((thread->ti_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
 		//FIXME: free(is);
 		return NULL;
 	}
-	thread->ti_msp = is;
+	thread->ti_msp = (u32) is;
 	thread->ti_priv = priv;
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */

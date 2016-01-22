@@ -11,9 +11,9 @@
 
 struct thread_info {
 	/* v7m data, could be moved to arch-dependent file */
-	void *ti_msp;   // +0
-	void *ti_psp;   // +4             //uint32_t
-	u32 ti_priv;    // +8
+	u32 ti_msp;     /* +0 */
+	u32 ti_psp;     /* +4 */
+	u32 ti_priv;    /* +8 */
 
 	/* thread description data */
 	int ti_prio;               /* unused */
