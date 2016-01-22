@@ -15,10 +15,10 @@ CSRC = start.c uart.c systick.c backend.c page.c test/list.c thread.c sched-rr.c
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: entry.elf
+all: kernel.elf
 
-entry.elf: $(OBJS)
-	$(CC) -mthumb -march=armv7e-m -nostartfiles -Wl,-Map=entry.map $(LDFLAGS) -o $@ $^
+kernel.elf: $(OBJS)
+	$(CC) -mthumb -march=armv7e-m -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nostartfiles -std=gnu99 $<
@@ -29,10 +29,10 @@ entry.elf: $(OBJS)
 	$(HOSTCC) -E -Iinclude $< | $(CC) -o $@ $(CFLAGS) -c -xassembler -
 
 clean:
-	rm -f *.o test/*.o *~ entry.map
+	rm -f *.o test/*.o *~ kernel.map
 
 distclean: clean
-	rm -f entry.elf
+	rm -f kernel.elf
 
-run: entry.elf
+run: kernel.elf
 	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
