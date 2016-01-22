@@ -92,9 +92,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 int thread_yield(void)
 {
 	//FIXME: use a top-level function instead, like sched_elect()
-	sched_rr_elect();
-
-	return 0;
+	return sched_rr_elect();
 }
 
 int thread_self(void)

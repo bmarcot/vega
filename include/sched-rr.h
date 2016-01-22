@@ -5,6 +5,6 @@
 
 void sched_rr_add(struct thread_info *);
 void sched_rr_del(struct thread_info *);
-void sched_rr_elect(void);
+int sched_rr_elect(void);
 
 #endif /* !SCHEDULER_H */

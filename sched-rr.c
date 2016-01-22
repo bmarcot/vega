@@ -36,7 +36,7 @@ void sched_rr_del(struct thread_info *thread)
 	}
 }
 
-void sched_rr_elect(void)
+int sched_rr_elect(void)
 {
 	CURRENT_THREAD_INFO(current);
 	struct thread_info *next;
@@ -51,6 +51,12 @@ void sched_rr_elect(void)
 	} else {
 		next = find_next_thread(current);
 	}
-	if (next != current)
-		switch_to(next, current);
+
+	/* keep running the previous thread */
+	if (next == current)
+		return -1;
+
+	switch_to(next, current);
+
+	return 0;
 }
