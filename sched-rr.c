@@ -46,6 +46,7 @@ int sched_rr_elect(void)
 #endif /* DEBUG */
 
 	if (list_empty(&rr_runq)) {
+		//FIXME: log this event into the perf monitor module
 		printf("-- go to thread idle\n");
 		next = thread_idle;
 	} else {
@@ -56,6 +57,9 @@ int sched_rr_elect(void)
 	if (next == current)
 		return -1;
 
+	/* Leave _current_ thread for now. The _current_ thread will be elected
+	   again after _next_ thread has run. Inform the caller function (in
+	   _current_ context) that the thread gently gave way.    */
 	switch_to(next, current);
 
 	return 0;
