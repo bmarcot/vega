@@ -49,10 +49,14 @@
 	.long	early_stack_base		@ SP_main value
 	.long	(warm_reset + THUMB_MODE)	@ Reset (warm)
 	.long	0				@ NMI
-	.long	0				@ HardFault
-	.long 	0				@ MemManage
-	.long 	0				@ BusFault
-	.long 	0				@ UsageFault
+	.long	(fault + THUMB_MODE)	@ HardFault
+	//FIXME: Qemu does not escalate other faults to #hf
+	.long	(fault + THUMB_MODE)	@ HardFault
+	.long	(fault + THUMB_MODE)	@ HardFault
+	.long	(fault + THUMB_MODE)	@ HardFault
+	//.long 	0				@ MemManage
+	//.long 	0				@ BusFault
+	//.long 	0				@ UsageFault
 	.long	0				@ Reserved
 	.long	0				@ Reserved
 	.long	0				@ Reserved
@@ -104,6 +108,20 @@ ENDPROC(cold_reset)
 ENTRY(warm_reset)
 	b	cold_reset
 ENDPROC(warm_reset)
+
+ENTRY(fault)
+	push	{r4-r11}	@ save non-scratch registers at time of fault
+	mov	r0, sp
+	mov	r2, lr		@ lr contains EXC_RETURN, fault was taken in thread or interrupt?
+
+	@ We don't handle faults taken in interrupt handler at the moment.
+	@ Hence the scratch registers auto pushed to the stack by the CPU
+	@ on interrupt-entry have been pushed to PSP (MSP is only used by
+	@ interrupts handler).
+	mrs	r1, psp
+
+	b	hardfault
+ENDPROC(fault)
 
 	.macro	early_fault f, m
 	.balign	8
