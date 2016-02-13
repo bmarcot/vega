@@ -27,10 +27,21 @@ SECTIONS
 	*(.rodata.*)
     } > rom
 
-    .data : {
+    /* Initialized data (.data* sections) are initially stored in Flash,
+       but need to be copied to a volatile storage for they are not
+       read-only.    */
+
+    PROVIDE(data_sect_flash = .);
+
+    .data /* ALIGN(32) */ : AT (data_sect_flash) {
+    	. = ALIGN(32);
+    	PROVIDE(data_sect_ram = .);
         *(.data)
         *(.data.*)
+    	. = ALIGN(32);
     } > ram
+
+    PROVIDE(data_sect_size = SIZEOF(.data));
 
     .bss : {
         *(.bss)

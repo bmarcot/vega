@@ -94,6 +94,32 @@ ENTRY(cold_reset)
 	str   	r1, [r0, #V7M_SHCSR]
 	sync
 
+	@ Copy the .data section from Flash to RAM.
+	ldr	r2, =data_sect_size
+	tst	r2, r2
+	beq	1f
+	ldr	r1, =data_sect_flash
+	ldr	r0, =data_sect_ram
+0:      ldr     r3, [r1], #4 // must be 32-byte aligned
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	ldr     r3, [r1], #4
+	str     r3, [r0], #4
+	subs    r2, #32
+	bgt     0b
+1:
+
 	@ The start_kernel function returns NULL or a pointer to the thread_info struct
 	@ of the first thread to run on the CPU. If the pointer is NULL the CPU is
 	@ software reseted (could be reseted differently). If the pointer is not NULL
