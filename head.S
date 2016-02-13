@@ -120,6 +120,24 @@ ENTRY(cold_reset)
 	bgt     0b
 1:
 
+	@ Zero-fill the .bss sections.
+	ldr	r2, =bss_sect_size
+	tst	r2, r2
+	beq	1f
+	mov	r1, #0
+	ldr	r0, =bss_sect_start
+0:      str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	str     r1, [r0], #4
+	subs    r2, #32
+	bgt     0b
+1:
+
 	@ The start_kernel function returns NULL or a pointer to the thread_info struct
 	@ of the first thread to run on the CPU. If the pointer is NULL the CPU is
 	@ software reseted (could be reseted differently). If the pointer is not NULL

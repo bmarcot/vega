@@ -44,9 +44,12 @@ SECTIONS
     PROVIDE(data_sect_size = SIZEOF(.data));
 
     .bss : {
+    	PROVIDE(bss_sect_start = .);
         *(.bss)
         *(COMMON)
     } > ram
+
+    PROVIDE(bss_sect_size = SIZEOF(.bss));
 
     /* 
      * This vector is used as a trampoline to Handler_Mode
