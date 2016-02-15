@@ -25,31 +25,30 @@ SECTIONS
 	*(.text.*)
 	*(.rodata)
 	*(.rodata.*)
+	PROVIDE(__text_end__ = .);
     } > rom
 
     /* Initialized data (.data* sections) are initially stored in Flash,
        but need to be copied to a volatile storage for they are not
        read-only.    */
 
-    PROVIDE(data_sect_flash = .);
-
-    .data /* ALIGN(32) */ : AT (data_sect_flash) {
+    .data /* ALIGN(32) */ : AT (__text_end__) {
     	. = ALIGN(32);
-    	PROVIDE(data_sect_ram = .);
+    	PROVIDE(__data_start__ = .);
         *(.data)
         *(.data.*)
     	. = ALIGN(32);
     } > ram
 
-    PROVIDE(data_sect_size = SIZEOF(.data));
+    PROVIDE(__data_size__ = SIZEOF(.data));
 
     .bss : {
-    	PROVIDE(bss_sect_start = .);
+    	PROVIDE(__bss_start__ = .);
         *(.bss)
         *(COMMON)
     } > ram
 
-    PROVIDE(bss_sect_size = SIZEOF(.bss));
+    PROVIDE(__bss_size__ = SIZEOF(.bss));
 
     /* 
      * This vector is used as a trampoline to Handler_Mode
