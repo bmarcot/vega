@@ -15,7 +15,7 @@ CSRC = main.c uart.c systick.c backend.c page.c test/list.c thread.c sched-rr.c 
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: kernel.elf
+all: lm3s6965evb.ld kernel.elf
 
 kernel.elf: $(OBJS)
 	$(CC) -mthumb -march=armv7e-m -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
@@ -28,8 +28,11 @@ kernel.elf: $(OBJS)
 %.o: %.S
 	$(HOSTCC) -E -Iinclude $< | $(CC) -o $@ $(CFLAGS) -c -xassembler -
 
+%.ld: %.ld.S
+	 $(HOSTCC) -E -P -Iinclude -o $@ $<
+
 clean:
-	rm -f *.o test/*.o *~ kernel.map
+	rm -f *.o test/*.o *~ kernel.map *.ld
 
 distclean: clean
 	rm -f kernel.elf

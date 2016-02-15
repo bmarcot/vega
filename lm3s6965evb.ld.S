@@ -1,3 +1,5 @@
+#include "utils.h"
+
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(cold_reset)
@@ -43,11 +45,10 @@ SECTIONS
     PROVIDE(__data_size__ = SIZEOF(.data));
 
     .bss : {
-    	. = ALIGN(32);
     	PROVIDE(__bss_start__ = .);
         *(.bss)
         *(COMMON)
-    	. = ALIGN(32);
+	. = __bss_start__ + align_hi(. - __bss_start__, 32);
     } > ram
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
