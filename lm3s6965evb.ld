@@ -43,9 +43,11 @@ SECTIONS
     PROVIDE(__data_size__ = SIZEOF(.data));
 
     .bss : {
+    	. = ALIGN(32);
     	PROVIDE(__bss_start__ = .);
         *(.bss)
         *(COMMON)
+    	. = ALIGN(32);
     } > ram
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
