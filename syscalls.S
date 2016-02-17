@@ -4,42 +4,6 @@
 
 #include "linux/linkage.h"
 
-	@ int sc_no_args(void)
-	.macro	sc_no_params id
-	mov	r0, #\id
-	svc	#0
-	.endm
-
-	@ int sc_one_arg(void *arg0)
-	.macro	sc_one_param id
-	/* keep r0 untouched */
-	mov	r1, #\id
-	svc	#1
-	.endm
-
-	@ int sc_two_args(void *arg0, void *arg1)
-	.macro	sc_two_args id
-	/* keep r0, r1 untouched */
-	mov	r2, #\id
-	svc	#3
-	.endm
-
-	@ int sc_three_args(void *arg0, void *arg1,
-	@                   void *arg2)
-	.macro	sc_three_args id
-	/* keep r0, r1, r2 untouched */
-	mov	r3, #\id
-	svc	#3
-	.endm
-
-	@ int sc_four_args(void *arg0, void *arg1,
-	@                  void *arg2, void *arg3)
-	.macro	syscall4 id
-	/* keep r0, r1, r2, r3 untouched */
-	mov	r12, #\id
-	svc	#4
-	.endm
-
 	.set RET_ADDRESS, 24
 
 ENTRY(svcall)
@@ -117,28 +81,57 @@ do_syscall4:
 	pop	{r7, pc}
 ENDPROC(svcall)
 
+	/* syscall call site */
+
+	@ In order to not clobbering the parameter passing to function of the
+	@ EABI, the SysCall ID is pushed as the last parameter in the param
+	@ list of the called function. See the EABI specs to know which
+	@ registers (and possibly the stack) are used during a function call.
+
+	.macro sys argc, id
+	.if \argc == 0
+	mov	r0, #\id
+	.elseif \argc == 1
+	mov	r1, #\id
+	.elseif \argc == 2
+	mov	r2, #\id
+	.elseif \argc == 3
+	mov	r3, #\id
+	.elseif \argc == 4
+	mov	r12, #\id
+	.else
+	.error "error: Unhandled number of parameters in SysCall."
+	.endif
+	svc	#\argc
+	.endm
+
 	/* syscall definitions */
+
+#define SYS_PTHREAD_YIELD   0
+#define SYS_PTHREAD_SELF    1
+#define SYS_PTHREAD_EXIT    2
+#define SYS_PTHREAD_CREATE  3
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
-	sc_no_params 0
+	sys	0, SYS_PTHREAD_YIELD
 	bx	lr
 ENDPROC(pthread_yield)
 
 	@ pthread_t pthread_self(void)
 ENTRY(pthread_self)
-	sc_no_params 1
+	sys	0, SYS_PTHREAD_SELF
 	bx	lr
 ENDPROC(pthread_self)
 
 	@ void pthread_exit(void *retval)
 ENTRY(pthread_exit)
-	sc_one_param 2
+	sys	1, SYS_PTHREAD_EXIT
 	bx	lr
 ENDPROC(pthread_exit)
 
 	@ int pthread_create(...)
 ENTRY(pthread_create)
-	sc_three_args 3
+	sys	3, SYS_PTHREAD_CREATE
 	bx	lr
 ENDPROC(pthread_create)
