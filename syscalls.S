@@ -88,22 +88,43 @@ ENDPROC(svcall)
 	@ list of the called function. See the EABI specs to know which
 	@ registers (and possibly the stack) are used during a function call.
 
-	.macro sys argc, id
-	.if \argc == 0
-	mov	r0, #\id
-	.elseif \argc == 1
-	mov	r1, #\id
-	.elseif \argc == 2
-	mov	r2, #\id
-	.elseif \argc == 3
-	mov	r3, #\id
-	.elseif \argc == 4
-	mov	r12, #\id
-	.else
-	.error "error: Unhandled number of parameters in SysCall."
-	.endif
-	svc	#\argc
-	.endm
+        @ sys{cond}     argc, sys_id
+#define DEFINE_SYS_CALL_SITE(cc)                \
+        .macro sys##cc argc, id         ;       \
+        .ifnb   cc                      ;       \
+        itt     cc                      ;       \
+        .endif                          ;       \
+        .if \argc == 0                  ;       \
+        mov##cc r0, #\id                ;       \
+        .elseif \argc == 1              ;       \
+        mov##cc r1, #\id                ;       \
+        .elseif \argc == 2              ;       \
+        mov##cc r2, #\id                ;       \
+        .elseif \argc == 3              ;       \
+        mov##cc r3, #\id                ;       \
+        .elseif \argc == 4              ;       \
+        mov##cc r12, #\id               ;       \
+        .else                           ;       \
+        .error "error: Unhandled number of parameters in SysCall." ;    \
+        .endif                          ;       \
+        svc##cc #\argc                  ;       \
+        .endm
+
+DEFINE_SYS_CALL_SITE()
+DEFINE_SYS_CALL_SITE(eq)
+DEFINE_SYS_CALL_SITE(ne)
+DEFINE_SYS_CALL_SITE(cs)
+DEFINE_SYS_CALL_SITE(cc)
+DEFINE_SYS_CALL_SITE(mi)
+DEFINE_SYS_CALL_SITE(pl)
+DEFINE_SYS_CALL_SITE(vs)
+DEFINE_SYS_CALL_SITE(vc)
+DEFINE_SYS_CALL_SITE(hi)
+DEFINE_SYS_CALL_SITE(ls)
+DEFINE_SYS_CALL_SITE(ge)
+DEFINE_SYS_CALL_SITE(lt)
+DEFINE_SYS_CALL_SITE(gt)
+DEFINE_SYS_CALL_SITE(le)
 
 	/* syscall definitions */
 
