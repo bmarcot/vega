@@ -146,3 +146,30 @@ ENTRY(pthread_create)
 	sys	3, SYS_PTHREAD_CREATE
 	bx	lr
 ENDPROC(pthread_create)
+
+	/* dummy syscalls for testing-purpose */
+
+ENTRY(dummy_0_args)
+	sys	0, SYS_PTHREAD_CREATE + 1
+	bx	lr
+ENDPROC(dummy_0_args)
+
+ENTRY(dummy_1_arg)
+	sys	1, SYS_PTHREAD_CREATE + 2
+	bx	lr
+ENDPROC(dummy_1_arg)
+
+ENTRY(dummy_2_args)
+	sys	2, SYS_PTHREAD_CREATE + 3
+	bx	lr
+ENDPROC(dummy_2_args)
+
+ENTRY(dummy_3_args)
+	sys	3, SYS_PTHREAD_CREATE + 4
+	bx	lr
+ENDPROC(dummy_3_args)
+
+ENTRY(dummy_4_args)
+	sys	4, SYS_PTHREAD_CREATE + 5
+	bx	lr
+ENDPROC(dummy_4_args)
