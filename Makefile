@@ -1,12 +1,21 @@
+# CPU must be one of the following: cortex-m0 cortex-m3 cortex-m4
 CPU= cortex-m3
 MACHINE= lm3s6965evb
+
+ifeq ($(CPU),cortex-m3)
+	ARCH = armv7-m
+else ifeq ($(CPU),cortex-m4)
+	ARCH = armv7e-m
+else ifeq ($(CPU),cortex-m0)
+	ARCH = armv6-m
+endif
 
 CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
 AS = $(CROSS)as
 HOSTCC=gcc
 # LD = $(CROSS)gcc
-CFLAGS = -mcpu=$(CPU) -mthumb -Iinclude
+CFLAGS = -mcpu=$(CPU) -march=$(ARCH) -mthumb -Iinclude
 LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC = head.S entry.S syscalls.S
@@ -18,7 +27,7 @@ OBJS += $(CSRC:.c=.o)
 all: lm3s6965evb.ld kernel.elf
 
 kernel.elf: $(OBJS)
-	$(CC) -mthumb -march=armv7e-m -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
+	$(CC) -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nostartfiles -std=gnu99 $<
