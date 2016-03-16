@@ -3,11 +3,13 @@
 #include <string.h>
 #include "thread.h"
 #include "pthread.h"
-#include "page.h"
+#include "mm.h"
 #include "utils.h"
 #include "sched-rr.h"
 #include "arch-v7m.h"
 #include "linux/types.h"
+
+#define PAGE_SIZE 1024
 
 static struct __intr_stackframe *build_intr_stack(void)
 {
@@ -17,7 +19,7 @@ static struct __intr_stackframe *build_intr_stack(void)
 	/* We don't need a huge stack for interrupt handling, however we need the page
 	   to be aligned on a known value to retrieve the Thread Control Block that
 	   is stored at the bottom of the physical page.    */
-	if ((memp = page_alloc()) == NULL)
+	if ((memp = page_alloc(PAGE_SIZE)) == NULL)
 		return NULL;
 	is = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __intr_stackframe));
 #ifndef DEBUG
@@ -45,7 +47,7 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*start_routine)(void *)
 	void *memp;
 	struct __thrd_stackframe *ts;
 
-	if (NULL == (memp = page_alloc())) // this one does not need to be aligned - size configurable
+	if (NULL == (memp = page_alloc(PAGE_SIZE))) // this one does not need to be aligned - size configurable
 		return NULL;
 	ts = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __thrd_stackframe));
 	ts->ts_gprs[0] = (u32) arg;

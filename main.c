@@ -4,6 +4,7 @@
 #include "systick.h"
 #include "thread.h"
 #include "sched-rr.h"
+#include "mm.h"
 
 extern void *vector_base;
 extern void set_vtor(void *);
@@ -20,6 +21,9 @@ struct thread_info *start_kernel(void)
 	set_vtor(&vector_base);
 	systick_init(0x227811);
 	/* systick_enable(); */
+
+	/* initialize the physical memory allocator */
+	page_init();
 
 	/* thread_main is the user entry point to the system */
 	struct thread_info *thread_main;

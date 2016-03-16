@@ -78,9 +78,10 @@ SECTIONS
         PROVIDE(early_stack_base = .);
     } > ram
 
-    .pgpool ALIGN(1k) : {
-        PROVIDE(pgpool_base = .);
+    .pgmem ALIGN(2k) : {
+        PROVIDE(__pgmem_base__ = .);
         . += 32k;
-        PROVIDE(pgpool_limit = .);
     } > ram
+
+    PROVIDE(__pgmem_size__ = SIZEOF(.pgmem));
 }
