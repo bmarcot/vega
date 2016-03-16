@@ -32,10 +32,8 @@ kernel.elf: $(OBJS)
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nostartfiles -std=gnu99 $<
 
-#%.o: %.S
-#	$(AS) -o $@ $(CFLAGS) $<
 %.o: %.S
-	$(HOSTCC) -E -Iinclude $< | $(CC) -o $@ $(CFLAGS) -c -xassembler -
+	$(CC) -o $@ $(CFLAGS) -c $<
 
 %.ld: %.ld.S
 	 $(HOSTCC) -E -P -Iinclude -o $@ $<
