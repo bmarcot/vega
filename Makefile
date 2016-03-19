@@ -38,8 +38,8 @@ kernel.elf: $(OBJS)
 %.ld: %.ld.S
 	 $(HOSTCC) -E -P -Iinclude -o $@ $<
 
-clean:
-	rm -f *.o test/*.o *~ kernel.map *.ld
+clean::
+	rm -f *.o *~ kernel.map *.ld
 
 distclean: clean
 	rm -f kernel.elf
