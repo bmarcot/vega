@@ -20,7 +20,7 @@ LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC = head.S entry.S syscalls.S
 CSRC = main.c uart.c systick.c backend.c test/list.c thread.c sched-rr.c sysvect.c \
-	sys/pthread.c user/main.c fault.c sysdummies.c bitmap.c mm.c
+	sys/pthread.c user/main.c fault.c bitmap.c mm.c
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
