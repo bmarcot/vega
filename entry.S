@@ -5,7 +5,7 @@
 #include "arch-v7m.h"
 #include "linux/linkage.h"
 
-	.include "macros.S"
+#include "../asm-pseudo.i"
 
 	@ void	set_vtor(void *addr)
 ENTRY(set_vtor)
