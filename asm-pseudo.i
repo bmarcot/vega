@@ -23,9 +23,6 @@
 	@ sys{cond}	argc, sys_id
 #define DEFINE_SYS_CALL_SITE(cc)		\
 	.macro sys##cc argc, id		;	\
-	.ifnb	cc			;	\
-	itt	cc			;	\
-	.endif				;	\
 	.if \argc == 0			;	\
 	mov##cc r0, #\id		;	\
 	.elseif \argc == 1		;	\
