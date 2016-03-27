@@ -93,6 +93,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 int thread_yield(void)
 {
+	CURRENT_THREAD_INFO(thread);
+	printf("thread: id=%d is yielding\n", thread->ti_id);
+
 	//FIXME: use a top-level function instead, like sched_elect()
 	return sched_rr_elect();
 }
@@ -109,7 +112,7 @@ void thread_exit(void *retval)
 	CURRENT_THREAD_INFO(thread);
 
 	thread->ti_retval = retval;
-	printf("in thread exit for id=%d with retval=%d\n", thread->ti_id, (int) retval);
+	printf("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
 	//FIXME: this does not release the resource, and creates a zombie thread
 	sched_rr_del(thread);
 }
