@@ -585,4 +585,25 @@ static inline void list_splice_tail_init(struct list_head *list,
 #define list_safe_reset_next(pos, n, member)				\
 	n = list_next_entry(pos, member)
 
+/**
+ * list_find_entry - iterate over list of given type
+ * @pos:        the type * to use as a loop cursor.
+ * @head:       the head for your list.
+ * @member:     the name of the list_head within the struct.
+ * @value:      the value to compare against.
+ * @field:      the name of the field to compare within the struct.
+ */
+/* https://gcc.gnu.org/onlinedocs/gcc/Local-Labels.html */
+#define list_find_entry(pos, head, member, value, field)		\
+		do {							\
+			__label__ found;				\
+			list_for_each_entry(pos, head, member) {	\
+				if (pos->field == value)		\
+					goto found;			\
+			}						\
+			if (&pos->member == head)			\
+				pos = NULL;				\
+		found:;							\
+		} while (0);
+
 #endif /* !LINUX_LIST_H */
