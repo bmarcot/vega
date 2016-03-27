@@ -14,4 +14,8 @@ struct list_head {
     struct list_head *next, *prev;
 };
 
+typedef struct {
+	volatile s32 val;
+} atomic_t;
+
 #endif /* !LINUX_TYPES_H */
