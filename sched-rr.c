@@ -64,3 +64,15 @@ int sched_rr_elect(void)
 
 	return 0;
 }
+
+/* This function is used when the runqueue has been modified externally, and it
+   is not possible to fetch the next thread.    */
+int sched_rr_elect_reset(void)
+{
+	CURRENT_THREAD_INFO(current);
+	struct thread_info *next = list_first_entry(&rr_runq, struct thread_info, ti_list);
+
+	switch_to(next, current);
+
+	return 0;
+}
