@@ -10,6 +10,8 @@ else ifeq ($(CPU),cortex-m0)
 	ARCH = armv6-m
 endif
 
+NAME = vega
+
 CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
 AS = $(CROSS)as
@@ -25,10 +27,10 @@ CSRC += main.c uart.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: lm3s6965evb.ld kernel.hex
+all: lm3s6965evb.ld $(NAME).hex
 
-kernel.elf: $(OBJS)
-	$(CC) -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
+$(NAME).elf: $(OBJS)
+	$(CC) -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -W -Wall -nostartfiles -std=gnu99 $<
@@ -43,10 +45,10 @@ kernel.elf: $(OBJS)
 	$(OCPY) -O ihex $< $@
 
 clean::
-	rm -f *.o *~ kernel.map *.ld
+	rm -f *.o *~ $(NAME).map *.ld
 
 distclean: clean
-	rm -f kernel.elf
+	rm -f $(NAME).elf
 
-run: kernel.elf
+run: $(NAME).elf
 	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
