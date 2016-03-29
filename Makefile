@@ -13,6 +13,7 @@ endif
 CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
 AS = $(CROSS)as
+OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 # LD = $(CROSS)gcc
 CFLAGS = -mcpu=$(CPU) -march=$(ARCH) -mthumb -Iinclude
@@ -24,7 +25,7 @@ CSRC += main.c uart.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 OBJS = $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: lm3s6965evb.ld kernel.elf
+all: lm3s6965evb.ld kernel.hex
 
 kernel.elf: $(OBJS)
 	$(CC) -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=kernel.map $(LDFLAGS) -o $@ $^
@@ -37,6 +38,9 @@ kernel.elf: $(OBJS)
 
 %.ld: %.ld.S
 	 $(HOSTCC) -E -P -Iinclude -o $@ $<
+
+%.hex: %.elf
+	$(OCPY) -O ihex $< $@
 
 clean::
 	rm -f *.o *~ kernel.map *.ld
