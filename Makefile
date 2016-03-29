@@ -10,6 +10,7 @@ else ifeq ($(CPU),cortex-m0)
 	ARCH = armv6-m
 endif
 
+# vegaz, compressed kernel
 NAME = vega
 
 CROSS = arm-none-eabi-
@@ -17,7 +18,6 @@ CC = $(CROSS)gcc
 AS = $(CROSS)as
 OCPY = $(CROSS)objcopy
 HOSTCC=gcc
-# LD = $(CROSS)gcc
 CFLAGS = -mcpu=$(CPU) -march=$(ARCH) -mthumb -Iinclude
 LDFLAGS = -Wl,-T$(MACHINE).ld
 
@@ -48,7 +48,7 @@ clean::
 	rm -f *.o *~ $(NAME).map *.ld
 
 distclean: clean
-	rm -f $(NAME).elf
+	rm -f $(NAME).elf $(NAME).hex
 
 run: $(NAME).elf
 	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
