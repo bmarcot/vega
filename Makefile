@@ -22,7 +22,7 @@ LDFLAGS = -Wl,-T$(MACHINE).ld
 SSRC += head.S entry.S syscalls.S kernel-if.S
 CSRC += main.c uart.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 	sys/pthread.c fault.c bitmap.c mm.c mutex.c
-OBJS = $(SSRC:.S=.o)
+OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
 all: lm3s6965evb.ld kernel.hex
