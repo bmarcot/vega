@@ -37,7 +37,7 @@ kernel.elf: $(OBJS)
 	$(CC) -o $@ $(CFLAGS) -c $<
 
 %.ld: %.ld.S
-	 $(HOSTCC) -E -P -Iinclude -o $@ $<
+	$(HOSTCC) -E -P -Iinclude -o $@ $<
 
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@
