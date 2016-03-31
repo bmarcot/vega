@@ -6,8 +6,8 @@ ENTRY(cold_reset)
 
 MEMORY
 {
-    rom (rx)  : ORIGIN = 0, LENGTH = 256k
-    ram (rwx) : ORIGIN = 0x20000000, LENGTH = 64k
+    rom (rx)  : ORIGIN = 0, LENGTH = ROMSZ
+    ram (rwx) : ORIGIN = 0x20000000, LENGTH = RAMSZ
 }
 
 SECTIONS
