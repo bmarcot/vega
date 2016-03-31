@@ -43,5 +43,5 @@ clean::
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
 
-run: $(NAME).elf
-	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
+# platform Makefile.rules contains flashing and running rules
+include platform/$(PLATFORM)/Makefile.rules

@@ -1,0 +1,2 @@
+run: $(NAME).elf
+	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
