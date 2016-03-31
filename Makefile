@@ -1,14 +1,7 @@
 # CPU must be one of the following: cortex-m0 cortex-m3 cortex-m4
 CPU= cortex-m3
+ARCH= armv7-m
 MACHINE= lm3s6965evb
-
-ifeq ($(CPU),cortex-m3)
-	ARCH = armv7-m
-else ifeq ($(CPU),cortex-m4)
-	ARCH = armv7e-m
-else ifeq ($(CPU),cortex-m0)
-	ARCH = armv6-m
-endif
 
 # vegaz, compressed kernel
 NAME = vega
@@ -18,7 +11,7 @@ CC = $(CROSS)gcc
 AS = $(CROSS)as
 OCPY = $(CROSS)objcopy
 HOSTCC=gcc
-CFLAGS = -mcpu=$(CPU) -march=$(ARCH) -mthumb -Iinclude
+CFLAGS = -mcpu=$(CPU) -mthumb -Iinclude
 LDFLAGS = -Wl,-T$(MACHINE).ld
 
 SSRC += head.S entry.S syscalls.S kernel-if.S
@@ -29,6 +22,7 @@ OBJS += $(CSRC:.c=.o)
 
 all: lm3s6965evb.ld $(NAME).hex
 
+# ld must know the architecture because we use the stdlib (printf, memcpy..)
 $(NAME).elf: $(OBJS)
 	$(CC) -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map $(LDFLAGS) -o $@ $^
 
