@@ -16,7 +16,7 @@ LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.l
 
 SSRC += head.S entry.S syscalls.S kernel-if.S
 CSRC += main.c uart.c systick.c backend.c thread.c sched-rr.c sysvect.c \
-	sys/pthread.c fault.c bitmap.c mm.c mutex.c
+	sys/pthread.c faults.c bitmap.c mm.c mutex.c
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
@@ -32,7 +32,7 @@ $(NAME).elf: $(OBJS)
 	$(CC) -o $@ $(CFLAGS) -c $<
 
 %.lds: %.lds.S
-	$(HOSTCC) -E -P -Iinclude -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
+	$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
 
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@

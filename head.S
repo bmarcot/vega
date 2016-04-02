@@ -49,14 +49,11 @@
 	.long	early_stack_base		@ SP_main value
 	.long	(warm_reset + THUMB_MODE)	@ Reset (warm)
 	.long	0				@ NMI
-	.long	(fault + THUMB_MODE)	@ HardFault
+	.long	(hardf + THUMB_MODE)		@ HardFault
 	//FIXME: Qemu does not escalate other faults to #hf
-	.long	(fault + THUMB_MODE)	@ HardFault
-	.long	(fault + THUMB_MODE)	@ HardFault
-	.long	(fault + THUMB_MODE)	@ HardFault
-	//.long 	0				@ MemManage
-	//.long 	0				@ BusFault
-	//.long 	0				@ UsageFault
+	.long	(memf + THUMB_MODE)		@ MemManage
+	.long	(busf + THUMB_MODE)		@ BusFault
+	.long	(usgf + THUMB_MODE)		@ UsageFault
 	.long	0				@ Reserved
 	.long	0				@ Reserved
 	.long	0				@ Reserved
@@ -153,7 +150,7 @@ ENTRY(warm_reset)
 	b	cold_reset
 ENDPROC(warm_reset)
 
-ENTRY(fault)
+	.macro	fault_handler f
 	push	{r4-r11}	@ save non-scratch registers at time of fault
 	mov	r0, sp
 	mov	r2, lr		@ lr contains EXC_RETURN, fault was taken in thread or interrupt?
@@ -164,8 +161,24 @@ ENTRY(fault)
 	@ interrupts handler).
 	mrs	r1, psp
 
-	b	hardfault
-ENDPROC(fault)
+	b	\f
+	.endm	/* fault_handler */
+
+ENTRY(hardf)
+	fault_handler hardfault
+ENDPROC(hardf)
+
+ENTRY(memf)
+	fault_handler memmanage
+ENDPROC(memf)
+
+ENTRY(busf)
+	fault_handler busfault
+ENDPROC(busf)
+
+ENTRY(usgf)
+	fault_handler usagefault
+ENDPROC(usgf)
 
 	.macro	early_fault f, m
 	.balign	8
