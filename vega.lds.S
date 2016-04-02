@@ -53,25 +53,12 @@ SECTIONS
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
 
-    /* 
-     * This vector is used as a trampoline to Handler_Mode
-     * and lives only for a few instructions. It should not
-     * allocate/reserve any physical memory for that purpose.
-     * Instead overlay that section and another, or reclaim
-     * that memory after kernel is started.
-     */
-    .vector.trampoline ALIGN(128) : {
-        PROVIDE(vtor_trampoline_base = .);
-        . += 64;
-    } > ram
-
     .heap ALIGN(32) : {
         PROVIDE(heap_base = .);
         . += 4k;
         PROVIDE(heap_limit = .);
     } > ram
 
-    /* same as .vector.trampoline */
     .early.stack ALIGN(8) : {
         PROVIDE(early_stack_limit = .);
         . += 1k;

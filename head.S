@@ -76,7 +76,7 @@ ENTRY(cold_reset)
 	movl	r0, V7M_SCB_BASE
 
 	@ switch to Handler_Mode
-	ldr	r1, =vtor_trampoline_base
+	ldr	r1, =__pgmem_base__		@ create temporary vector in .pgmem
 	str	r1, [r0, #V7M_VTOR]
 	ldr	r2, =0f
 	adds	r2, #1
