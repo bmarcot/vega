@@ -20,7 +20,7 @@ CSRC += main.c uart.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: vega.lds $(NAME).hex
+all: $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -38,7 +38,7 @@ $(NAME).elf: $(OBJS)
 	$(OCPY) -O ihex $< $@
 
 clean::
-	rm -f *.o *~ $(NAME).map *.ld
+	rm -f *.o *~ $(NAME).map $(NAME).lds
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
