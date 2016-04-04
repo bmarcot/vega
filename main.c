@@ -11,7 +11,11 @@ extern void set_vtor(void *);
 
 void *cpu_idle(void *);
 
+#ifndef FREESTANDING
 extern void *main(void *);
+#else
+static void *main(__unused void *arg) { return 0; }
+#endif /* !FREESTANDING */
 
 struct thread_info *thread_idle;
 
