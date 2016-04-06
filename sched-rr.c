@@ -3,6 +3,7 @@
 
 #include "thread.h"
 #include "linux/list.h"
+#include "kernel.h"
 
 static LIST_HEAD(rr_runq);
 extern struct thread_info *thread_idle;
@@ -42,12 +43,12 @@ int sched_rr_elect(void)
 	struct thread_info *next;
 
 #ifdef DEBUG
-	printf("current thread is %p\n", current);
+	printk("current thread is %p\n", current);
 #endif /* DEBUG */
 
 	if (list_empty(&rr_runq)) {
 		//FIXME: log this event into the perf monitor module
-		printf("-- go to thread idle\n");
+		printk("-- go to thread idle\n");
 		next = thread_idle;
 	} else {
 		next = find_next_thread(current);

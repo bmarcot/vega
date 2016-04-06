@@ -8,6 +8,7 @@
 #include "sched-rr.h"
 #include "arch-v7m.h"
 #include "linux/types.h"
+#include "kernel.h"
 
 #define PAGE_SIZE 1024
 
@@ -54,7 +55,7 @@ static struct __thrd_stackframe *build_thrd_stack(void *(*start_routine)(void *)
 #ifndef DEBUG
 	memset(&ts->ts_gprs[1], 0, 4 * sizeof (u32));
 #else
-	printf("thread sp = %p\n", ts);
+	printk("thread sp = %p\n", ts);
 	ts->ts_gprs[1] = 0xcafe0001;
 	ts->ts_gprs[2] = 0xcafe0002;
 	ts->ts_gprs[3] = 0xcafe0003;
@@ -94,7 +95,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 int thread_yield(void)
 {
 	CURRENT_THREAD_INFO(thread);
-	printf("thread: id=%d is yielding\n", thread->ti_id);
+	printk("thread: id=%d is yielding\n", thread->ti_id);
 
 	//FIXME: use a top-level function instead, like sched_elect()
 	return sched_rr_elect();
@@ -112,7 +113,7 @@ void thread_exit(void *retval)
 	CURRENT_THREAD_INFO(thread);
 
 	thread->ti_retval = retval;
-	printf("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
+	printk("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
 	//FIXME: this does not release the resource, and creates a zombie thread
 	sched_rr_del(thread);
 }

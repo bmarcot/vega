@@ -4,9 +4,10 @@
 #include "bitmap.h"
 #include "utils.h"
 #include "linux/list.h"
+#include "kernel.h"
 
-#define DEBUG_PRINTF(...)\
-	do { printf(__VA_ARGS__); fflush(stdout); } while (0);
+#define DEBUG_PRINTK(...)\
+	do { printk(__VA_ARGS__); fflush(stdout); } while (0);
 
 struct free_area free_area[MAX_BLOCK_ORDER + 1];
 
@@ -65,12 +66,12 @@ static void *try_alloc(unsigned order)
 	unsigned ix;
 
 	if (order > MAX_BLOCK_ORDER) {
-		DEBUG_PRINTF("mm: alloc failed: no free block could be found\n");
+		DEBUG_PRINTK("mm: alloc failed: no free block could be found\n");
 		return NULL;
 	}
 
 	if (list_empty(&free_area[order].free_list)) {
-		DEBUG_PRINTF("mm: no free block with order=%d, trying with order=%d\n",
+		DEBUG_PRINTK("mm: no free block with order=%d, trying with order=%d\n",
 			order, order + 1);
 		page_addr = try_alloc(order + 1);
 		if (page_addr != NULL)
@@ -78,7 +79,7 @@ static void *try_alloc(unsigned order)
 		else
 			return NULL;
 	} else {
-		DEBUG_PRINTF("mm: found a free block with order=%d at %p\n",
+		DEBUG_PRINTK("mm: found a free block with order=%d at %p\n",
 			order, free_area[order].free_list.next);
 		return free_area[order].free_list.next;
 	}
@@ -104,7 +105,7 @@ void *page_alloc(int size)
 		list_del(page_addr);
 	}
 
-	DEBUG_PRINTF("mm: allocated a page at %p\n", page_addr);
+	DEBUG_PRINTK("mm: allocated a page at %p\n", page_addr);
 
 	return page_addr;
 }
@@ -121,11 +122,11 @@ int page_init(void)
 {
 	void *block_addr = &__pgmem_base__;
 
-	printf("physical memory splitting:\n");
+	printk("physical memory splitting:\n");
 	for (unsigned o = 0; o <= MAX_BLOCK_ORDER; o++) {
 		INIT_LIST_HEAD(&free_area[o].free_list);
 		free_area[o].page_count = (u32) &__pgmem_size__ / order_to_bytesz(o);
-		printf("  - %3d pages of %4d bytes\n", free_area[o].page_count,
+		printk("  - %3d pages of %4d bytes\n", free_area[o].page_count,
 			order_to_bytesz(o));
 		free_area[o].map = maps[o];
 	}
@@ -136,8 +137,8 @@ int page_init(void)
 		block_addr = block_addr + order_to_bytesz(MAX_BLOCK_ORDER);
 	}
 
-	printf("__pgmem_base__ is set to %p\n", &__pgmem_base__);
-	printf("__pgmem_size__ is set to %p\n", &__pgmem_size__);
+	printk("__pgmem_base__ is set to %p\n", &__pgmem_base__);
+	printk("__pgmem_size__ is set to %p\n", &__pgmem_size__);
 
 	return 0;
 }

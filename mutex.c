@@ -5,6 +5,7 @@
 #include "linux/list.h"
 #include "thread.h"
 #include "sched-rr.h"
+#include "kernel.h"
 
 struct mutex {
 	atomic_t *m_lock;
@@ -17,7 +18,7 @@ LIST_HEAD(mutexes);
 
 int mutex_lock(atomic_t /* __user  */ *lock)
 {
-	printf("mutex: locking %p (val=%d)\n", lock, lock->val);
+	printk("mutex: locking %p (val=%d)\n", lock, lock->val);
 
 	struct mutex *mutexp;
 	CURRENT_THREAD_INFO(threadp);
@@ -38,7 +39,7 @@ int mutex_lock(atomic_t /* __user  */ *lock)
 		mutexp->m_lock = lock;
 		INIT_LIST_HEAD(&mutexp->waitq);
 		list_add(&mutexp->list, &mutexes);
-		printf("mutex: no mutex struct where found, created %p\n", mutexp);
+		printk("mutex: no mutex struct where found, created %p\n", mutexp);
 	}
 
 	lock->val++;    /* data is in the [1, n] range */
@@ -60,7 +61,7 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 {
 	struct mutex *mutexp;
 
-	printf("mutex: unlocking %p (val=%d)\n", lock, lock->val);
+	printk("mutex: unlocking %p (val=%d)\n", lock, lock->val);
 
 	/* we are here because there is at least one waiting thread */
 

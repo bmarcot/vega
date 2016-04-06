@@ -5,6 +5,7 @@
 #include "thread.h"
 #include "sched-rr.h"
 #include "mm.h"
+#include "kernel.h"
 
 extern void *vector_base;
 extern void set_vtor(void *);
@@ -32,12 +33,12 @@ struct thread_info *start_kernel(void)
 	/* thread_main is the user entry point to the system */
 	struct thread_info *thread_main;
 	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
-		printf("[!] Could not create user main thread.\n");
+		printk("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
 
 	/* the idle thread is not pushed in the rr-runqueue */
 	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR)) == NULL) {
-		printf("[!] Could not create system idle thread.\n");
+		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
 
@@ -47,14 +48,14 @@ struct thread_info *start_kernel(void)
 
 void cpu_locked(int errno)
 {
-	printf("%d: cpu locked\n", errno);
+	printk("%d: cpu locked\n", errno);
 	for (;;)
 		;
 }
 
 void *cpu_idle(__unused void *arg)
 {
-	printf("-- in cpu idle --\n");
+	printk("-- in cpu idle --\n");
 	for (;;)
 		;
 }
