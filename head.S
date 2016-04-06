@@ -88,6 +88,8 @@ ENTRY(cold_reset)
 
 	@ enable usgf, busf, memf
 	ldr   	r1, =(V7M_SHCSR_USGFAULTENA | V7M_SHCSR_BUSFAULTENA | V7M_SHCSR_MEMFAULTENA)
+	ldr   	r2, [r0, #V7M_SHCSR]
+	orr	r1, r2
 	str   	r1, [r0, #V7M_SHCSR]
 	sync
 
