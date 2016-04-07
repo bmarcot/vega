@@ -1,5 +1,12 @@
 #include "uart.h"
 
+struct uart {
+	unsigned int uartdr;
+	char pad[0x28];
+	unsigned int uartlcrh;
+	unsigned int uartctl;
+};
+
 volatile struct uart *uart0 = (void *) 0x4000c000;
 
 void uart_enable(void)
@@ -32,4 +39,9 @@ int puts(const char *s)
 	uart_putchar('\n');
 
 	return 0;
+}
+
+void uart_init(void)
+{
+	uart_enable();
 }

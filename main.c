@@ -21,7 +21,7 @@ struct thread_info *thread_idle;
 
 struct thread_info *start_kernel(void)
 {
-	uart_enable();
+	uart_init();
 	set_vtor(&vector_base);
 	systick_init(0x227811);
 	/* systick_enable(); */
