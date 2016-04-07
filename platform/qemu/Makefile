@@ -4,3 +4,5 @@ MACHINE	= lm3s6965evb
 
 ROMSZ	= 256k
 RAMSZ	= 64k
+
+CSRC	+= platform/qemu/uart.c
