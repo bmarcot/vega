@@ -1,3 +1,4 @@
+#include "kernel.h"
 #include "uart.h"
 
 struct uart {
@@ -41,7 +42,7 @@ int puts(const char *s)
 	return 0;
 }
 
-void uart_init(void)
+void __init uart_init(void)
 {
 	uart_enable();
 }
