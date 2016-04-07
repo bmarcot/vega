@@ -5,5 +5,5 @@ before_install:
 # - sudo apt-get install -y qemu-system
 
 script:
-  - make PLATFORM=qemu FREESTANDING=1
+  - make PLATFORM=qemu
 # - make PLATFORM=qemu --file tests/mutex_00/Makefile

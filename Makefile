@@ -11,10 +11,8 @@ AS = $(CROSS)as
 OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 
-CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude
-ifeq ($(FREESTANDING),1)
-CFLAGS += -DFREESTANDING -Wno-main
-endif
+# warning: return type of 'main' is not 'int' [-Wmain]
+CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Wno-main
 
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
 LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds
