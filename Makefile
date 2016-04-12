@@ -23,7 +23,7 @@ CSRC += main.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: $(NAME).lds $(NAME).hex
+all: include/version.h $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -37,11 +37,15 @@ $(NAME).elf: $(OBJS)
 %.lds: %.lds.S
 	$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
 
+include/version.h: include/version_template.h
+	cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
+	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
+
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@
 
 clean::
-	rm -f *.o *~ $(NAME).map $(NAME).lds
+	rm -f *.o *~ $(NAME).map $(NAME).lds include/version.h
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex

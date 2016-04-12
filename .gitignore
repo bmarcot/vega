@@ -4,3 +4,4 @@
 *.map
 *.lds
 *.hex
+include/version.h

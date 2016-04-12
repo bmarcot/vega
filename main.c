@@ -6,6 +6,7 @@
 #include "sched-rr.h"
 #include "mm.h"
 #include "kernel.h"
+#include "version.h"
 
 extern void *vector_base;
 extern void set_vtor(void *);
@@ -23,6 +24,10 @@ struct thread_info *start_kernel(void)
 {
 	uart_init();
 	set_vtor(&vector_base);
+
+	printk("Version:    %s\n", VER_SLUG);
+	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
+
 	systick_init(0x227811);
 	/* systick_enable(); */
 
