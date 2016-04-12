@@ -28,7 +28,7 @@ struct thread_info *start_kernel(void)
 	printk("Version:    %s\n", VER_SLUG);
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
 
-	systick_init(0x227811);
+	/* systick_init(0x227811); */
 	/* systick_enable(); */
 
 	/* initialize the physical memory allocator */
