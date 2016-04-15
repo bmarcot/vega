@@ -14,7 +14,7 @@ struct free_area free_area[MAX_BLOCK_ORDER + 1];
 extern void *__pgmem_base__;
 extern void *__pgmem_size__;
 
-static inline unsigned get_block_ix(void *addr, unsigned order)
+static inline unsigned addr_to_block_index(void *addr, unsigned order)
 {
 	//FIXME: multiple zone to allocate from? use the zone's base address instead
 	return ((u32) addr - (u32) &__pgmem_base__) >> (order + MIN_PAGE_ORDER);
@@ -45,7 +45,7 @@ static unsigned bytesz_to_order(size_t size)
    the list of free blocks of order n-1.    */
 static void *split_block(void *block_addr, unsigned order)
 {
-	unsigned ix = get_block_ix(block_addr, order);
+	unsigned ix = addr_to_block_index(block_addr, order);
 	void *new_block;
 
 	bitmap_set(free_area[order].map, ix);
@@ -83,7 +83,7 @@ static void *try_alloc(unsigned order)
 			order, free_area[order].free_list.next);
 		return free_area[order].free_list.next;
 	}
-	ix = get_block_ix(page_addr, order);
+	ix = addr_to_block_index(page_addr, order);
 	bitmap_set(free_area[order].map, ix);
 
 	return page_addr;
@@ -101,7 +101,7 @@ void *page_alloc(int size)
 	} else {
 		/* fast path alloc */
 		page_addr = free_area[order].free_list.next;
-		bitmap_set(free_area[order].map, get_block_ix(page_addr, order));
+		bitmap_set(free_area[order].map, addr_to_block_index(page_addr, order));
 		list_del(page_addr);
 	}
 
