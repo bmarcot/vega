@@ -5,3 +5,6 @@
 *.lds
 *.hex
 include/version.h
+
+# Travis-CI and unit test framework
+vega-test-master
