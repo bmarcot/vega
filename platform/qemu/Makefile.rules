@@ -1,2 +1,5 @@
 run: $(NAME).elf
 	qemu-system-arm -serial stdio -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
+
+run-with-semihosting: $(NAME).elf
+	qemu-system-arm -semihosting -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
