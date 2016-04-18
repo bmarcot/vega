@@ -11,13 +11,22 @@
 
 struct free_area free_area[MAX_BLOCK_ORDER + 1];
 
-extern void *__pgmem_base__;
-extern void *__pgmem_size__;
+extern char __text_start__;
+extern char __text_end__;
+extern char __rodata_start__;
+extern char __rodata_end__;
+extern char __data_start__;
+extern char __data_end__;
+extern char __bss_start__;
+extern char __bss_end__;
+extern char __pgmem_start__;
+extern char __pgmem_end__;
+extern char __pgmem_size__;
 
 static inline unsigned addr_to_block_index(void *addr, unsigned order)
 {
 	//FIXME: multiple zone to allocate from? use the zone's base address instead
-	return ((u32) addr - (u32) &__pgmem_base__) >> (order + MIN_PAGE_ORDER);
+	return ((u32) addr - (u32) &__pgmem_start__) >> (order + MIN_PAGE_ORDER);
 }
 
 static inline int order_to_bytesz(unsigned order)
@@ -120,7 +129,7 @@ static u32 *maps[] = { (u32 []){0, 0, 0, 0}, (u32 []){0, 0}, (u32 []){0}, (u32 [
 
 int page_init(void)
 {
-	void *block_addr = &__pgmem_base__;
+	void *block_addr = &__pgmem_start__;
 
 	printk("physical memory splitting:\n");
 	for (unsigned o = 0; o <= MAX_BLOCK_ORDER; o++) {
@@ -137,8 +146,17 @@ int page_init(void)
 		block_addr = block_addr + order_to_bytesz(MAX_BLOCK_ORDER);
 	}
 
-	printk("__pgmem_base__ is set to %p\n", &__pgmem_base__);
-	printk("__pgmem_size__ is set to %p\n", &__pgmem_size__);
+	printk("Memory map:\n");
+	printk("  .text   = %08x--%08x  %6d Bytes\n", &__text_start__,
+		&__text_end__, &__text_end__ - &__text_start__);
+	printk("  .rodata = %08x--%08x  %6d Bytes\n", &__rodata_start__,
+		&__rodata_end__, &__rodata_end__ - &__rodata_start__);
+	printk("  .data   = %08x--%08x  %6d Bytes\n", &__data_start__,
+		&__data_end__, &__data_end__ - &__data_start__);
+	printk("  .bss    = %08x--%08x  %6d Bytes\n", &__bss_start__,
+		&__bss_end__, &__bss_end__ - &__bss_start__);
+	printk("  .pgmem  = %08x--%08x  %6d Bytes\n", &__pgmem_start__,
+		&__pgmem_end__, &__pgmem_end__ - &__pgmem_start__);
 
 	return 0;
 }

@@ -73,7 +73,7 @@ ENTRY(cold_reset)
 	movl	r0, V7M_SCB_BASE
 
 	@ switch to Handler_Mode
-	ldr	r1, =__pgmem_base__		@ create temporary vector in .pgmem
+	ldr	r1, =__pgmem_start__		@ create temporary vector in .pgmem
 	str	r1, [r0, #V7M_VTOR]
 	ldr	r2, =0f
 	adds	r2, #1
@@ -97,7 +97,7 @@ ENTRY(cold_reset)
 	ldr	r2, =__data_size__
 	tst	r2, r2
 	beq	1f
-	ldr	r1, =__text_end__
+	ldr	r1, =__rodata_end__
 	ldr	r0, =__data_start__
 0:      ldr     r3, [r1], #4 // must be 32-byte aligned
 	str     r3, [r0], #4

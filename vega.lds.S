@@ -23,23 +23,27 @@ SECTIONS
     } > rom
 
     .text ALIGN(8) : {
+	PROVIDE(__text_start__ = .);
         *(.text)
 	*(.text.*)
+	PROVIDE(__text_end__ = .);
+	PROVIDE(__rodata_start__ = .);
 	*(.rodata)
 	*(.rodata.*)
-	PROVIDE(__text_end__ = .);
+	PROVIDE(__rodata_end__ = .);
     } > rom
 
     /* Initialized data (.data* sections) are initially stored in Flash,
        but need to be copied to a volatile storage for they are not
        read-only.    */
 
-    .data /* ALIGN(32) */ : AT (__text_end__) {
+    .data /* ALIGN(32) */ : AT (__rodata_end__) {
     	. = ALIGN(32);
     	PROVIDE(__data_start__ = .);
         *(.data)
         *(.data.*)
     	. = ALIGN(32);
+	PROVIDE(__data_end__ = .);
     } > ram
 
     PROVIDE(__data_size__ = SIZEOF(.data));
@@ -49,6 +53,7 @@ SECTIONS
         *(.bss)
         *(COMMON)
 	. = __bss_start__ + align_hi(. - __bss_start__, 32);
+	PROVIDE(__bss_end__ = .);
     } > ram
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
@@ -66,8 +71,9 @@ SECTIONS
     } > ram
 
     .pgmem ALIGN(2k) : {
-        PROVIDE(__pgmem_base__ = .);
+	PROVIDE(__pgmem_start__ = .);
         . += 32k;
+	PROVIDE(__pgmem_end__ = .);
     } > ram
 
     PROVIDE(__pgmem_size__ = SIZEOF(.pgmem));
