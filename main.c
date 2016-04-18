@@ -34,17 +34,17 @@ struct thread_info *start_kernel(void)
 	/* initialize the physical memory allocator */
 	page_init();
 
-	/* thread_main is the user entry point to the system */
-	struct thread_info *thread_main;
-	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
-		printk("[!] Could not create user main thread.\n");
-	sched_rr_add(thread_main);
-
 	/* the idle thread is not pushed in the rr-runqueue */
 	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR)) == NULL) {
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
+
+	/* thread_main is the user entry point to the system */
+	struct thread_info *thread_main;
+	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
+		printk("[!] Could not create user main thread.\n");
+	sched_rr_add(thread_main);
 
 	return thread_main;
 }
