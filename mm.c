@@ -131,11 +131,11 @@ int page_init(void)
 {
 	void *block_addr = &__pgmem_start__;
 
-	printk("physical memory splitting:\n");
+	printk("Physical memory:\n");
 	for (unsigned o = 0; o <= MAX_BLOCK_ORDER; o++) {
 		INIT_LIST_HEAD(&free_area[o].free_list);
 		free_area[o].page_count = (u32) &__pgmem_size__ / order_to_bytesz(o);
-		printk("  - %3d pages of %4d bytes\n", free_area[o].page_count,
+		printk("  - %3d pages of %4d Bytes\n", free_area[o].page_count,
 			order_to_bytesz(o));
 		free_area[o].map = maps[o];
 	}
