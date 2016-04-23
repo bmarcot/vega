@@ -6,10 +6,11 @@
 #include "linux/types.h"
 
 static volatile u32 overflow = 0;
+unsigned int tick_count;
 
 void systick(void)
 {
-	uart_putstring("SysTick interrupt...\n");
+	tick_count++;
 	if (overflow == 0xff)
 		overflow = 0;
 	overflow++;

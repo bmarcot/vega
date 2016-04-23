@@ -7,6 +7,7 @@
 #include "mm.h"
 #include "kernel.h"
 #include "version.h"
+#include "platform.h"
 
 extern void *vector_base;
 extern void set_vtor(void *);
@@ -28,9 +29,6 @@ struct thread_info *start_kernel(void)
 	printk("Version:    %s\n", VER_SLUG);
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
 
-	/* systick_init(0x227811); */
-	/* systick_enable(); */
-
 	/* initialize the physical memory allocator */
 	page_init();
 
@@ -45,6 +43,10 @@ struct thread_info *start_kernel(void)
 	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
 		printk("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
+
+	/* systick at 1kHz */
+	systick_init(CPU_FREQ_HZ / 1000);
+	systick_enable();
 
 	return thread_main;
 }
