@@ -16,5 +16,6 @@ struct free_area {
 
 int page_init(void);
 void *page_alloc(int size);
+void page_free(void *ptr);
 
 #endif /* !MM_H */

@@ -160,3 +160,88 @@ int page_init(void)
 
 	return 0;
 }
+
+static void *index_to_addr(unsigned ix, unsigned order)
+{
+	return &__pgmem_start__ + ix * order_to_bytesz(order);
+}
+
+static inline unsigned get_highest_order(void *ptr)
+{
+	unsigned order = 0;
+	u32 addr = (u32) ptr >> MIN_PAGE_ORDER;
+
+	for (; order < MAX_BLOCK_ORDER; order++, addr >>= 1) {
+		if (addr & 1)
+			break;
+	}
+
+	return order;
+}
+
+static unsigned get_buddy_index(unsigned ix)
+{
+	if (ix % 2)
+		return ix - 1;
+	return ix + 1;
+}
+
+static inline unsigned lower_buddy_index(unsigned ix)
+{
+	if (ix % 2)
+		return ix - 1;
+	return ix;
+}
+
+int try_coalesce(unsigned ix, unsigned order)
+{
+	if (order == MAX_BLOCK_ORDER)
+		return 0;
+
+	ix = lower_buddy_index(ix);
+
+	if (bitmap_get(free_area[order].map, ix)
+		|| bitmap_get(free_area[order].map, ix + 1))
+		return 0;
+
+	/* remove the blocks from the list of free blocks */
+	list_del(index_to_addr(ix, order));
+	list_del(index_to_addr(ix + 1, order));
+
+	/* clear bit in the bitmap of upper order */
+	bitmap_clear(free_area[order + 1].map, ix / 2);
+
+	/* add a new block into the list of blocks of upper order */
+	list_add(index_to_addr(ix / 2, order + 1),
+		&free_area[order + 1].free_list);
+
+	printk("mm: coalesced two blocks of order=%d into one of order=%d\n", order, order + 1);
+
+	return 1 + try_coalesce(ix / 2, order + 1);
+}
+
+void page_free(void *ptr)
+{
+	/* A pointer aligned on 2KiB can be any page between 2KiB and 256 bytes.
+	 * Start from the highest posssible order and find the first bit set in
+	 * the lowest order.    */
+	int order = get_highest_order(ptr);
+	for (int o = order; o >= 0; o--) {
+		if (bitmap_get(free_area[o].map, addr_to_block_index(ptr, o)))
+			order = o;
+	}
+
+	printk("mm: free a page with order=%d\n", order);
+
+	unsigned ix = addr_to_block_index(ptr, order);
+	unsigned buddy_ix = get_buddy_index(ix);
+
+	bitmap_clear(free_area[order].map, ix);
+
+	if (!bitmap_get(free_area[order].map, buddy_ix)) {
+		int n = try_coalesce(ix, order);
+		printk("mm: coalesced across %d orders\n", n);
+	} else {
+		list_add(ptr, &free_area[order].free_list);
+	}
+}
