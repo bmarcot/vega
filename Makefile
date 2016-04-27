@@ -19,7 +19,8 @@ LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.l
 
 SSRC += head.S entry.S syscalls.S kernel-if.S
 CSRC += main.c systick.c backend.c thread.c sched-rr.c sysvect.c \
-	sys/pthread.c faults.c bitmap.c mm.c mutex.c printk.c sleep.c
+	sys/pthread.c faults.c bitmap.c mm.c mutex.c printk.c sleep.c \
+	timer.c
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 

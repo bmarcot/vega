@@ -12,6 +12,7 @@
 	.set SYS_PTHREAD_CREATE, 3
 	.set SYS_PTHREAD_MUTEX_LOCK, 4
 	.set SYS_PTHREAD_MUTEX_UNLOCK, 5
+	.set SYS_TIMER_CREATE, 6
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -71,3 +72,9 @@ ENTRY(pthread_mutex_unlock)
 	movs	r0, #0
 	bx	lr
 ENDPROC(pthread_mutex_lock)
+
+	@ int timer_create(...)
+ENTRY(timer_create)
+	sys	1, SYS_TIMER_CREATE
+	bx	lr
+ENDPROC(timer_create)

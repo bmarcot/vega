@@ -4,16 +4,29 @@
 #include "uart.h"
 #include "sched-rr.h"
 #include "linux/types.h"
+#include "timer.h"
 
 static volatile u32 overflow = 0;
-unsigned int tick_count;
+u32 clocktime_in_msecs;
+
+extern struct list_head timers;
 
 void systick(void)
 {
-	tick_count++;
+	clocktime_in_msecs++;
 	if (overflow == 0xff)
 		overflow = 0;
 	overflow++;
+
+	struct timer *pos;
+	list_for_each_entry(pos, &timers, list) {
+		if (pos->expire_clocktime < clocktime_in_msecs) {
+			list_del(&pos->list);
+			sched_rr_add(pos->tip);
+			sched_rr_elect_reset();
+			return;
+		}
+	}
 }
 
 void systick_init(u32 rvr)
