@@ -71,8 +71,10 @@ int sched_rr_elect(void)
 int sched_rr_elect_reset(void)
 {
 	CURRENT_THREAD_INFO(current);
-	struct thread_info *next = list_first_entry(&rr_runq, struct thread_info, ti_list);
+	struct thread_info *next = thread_idle;
 
+	if (!list_empty(&rr_runq))
+	  next = list_first_entry(&rr_runq, struct thread_info, ti_list);
 	switch_to(next, current);
 
 	return 0;
