@@ -3,6 +3,9 @@
 
 #include "linux/types.h"
 
+#define SYSTICK_FREQ 500
+#define SYSTICK_PERIOD_IN_MSECS 2
+
 struct systick {
 	volatile u32 syst_csr;
 	u32 syst_rvr;

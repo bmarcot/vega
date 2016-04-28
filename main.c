@@ -45,7 +45,7 @@ struct thread_info *start_kernel(void)
 	sched_rr_add(thread_main);
 
 	/* systick at 1kHz */
-	systick_init(CPU_FREQ_HZ / 1000);
+	systick_init(CPU_FREQ_HZ / SYSTICK_FREQ);
 	systick_enable();
 
 	return thread_main;

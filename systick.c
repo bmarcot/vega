@@ -13,7 +13,7 @@ extern struct list_head timers;
 
 void systick(void)
 {
-	clocktime_in_msecs++;
+	clocktime_in_msecs += SYSTICK_PERIOD_IN_MSECS;
 	if (overflow == 0xff)
 		overflow = 0;
 	overflow++;
