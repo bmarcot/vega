@@ -45,6 +45,8 @@ struct thread_info *start_kernel(void)
 	sched_rr_add(thread_main);
 
 	/* systick at 1kHz */
+	printk("Processor speed: %dMHz\n", CPU_FREQ_HZ / 1000000);
+	printk("Timer precision: %dms\n", SYSTICK_PERIOD_IN_MSECS);
 	systick_init(CPU_FREQ_HZ / SYSTICK_FREQ);
 	systick_enable();
 
