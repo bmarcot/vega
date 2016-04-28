@@ -1,9 +1,6 @@
-extern unsigned int tick_count;
+#include "timer.h"
 
 void msleep(unsigned int msecs)
 {
-	unsigned int t = tick_count;
-
-	while (tick_count < t + msecs)
-		;
+	timer_create(msecs);
 }
