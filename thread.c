@@ -94,8 +94,10 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 int thread_yield(void)
 {
+#ifdef DEBUG
 	CURRENT_THREAD_INFO(thread);
 	printk("thread: id=%d is yielding\n", thread->ti_id);
+#endif /* DEBUG */
 
 	//FIXME: use a top-level function instead, like sched_elect()
 	return sched_rr_elect();
