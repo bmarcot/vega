@@ -199,7 +199,6 @@ int try_coalesce(unsigned ix, unsigned order)
 		return 0;
 
 	ix = lower_buddy_index(ix);
-
 	if (bitmap_get(free_area[order].map, ix)
 		|| bitmap_get(free_area[order].map, ix + 1))
 		return 0;
@@ -234,12 +233,9 @@ void page_free(void *ptr)
 	printk("mm: free a page with order=%d\n", order);
 
 	unsigned ix = addr_to_block_index(ptr, order);
-	unsigned buddy_ix = get_buddy_index(ix);
-
 	bitmap_clear(free_area[order].map, ix);
-
 	if ((order < MAX_BLOCK_ORDER)
-		&& !bitmap_get(free_area[order].map, buddy_ix)) {
+		&& !bitmap_get(free_area[order].map, get_buddy_index(ix))) {
 		int n = try_coalesce(ix, order);
 		printk("mm: coalesced across %d orders\n", n);
 	} else {
