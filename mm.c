@@ -238,7 +238,8 @@ void page_free(void *ptr)
 
 	bitmap_clear(free_area[order].map, ix);
 
-	if (!bitmap_get(free_area[order].map, buddy_ix)) {
+	if ((order < MAX_BLOCK_ORDER)
+		&& !bitmap_get(free_area[order].map, buddy_ix)) {
 		int n = try_coalesce(ix, order);
 		printk("mm: coalesced across %d orders\n", n);
 	} else {
