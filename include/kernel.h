@@ -8,6 +8,9 @@
  *  area, and mitigate cache contention.    */
 #define __init
 
+/* Placeholder, such qualified pointers should be checked at runtime. */
+#define __user
+
 int printk(const char *fmt, ...);
 
 #endif /* !KERNEL_H */
