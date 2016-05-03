@@ -6,8 +6,12 @@
 #include "linux/list.h"
 #include "kernel.h"
 
-#define DEBUG_PRINTK(...)\
+#ifdef DEBUG
+#define DEBUG_PRINTK(...)					\
 	do { printk(__VA_ARGS__); fflush(stdout); } while (0);
+#else
+#define DEBUG_PRINTK(...)
+#endif /* DEBUG */
 
 struct free_area free_area[MAX_BLOCK_ORDER + 1];
 
@@ -75,7 +79,7 @@ static void *try_alloc(unsigned order)
 	unsigned ix;
 
 	if (order > MAX_BLOCK_ORDER) {
-		DEBUG_PRINTK("mm: alloc failed: no free block could be found\n");
+		printk("mm: alloc failed: no free block could be found\n");
 		return NULL;
 	}
 
@@ -114,7 +118,7 @@ void *page_alloc(int size)
 		list_del(page_addr);
 	}
 
-	DEBUG_PRINTK("mm: allocated a page at %p\n", page_addr);
+	printk("mm: allocated a page at %p\n", page_addr);
 
 	return page_addr;
 }
@@ -214,7 +218,8 @@ int try_coalesce(unsigned ix, unsigned order)
 	list_add(index_to_addr(ix / 2, order + 1),
 		&free_area[order + 1].free_list);
 
-	printk("mm: coalesced two blocks of order=%d into one of order=%d\n", order, order + 1);
+	DEBUG_PRINTK("mm: coalesced two blocks of order=%d into one of order=%d\n",
+		order, order + 1);
 
 	return 1 + try_coalesce(ix / 2, order + 1);
 }
@@ -230,14 +235,18 @@ void page_free(void *ptr)
 			order = o;
 	}
 
-	printk("mm: free a page with order=%d\n", order);
+	DEBUG_PRINTK("mm: free a page with order=%d\n", order);
 
 	unsigned ix = addr_to_block_index(ptr, order);
 	bitmap_clear(free_area[order].map, ix);
 	if ((order < MAX_BLOCK_ORDER)
 		&& !bitmap_get(free_area[order].map, get_buddy_index(ix))) {
+#ifndef DEBUG
+		try_coalesce(ix, order);
+#else
 		int n = try_coalesce(ix, order);
-		printk("mm: coalesced across %d orders\n", n);
+		DEBUG_PRINTK("mm: coalesced across %d orders\n", n);
+#endif /* !DEBUG */
 	} else {
 		list_add(ptr, &free_area[order].free_list);
 	}
