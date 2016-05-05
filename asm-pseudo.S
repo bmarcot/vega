@@ -10,7 +10,9 @@
 	@ movl	rd, imm32
 	.macro	movl rd, imm32
 	movw	\rd, #(\imm32 & 0xffff)
+	.if (\imm32 < 0) || (\imm32 > 65535)
 	movt	\rd, #(\imm32 >> 16)
+	.endif
 	.endm
 
 	/* syscall call site */
