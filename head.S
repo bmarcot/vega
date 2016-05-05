@@ -94,48 +94,16 @@ ENTRY(cold_reset)
 	sync
 
 	@ Copy the .data section from Flash to RAM.
-	ldr	r2, =__data_size__
-	tst	r2, r2
-	beq	1f
-	ldr	r1, =__rodata_end__
 	ldr	r0, =__data_start__
-0:      ldr     r3, [r1], #4 // must be 32-byte aligned
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	ldr     r3, [r1], #4
-	str     r3, [r0], #4
-	subs    r2, #32
-	bgt     0b
-1:
+	ldr	r1, =__rodata_end__
+	ldr	r2, =__data_size__
+	bl	memcpy
 
 	@ Zero-fill the .bss sections.
-	ldr	r2, =__bss_size__
-	tst	r2, r2
-	beq	1f
-	mov	r1, #0
 	ldr	r0, =__bss_start__
-0:      str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	str     r1, [r0], #4
-	subs    r2, #32
-	bgt     0b
-1:
+	mov	r1, #0
+	ldr	r2, =__bss_size__
+	bl	memset
 
 	@ The start_kernel function returns NULL or a pointer to the thread_info struct
 	@ of the first thread to run on the CPU. If the pointer is NULL the CPU is
