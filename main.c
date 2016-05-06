@@ -8,8 +8,9 @@
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"
+#include "cmsis/arm/ARMCM4.h"
 
-extern void *vector_base;
+extern char vector_base;
 extern void set_vtor(void *);
 
 void *cpu_idle(void *);
@@ -21,10 +22,24 @@ void __weak *main(__unused void *arg)
 
 struct thread_info *thread_idle;
 
+/* Cortex-M4 system initialization */
+static void cm4_init(void)
+{
+	/* enable UsageFault, BusFault, MemManage faults */
+	SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk
+		| SCB_SHCSR_MEMFAULTENA_Msk);
+
+	/* use the second-stage exception vector */
+	SCB->VTOR = (int) &vector_base;
+
+	/* follow the architectural requirements */
+	__DSB();
+}
+
 struct thread_info *start_kernel(void)
 {
+	cm4_init();
 	uart_init();
-	set_vtor(&vector_base);
 
 	printk("Version:    %s\n", VER_SLUG);
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);

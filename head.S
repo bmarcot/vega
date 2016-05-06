@@ -86,13 +86,6 @@ ENTRY(cold_reset)
 	ldr	r1, =vtor_early_base
 	str	r1, [r0, #V7M_VTOR]
 
-	@ enable usgf, busf, memf
-	ldr   	r1, =(V7M_SHCSR_USGFAULTENA | V7M_SHCSR_BUSFAULTENA | V7M_SHCSR_MEMFAULTENA)
-	ldr   	r2, [r0, #V7M_SHCSR]
-	orr	r1, r2
-	str   	r1, [r0, #V7M_SHCSR]
-	sync
-
 	@ Copy the .data section from Flash to RAM.
 	ldr	r0, =__data_start__
 	ldr	r1, =__rodata_end__
