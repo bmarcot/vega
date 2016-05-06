@@ -24,7 +24,7 @@ CSRC += main.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
-all: include/version.h $(NAME).lds $(NAME).hex
+all: include/cmsis/arm include/version.h $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -41,6 +41,10 @@ $(NAME).elf: $(OBJS)
 include/version.h: include/version_template.h
 	cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
 	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
+
+include/cmsis/arm:
+	svn export --force https://github.com/ARM-software/CMSIS/trunk/CMSIS/Include include/cmsis/arm
+	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM4/Include include/cmsis/arm
 
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@
