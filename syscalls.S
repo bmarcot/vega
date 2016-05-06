@@ -11,8 +11,7 @@
 ENTRY(svcall)
 	mrs	r0, psp
 	ldr	r1, [r0, #RET_ADDRESS]
-	ldr	r1, [r1, #-2]		@ address of the SVC call site
-	and	r1, #0xff
+	ldrb	r1, [r1, #-2]		@ address of the SVC call site
 	tbb	[pc, r1]		@ only r0, r1 have been clobbered so far
 
 0:	.irpc	argc, 01234
