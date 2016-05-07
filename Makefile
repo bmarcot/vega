@@ -38,7 +38,7 @@ $(NAME).elf: $(OBJS)
 %.lds: %.lds.S
 	$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
 
-include/version.h: include/version_template.h
+include/version.h: include/version.template.h
 	cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
 	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
 
