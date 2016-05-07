@@ -1,5 +1,3 @@
-#include "utils.h"
-
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(cold_reset)
@@ -37,12 +35,10 @@ SECTIONS
        but need to be copied to a volatile storage for they are not
        read-only.    */
 
-    .data /* ALIGN(32) */ : AT (__rodata_end__) {
-    	. = ALIGN(32);
+    .data : AT (__rodata_end__) {
     	PROVIDE(__data_start__ = .);
         *(.data)
         *(.data.*)
-    	. = ALIGN(32);
 	PROVIDE(__data_end__ = .);
     } > ram
 
@@ -52,7 +48,6 @@ SECTIONS
     	PROVIDE(__bss_start__ = .);
         *(.bss)
         *(COMMON)
-	. = __bss_start__ + align_hi(. - __bss_start__, 32);
 	PROVIDE(__bss_end__ = .);
     } > ram
 
