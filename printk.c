@@ -2,7 +2,9 @@
 #include <stdarg.h>
 #include "uart.h"
 
-#define PRINTK_BUF_SIZE 1024
+/* FIXME: There is definitely something wrong with vsnprintf function, why
+   does it needs such a big buffer?!    */
+#define PRINTK_BUF_SIZE 2048
 
 static char printk_buf[PRINTK_BUF_SIZE];
 
