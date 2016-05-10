@@ -65,7 +65,7 @@ SECTIONS
         PROVIDE(early_stack_base = .);
     } > ram
 
-    .pgmem ALIGN(2k) : {
+    .pgmem 0x20000000 + RAMSZ - 32k : {
 	PROVIDE(__pgmem_start__ = .);
         . += 32k;
 	PROVIDE(__pgmem_end__ = .);
