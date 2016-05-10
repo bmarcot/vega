@@ -131,6 +131,8 @@ void *page_alloc(int size)
  */
 static u32 *maps[] = { (u32 []){0, 0, 0, 0}, (u32 []){0, 0}, (u32 []){0}, (u32 []){0} };
 
+extern char __early_stack_end__;
+
 int page_init(void)
 {
 	void *block_addr = &__pgmem_start__;
@@ -144,11 +146,16 @@ int page_init(void)
 		free_area[o].map = maps[o];
 	}
 
-	/* populate the high-order free list */
-	for (unsigned i = 0; i < 16; i++) {
+	/* Populate the high-order free list, but mark the last page as reserved.
+	 * Last page in the pageable memory is reserved for the early stack used
+	 * during kernel bootstrap. This page will be reclaimed by the system and
+	 * released to the pageable pool just before jumping to the main thread. */
+	for (unsigned i = 0; i < 15; i++) {
 		list_add(block_addr, &free_area[MAX_BLOCK_ORDER].free_list);
 		block_addr = block_addr + order_to_bytesz(MAX_BLOCK_ORDER);
 	}
+	bitmap_set(free_area[MAX_BLOCK_ORDER].map,
+		addr_to_block_index(&__early_stack_end__, MAX_BLOCK_ORDER));
 
 	printk("Memory map:\n");
 	printk("  .text   = %08x--%08x  %6d Bytes\n", &__text_start__,

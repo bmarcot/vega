@@ -59,15 +59,17 @@ SECTIONS
         PROVIDE(heap_limit = .);
     } > ram
 
-    .early.stack ALIGN(8) : {
-        PROVIDE(early_stack_limit = .);
-        . += 1k;
-        PROVIDE(early_stack_base = .);
-    } > ram
-
     .pgmem 0x20000000 + RAMSZ - 32k : {
 	PROVIDE(__pgmem_start__ = .);
-        . += 32k;
+	. += 30k;
+
+	/* Reserve the last page for the early stack. Must be of the biggest size
+	 * such that there will be no coalescing when freeing the page, for lower
+	 * booting time.    */
+	PROVIDE(__early_stack_end__ = .);
+	. += 2k;
+	PROVIDE(__early_stack_start__ = .);
+
 	PROVIDE(__pgmem_end__ = .);
     } > ram
 

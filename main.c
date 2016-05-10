@@ -10,6 +10,7 @@
 #include "platform.h"
 #include "cmsis/arm/ARMCM4.h"
 
+extern char __early_stack_end__;
 extern char vector_base;
 extern void set_vtor(void *);
 
@@ -64,6 +65,11 @@ struct thread_info *start_kernel(void)
 	printk("Timer precision: %dms\n", SYSTICK_PERIOD_IN_MSECS);
 	systick_init(CPU_FREQ_HZ / SYSTICK_FREQ);
 	systick_enable();
+
+	/* Reclaim the early stack physical memory. In the current context, no
+	 * page allocation after this point are allowed.    */
+	printf("Reclaim early stack's physical memory (%d Bytes).\n", 2048);
+	page_free(&__early_stack_end__);
 
 	return thread_main;
 }

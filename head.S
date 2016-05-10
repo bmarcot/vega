@@ -33,7 +33,7 @@
 
 	@ the early vector is naturally aligned on the bottom of the
 	@ ROM, also the VTOR is pointing to the early vector base
-	.long	early_stack_base		@ SP_main value
+	.long	__early_stack_start__		@ SP_main value
 	.long	(cold_reset + THUMB_MODE)	@ Reset (cold)
 	.long	0				@ Unused
 	.long	(early_hardfault + THUMB_MODE)	@ HardFault
@@ -46,7 +46,7 @@
 	@ the vector must be aligned on 128 bytes (see VTOR reserved
 	@ bits 6:0), alignment shall be handled in the linker script
 	@ note: the SP has been set by the early vector at this point
-	.long	early_stack_base		@ SP_main value
+	.long	__early_stack_start__		@ SP_main value
 	.long	(warm_reset + THUMB_MODE)	@ Reset (warm)
 	.long	0				@ NMI
 	.long	(hardf + THUMB_MODE)		@ HardFault
