@@ -15,12 +15,12 @@ SECTIONS
     	*(.vector.early)
     } > rom
 
-    .vector ALIGN(128) : {
+    .vector BLOCK(128) : {
     	PROVIDE(vector_base = .);
     	*(.vector)
     } > rom
 
-    .text ALIGN(8) : {
+    .text BLOCK(8) : {
 	PROVIDE(__text_start__ = .);
         *(.text)
 	*(.text.*)
@@ -53,7 +53,7 @@ SECTIONS
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
 
-    .heap ALIGN(32) : {
+    .heap BLOCK(32) : {
         PROVIDE(heap_base = .);
         . += 4k;
         PROVIDE(heap_limit = .);
