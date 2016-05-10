@@ -26,6 +26,8 @@ extern char __bss_end__;
 extern char __pgmem_start__;
 extern char __pgmem_end__;
 extern char __pgmem_size__;
+extern char heap_base;
+extern char heap_limit;
 
 static inline unsigned addr_to_block_index(void *addr, unsigned order)
 {
@@ -166,6 +168,8 @@ int page_init(void)
 		&__data_end__, &__data_end__ - &__data_start__);
 	printk("  .bss    = %08x--%08x  %6d Bytes\n", &__bss_start__,
 		&__bss_end__, &__bss_end__ - &__bss_start__);
+	printk("  .heap   = %08x--%08x  %6d Bytes\n", &heap_base,
+		&heap_limit, &heap_limit - &heap_base);
 	printk("  .pgmem  = %08x--%08x  %6d Bytes\n", &__pgmem_start__,
 		&__pgmem_end__, &__pgmem_end__ - &__pgmem_start__);
 
