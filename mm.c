@@ -129,7 +129,7 @@ void *page_alloc(int size)
  *    -  32 pages of 1KiB = a 4 bytes map
  *    -  16 pages of 2KiB = a 2 bytes map
  */
-static u32 *maps[] = { (u32 []){0, 0, 0, 0}, (u32 []){0, 0}, (u32 []){0}, (u32 []){0} };
+static u32 *const maps[] = { (u32 []){0, 0, 0, 0}, (u32 []){0, 0}, (u32 []){0}, (u32 []){0} };
 
 extern char __early_stack_end__;
 
@@ -168,6 +168,11 @@ int page_init(void)
 		&__bss_end__, &__bss_end__ - &__bss_start__);
 	printk("  .pgmem  = %08x--%08x  %6d Bytes\n", &__pgmem_start__,
 		&__pgmem_end__, &__pgmem_end__ - &__pgmem_start__);
+
+	printk("Block bitmaps:");
+	for (unsigned o = 0; o <= MAX_BLOCK_ORDER; o++)
+		printk(" %d@%p", o, maps[o]);
+	printk("\n");
 
 	return 0;
 }
