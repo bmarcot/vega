@@ -78,9 +78,10 @@ ENTRY(cold_reset)
 	ldr	r2, =0f
 	adds	r2, #1
 	str	r2, [r1, #V7M_VTOR_OFFSET_SVC]
-	sync
+	dsb					/* [1] */
 	svc	#0
 0:
+/* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
 
 	@ restore the early vector
 	ldr	r1, =vtor_early_base
