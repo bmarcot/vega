@@ -2,10 +2,12 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(cold_reset)
 
+#define RAMORG 0x20000000
+
 MEMORY
 {
     rom (rx)  : ORIGIN = 0, LENGTH = ROMSZ
-    ram (rwx) : ORIGIN = 0x20000000, LENGTH = RAMSZ
+    ram (rwx) : ORIGIN = RAMORG, LENGTH = RAMSZ
 }
 
 SECTIONS
@@ -59,7 +61,7 @@ SECTIONS
         PROVIDE(heap_limit = .);
     } > ram
 
-    .pgmem 0x20000000 + RAMSZ - 32k : {
+    .pgmem RAMORG + RAMSZ - 32k : {
 	PROVIDE(__pgmem_start__ = .);
 	. += 30k;
 
