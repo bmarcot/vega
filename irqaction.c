@@ -1,5 +1,4 @@
 #include "thread.h"
-#include "arch-v7m.h"
 #include "irqaction.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
@@ -28,7 +27,7 @@ void stage_irqaction(struct irqaction *irqaction, void *arg)
 	ts->ts_gprs[4] = 0;
 	ts->ts_lr = (u32) return_from_irqaction;
 	ts->ts_ret_addr = (u32) irqaction->ia_irqaction & 0xfffffffe;
-	ts->ts_xpsr = V7M_XPSR_T;
+	ts->ts_xpsr = xPSR_T_Msk;
 
 	/* If we staged the irqaction on the current thread context, update
 	 * the SP_process before returning to thread.    */
