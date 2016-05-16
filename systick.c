@@ -5,6 +5,7 @@
 #include "sched-rr.h"
 #include "linux/types.h"
 #include "timer.h"
+#include "cmsis/arm/ARMCM4.h"
 
 static volatile u32 overflow = 0;
 u32 clocktime_in_msecs;
@@ -31,10 +32,7 @@ void systick(void)
 
 void systick_init(u32 rvr)
 {
-	syst->syst_rvr = rvr;
-	syst->syst_cvr = 0;
-	syst->syst_csr |= (SYST_CSR_CLKSOURCE | SYST_CSR_TICKINT);
-	//FIXME: need synchronization?
+	SysTick_Config(rvr);
 }
 
 u32 gettick(void)
