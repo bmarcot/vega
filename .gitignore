@@ -6,5 +6,8 @@
 *.hex
 include/version.h
 
+# CMSIS is managed as an external dependency
+include/cmsis
+
 # Travis-CI and unit test framework
-vega-test-master
+vega-test
