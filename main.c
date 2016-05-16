@@ -88,3 +88,8 @@ void *cpu_idle(__unused void *arg)
 	for (;;)
 		;
 }
+
+void system_reset(__unused int reason)
+{
+	NVIC_SystemReset();
+}

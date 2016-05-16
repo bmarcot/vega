@@ -105,8 +105,7 @@ ENTRY(cold_reset)
 	@ the first thread context is kickstarted. 
 	bl	start_kernel	@ do the high-level kernel init
 	cmp	r0, #0		@ the proc returns the first thread to run
-	it	eq		@ compare to NULL
-	beq	soft_reset	@ reset if no threads to run
+	beq	system_reset	@ reset if system bootstrap failed
 	b	thread_restore
 ENDPROC(cold_reset)
 

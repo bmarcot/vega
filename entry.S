@@ -16,19 +16,6 @@ ENTRY(set_vtor)
 	bx	lr
 ENDPROC(set_vtor)
 
-	/* Qemu does not implement the soft reset procedure.    */
-	@ void	soft_reset(void)
-	.balign	8
-	.global soft_reset
-soft_reset:
-	movl	r1, V7M_SCB_BASE
-	movl	r2, ((0x5fa << 16) | (1 << 2))
-	dsb	sy
-	str	r2, [r1, #V7M_AIRCR]
-	dsb	sy
-	b	cpu_locked
-	.type	soft_reset, %function
-
 	@ get task control block
 	@ this works as long as the TCB is effectively at the
 	@ base of the stack __and__ this is only one stack
