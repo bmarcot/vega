@@ -79,7 +79,7 @@ ENTRY(return_from_irqaction)
 	ldrd	r0, r1, [sp, #24]	/* r0 = ret_addr, r1 = xpsr */
 	orr	r0, #1
 	str	r0, [sp, #24]
-	msr	xpsr, r1		/* restore flags */
+	msr	apsr_nzcvq, r1		/* restore flags */
 	pop	{r0-r3, r12, lr}
 	ldr	pc, [sp], #8		/* return into user thread */
 ENDPROC(return_from_irqaction)
