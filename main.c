@@ -13,7 +13,6 @@
 extern char __early_stack_start__;
 extern char __early_stack_end__;
 extern char vector_base;
-extern void set_vtor(void *);
 
 void *cpu_idle(void *);
 

@@ -7,15 +7,6 @@
 
 #include "../asm-pseudo.S"
 
-	@ void	set_vtor(void *addr)
-ENTRY(set_vtor)
-	movl	r1, V7M_SCB_BASE
-	str	r0, [r1, #V7M_VTOR]
-	dsb	sy				//FIXME: in any order?
-	isb	sy
-	bx	lr
-ENDPROC(set_vtor)
-
 	@ get task control block
 	@ this works as long as the TCB is effectively at the
 	@ base of the stack __and__ this is only one stack
