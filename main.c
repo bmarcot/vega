@@ -10,6 +10,7 @@
 #include "platform.h"
 #include "cmsis/arm/ARMCM4.h"
 
+extern char __early_stack_start__;
 extern char __early_stack_end__;
 extern char vector_base;
 extern void set_vtor(void *);
@@ -68,8 +69,11 @@ struct thread_info *start_kernel(void)
 
 	/* Reclaim the early stack physical memory. In the current context, no
 	 * page allocation after this point are allowed.    */
-	printf("Reclaim early stack's physical memory (%d Bytes).\n", 2048);
+	printf("Reclaim early stack's physical memory (%d Bytes).\n",
+		&__early_stack_start__ - &__early_stack_end__);
 	page_free(&__early_stack_end__);
+
+	printf("Kernel bootstrap done.\n\n");
 
 	return thread_main;
 }
