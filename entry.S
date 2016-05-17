@@ -2,10 +2,7 @@
 	.syntax unified
 	.thumb
 
-#include "arch-v7m.h"
 #include "linux/linkage.h"
-
-#include "../asm-pseudo.S"
 
 	@ get task control block
 	@ this works as long as the TCB is effectively at the
