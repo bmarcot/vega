@@ -60,11 +60,10 @@ struct thread_info *start_kernel(void)
 		printk("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
 
-	/* systick at 1kHz */
+	/* SysTick at 1kHz */
 	printk("Processor speed: %dMHz\n", CPU_FREQ_HZ / 1000000);
 	printk("Timer precision: %dms\n", SYSTICK_PERIOD_IN_MSECS);
-	systick_init(CPU_FREQ_HZ / SYSTICK_FREQ);
-	systick_enable();
+	SysTick_Config(CPU_FREQ_HZ / SYSTICK_FREQ);
 
 	/* Reclaim the early stack physical memory. In the current context, no
 	 * page allocation after this point are allowed.    */

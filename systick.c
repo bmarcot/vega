@@ -30,11 +30,6 @@ void systick(void)
 	}
 }
 
-void systick_init(u32 rvr)
-{
-	SysTick_Config(rvr);
-}
-
 u32 gettick(void)
 {
 	u32 of = overflow;
