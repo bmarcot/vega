@@ -19,14 +19,10 @@
 
 	.set	INTR_STACK_SIZE_ORDER, 10
 
-	.macro	_current_thread_info reg
-	mov	\reg, sp
-	bfc	\reg, #0, #INTR_STACK_SIZE_ORDER
-	.endm
-
 	@ struct thread_info *current_thread_info(void)
 ENTRY(current_thread_info)
-	_current_thread_info r0
+	mov	r0, sp
+	bfc	r0, #0, #INTR_STACK_SIZE_ORDER
 	bx	lr
 ENDPROC(current_thread_info)
 
