@@ -77,7 +77,6 @@ ENDPROC(pthread_mutex_trylock)
 	@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
 ENTRY(pthread_mutex_unlock)
 	movs	r2, #-1
-	dmb			@ ARMv7-M ARM, A3.4.6
 0:	ldrex	r1, [r0]
 	tst	r1, r1
 	ittt	ne		@ 't' 3x because 'sys' pseudo-op is 2 instructions
