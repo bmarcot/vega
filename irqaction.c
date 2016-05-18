@@ -25,7 +25,7 @@ void stage_irqaction(struct irqaction *irqaction, void *arg)
 	ts->ts_gprs[2] = 0;
 	ts->ts_gprs[3] = 0;
 	ts->ts_gprs[4] = 0;
-	ts->ts_lr = (u32) return_from_irqaction;
+	ts->ts_lr = (u32) return_from_irqaction | 1;    /* return in Thumb Mode */
 	ts->ts_ret_addr = (u32) irqaction->ia_irqaction & 0xfffffffe;
 	ts->ts_xpsr = xPSR_T_Msk;
 
