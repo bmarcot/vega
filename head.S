@@ -107,11 +107,11 @@ ENTRY(cold_reset)
 	cmp	r0, #0		@ the proc returns the first thread to run
 	beq	system_reset	@ reset if system bootstrap failed
 	b	thread_restore
-ENDPROC(cold_reset)
+END(cold_reset)
 
 ENTRY(warm_reset)
 	b	cold_reset
-ENDPROC(warm_reset)
+END(warm_reset)
 
 	.macro	fault_handler f
 	push	{r4-r11}	@ save non-scratch registers at time of fault
@@ -129,19 +129,19 @@ ENDPROC(warm_reset)
 
 ENTRY(hardf)
 	fault_handler hardfault
-ENDPROC(hardf)
+END(hardf)
 
 ENTRY(memf)
 	fault_handler memmanage
-ENDPROC(memf)
+END(memf)
 
 ENTRY(busf)
 	fault_handler busfault
-ENDPROC(busf)
+END(busf)
 
 ENTRY(usgf)
 	fault_handler usagefault
-ENDPROC(usgf)
+END(usgf)
 
 	.macro	early_fault f, m
 	.balign	8
