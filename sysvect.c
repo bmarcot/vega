@@ -1,6 +1,7 @@
 #include "sys/pthread.h"
 #include "mutex.h"
 #include "timer.h"
+#include "unistd.h"
 
 #define SYS_MAX 16
 
@@ -16,7 +17,10 @@ void *sys_vect[SYS_MAX] = {
 	mutex_unlock,
 
 	/* timers */
-	timer_create_1
+	timer_create_1,
+
+	/* unix standards */
+	sysconf_1
 };
 
 int sysvect_register(unsigned ix, void *(*fn)())

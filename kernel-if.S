@@ -13,6 +13,7 @@
 	.set SYS_PTHREAD_MUTEX_LOCK, 4
 	.set SYS_PTHREAD_MUTEX_UNLOCK, 5
 	.set SYS_TIMER_CREATE, 6
+	.set SYS_SYSCONF, 7
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -95,3 +96,9 @@ ENTRY(timer_create)
 	sys	1, SYS_TIMER_CREATE
 	bx	lr
 ENDPROC(timer_create)
+
+	@ long sysconf(int name)
+ENTRY(sysconf)
+	sys	1, SYS_SYSCONF
+	bx	lr
+ENDPROC(sysconf)

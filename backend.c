@@ -35,6 +35,8 @@ int _read(__unused int file, __unused char *ptr, __unused int len)
 	return -1;
 }
 
+#define STDOUT_FILENO 1
+
 int _write(int file, char *ptr, int len)
 {
 	int i;
