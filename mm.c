@@ -120,7 +120,7 @@ void *page_alloc(int size)
 		list_del(page_addr);
 	}
 
-	printk("mm: allocated a page at %p\n", page_addr);
+	DEBUG_PRINTK("mm: allocated a page at %p\n", page_addr);
 
 	return page_addr;
 }
