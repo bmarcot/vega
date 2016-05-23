@@ -27,6 +27,10 @@ static inline void halt(void)
 		__wfi();
 }
 
+char *strrev(char *s);
+void strpad(char *buf, char pad_val, int count);
+char *_itoa(unsigned int u, char *buf, const char *base);
+
 #endif /* !__LINKER__ */
 
 #endif /* !UTILS_H */
