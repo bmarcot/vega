@@ -1,6 +1,8 @@
 #ifndef LINUX_TYPES_H
 #define LINUX_TYPES_H
 
+#define S32_MAX 2147483647
+
 typedef unsigned int   u32;
 typedef int            s32;
 
