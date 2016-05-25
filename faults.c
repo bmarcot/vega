@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "kernel.h"
 #include "linux/types.h"
 #include "thread.h"
 #include "utils.h"
@@ -13,26 +13,26 @@
 static void print_gprs(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
 		u32 exc_return)
 {
-	printf(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->ts_gprs[0],
+	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->ts_gprs[0],
 		scratch->ts_gprs[1], scratch->ts_gprs[2], scratch->ts_gprs[3]);
-	printf(" r4: %08x    r5: %08x    r6: %08x    r7: %08x\n", noscratch->is_gprs[0],
+	printk(" r4: %08x    r5: %08x    r6: %08x    r7: %08x\n", noscratch->is_gprs[0],
 		noscratch->is_gprs[1], noscratch->is_gprs[2], noscratch->is_gprs[3]);
-	printf(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n", noscratch->is_gprs[4],
+	printk(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n", noscratch->is_gprs[4],
 		noscratch->is_gprs[5], noscratch->is_gprs[6], noscratch->is_gprs[7]);
-	printf("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->ts_gprs[5],
+	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->ts_gprs[5],
 		(u32) scratch, scratch->ts_lr, scratch->ts_ret_addr);
-	printf("\nEXC_RETURN: %08x\n", exc_return);
+	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
 
 static void fault_enter(const char *s)
 {
-	printf("\n-------------------------------------------------------------\n");
-	printf(" #%s\n\n", s);
+	printk("\n-------------------------------------------------------------\n");
+	printk(" #%s\n\n", s);
 }
 
 static void fault_exit(void)
 {
-	printf("-------------------------------------------------------------\n");
+	printk("-------------------------------------------------------------\n");
 	halt();
 }
 
@@ -65,9 +65,9 @@ void usagefault(struct __intr_stackframe *noscratch, struct __thrd_stackframe *s
 	else if (ufsr & UFSR_UNDEFINSTR)
 		cause = "UNDEFINSTR";
 	if (cause)
-		printf("      ufsr: %08x  <%s>\n", ufsr, cause);
+		printk("      ufsr: %08x  <%s>\n", ufsr, cause);
 	else
-		printf("      ufsr: %08x\n", ufsr);
+		printk("      ufsr: %08x\n", ufsr);
 	fault_exit();
 }
 

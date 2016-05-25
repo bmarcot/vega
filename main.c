@@ -67,11 +67,11 @@ struct thread_info *start_kernel(void)
 
 	/* Reclaim the early stack physical memory. In the current context, no
 	 * page allocation after this point are allowed.    */
-	printf("Reclaim early stack's physical memory (%d Bytes).\n",
+	printk("Reclaim early stack's physical memory (%d Bytes).\n",
 		&__early_stack_start__ - &__early_stack_end__);
 	page_free(&__early_stack_end__);
 
-	printf("Kernel bootstrap done.\n\n");
+	printk("Kernel bootstrap done.\n\n");
 
 	return thread_main;
 }
