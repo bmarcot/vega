@@ -54,3 +54,52 @@ ENTRY(return_from_irqaction)
 	pop	{r0-r3, r12, lr}
 	ldr	pc, [sp], #8		/* return into user thread */
 END(return_from_irqaction)
+
+	.set MC_SP, 0
+	.set MC_LR, 4
+	.set MC_GPRS, 8
+	.set MC_PC, 15*4
+	.set UC_MCONTEXT, 16
+	.set UC_LINK, 0
+
+	/* Swap context to a clean context (created from makecontext()):
+	 *   - save the non-scratch registers
+	 *   - just restore scratch registers (for arguments to entry function)
+	 *
+	 * Swap to a dirty context (inited with getcontext, or return to a
+	 * swapped context):
+	 *   - save the non-scratch registers
+	 *   - restore all registers
+	 */
+
+ENTRY(swapcontext)
+	/* save to oucp */
+	add	r0, #UC_MCONTEXT
+	str	sp, [r0, #MC_SP]
+	str	lr, [r0, #MC_LR]
+	add	r0, #MC_GPRS
+	stm	r0, {r0-r12, lr}
+
+	/* retore from ucp */
+	add	r1, #UC_MCONTEXT
+	ldr	sp, [r1, #MC_SP]
+	ldr	lr, [r1, #MC_LR]
+	add	r1, #MC_GPRS
+	ldm	r1, {r0-r12, pc}
+ENDPROC(swapcontext)
+
+ENTRY(return_from_makecontext)
+	/* retrieve the struct& from the top of the stack */
+	ldr	r0, [sp]
+
+	/* get the machine struct for the linked context */
+	ldr	r0, [r0, #UC_LINK]
+	add	r0, #UC_MCONTEXT
+
+	/* restore the link context */
+	ldr	sp, [r0, #MC_SP]
+	ldr	lr, [r0, #MC_LR]
+	add	r0, #MC_GPRS
+	//FIXME: return code - the r0 value that is restored from the stack should be 0
+	ldm	r0, {r0-r12, pc}
+ENDPROC(return_from_makecontext)
