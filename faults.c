@@ -10,17 +10,17 @@
 #define UFSR_INVSTATE (1 << 1)
 #define UFSR_UNDEFINSTR 1
 
-static void print_gprs(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
-		u32 exc_return)
+static void print_gprs(struct kernel_context_regs *noscratch,
+		struct thread_context_regs *scratch, u32 exc_return)
 {
-	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->ts_gprs[0],
-		scratch->ts_gprs[1], scratch->ts_gprs[2], scratch->ts_gprs[3]);
-	printk(" r4: %08x    r5: %08x    r6: %08x    r7: %08x\n", noscratch->is_gprs[0],
-		noscratch->is_gprs[1], noscratch->is_gprs[2], noscratch->is_gprs[3]);
-	printk(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n", noscratch->is_gprs[4],
-		noscratch->is_gprs[5], noscratch->is_gprs[6], noscratch->is_gprs[7]);
-	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->ts_gprs[5],
-		(u32) scratch, scratch->ts_lr, scratch->ts_ret_addr);
+	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->gprs[0],
+		scratch->gprs[1], scratch->gprs[2], scratch->gprs[3]);
+	printk(" r4: %08x    r5: %08x    r6: %08x    r7: %08x\n", noscratch->gprs[0],
+		noscratch->gprs[1], noscratch->gprs[2], noscratch->gprs[3]);
+	printk(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n", noscratch->gprs[4],
+		noscratch->gprs[5], noscratch->gprs[6], noscratch->gprs[7]);
+	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->gprs[5],
+		(u32) scratch, scratch->lr, scratch->ret_addr);
 	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
 
@@ -36,16 +36,16 @@ static void fault_exit(void)
 	halt();
 }
 
-void hardfault(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
-	u32 exc_return)
+void hardfault(struct kernel_context_regs *noscratch,
+	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("HardFault");
 	print_gprs(noscratch, scratch, exc_return);
 	fault_exit();
 }
 
-void usagefault(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
-		u32 exc_return)
+void usagefault(struct kernel_context_regs *noscratch,
+		struct thread_context_regs *scratch, u32 exc_return)
 {
 	u32 ufsr = (*((volatile u32 *) 0xe000ed28)) >> 16;
 	const char *cause = NULL;
@@ -71,16 +71,16 @@ void usagefault(struct __intr_stackframe *noscratch, struct __thrd_stackframe *s
 	fault_exit();
 }
 
-void busfault(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
-	u32 exc_return)
+void busfault(struct kernel_context_regs *noscratch,
+	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("BusFault");
 	print_gprs(noscratch, scratch, exc_return);
 	fault_exit();
 }
 
-void memmanage(struct __intr_stackframe *noscratch, struct __thrd_stackframe *scratch,
-	u32 exc_return)
+void memmanage(struct kernel_context_regs *noscratch,
+	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("MemManage");
 	print_gprs(noscratch, scratch, exc_return);

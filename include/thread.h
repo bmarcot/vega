@@ -62,17 +62,16 @@ enum thread_privilege {
  *   CPU. We initialize the task non-scratch registers to 0.
  */
 
-struct __intr_stackframe {
-	u32 is_gprs[8];	/* task-context r4 to r11, zero-filled */
-	u32 is_lr;      /* loaded with EXC_RETURN value */
+struct kernel_context_regs {
+	u32 gprs[8];    /* r4 to r11, zero-filled */
+	u32 lr;         /* initially loaded with EXC_RETURN value */
 };
 
-//struct basic_stackframe { // lazy pushed
-struct __thrd_stackframe {
-	u32 ts_gprs[5];	 /* thread-context r0 to r3, r12, zero-filled */
-	u32 ts_lr;	 /* this should be loaded with _exit() */
-	u32 ts_ret_addr; /* entry-point to the thread, usually main() */
-	u32 ts_xpsr;	 /* forced to Thumb Mode */
+struct thread_context_regs {
+	u32 gprs[5];    /* r0 to r3, r12, args or zero-filled */
+	u32 lr;	        /* initially loaded with pthread_exit() */
+	u32 ret_addr;   /* thread entry-point function */
+	u32 xpsr;       /* forced to Thumb_Mode */
 };
 
 /* forward declarations */

@@ -13,79 +13,79 @@
 
 #define PAGE_SIZE 1024
 
-static struct __intr_stackframe *build_intr_stack(void)
+static struct kernel_context_regs *build_intr_stack(void)
 {
 	void *memp;
-	struct __intr_stackframe *is;
+	struct kernel_context_regs *kcr;
 
 	/* We don't need a huge stack for interrupt handling, however we need the page
 	   to be aligned on a known value to retrieve the Thread Control Block that
 	   is stored at the bottom of the physical page.    */
 	if ((memp = page_alloc(PAGE_SIZE)) == NULL)
 		return NULL;
-	is = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __intr_stackframe));
+	kcr = (void *)((u32) memp + PAGE_SIZE - sizeof (struct kernel_context_regs));
 #ifndef DEBUG
-	memset(is->is_gprs, 0, 8 * sizeof (u32));
+	memset(kcr->gprs, 0, 8 * sizeof (u32));
 #else
-	is->is_gprs[0] = 0xcafe0004;
-	is->is_gprs[1] = 0xcafe0005;
-	is->is_gprs[2] = 0xcafe0006;
-	is->is_gprs[3] = 0xcafe0007;
-	is->is_gprs[4] = 0xcafe0008;
-	is->is_gprs[5] = 0xcafe0009;
-	is->is_gprs[5] = 0xcafe0010;
-	is->is_gprs[7] = 0xcafe0011;
+	kcr->gprs[0] = 0xcafe0004;
+	kcr->gprs[1] = 0xcafe0005;
+	kcr->gprs[2] = 0xcafe0006;
+	kcr->gprs[3] = 0xcafe0007;
+	kcr->gprs[4] = 0xcafe0008;
+	kcr->gprs[5] = 0xcafe0009;
+	kcr->gprs[5] = 0xcafe0010;
+	kcr->gprs[7] = 0xcafe0011;
 #endif /* !DEBUG */
-	is->is_lr = V7M_EXC_RETURN_THREAD_PROCESS;
+	kcr->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
-	return is;
+	return kcr;
 }
 
 // pass user-supplied stack size - configure task stack size
 // note: detect stack overflow -> #memf && (SP_Process == MMFAR)
-static struct __thrd_stackframe *build_thrd_stack(void *(*start_routine)(void *),
+static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void *),
 						void *arg)
 {
 	void *memp;
-	struct __thrd_stackframe *ts;
+	struct thread_context_regs *tcr;
 
 	if (NULL == (memp = page_alloc(PAGE_SIZE))) // this one does not need to be aligned - size configurable
 		return NULL;
-	ts = (void *)((u32) memp + PAGE_SIZE - sizeof (struct __thrd_stackframe));
-	ts->ts_gprs[0] = (u32) arg;
+	tcr = (void *)((u32) memp + PAGE_SIZE - sizeof (struct thread_context_regs));
+	tcr->gprs[0] = (u32) arg;
 #ifndef DEBUG
-	memset(&ts->ts_gprs[1], 0, 4 * sizeof (u32));
+	memset(&tcr->gprs[1], 0, 4 * sizeof (u32));
 #else
 	printk("thread sp = %p\n", ts);
-	ts->ts_gprs[1] = 0xcafe0001;
-	ts->ts_gprs[2] = 0xcafe0002;
-	ts->ts_gprs[3] = 0xcafe0003;
-	ts->ts_gprs[4] = 0xcafe0012;
+	tcr->gprs[1] = 0xcafe0001;
+	tcr->gprs[2] = 0xcafe0002;
+	tcr->gprs[3] = 0xcafe0003;
+	tcr->gprs[4] = 0xcafe0012;
 #endif /* !DEBUG */
 	/* Calls pthread_exit() on return keyword. This might need to be fixed at
 	   runtime in the future.    */
-	ts->ts_lr = (u32) pthread_exit /* & (u32) ~1 */;
-	ts->ts_ret_addr = (u32) start_routine & 0xfffffffe;
-	ts->ts_xpsr = xPSR_T_Msk;
+	tcr->lr = (u32) pthread_exit /* & (u32) ~1 */;
+	tcr->ret_addr = (u32) start_routine & 0xfffffffe;
+	tcr->xpsr = xPSR_T_Msk;
 
-	return ts;
+	return tcr;
 }
 
 struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 				enum thread_privilege priv)
 {
 	struct thread_info *thread;
-	struct __intr_stackframe *is;
+	struct kernel_context_regs *kcr;
 	static int thread_count = 0;
 
-	if ((is = build_intr_stack()) == NULL)
+	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
-	thread = (struct thread_info *) align_lo((u32) is, PAGE_SIZE);
+	thread = (struct thread_info *) align_lo((u32) kcr, PAGE_SIZE);
 	if ((thread->ti_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
-		//FIXME: free(is);
+		//FIXME: free(kcr);
 		return NULL;
 	}
-	thread->ti_msp = (u32) is;
+	thread->ti_msp = (u32) kcr;
 	thread->ti_priv = priv;
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */
