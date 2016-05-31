@@ -62,9 +62,9 @@ struct thread_info *start_kernel(void)
 	sched_rr_add(thread_main);
 
 	/* SysTick at 1kHz */
-	printk("Processor speed: %3d MHz\n", CPU_FREQ_HZ / 1000000);
+	printk("Processor speed: %3d MHz\n", CPU_FREQ_IN_HZ / 1000000);
 	printk("Timer precision: %3d msec\n", SYSTICK_PERIOD_IN_MSECS);
-	SysTick_Config(CPU_FREQ_HZ / SYSTICK_FREQ);
+	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
 
 	/* Reclaim the early stack physical memory. In the current context, no
 	 * page allocation after this point are allowed.    */
