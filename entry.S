@@ -42,8 +42,8 @@ ENTRY(thread_restore)
 	msr	psp, r2
 	msr	control, r3		@ write to SPSEL is ignored in Handler_Mode
 	pop	{r4-r11, pc}
-END(thread_restore)
-END(switch_to)
+ENDPROC(thread_restore)
+ENDPROC(switch_to)
 
 	 @ emulate a return from interrupt
 ENTRY(return_from_irqaction)
