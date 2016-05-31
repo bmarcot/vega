@@ -73,19 +73,19 @@ ENTRY(cold_reset)
 	movl	r0, V7M_SCB_BASE
 
 	@ switch to Handler_Mode
-	ldr	r1, =__pgmem_start__		@ create temporary vector in .pgmem
+	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
 	str	r1, [r0, #V7M_VTOR]
 	ldr	r2, =0f
-	adds	r2, #1
+	orr	r2, #THUMB_MODE
 	str	r2, [r1, #V7M_VTOR_OFFSET_SVC]
 	dsb					/* [1] */
 	svc	#0
 0:
-/* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
 
 	@ restore the early vector
 	ldr	r1, =vtor_early_base
 	str	r1, [r0, #V7M_VTOR]
+	dsb					/* [1] */
 
 	@ Copy the .data section from Flash to RAM.
 	ldr	r0, =__data_start__
@@ -108,6 +108,8 @@ ENTRY(cold_reset)
 	beq	system_reset	@ reset if system bootstrap failed
 	b	thread_restore
 END(cold_reset)
+
+/* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
 
 ENTRY(warm_reset)
 	b	cold_reset
