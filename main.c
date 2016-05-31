@@ -39,6 +39,8 @@ static void cm4_init(void)
 
 struct thread_info *start_kernel(void)
 {
+	struct thread_info *thread_main;
+
 	cm4_init();
 	uart_init();
 
@@ -55,14 +57,13 @@ struct thread_info *start_kernel(void)
 	}
 
 	/* thread_main is the user entry point to the system */
-	struct thread_info *thread_main;
 	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER)) == NULL)
 		printk("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
 
 	/* SysTick at 1kHz */
-	printk("Processor speed: %dMHz\n", CPU_FREQ_HZ / 1000000);
-	printk("Timer precision: %dms\n", SYSTICK_PERIOD_IN_MSECS);
+	printk("Processor speed: %3d MHz\n", CPU_FREQ_HZ / 1000000);
+	printk("Timer precision: %3d msec\n", SYSTICK_PERIOD_IN_MSECS);
 	SysTick_Config(CPU_FREQ_HZ / SYSTICK_FREQ);
 
 	/* Reclaim the early stack physical memory. In the current context, no
@@ -74,14 +75,6 @@ struct thread_info *start_kernel(void)
 	printk("Kernel bootstrap done.\n\n");
 
 	return thread_main;
-}
-
-
-void cpu_locked(int errno)
-{
-	printk("%d: cpu locked\n", errno);
-	for (;;)
-		;
 }
 
 void *cpu_idle(__unused void *arg)
