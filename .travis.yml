@@ -18,3 +18,8 @@ before_install:
 
 script:
   - python vega-test/build.py
+
+branches:
+  only:
+    - master
+    - /^devel(-\w+)?$/
