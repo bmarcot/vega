@@ -6,7 +6,7 @@
 #include "linux/types.h"
 #include "linux/list.h"
 
-#define INTR_STACK_ORDER 10 // 0x400 = 1kB
+#define INTR_STACK_ORDER 8    /* 0x100 = 256 Bytes */
 #define INTR_STACK_SIZE (1 << INTR_STACK_ORDER)
 
 struct thread_info {

@@ -21,9 +21,9 @@ static struct kernel_context_regs *build_intr_stack(void)
 	/* We don't need a huge stack for interrupt handling, however we need the page
 	   to be aligned on a known value to retrieve the Thread Control Block that
 	   is stored at the bottom of the physical page.    */
-	if ((memp = page_alloc(PAGE_SIZE)) == NULL)
+	if ((memp = page_alloc(INTR_STACK_SIZE)) == NULL)
 		return NULL;
-	kcr = (void *)((u32) memp + PAGE_SIZE - sizeof (struct kernel_context_regs));
+	kcr = (void *)((u32) memp + INTR_STACK_SIZE - sizeof (struct kernel_context_regs));
 #ifndef DEBUG
 	memset(kcr->gprs, 0, 8 * sizeof (u32));
 #else
@@ -80,7 +80,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
-	thread = (struct thread_info *) align_lo((u32) kcr, PAGE_SIZE);
+	thread = (struct thread_info *) align_lo((u32) kcr, INTR_STACK_SIZE);
 	if ((thread->ti_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
 		//FIXME: free(kcr);
 		return NULL;
