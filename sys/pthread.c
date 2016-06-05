@@ -5,6 +5,7 @@
 
 static ucontext_t main_context, pthread_context;
 static unsigned int ctx_stack[256];
+static int create_ret_code;
 
 int pthread_yield_1(void)
 {
@@ -28,8 +29,10 @@ static int pthread_create_2(/* __user */ pthread_t *thread, /* const pthread_att
 
 	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
 	   to this process user-space.    */
-	if ((thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER)) == NULL)
+	if ((thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER)) == NULL) {
+		create_ret_code = -1;
 		return -1;
+	}
 	*thread = (pthread_t) thread_info->ti_id;
 
 	sched_rr_add(thread_info);
@@ -48,4 +51,6 @@ int pthread_create_1(/* __user */ pthread_t *thread, /* const pthread_attr_t *at
 	makecontext(&pthread_context, pthread_create_2, 3, thread, start_routine,
 		arg);
 	swapcontext(&main_context, &pthread_context);
+
+	return create_ret_code;
 }
