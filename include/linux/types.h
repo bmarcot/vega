@@ -12,6 +12,8 @@ typedef short          s16;
 typedef unsigned char  u8;
 typedef char           s8;
 
+typedef unsigned int size_t;
+
 struct list_head {
     struct list_head *next, *prev;
 };
