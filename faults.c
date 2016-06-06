@@ -19,7 +19,7 @@ static void print_gprs(struct kernel_context_regs *noscratch,
 		noscratch->gprs[1], noscratch->gprs[2], noscratch->gprs[3]);
 	printk(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n", noscratch->gprs[4],
 		noscratch->gprs[5], noscratch->gprs[6], noscratch->gprs[7]);
-	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->gprs[5],
+	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->gprs[4],
 		(u32) scratch, scratch->lr, scratch->ret_addr);
 	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
