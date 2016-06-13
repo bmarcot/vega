@@ -7,11 +7,16 @@
 #define INTR_STACK_ORDER 8    /* 0x100 = 256 Bytes */
 #define INTR_STACK_SIZE (1 << INTR_STACK_ORDER)
 
+/* machine-specific thread info on ARM */
+struct mthread_info {
+	u32 mi_msp;     /* +0 */
+	u32 mi_psp;     /* +4 */
+	u32 mi_priv;    /* +8 */
+};
+
 struct thread_info {
-	/* v7m data, could be moved to arch-dependent file */
-	u32 ti_msp;     /* +0 */
-	u32 ti_psp;     /* +4 */
-	u32 ti_priv;    /* +8 */
+	/* machine-specific thread info */
+	struct mthread_info ti_mach;
 
 	/* thread description data */
 	int ti_prio;               /* unused */

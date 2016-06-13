@@ -13,13 +13,13 @@ void stage_irqaction(struct irqaction *irqaction, void *arg)
 	/* If we stage the irqaction on the current thread context, note that
 	 * the thread control block structure has not been updated with current
 	 * SP_process.    */
-	threadp->ti_psp = __get_PSP();
+	threadp->ti_mach.mi_psp = __get_PSP();
 
 	/* the irqaction context will be poped by cpu on exception return */
-	threadp->ti_psp -= sizeof (struct thread_context_regs);
+	threadp->ti_mach.mi_psp -= sizeof (struct thread_context_regs);
 
 	/* build the irqaction context */
-	tcr = (struct thread_context_regs *) threadp->ti_psp;
+	tcr = (struct thread_context_regs *) threadp->ti_mach.mi_psp;
 	tcr->gprs[0] = (u32) arg;
 	tcr->gprs[1] = 0;
 	tcr->gprs[2] = 0;
@@ -31,5 +31,5 @@ void stage_irqaction(struct irqaction *irqaction, void *arg)
 
 	/* If we staged the irqaction on the current thread context, update
 	 * the SP_process before returning to thread.    */
-	__set_PSP(threadp->ti_psp);
+	__set_PSP(threadp->ti_mach.mi_psp);
 }

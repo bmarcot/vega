@@ -81,12 +81,12 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
 	thread = (struct thread_info *) align_lo((u32) kcr, INTR_STACK_SIZE);
-	if ((thread->ti_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
+	if ((thread->ti_mach.mi_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
 		//FIXME: free(kcr);
 		return NULL;
 	}
-	thread->ti_msp = (u32) kcr;
-	thread->ti_priv = priv;
+	thread->ti_mach.mi_msp = (u32) kcr;
+	thread->ti_mach.mi_priv = priv;
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */
 
