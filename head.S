@@ -4,7 +4,7 @@
 
 #include "arch-v7m.h"
 #include "linux/linkage.h"
-#include "../asm-pseudo.S"
+#include "../pseudo.S"
 
 	.section ".vector", "a"
 

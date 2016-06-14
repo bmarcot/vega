@@ -3,8 +3,7 @@
 	.thumb
 
 #include "linux/linkage.h"
-
-#include "../asm-pseudo.S"
+#include "../pseudo.S"
 
 	.set SYS_PTHREAD_YIELD, 0
 	.set SYS_PTHREAD_SELF, 1
