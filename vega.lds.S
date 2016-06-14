@@ -1,6 +1,6 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(cold_reset)
+ENTRY(reset)
 
 #define RAMORG 0x20000000
 
@@ -12,13 +12,8 @@ MEMORY
 
 SECTIONS
 {
-    .vector.early : {
-    	PROVIDE(vtor_early_base = .);
-    	*(.vector.early)
-    } > rom
-
-    .vector BLOCK(128) : {
-    	PROVIDE(vector_base = .);
+    .vector 0 : {
+	PROVIDE(__vector_start__ = .);
     	*(.vector)
     } > rom
 

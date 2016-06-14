@@ -12,7 +12,6 @@
 
 extern char __early_stack_start__;
 extern char __early_stack_end__;
-extern char vector_base;
 
 void *cpu_idle(void *);
 
@@ -29,9 +28,6 @@ static void cm4_init(void)
 	/* enable UsageFault, BusFault, MemManage faults */
 	SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk
 		| SCB_SHCSR_MEMFAULTENA_Msk);
-
-	/* use the second-stage exception vector */
-	SCB->VTOR = (int) &vector_base;
 
 	/* follow the architectural requirements */
 	__DSB();
