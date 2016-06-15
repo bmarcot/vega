@@ -24,10 +24,28 @@
 	@ list of the called function. See the EABI specs to know which
 	@ registers (and possibly the stack) are used during a function call.
 
-	@ sys{cond}	argc, sys_id
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+	@ sys	argc, id
+#define DEFINE_SYS_CALL_SITE()			\
+	.macro sys argc, id		;	\
+	.if	\argc == 0		;	\
+	movs	r0, #\id		;	\
+	.elseif \argc == 1		;	\
+	movs	r1, #\id		;	\
+	.elseif \argc == 2		;	\
+	movs	r2, #\id		;	\
+	.elseif \argc == 3		;	\
+	movs	r3, #\id		;	\
+	.elseif \argc == 4		;	\
+	movs	r12, #\id		;	\
+	.endif				;	\
+	svc	#\argc			;	\
+	.endm
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
+	@ sys{cond} argc, id
 #define DEFINE_SYS_CALL_SITE(cc)		\
 	.macro sys##cc argc, id		;	\
-	.if \argc == 0			;	\
+	.if	\argc == 0		;	\
 	mov##cc r0, #\id		;	\
 	.elseif \argc == 1		;	\
 	mov##cc r1, #\id		;	\
@@ -37,13 +55,13 @@
 	mov##cc r3, #\id		;	\
 	.elseif \argc == 4		;	\
 	mov##cc r12, #\id		;	\
-	.else				;	\
-	.error "error: Unhandled number of parameters in SysCall." ;	\
 	.endif				;	\
 	svc##cc #\argc			;	\
 	.endm
+#endif
 
 DEFINE_SYS_CALL_SITE();
+#if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 DEFINE_SYS_CALL_SITE(eq);
 DEFINE_SYS_CALL_SITE(ne);
 DEFINE_SYS_CALL_SITE(cs);
@@ -58,5 +76,6 @@ DEFINE_SYS_CALL_SITE(ge);
 DEFINE_SYS_CALL_SITE(lt);
 DEFINE_SYS_CALL_SITE(gt);
 DEFINE_SYS_CALL_SITE(le);
+#endif
 
 #endif /* !ASM_PSEUDO_I */
