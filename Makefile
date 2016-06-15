@@ -17,7 +17,14 @@ CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iplatform/$(PLATFORM) -Wno-main
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
 LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds
 
-SSRC += head.S entry.S syscalls.S kernel-if.S
+#FIXME: revisit the arch-specific imports
+ifeq ($(ARCH),armv6-m)
+	SSRC += v6m-entry.S
+else
+	SSRC += v7m-entry.S
+endif
+
+SSRC += head.S syscalls.S kernel-if.S
 CSRC += main.c systick.c backend.c thread.c sched-rr.c sysvect.c \
 	sys/pthread.c faults.c bitmap.c mm.c mutex.c printk.c sleep.c \
 	timer.c irqaction.c unistd.c utils.c libc/stdio.c libc/ucontext.c \
