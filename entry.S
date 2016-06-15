@@ -104,3 +104,33 @@ ENTRY(return_from_makecontext)
 	//FIXME: return code - the r0 value that is restored from the stack should be 0
 	ldm	r0, {r0-r12, pc}
 ENDPROC(return_from_makecontext)
+
+	.macro	fault_handler f
+	push	{r4-r11}	@ save non-scratch registers at time of fault
+	mov	r0, sp
+	mov	r2, lr		@ lr contains EXC_RETURN, fault was taken in thread or interrupt?
+
+	@ We don't handle faults taken in interrupt handler at the moment.
+	@ Hence the scratch registers auto pushed to the stack by the CPU
+	@ on interrupt-entry have been pushed to PSP (MSP is only used by
+	@ interrupts handler).
+	mrs	r1, psp
+
+	b	\f
+	.endm	/* fault_handler */
+
+ENTRY(hardf)
+	fault_handler hardfault
+ENDPROC(hardf)
+
+ENTRY(memf)
+	fault_handler memmanage
+ENDPROC(memf)
+
+ENTRY(busf)
+	fault_handler busfault
+ENDPROC(busf)
+
+ENTRY(usgf)
+	fault_handler usagefault
+ENDPROC(usgf)
