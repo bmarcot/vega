@@ -17,10 +17,16 @@
 	.long	reset				@ Reset (warm)
 	.long	0				@ NMI
 	.long	hardf				@ HardFault
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+	.long	0				@ Reserved
+	.long	0				@ Reserved
+	.long	0				@ Reserved
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 	//FIXME: Qemu does not escalate other faults to #hf
 	.long	memf				@ MemManage
 	.long	busf				@ BusFault
 	.long	usgf				@ UsageFault
+#endif
 	.long	0				@ Reserved
 	.long	0				@ Reserved
 	.long	0				@ Reserved
@@ -42,7 +48,12 @@ ENTRY(reset)
 	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
 	str	r1, [r0, #V7M_VTOR]
 	ldr	r2, =0f
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+	movs	r3, #THUMB_MODE
+	orrs	r2, r3
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 	orr	r2, #THUMB_MODE
+#endif
 	str	r2, [r1, #V7M_VTOR_OFFSET_SVC]
 	dsb					/* [1] */
 	svc	#0
@@ -61,7 +72,7 @@ ENTRY(reset)
 
 	@ Zero-fill the .bss sections.
 	ldr	r0, =__bss_start__
-	mov	r1, #0
+	movs	r1, #0
 	ldr	r2, =__bss_size__
 	bl	memset
 
