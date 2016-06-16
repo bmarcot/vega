@@ -53,6 +53,7 @@ include/version.h: include/version.template.h
 include/cmsis/arm:
 	svn export --force https://github.com/ARM-software/CMSIS/trunk/CMSIS/Include include/cmsis/arm
 	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM4/Include include/cmsis/arm
+	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM0/Include include/cmsis/arm
 
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@
