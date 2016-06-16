@@ -9,7 +9,11 @@
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+#include "cmsis/arm/ARMCM0.h"
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 #include "cmsis/arm/ARMCM4.h"
+#endif
 #include "libc/stdlib.h"
 
 extern char __early_stack_start__;
@@ -26,8 +30,9 @@ void __weak *main(__unused void *arg)
 
 struct thread_info *thread_idle;
 
-/* Cortex-M4 system initialization */
-static void cm4_init(void)
+/* Cortex-M3 & Cortex-M4 system initialization */
+#if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
+static void v7m_init(void)
 {
 	/* enable UsageFault, BusFault, MemManage faults */
 	SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk
@@ -36,12 +41,15 @@ static void cm4_init(void)
 	/* follow the architectural requirements */
 	__DSB();
 }
+#endif
 
 struct thread_info *start_kernel(void)
 {
 	struct thread_info *thread_main;
 
-	cm4_init();
+#if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
+	v7m_init();
+#endif
 	uart_init();
 
 	/* initialize the kernel's malloc */
