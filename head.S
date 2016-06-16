@@ -82,8 +82,10 @@ ENTRY(reset)
 	@ the first thread context is kickstarted. 
 	bl	start_kernel	@ do the high-level kernel init
 	cmp	r0, #0		@ the proc returns the first thread to run
-	beq	system_reset	@ reset if system bootstrap failed
+	beq	0f		@ reset if system bootstrap failed
 	b	thread_restore
+0:	ldr	r0, =system_reset
+	bx	r0
 ENDPROC(reset)
 
 /* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
