@@ -20,8 +20,10 @@ LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.l
 #FIXME: revisit the arch-specific imports
 ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
+	CSRC += v6m-faults.c
 else
 	SSRC += v7m-entry.S
+	CSRC += v7m-faults.c
 endif
 
 SSRC += head.S syscalls.S kernel-if.S

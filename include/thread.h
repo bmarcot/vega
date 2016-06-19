@@ -66,7 +66,17 @@ enum thread_privilege {
  */
 
 struct kernel_context_regs {
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+	u32 r8_r11[4];
+	//FIXME: restore r12 also? yes because kernel might use it! This is the
+	//       kernel context (non-scratch), not the non-scratch for the user
+	//       thread: they are implicitly restored by the epilogues for those
+	//       used by kernel, or filled with 0 from there.
+	//       u32 r8__r12[5];
+	u32 r4_r7[4];
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 	u32 gprs[8];    /* r4 to r11, zero-filled */
+#endif
 	u32 lr;         /* initially loaded with EXC_RETURN value */
 };
 
