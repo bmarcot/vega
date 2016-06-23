@@ -21,14 +21,12 @@ ENDPROC(current_thread_info)
 	@ (r1), r2, r3, r12: scratch registers
 ENTRY(switch_to)
 	/* save previous thread context */
-	push	{r4-r7}
+	push	{r4-r7, lr}
 	mov	r2, r8
 	mov	r3, r9
 	mov	r4, r10
 	mov	r5, r11
-	mov	r6, lr
-	push	{r2-r6}
-	//push	{r4-r11, lr}
+	push	{r2-r5}
 	mov	r2, sp
 	mrs	r3, psp
 	stm	r1!, {r2, r3}
@@ -39,8 +37,7 @@ ENTRY(thread_restore)
 	mov	sp, r1
 	msr	psp, r2
 	msr	control, r3		@ write to SPSEL is ignored in Handler_Mode
-	//pop	{r4-r11, pc}
-	pop	{r2-r5} //FIXME: r6 filled with r12?
+	pop	{r2-r5} //FIXME: r6 filled with r12? r12 is a scratch in the thread context, not but not in the interrupt/kernel context
 	mov	r8, r2
 	mov	r9, r3
 	mov	r10, r4
