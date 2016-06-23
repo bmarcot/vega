@@ -25,7 +25,12 @@ static struct kernel_context_regs *build_intr_stack(void)
 		return NULL;
 	kcr = (void *)((u32) memp + INTR_STACK_SIZE - sizeof (struct kernel_context_regs));
 #ifndef DEBUG
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+	memset(kcr->r4_r7, 0, 4 * sizeof (u32));
+	memset(kcr->r8_r11, 0, 4 * sizeof (u32));
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 	memset(kcr->gprs, 0, 8 * sizeof (u32));
+#endif
 #else
 	kcr->gprs[0] = 0xcafe0004;
 	kcr->gprs[1] = 0xcafe0005;
