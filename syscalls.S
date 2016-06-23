@@ -82,7 +82,7 @@ do_syscall3:
 	push	{r7, lr}
 	ldm	r0, {r0, r1}		@ r0-r2 -> params, r3 -> syscall id
 	ldr	r7, =sys_vect
-	lsls	r7, #2
+	lsls	r3, #2
 	ldr	r7, [r7, r3]
 	blx	r7
 	mrs	r1, psp
