@@ -52,18 +52,11 @@ int _write(int file, char *ptr, int len)
 	return len;
 }
 
-extern intptr_t heap_base;
-extern intptr_t heap_limit;
-
 void *_sbrk(intptr_t incr)
 {
-	static void *next = (void *) &heap_base;
+	(void) incr;
 
-	if ((next + incr) > (void *) &heap_limit)
-		return (void *) 0;
-	next += incr;    /* the heap just grows up */
-
-	return next - incr;
+	return NULL;
 }
 
 void _exit(__unused int status)

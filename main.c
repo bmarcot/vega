@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "uart.h"
 #include "systick.h"
@@ -9,9 +10,12 @@
 #include "version.h"
 #include "platform.h"
 #include "cmsis/arm/ARMCM4.h"
+#include "libc/stdlib.h"
 
 extern char __early_stack_start__;
 extern char __early_stack_end__;
+extern char __heap_start__;
+extern char __heap_size__;
 
 void *cpu_idle(void *);
 
@@ -39,6 +43,9 @@ struct thread_info *start_kernel(void)
 
 	cm4_init();
 	uart_init();
+
+	/* initialize the kernel's malloc */
+	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
 
 	printk("Version:    %s\n", VER_SLUG);
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);

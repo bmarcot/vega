@@ -50,11 +50,14 @@ SECTIONS
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
 
+    /* heap for the kernel's malloc */
     .heap BLOCK(32) : {
-        PROVIDE(heap_base = .);
+        PROVIDE(__heap_start__ = .);
         . += 4k;
-        PROVIDE(heap_limit = .);
+        PROVIDE(__heap_end__ = .);
     } > ram
+
+    PROVIDE(__heap_size__ = SIZEOF(.heap));
 
     .pgmem RAMORG + RAMSZ - 32k : {
 	PROVIDE(__pgmem_start__ = .);
