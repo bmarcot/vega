@@ -14,8 +14,6 @@ typedef char           s8;
 
 typedef unsigned int size_t;
 
-typedef _Bool bool;
-
 struct list_head {
     struct list_head *next, *prev;
 };

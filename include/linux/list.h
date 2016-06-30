@@ -11,6 +11,7 @@
 #include "linux/poison.h"
 #include "linux/kernel.h"
 #include "linux/compiler.h" /* for READ_ONCE and WRITE_ONCE definitions */
+#include "libc/stdbool.h"
 
 /*
  * Simple doubly linked list implementation.
