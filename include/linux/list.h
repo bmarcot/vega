@@ -396,7 +396,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:	the name of the list_head within the struct.
  */
 #define list_next_entry(pos, member) \
-	list_entry((pos)->member.next, typeof(*(pos)), member)
+	list_entry((pos)->member.next, __typeof__(*(pos)), member)
 
 /**
  * list_prev_entry - get the prev element in list
@@ -404,7 +404,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:	the name of the list_head within the struct.
  */
 #define list_prev_entry(pos, member) \
-	list_entry((pos)->member.prev, typeof(*(pos)), member)
+	list_entry((pos)->member.prev, __typeof__(*(pos)), member)
 
 /**
  * list_for_each	-	iterate over a list
@@ -450,7 +450,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:	the name of the list_head within the struct.
  */
 #define list_for_each_entry(pos, head, member)				\
-	for (pos = list_first_entry(head, typeof(*pos), member);	\
+	for (pos = list_first_entry(head, __typeof__(*pos), member);	\
 	     &pos->member != (head);					\
 	     pos = list_next_entry(pos, member))
 
@@ -461,7 +461,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:	the name of the list_head within the struct.
  */
 #define list_for_each_entry_reverse(pos, head, member)			\
-	for (pos = list_last_entry(head, typeof(*pos), member);		\
+	for (pos = list_last_entry(head, __typeof__(*pos), member);		\
 	     &pos->member != (head); 					\
 	     pos = list_prev_entry(pos, member))
 
@@ -474,7 +474,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * Prepares a pos entry for use as a start point in list_for_each_entry_continue().
  */
 #define list_prepare_entry(pos, head, member) \
-	((pos) ? : list_entry(head, typeof(*pos), member))
+	((pos) ? : list_entry(head, __typeof__(*pos), member))
 
 /**
  * list_for_each_entry_continue - continue iteration over list of given type
@@ -524,7 +524,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:	the name of the list_head within the struct.
  */
 #define list_for_each_entry_safe(pos, n, head, member)			\
-	for (pos = list_first_entry(head, typeof(*pos), member),	\
+	for (pos = list_first_entry(head, __typeof__(*pos), member),	\
 		n = list_next_entry(pos, member);			\
 	     &pos->member != (head); 					\
 	     pos = n, n = list_next_entry(n, member))
@@ -571,7 +571,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * of list entry.
  */
 #define list_for_each_entry_safe_reverse(pos, n, head, member)		\
-	for (pos = list_last_entry(head, typeof(*pos), member),		\
+	for (pos = list_last_entry(head, __typeof__(*pos), member),		\
 		n = list_prev_entry(pos, member);			\
 	     &pos->member != (head); 					\
 	     pos = n, n = list_prev_entry(n, member))
@@ -707,7 +707,7 @@ static inline void hlist_move_list(struct hlist_head *old,
 	     pos = n)
 
 #define hlist_entry_safe(ptr, type, member) \
-	({ typeof(ptr) ____ptr = (ptr); \
+	({ __typeof__(ptr) ____ptr = (ptr); \
 	   ____ptr ? hlist_entry(____ptr, type, member) : NULL; \
 	})
 
@@ -718,9 +718,9 @@ static inline void hlist_move_list(struct hlist_head *old,
  * @member:	the name of the hlist_node within the struct.
  */
 #define hlist_for_each_entry(pos, head, member)				\
-	for (pos = hlist_entry_safe((head)->first, typeof(*(pos)), member);\
+	for (pos = hlist_entry_safe((head)->first, __typeof__(*(pos)), member);\
 	     pos;							\
-	     pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+	     pos = hlist_entry_safe((pos)->member.next, __typeof__(*(pos)), member))
 
 /**
  * hlist_for_each_entry_continue - iterate over a hlist continuing after current point
@@ -728,9 +728,9 @@ static inline void hlist_move_list(struct hlist_head *old,
  * @member:	the name of the hlist_node within the struct.
  */
 #define hlist_for_each_entry_continue(pos, member)			\
-	for (pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member);\
+	for (pos = hlist_entry_safe((pos)->member.next, __typeof__(*(pos)), member);\
 	     pos;							\
-	     pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+	     pos = hlist_entry_safe((pos)->member.next, __typeof__(*(pos)), member))
 
 /**
  * hlist_for_each_entry_from - iterate over a hlist continuing from current point
@@ -739,7 +739,7 @@ static inline void hlist_move_list(struct hlist_head *old,
  */
 #define hlist_for_each_entry_from(pos, member)				\
 	for (; pos;							\
-	     pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+	     pos = hlist_entry_safe((pos)->member.next, __typeof__(*(pos)), member))
 
 /**
  * hlist_for_each_entry_safe - iterate over list of given type safe against removal of list entry
@@ -749,8 +749,8 @@ static inline void hlist_move_list(struct hlist_head *old,
  * @member:	the name of the hlist_node within the struct.
  */
 #define hlist_for_each_entry_safe(pos, n, head, member) 		\
-	for (pos = hlist_entry_safe((head)->first, typeof(*pos), member);\
+	for (pos = hlist_entry_safe((head)->first, __typeof__(*pos), member);\
 	     pos && ({ n = pos->member.next; 1; });			\
-	     pos = hlist_entry_safe(n, typeof(*pos), member))
+	     pos = hlist_entry_safe(n, __typeof__(*pos), member))
 
 #endif
