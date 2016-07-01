@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "libc/stdlib.h"
 #include "thread.h"
 #include "pthread.h"
 #include "mm.h"
