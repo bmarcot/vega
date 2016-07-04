@@ -30,7 +30,7 @@ static struct kernel_context_regs *build_intr_stack(void)
 	memset(kcr->r4_r7, 0, 4 * sizeof (u32));
 	memset(kcr->r8_r11, 0, 4 * sizeof (u32));
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	memset(kcr->gprs, 0, 8 * sizeof (u32));
+	memset(kcr->r4_r11, 0, 8 * sizeof (u32));
 #endif
 #else
 	kcr->gprs[0] = 0xcafe0004;
