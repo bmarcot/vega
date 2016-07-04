@@ -81,10 +81,10 @@ struct kernel_context_regs {
 };
 
 struct thread_context_regs {
-	u32 gprs[5];    /* r0 to r3, r12, args or zero-filled */
-	u32 lr;	        /* initially loaded with pthread_exit() */
-	u32 ret_addr;   /* thread entry-point function */
-	u32 xpsr;       /* forced to Thumb_Mode */
+	u32 r0_r3__r12[5];  /* r0 to r3, r12; args or zero-filled */
+	u32 lr;	            /* initially loaded with pthread_exit() */
+	u32 ret_addr;       /* thread entry-point function */
+	u32 xpsr;           /* forced to Thumb_Mode */
 };
 
 /* forward declarations */

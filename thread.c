@@ -58,9 +58,9 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 	if (NULL == (memp = page_alloc(PAGE_SIZE))) // this one does not need to be aligned - size configurable
 		return NULL;
 	tcr = (void *)((u32) memp + PAGE_SIZE - sizeof (struct thread_context_regs));
-	tcr->gprs[0] = (u32) arg;
+	tcr->r0_r3__r12[0] = (u32) arg;
 #ifndef DEBUG
-	memset(&tcr->gprs[1], 0, 4 * sizeof (u32));
+	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof (u32));
 #else
 	printk("thread sp = %p\n", ts);
 	tcr->gprs[1] = 0xcafe0001;

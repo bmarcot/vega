@@ -20,11 +20,11 @@ void stage_irqaction(struct irqaction *irqaction, void *arg)
 
 	/* build the irqaction context */
 	tcr = (struct thread_context_regs *) threadp->ti_mach.mi_psp;
-	tcr->gprs[0] = (u32) arg;
-	tcr->gprs[1] = 0;
-	tcr->gprs[2] = 0;
-	tcr->gprs[3] = 0;
-	tcr->gprs[4] = 0;
+	tcr->r0_r3__r12[0] = (u32) arg;
+	tcr->r0_r3__r12[1] = 0;
+	tcr->r0_r3__r12[2] = 0;
+	tcr->r0_r3__r12[3] = 0;
+	tcr->r0_r3__r12[4] = 0;
 	tcr->lr = (u32) return_from_irqaction | 1;    /* return in Thumb Mode */
 	tcr->ret_addr = (u32) irqaction->ia_irqaction & 0xfffffffe;
 	tcr->xpsr = xPSR_T_Msk;
