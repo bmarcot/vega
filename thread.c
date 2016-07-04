@@ -11,8 +11,7 @@
 #include "linux/types.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
-
-#define PAGE_SIZE 1024
+#include "sys/resource.h"
 
 static struct kernel_context_regs *build_intr_stack(void)
 {
@@ -54,10 +53,14 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 {
 	void *memp;
 	struct thread_context_regs *tcr;
+	struct rlimit stacklimit;
 
-	if (NULL == (memp = page_alloc(PAGE_SIZE))) // this one does not need to be aligned - size configurable
+	/* get the default thread's stack size */
+	getrlimit(RLIMIT_STACK, &stacklimit);
+
+	if ((memp = page_alloc(stacklimit.rlim_cur)) == NULL)
 		return NULL;
-	tcr = (void *)((u32) memp + PAGE_SIZE - sizeof (struct thread_context_regs));
+	tcr = (void *)((u32) memp + stacklimit.rlim_cur - sizeof(struct thread_context_regs));
 	tcr->r0_r3__r12[0] = (u32) arg;
 #ifndef DEBUG
 	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof (u32));
