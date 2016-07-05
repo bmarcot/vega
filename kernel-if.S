@@ -34,7 +34,7 @@ ENDPROC(pthread_exit)
 
 	@ int pthread_create(...)
 ENTRY(pthread_create)
-	sys	3, SYS_PTHREAD_CREATE
+	sys	4, SYS_PTHREAD_CREATE
 	bx	lr
 ENDPROC(pthread_create)
 

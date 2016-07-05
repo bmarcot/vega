@@ -3,6 +3,7 @@
 
 #include "linux/types.h"
 #include "linux/list.h"
+#include "pthread.h"
 
 #define INTR_STACK_ORDER 8    /* 0x100 = 256 Bytes */
 #define INTR_STACK_SIZE (1 << INTR_STACK_ORDER)
@@ -92,7 +93,7 @@ struct thread_context_regs {
 void switch_to(struct thread_info *, struct thread_info *);
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
-struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privilege);
+struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privilege, const pthread_attr_t *);
 int thread_yield(void);
 int thread_self(void);
 void thread_exit(void *);

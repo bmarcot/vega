@@ -49,18 +49,14 @@ static struct kernel_context_regs *build_intr_stack(void)
 // pass user-supplied stack size - configure task stack size
 // note: detect stack overflow -> #memf && (SP_Process == MMFAR)
 static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void *),
-						void *arg)
+						void *arg, size_t stacksize)
 {
 	void *memp;
 	struct thread_context_regs *tcr;
-	struct rlimit stacklimit;
 
-	/* get the default thread's stack size */
-	getrlimit(RLIMIT_STACK, &stacklimit);
-
-	if ((memp = page_alloc(stacklimit.rlim_cur)) == NULL)
+	if ((memp = page_alloc(stacksize)) == NULL)
 		return NULL;
-	tcr = (void *)((u32) memp + stacklimit.rlim_cur - sizeof(struct thread_context_regs));
+	tcr = (void *)((u32) memp + stacksize - sizeof(struct thread_context_regs));
 	tcr->r0_r3__r12[0] = (u32) arg;
 #ifndef DEBUG
 	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof (u32));
@@ -81,16 +77,26 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 }
 
 struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
-				enum thread_privilege priv)
+				enum thread_privilege priv, const pthread_attr_t *attr)
 {
 	struct thread_info *thread;
 	struct kernel_context_regs *kcr;
 	static int thread_count = 0;
+	size_t stacksize;
+	struct rlimit stacklimits;
+
+	/* get the thread's stack size */
+	if (attr->flags & PTHREAD_ATTR_STACKSIZE) {
+		stacksize = attr->stacksize;
+	} else {
+		getrlimit(RLIMIT_STACK, &stacklimits);
+		stacksize = stacklimits.rlim_cur;
+	}
 
 	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
 	thread = (struct thread_info *) align_lo((u32) kcr, INTR_STACK_SIZE);
-	if ((thread->ti_mach.mi_psp = (u32) build_thrd_stack(start_routine, arg)) == 0) {
+	if ((thread->ti_mach.mi_psp = (u32) build_thrd_stack(start_routine, arg, stacksize)) == 0) {
 		//FIXME: free(kcr);
 		return NULL;
 	}
