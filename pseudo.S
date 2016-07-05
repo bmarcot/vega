@@ -37,7 +37,10 @@
 	.elseif \argc == 3		;	\
 	movs	r3, #\id		;	\
 	.elseif \argc == 4		;	\
-	movs	r12, #\id		;	\
+	push	{r0}			;	\
+	movs	r0, #\id		;	\
+	mov	r12, r0			;	\
+	pop	{r0}			;	\
 	.endif				;	\
 	svc	#\argc			;	\
 	.endm
