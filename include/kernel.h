@@ -1,6 +1,9 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
+/* GCC unused symbol declaration */
+#define __unused __attribute__((unused))
+
 /* GCC weak symbol declaration */
 #define __weak __attribute__((weak))
 
