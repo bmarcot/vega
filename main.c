@@ -61,13 +61,13 @@ struct thread_info *start_kernel(void)
 	page_init();
 
 	/* the idle thread is not pushed in the rr-runqueue */
-	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, NULL)) == NULL) {
+	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024)) == NULL) {
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
 
 	/* thread_main is the user entry point to the system */
-	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER, NULL)) == NULL)
+	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024)) == NULL)
 		printk("[!] Could not create user main thread.\n");
 	sched_rr_add(thread_main);
 

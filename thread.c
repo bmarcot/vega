@@ -77,21 +77,11 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 }
 
 struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
-				enum thread_privilege priv, const pthread_attr_t *attr)
+				enum thread_privilege priv, size_t stacksize)
 {
 	struct thread_info *thread;
 	struct kernel_context_regs *kcr;
 	static int thread_count = 0;
-	size_t stacksize;
-	struct rlimit stacklimits;
-
-	/* get the thread's stack size */
-	if (attr->flags & PTHREAD_ATTR_STACKSIZE) {
-		stacksize = attr->stacksize;
-	} else {
-		getrlimit(RLIMIT_STACK, &stacklimits);
-		stacksize = stacklimits.rlim_cur;
-	}
 
 	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
