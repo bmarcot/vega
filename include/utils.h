@@ -7,6 +7,8 @@
 #define align_hi(val, align)	\
 	(((val) + (align) - 1) & ~((align) - 1))
 
+#define MIN(a,b) ((a)<(b) ? (a):(b))
+
 #ifndef __LINKER__
 
 #include "cmsis/arm/ARMCM4.h"
