@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/times.h>
-
+#include "kernel.h"
 #include "uart.h"
+#include "linux/stddef.h"
+#include "sys/cdefs.h"
 
 int _isatty(__unused int file)
 {
@@ -20,7 +20,7 @@ int _close(__unused int file)
 	return -1;
 }
 
-int _fstat(__unused int file, __unused struct stat *st)
+int _fstat(/* __unused int file, __unused struct stat *st */)
 {
 	return -1;
 }
@@ -65,7 +65,8 @@ void _exit(__unused int status)
 		;
 }
 
-clock_t _times(__unused struct tms *buf)
+typedef int clock_t;
+clock_t _times(/* __unused struct tms *buf */)
 {
 	return -1;
 }

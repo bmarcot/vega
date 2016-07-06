@@ -2,21 +2,9 @@
 #define PTHREAD_H
 
 #include "linux/types.h"
+#include "sys/types.h"
 
 //FIXME: this is the lib, move to a lib folder
-
-typedef unsigned int pthread_t;
-typedef int pthread_mutex_t;
-
-typedef struct {
-	int    flags;
-	size_t stacksize;
-	void   *__stackaddr;
-	/* void		    (*__exitfunc)(void *status); */
-	/* int		    __policy; */
-	/* struct sched_param  __param; */
-	/* unsigned	    __guardsize; */
-} pthread_attr_t;
 
 #define PTHREAD_ATTR_STACKSIZE 1
 
