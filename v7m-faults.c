@@ -1,5 +1,4 @@
 #include "kernel.h"
-#include "linux/types.h"
 #include "thread.h"
 #include "utils.h"
 

@@ -1,3 +1,5 @@
+#include <sys/types.h>
+
 #include "timer.h"
 #include "thread.h"
 #include "linux/list.h"

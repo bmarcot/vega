@@ -40,7 +40,7 @@ $(NAME).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
-	$(CC) -o $@ $(CFLAGS) -c -W -Wall -std=c11 $<
+	$(CC) -o $@ $(CFLAGS) -c -W -Wall -std=c11 -D__KERNEL__ $<
 
 %.o: %.S
 	$(CC) -o $@ $(CFLAGS) -c $<

@@ -1,6 +1,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <sys/types.h>
+
 #include "thread.h"
 #include "linux/types.h"
 #include "linux/list.h"

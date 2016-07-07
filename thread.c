@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 
 #include "thread.h"
 #include "pthread.h"
@@ -9,7 +10,6 @@
 #include "utils.h"
 #include "sched-rr.h"
 #include "arch-v7m.h"
-#include "linux/types.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 
