@@ -1,8 +1,9 @@
 #ifndef UCONTEXT_H
 #define UCONTEXT_H
 
+#include <signal.h>
+
 #include "linux/types.h"
-#include "libc/signal.h"
 
 /* machine context on ARM */
 typedef struct mcontext {

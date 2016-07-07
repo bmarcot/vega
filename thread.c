@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/resource.h>
 
-#include "libc/stdlib.h"
 #include "thread.h"
 #include "pthread.h"
 #include "mm.h"
@@ -11,7 +12,6 @@
 #include "linux/types.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
-#include "sys/resource.h"
 
 static struct kernel_context_regs *build_intr_stack(void)
 {

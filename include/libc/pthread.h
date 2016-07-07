@@ -1,14 +1,9 @@
 #ifndef PTHREAD_H
 #define PTHREAD_H
 
-#include "linux/types.h"
-#include "sys/types.h"
+#include <sys/types.h>
 
-//FIXME: this is the lib, move to a lib folder
-
-#define PTHREAD_ATTR_STACKSIZE 1
-
-/* create and get attributes */
+/* pthread attributes */
 
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize);

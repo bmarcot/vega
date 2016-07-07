@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "libc/stdlib.h"
 #include "mm.h"
 #include "bitmap.h"
 #include "utils.h"

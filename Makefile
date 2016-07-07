@@ -12,7 +12,7 @@ OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iplatform/$(PLATFORM) -Wno-main
+CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -Iplatform/$(PLATFORM) -Wno-main
 
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
 LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds

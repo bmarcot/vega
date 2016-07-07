@@ -1,9 +1,10 @@
+#include <stdbool.h>
+
 #include "linux/types.h"
 #include "linux/list.h"
 #include "linux/kernel.h"
 #include "kernel.h"
 #include "utils.h"
-#include "libc/stdbool.h"
 
 /* This is a boundary tag, located at the beginning of the block wether it's
  * free or allocated.    */

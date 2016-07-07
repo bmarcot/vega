@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "libc/stdlib.h"
 #include "linux/types.h"
 #include "linux/list.h"
 #include "thread.h"

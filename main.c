@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/cdefs.h>
 
 #include "uart.h"
 #include "systick.h"
@@ -13,7 +15,6 @@
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 #include "cmsis/arm/ARMCM4.h"
 #endif
-#include "libc/stdlib.h"
 
 extern char __early_stack_start__;
 extern char __early_stack_end__;

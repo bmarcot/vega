@@ -1,7 +1,7 @@
 /* https://github.com/torvalds/linux/blob/master/lib/string.c */
 
-#include "libc/string.h"
-#include "libc/stddef.h"
+#include <stddef.h>
+#include <string.h>
 
 char *strcpy(char *dest, const char *src)
 {

@@ -9,6 +9,18 @@
 typedef signed int off_t;
 #endif
 
+/* Used for sizes of objects. */
+#ifndef _SIZE_T
+#define _SIZE_T
+typedef unsigned int size_t;
+#endif
+
+/* Used for a count of bytes or an error indication. */
+#ifndef _SSIZE_T
+#define _SSIZE_T
+typedef signed int ssize_t;
+#endif
+
 /* Used to identify a thread attribute object. */
 typedef struct {
 	int    flags;
@@ -25,17 +37,5 @@ typedef int pthread_mutex_t;
 
 /* Used to identify a thread. */
 typedef unsigned int pthread_t;
-
-/* Used for sizes of objects. */
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef unsigned int size_t;
-#endif
-
-/* Used for a count of bytes or an error indication. */
-#ifndef _SSIZE_T
-#define _SSIZE_T
-typedef signed int ssize_t;
-#endif
 
 #endif /* !SYS_TYPES_H */

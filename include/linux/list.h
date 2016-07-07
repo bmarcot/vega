@@ -6,12 +6,13 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
+#include <stdbool.h>
+
 #include "linux/types.h"
 #include "linux/stddef.h"
 #include "linux/poison.h"
 #include "linux/kernel.h"
 #include "linux/compiler.h" /* for READ_ONCE and WRITE_ONCE definitions */
-#include "libc/stdbool.h"
 
 /*
  * Simple doubly linked list implementation.
