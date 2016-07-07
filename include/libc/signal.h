@@ -1,5 +1,5 @@
-#ifndef LIBC_SIGNAL_H
-#define LIBC_SIGNAL_H
+#ifndef SIGNAL_H
+#define SIGNAL_H
 
 #include <stddef.h>
 
@@ -9,4 +9,4 @@ typedef struct {
 	size_t ss_size;	 /* Number of bytes in stack */
 } stack_t;
 
-#endif /* !LIBC_SIGNAL_H */
+#endif /* !SIGNAL_H */
