@@ -1,6 +1,6 @@
-#include <stdarg.h>
 #include "linux/types.h"
 #include "libc/ucontext.h"
+#include "libc/stdarg.h"
 
 void return_from_makecontext();
 

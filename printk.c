@@ -1,7 +1,7 @@
 #include <stdio.h> /* for vsnprintf() */
-#include <stdarg.h>
 #include "uart.h"
 #include "libc/ucontext.h"
+#include "libc/stdarg.h"
 
 #define PRINTK_BUF_SIZE 512
 
