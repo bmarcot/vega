@@ -73,7 +73,6 @@ int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
 {
 	if (attr == NULL)
 		return -1;
-	attr->flags |= PTHREAD_ATTR_STACKSIZE;
 	attr->stacksize = stacksize;
 
 	return 0;
