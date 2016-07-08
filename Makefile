@@ -26,7 +26,7 @@ else
 	CSRC += v7m-faults.c
 endif
 
-SSRC += head.S syscalls.S kernel-if.S
+SSRC += head.S common.S kernel-if.S
 CSRC += main.c sys/pthread.c bitmap.c  sleep.c \
 	unistd.c utils.c sys/resource.c
 CSRC += $(wildcard libc/*.c)

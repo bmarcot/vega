@@ -13,7 +13,7 @@ int pthread_create_1(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 
 #define SYS_MAX 16
 
-void *sys_vect[SYS_MAX] = {
+void *syscall_vector[SYS_MAX] = {
 	/* multithreading */
 	pthread_yield_1,
 	pthread_self_1,
@@ -35,7 +35,7 @@ int sysvect_register(unsigned ix, void *(*fn)())
 {
 	if (ix >= SYS_MAX)
 		return -1;
-	sys_vect[ix] = fn;
+	syscall_vector[ix] = fn;
 
 	return 0;
 }

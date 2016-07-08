@@ -15,8 +15,8 @@ ENTRY(pthread_mutex_lock)
 	movs	r2, #0
 0:	ldrex	r1, [r0]
 	tst	r1, r1
-	ittt	pl		@ 't' 3x because 'sys' pseudo-op is 2 instructions
-	syspl	1, SYS_PTHREAD_MUTEX_LOCK
+	itt	pl
+	svcpl	#SYS_PTHREAD_MUTEX_LOCK
 	bxpl	lr
 	strex	r1, r2, [r0]
 	tst	r1, r1
@@ -49,8 +49,8 @@ ENTRY(pthread_mutex_unlock)
 	movs	r2, #-1
 0:	ldrex	r1, [r0]
 	tst	r1, r1
-	ittt	ne		@ 't' 3x because 'sys' pseudo-op is 2 instructions
-	sysne	1, SYS_PTHREAD_MUTEX_UNLOCK
+	itt	ne
+	svcne	#SYS_PTHREAD_MUTEX_UNLOCK
 	bxne	lr
 	strex	r1, r2, [r0]
 	tst	r1, r1

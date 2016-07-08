@@ -1,4 +1,6 @@
 
+	//XXX: move this to uapi/
+
 	.syntax unified
 	.thumb
 
@@ -16,36 +18,36 @@
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
-	sys	0, SYS_PTHREAD_YIELD
+	svc	#SYS_PTHREAD_YIELD
 	bx	lr
 ENDPROC(pthread_yield)
 
 	@ pthread_t pthread_self(void)
 ENTRY(pthread_self)
-	sys	0, SYS_PTHREAD_SELF
+	svc	#SYS_PTHREAD_SELF
 	bx	lr
 ENDPROC(pthread_self)
 
 	@ void pthread_exit(void *retval)
 ENTRY(pthread_exit)
-	sys	1, SYS_PTHREAD_EXIT
+	svc	#SYS_PTHREAD_EXIT
 	bx	lr
 ENDPROC(pthread_exit)
 
 	@ int pthread_create(...)
 ENTRY(pthread_create)
-	sys	4, SYS_PTHREAD_CREATE
+	svc	#SYS_PTHREAD_CREATE
 	bx	lr
 ENDPROC(pthread_create)
 
 	@ int timer_create(...)
 ENTRY(timer_create)
-	sys	1, SYS_TIMER_CREATE
+	svc	#SYS_TIMER_CREATE
 	bx	lr
 ENDPROC(timer_create)
 
 	@ long sysconf(int name)
 ENTRY(sysconf)
-	sys	1, SYS_SYSCONF
+	svc	#SYS_SYSCONF
 	bx	lr
 ENDPROC(sysconf)
