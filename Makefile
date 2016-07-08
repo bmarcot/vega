@@ -27,7 +27,7 @@ else
 endif
 
 SSRC += head.S syscalls.S kernel-if.S
-CSRC += main.c backend.c sys/pthread.c bitmap.c  sleep.c \
+CSRC += main.c sys/pthread.c bitmap.c  sleep.c \
 	unistd.c utils.c sys/resource.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)
