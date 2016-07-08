@@ -2,9 +2,9 @@
 #include <ucontext.h>
 #include <sys/resource.h>
 
-#include "thread.h"
-#include "pthread.h"
-#include "sched-rr.h"
+#include <kernel/sched-rr.h>
+#include <kernel/thread.h>
+
 #include "utils.h"
 
 static ucontext_t main_context, pthread_context;
