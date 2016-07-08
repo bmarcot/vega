@@ -1,5 +1,6 @@
+#include <kernel/thread.h>
+
 #include "kernel.h"
-#include "thread.h"
 #include "utils.h"
 
 extern void print_gprs(struct kernel_context_regs *noscratch,

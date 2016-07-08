@@ -1,4 +1,4 @@
-#include "timer.h"
+#include <kernel/timer.h>
 
 void msleep(unsigned int msecs)
 {

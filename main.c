@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
+#include <kernel/mm.h>
+#include <kernel/sched-rr.h>
+#include <kernel/thread.h>
+
 #include "uart.h"
 #include "systick.h"
-#include "thread.h"
-#include "sched-rr.h"
-#include "mm.h"
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"

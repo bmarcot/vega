@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mm.h"
+#include <kernel/mm.h>
+
 #include "bitmap.h"
 #include "utils.h"
 #include "linux/list.h"

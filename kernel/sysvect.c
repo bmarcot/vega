@@ -1,7 +1,8 @@
 #include <pthread.h>
 
-#include "mutex.h"
-#include "timer.h"
+#include <kernel/mutex.h>
+#include <kernel/timer.h>
+
 #include "unistd.h"
 
 int pthread_yield_1(void);

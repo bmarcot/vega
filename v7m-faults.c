@@ -1,5 +1,6 @@
+#include <kernel/thread.h>
+
 #include "kernel.h"
-#include "thread.h"
 #include "utils.h"
 
 extern void fault_enter(const char *s);

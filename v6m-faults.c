@@ -1,5 +1,6 @@
+#include <kernel/thread.h>
+
 #include "kernel.h"
-#include "thread.h"
 #include "utils.h"
 
 #define UFSR_DIVBYZERO (1 << 9)

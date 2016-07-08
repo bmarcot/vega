@@ -1,14 +1,15 @@
+#include <pthread.h>  /* include pthread.h because lr loaded with pthread_exit() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/resource.h>
 #include <sys/types.h>
 
-#include "thread.h"
-#include "pthread.h"
-#include "mm.h"
+#include <kernel/mm.h>
+#include <kernel/sched-rr.h>
+#include <kernel/thread.h>
+
 #include "utils.h"
-#include "sched-rr.h"
 #include "arch-v7m.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"

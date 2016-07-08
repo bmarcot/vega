@@ -1,10 +1,11 @@
 #include <sys/types.h>
 
-#include "timer.h"
-#include "thread.h"
+#include <kernel/sched-rr.h>
+#include <kernel/timer.h>
+#include <kernel/thread.h>
+
 #include "linux/list.h"
 #include "kernel.h"
-#include "sched-rr.h"
 
 /* static */ LIST_HEAD(timers); //XXX: create accessors..
 

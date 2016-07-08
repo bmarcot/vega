@@ -1,7 +1,7 @@
-//FIXME: for debug purpose..
-#include <stdio.h>
+#include <stdio.h>  //FIXME: for debug purpose..
 
-#include "thread.h"
+#include <kernel/thread.h>
+
 #include "linux/list.h"
 #include "kernel.h"
 

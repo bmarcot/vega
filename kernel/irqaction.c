@@ -1,5 +1,6 @@
-#include "thread.h"
-#include "irqaction.h"
+#include <kernel/irqaction.h>
+#include <kernel/thread.h>
+
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 

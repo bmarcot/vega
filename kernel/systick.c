@@ -1,10 +1,11 @@
 #include <stdint.h>
 
+#include <kernel/sched-rr.h>
+#include <kernel/timer.h>
+
 #include "systick.h"
 #include "uart.h"
-#include "sched-rr.h"
 #include "linux/types.h"
-#include "timer.h"
 #include "cmsis/arm/ARMCM4.h"
 
 static volatile u32 overflow = 0;

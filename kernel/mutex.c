@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <kernel/sched-rr.h>
+#include <kernel/thread.h>
+
 #include "linux/types.h"
 #include "linux/list.h"
-#include "thread.h"
-#include "sched-rr.h"
 #include "kernel.h"
 
 struct mutex {
