@@ -26,7 +26,7 @@ void pthread_exit_1(void *retval)
 	thread_exit(retval);
 }
 
-static int pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
+static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
 	struct thread_info *thread_info;
@@ -45,13 +45,11 @@ static int pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t
 	   to this process user-space.    */
 	if ((thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize)) == NULL) {
 		create_ret_code = -1;
-		return -1;
+		return;
 	}
 	*thread = (pthread_t) thread_info->ti_id;
 
 	sched_rr_add(thread_info);
-
-	return 0;
 }
 
 int pthread_create_1(/* __user */ pthread_t *thread, const pthread_attr_t *attr,

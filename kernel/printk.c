@@ -9,16 +9,13 @@
 static char printk_buf[PRINTK_BUF_SIZE];
 static ucontext_t main_context, print_context;
 static unsigned int ctx_stack[128];
+static int printed;
 
 /* this function is not thread-safe, nor it is reentrant */
-int printk_1(const char *format, va_list ap)
+void printk_1(const char *format, va_list ap)
 {
-	int printed;
-
 	printed = vsnprintf(printk_buf, PRINTK_BUF_SIZE, format, ap);
 	uart_putstring(printk_buf);
-
-	return printed;
 }
 
 int printk(const char *format, ...)
@@ -35,5 +32,5 @@ int printk(const char *format, ...)
 	swapcontext(&main_context, &print_context);
 	va_end(ap);
 
-	return 0;
+	return printed;
 }
