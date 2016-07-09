@@ -34,7 +34,7 @@ static int pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t
 	size_t stacksize;
 
 	/* get the thread's stack size */
-	getrlimit(RLIMIT_STACK, &stacklimit);
+	sys_getrlimit(RLIMIT_STACK, &stacklimit);
 	if (attr) {
 		stacksize = MIN(attr->stacksize, stacklimit.rlim_max);
 	} else {
