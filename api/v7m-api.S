@@ -3,7 +3,6 @@
 	.thumb
 
 #include "linux/linkage.h"
-#include "../pseudo.S"
 
 	.set SYS_PTHREAD_MUTEX_LOCK, 4
 	.set SYS_PTHREAD_MUTEX_UNLOCK, 5

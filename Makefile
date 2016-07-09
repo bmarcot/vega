@@ -22,11 +22,11 @@ ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	SSRC += v7m-entry.S v7m-if.S
+	SSRC += v7m-entry.S api/v7m-api.S
 	CSRC += v7m-faults.c
 endif
 
-SSRC += head.S common.S kernel-if.S
+SSRC += head.S common.S api/api.S
 CSRC += main.c sys/pthread.c bitmap.c  sleep.c \
 	unistd.c utils.c
 CSRC += $(wildcard libc/*.c)
