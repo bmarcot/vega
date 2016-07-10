@@ -9,4 +9,7 @@ enum sc_varname {
 long sysconf(int name);
 long sysconf_1(int name);
 
+unsigned int msleep(unsigned int msecs);
+unsigned sleep(unsigned seconds);
+
 #endif /* !UNISTD_H */
