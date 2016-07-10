@@ -1,7 +1,7 @@
-#include "unistd.h"
-#include "systick.h"
+#include <unistd.h>
+#include <systick.h>
 
-long sysconf_1(int name)
+long sys_sysconf(int name)
 {
 	switch (name) {
 	case PAGESIZE:
