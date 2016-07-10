@@ -61,7 +61,7 @@ include/cmsis/arm:
 	$(OCPY) -O ihex $< $@
 
 clean::
-	rm -f *.o libc/*.o kernel/*.o sys/*.o *~ $(NAME).map $(NAME).lds include/version.h
+	rm -f *.o libc/*.o kernel/*.o *~ $(NAME).map $(NAME).lds include/version.h
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
