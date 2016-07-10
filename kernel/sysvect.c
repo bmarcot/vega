@@ -5,9 +5,9 @@
 
 #include "unistd.h"
 
-int pthread_yield_1(void);
-pthread_t pthread_self_1(void);
-void pthread_exit_1(void *);
+int sys_pthread_yield(void);
+pthread_t sys_pthread_self(void);
+void sys_pthread_exit(void *);
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg);
 
@@ -15,9 +15,9 @@ int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *att
 
 void *syscall_vector[SYS_MAX] = {
 	/* multithreading */
-	pthread_yield_1,
-	pthread_self_1,
-	pthread_exit_1,
+	sys_pthread_yield,
+	sys_pthread_self,
+	sys_pthread_exit,
 	sys_pthread_create,
 
 	/* mutex */

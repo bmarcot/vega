@@ -134,17 +134,17 @@ static ucontext_t main_context, pthread_context;
 static unsigned int ctx_stack[256];
 static int create_ret_code;
 
-int pthread_yield_1(void)
+int sys_pthread_yield(void)
 {
 	return thread_yield();
 }
 
-pthread_t pthread_self_1(void)
+pthread_t sys_pthread_self(void)
 {
 	return (pthread_t) thread_self();
 }
 
-void pthread_exit_1(void *retval)
+void sys_pthread_exit(void *retval)
 {
 	thread_exit(retval);
 }
