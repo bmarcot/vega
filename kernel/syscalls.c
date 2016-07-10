@@ -8,6 +8,7 @@ pthread_t sys_pthread_self(void);
 void sys_pthread_exit(void *);
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg);
+int sys_timer_create(unsigned int msecs);
 long sys_sysconf(int name);
 
 #define SYS_MAX 16
@@ -24,7 +25,7 @@ void *syscall_vector[SYS_MAX] = {
 	mutex_unlock,
 
 	/* timers */
-	timer_create_1,
+	sys_timer_create,
 
 	/* unix standards */
 	sys_sysconf

@@ -15,6 +15,5 @@ struct timer {
 
 /* system interfaces */
 int timer_create(unsigned int msecs);
-int timer_create_1(unsigned int msecs);
 
 #endif /* !TIMER_H */

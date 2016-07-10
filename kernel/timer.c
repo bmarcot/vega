@@ -1,7 +1,7 @@
 #include <sys/types.h>
 
 #include <kernel/sched-rr.h>
-#include <kernel/timer.h>
+#include <kernel/timer.h> //FIXME: types in libc instead
 #include <kernel/thread.h>
 
 #include "linux/list.h"
@@ -11,7 +11,7 @@
 
 extern u32 clocktime_in_msecs;
 
-int timer_create_1(unsigned int msecs)
+int sys_timer_create(unsigned int msecs)
 {
 	/* XXX: 1 timer per thread, replace wih malloc/free when implementing
 	        timer_create/timer_arm/signals timer management. */
