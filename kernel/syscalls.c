@@ -30,7 +30,7 @@ void *syscall_vector[SYS_MAX] = {
 	sys_sysconf
 };
 
-int sysvect_register(unsigned ix, void *(*fn)())
+int syscall_register(unsigned ix, void *(*fn)())
 {
 	if (ix >= SYS_MAX)
 		return -1;
