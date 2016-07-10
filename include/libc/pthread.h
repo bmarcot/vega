@@ -5,6 +5,7 @@
 
 /* pthread attributes */
 
+int pthread_attr_init(pthread_attr_t *attr);
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize);
 

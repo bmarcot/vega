@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <ucontext.h>
 
 #include <kernel/mm.h>
 #include <kernel/sched-rr.h>
@@ -125,4 +126,66 @@ void thread_exit(void *retval)
 	printk("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
 	//FIXME: this does not release the resource, and creates a zombie thread
 	sched_rr_del(thread);
+}
+
+/* pthread interface */
+
+static ucontext_t main_context, pthread_context;
+static unsigned int ctx_stack[256];
+static int create_ret_code;
+
+int pthread_yield_1(void)
+{
+	return thread_yield();
+}
+
+pthread_t pthread_self_1(void)
+{
+	return (pthread_t) thread_self();
+}
+
+void pthread_exit_1(void *retval)
+{
+	thread_exit(retval);
+}
+
+static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
+		void *(*start_routine)(void *), void *arg)
+{
+	struct thread_info *thread_info;
+	struct rlimit stacklimit;
+	size_t stacksize;
+
+	/* get the thread's stack size */
+	sys_getrlimit(RLIMIT_STACK, &stacklimit);
+	if (attr) {
+		stacksize = MIN(attr->stacksize, stacklimit.rlim_max);
+	} else {
+		stacksize = stacklimit.rlim_cur;
+	}
+
+	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
+	   to this process user-space.    */
+	if ((thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize)) == NULL) {
+		create_ret_code = -1;
+		return;
+	}
+	*thread = (pthread_t) thread_info->ti_id;
+
+	sched_rr_add(thread_info);
+}
+
+int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
+		void *(*start_routine)(void *), void *arg)
+{
+	/* link the current context to the print context */
+	pthread_context.uc_link = &main_context;
+	pthread_context.uc_stack.ss_sp = &ctx_stack[256];
+
+	/* pass the arguments to the new context, and swap */
+	makecontext(&pthread_context, pthread_create_2, 4, thread, attr, start_routine,
+		arg);
+	swapcontext(&main_context, &pthread_context);
+
+	return create_ret_code;
 }

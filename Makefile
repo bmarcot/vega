@@ -27,7 +27,7 @@ else
 endif
 
 SSRC += head.S common.S api/api.S
-CSRC += main.c sys/pthread.c bitmap.c  sleep.c \
+CSRC += main.c bitmap.c  sleep.c \
 	unistd.c utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)
