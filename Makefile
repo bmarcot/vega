@@ -32,7 +32,7 @@ else
 endif
 
 SSRC += head.S common.S api/api.S
-CSRC += main.c bitmap.c utils.c
+CSRC += bitmap.c utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)
 OBJS += $(SSRC:.S=.o)
