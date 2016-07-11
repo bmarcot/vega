@@ -2,6 +2,11 @@
 # vegaz, compressed kernel
 NAME = vega
 
+# QEMU is our default platform
+PLATFORM ?= qemu
+
+DIRS = . kernel libc api include include/libc include/libc/sys
+
 # platform Makefile contains hw details and flags
 include platform/$(PLATFORM)/Makefile
 
@@ -60,7 +65,8 @@ include/cmsis/arm:
 	$(OCPY) -O ihex $< $@
 
 clean::
-	rm -f *.o libc/*.o kernel/*.o *~ $(NAME).map $(NAME).lds include/version.h
+	rm -f $(OBJS) $(NAME).map $(NAME).lds include/version.h
+	$(foreach dir,$(DIRS),$(shell rm -f $(dir)/*~))
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
