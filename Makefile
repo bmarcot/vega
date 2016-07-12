@@ -64,9 +64,10 @@ include/cmsis/arm:
 %.hex: %.elf
 	$(OCPY) -O ihex $< $@
 
+EMACS_TRASH = $(foreach dir,$(DIRS),$(wildcard $(dir)/*~))
+
 clean::
-	rm -f $(OBJS) $(NAME).map $(NAME).lds include/version.h
-	$(foreach dir,$(DIRS),$(shell rm -f $(dir)/*~))
+	rm -f $(OBJS) $(NAME).map $(NAME).lds include/version.h $(EMACS_TRASH)
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
