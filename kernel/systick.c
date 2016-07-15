@@ -12,6 +12,7 @@ static volatile u32 overflow = 0;
 u32 clocktime_in_msecs;
 
 extern struct list_head timers;
+extern struct thread_info *thread_idle;
 
 void systick(void)
 {
@@ -23,9 +24,13 @@ void systick(void)
 	struct timer *pos;
 	list_for_each_entry(pos, &timers, list) {
 		if (pos->expire_clocktime < clocktime_in_msecs) {
+			/* printk("timer expired!\n"); */
 			list_del(&pos->list);
 			sched_add(pos->tip);
-			sched_elect(SCHED_OPT_RESET);
+			CURRENT_THREAD_INFO(current);
+			if (current != thread_idle)
+				sched_add(current);
+			sched_elect(SCHED_OPT_NONE);
 			return;
 		}
 	}

@@ -3,6 +3,10 @@
 
 #include <kernel/thread.h>
 
+/* 0 <= PRI_MAX <= PRI_MIN */
+#define PRI_MAX  0
+#define PRI_MIN  31
+
 #define SCHED_CLASS_RR  0
 #define SCHED_CLASS_O1  1
 

@@ -63,18 +63,25 @@ struct thread_info *start_kernel(void)
 	page_init();
 
 	/* select a scheduling policy */
-	sched_select(SCHED_CLASS_RR);
+	sched_select(SCHED_CLASS_O1);
 
-	/* the idle thread is not pushed in the rr-runqueue */
-	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024)) == NULL) {
+	/* idle_thread is not added to the runqueue */
+	thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
+	if (thread_idle == NULL) {
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
+	printk("Created idle_thread at %p\n", thread_idle);
 
-	/* thread_main is the user entry point to the system */
-	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024)) == NULL)
+	/* The main_thread is the user entry point to the system, and is not added to
+	 * the runqueue because it is implicitly "elected".  */
+	thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024);
+	if (thread_main == NULL) {
 		printk("[!] Could not create user main thread.\n");
-	sched_add(thread_main);
+		return NULL;
+	}
+	printk("Created main_thread at %p with priority=%d\n", thread_main,
+		thread_main->ti_priority);
 
 	/* SysTick at 1kHz */
 	printk("Processor speed: %3d MHz\n", CPU_FREQ_IN_HZ / 1000000);
@@ -82,7 +89,7 @@ struct thread_info *start_kernel(void)
 	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
 
 	/* Reclaim the early stack physical memory. In the current context, no
-	 * page allocation after this point are allowed.    */
+	 * page allocation after this point are allowed.  */
 	printk("Reclaim early stack's physical memory (%d Bytes).\n",
 		&__early_stack_start__ - &__early_stack_end__);
 	page_free(&__early_stack_end__);

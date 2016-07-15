@@ -20,11 +20,11 @@ int sys_timer_create(unsigned int msecs)
 
 	printk("timer: create a timer t=%dms at %p\n", msecs, &timerp);
 
-	timerp.tip = threadp;
+	timerp.tip = threadp; //FIXME: rename to timer.owner
 	timerp.expire_clocktime = clocktime_in_msecs + msecs;
 	list_add(&timerp.list, &timers);
-	list_del(&threadp->ti_list);
-	sched_elect(SCHED_OPT_RESET);
+	sched_del(threadp);
+	sched_elect(SCHED_OPT_NONE);
 
 	return 0;
 }

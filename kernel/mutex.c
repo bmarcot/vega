@@ -1,3 +1,8 @@
+/* mutex.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -51,8 +56,8 @@ int mutex_lock(atomic_t /* __user  */ *lock)
 	   runqueue. By design, no other thread can have acquired the mutex in
 	   the meantime because the lock value is still positive or equal to 0
 	   and they would enter the locking slow path.    */
-	list_move(&threadp->ti_list, &mutexp->waitq);
-	sched_elect(SCHED_OPT_RESET);
+	list_add_tail(&threadp->ti_list, &mutexp->waitq);
+	sched_elect(SCHED_OPT_NONE);
 
 	/* Return to userland with the mutex.     */
 	return 0;
@@ -61,6 +66,7 @@ int mutex_lock(atomic_t /* __user  */ *lock)
 int mutex_unlock(atomic_t /* __user */ *lock)
 {
 	struct mutex *mutexp;
+	struct thread_info *waiter;
 
 	printk("mutex: unlocking %p (val=%d)\n", lock, lock->val);
 
@@ -71,7 +77,8 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 	list_find_entry(mutexp, &mutexes, list, lock, m_lock);
 	if (mutexp == NULL)
 		return -1;
-	struct thread_info *waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_list);
+	waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_list);
+	list_del(&waiter->ti_list);
 	sched_add(waiter);
 
 	if (list_empty(&mutexp->waitq)) {
@@ -82,8 +89,10 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 
 	lock->val--;
 
-	//XXX: elect? yes, if one thread of high-prio is blocking on that mutex
-	//sched_elect();
+	//XXX: elect iff one thread of high-prio is blocking on that mutex
+	CURRENT_THREAD_INFO(current);
+	sched_add(current);
+	sched_elect(SCHED_OPT_NONE);
 
 	return 0;
 }

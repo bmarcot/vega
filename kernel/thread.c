@@ -96,6 +96,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_mach.mi_priv = priv;
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */
+	thread->ti_priority = PRI_MIN;  /* new threads are assigned the lowest priority */
 
 	return thread;
 }
@@ -106,6 +107,10 @@ int thread_yield(void)
 	CURRENT_THREAD_INFO(thread);
 	printk("thread: id=%d is yielding\n", thread->ti_id);
 #endif /* DEBUG */
+
+	//FIXME: elect iff there is a higher-priority thread ready to run
+	CURRENT_THREAD_INFO(current);
+	sched_add(current);
 
 	return sched_elect(SCHED_OPT_NONE);
 }
@@ -124,7 +129,15 @@ void thread_exit(void *retval)
 	thread->ti_retval = retval;
 	printk("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
 	//FIXME: this does not release the resource, and creates a zombie thread
-	sched_del(thread);
+	sched_del(thread);  //FIXME: not needed if by design the current threasd is not in runq
+	sched_elect(SCHED_OPT_RESTORE_ONLY);
+}
+
+int thread_set_priority(struct thread_info *thread, int priority)
+{
+	thread->ti_priority = priority;
+
+	return 0;
 }
 
 /* pthread interface */
