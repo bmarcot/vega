@@ -12,24 +12,33 @@ for (;;) {
 	msleep(470);
 */
 
-static void set_gpio_direction(struct gpio_chip *chip, unsigned offset, int dir)
+//#include <drivers/gpio.h>
+
+#define GPIO_DIR_OUT  0
+#define GPIO_DIR_IN   1
+
+static void set_gpio_direction(struct gpio_chip *chip, unsigned int offset, int dir)
 {
-	(void)chip;
+	(void) chip;
 
 	if (dir == GPIO_DIR_OUT) {
-		NRF_P0->PIN_CNF[offset] = (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+		NRF_P0->PIN_CNF[offset] = (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
+			| (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
 			| (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-			| (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+			| (GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+			| (GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
 	} else {
-		NRF_P0->PIN_CNF[offset] = (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+		NRF_P0->PIN_CNF[offset] = (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos)
+			| (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
 			| (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-			| (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+			| (GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+			| (GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
 	}
 }
 
-static void nrf52_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
+static void nrf52_gpio_set(struct gpio_chip *chip, unsigned int offset, int value)
 {
-	(void)chip;
+	(void) chip;
 
 	if (value)
 		NRF_P0->OUTSET = 1 << offset;
@@ -37,11 +46,9 @@ static void nrf52_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 		NRF_P0->OUTCLR = 1 << offset;
 }
 
-static int gemini_gpio_get(struct gpio_chip *chip, unsigned offset)
+static int nrf52_gpio_get(struct gpio_chip *chip, unsigned int offset)
 {
-	void __iomem *base = GPIO_BASE(offset / 32);
-
-	return (__raw_readl(base + GPIO_DATA_IN) >> (offset % 32)) & 1;
+	return (NRF_P0->IN >> offset) & 1;
 }
 
 static int nrf52_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
@@ -55,22 +62,22 @@ static int nrf52_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 				int value)
 {
 	set_gpio_direction(chip, offset, GPIO_DIR_OUT);
-	gemini_gpio_set(chip, offset, value);
+	nrf52_gpio_set(chip, offset, value);
 
 	return 0;
 }
 
-static struct gpio_chip gemini_gpio_chip = {
-	.label= "Gemini",
-	.direction_input= gemini_gpio_direction_input,
-	.get= gemini_gpio_get,
-	.direction_output= gemini_gpio_direction_output,
-	.set= gemini_gpio_set,
-	.base= 0,
-	.ngpio= GPIO_PORT_NUM * 32,
+static struct gpio_chip nrf52_gpio_chip = {
+	.label = "nRF52",
+	.direction_input = nrf52_gpio_direction_input,
+	.get = nrf52_gpio_get,
+	.direction_output = nrf52_gpio_direction_output,
+	.set = nrf52_gpio_set,
+	/* .base= 0, */
+	.ngpio = 32,
 };
 
-void __init gemini_gpio_init(void)
+void __init nrf52_gpio_init(void)
 {
 	int i, j;
 
@@ -92,4 +99,28 @@ void __init gemini_gpio_init(void)
 	}
 
 	BUG_ON(gpiochip_add_data(&gemini_gpio_chip, NULL));
+}
+
+#ifdef CONFIG_HAS_GPIO
+#endif
+
+void gpio_set(struct gpio_chip *chip, unsigned int offset, int value)
+{
+	gpio_chip->gpio_set(chip, offset, value);
+}
+
+int gpio_get(struct gpio_chip *chip, unsigned int offset)
+{
+	return gpio_chip->gpio_get(chip, offset);
+}
+
+int gpio_direction_input(struct gpio_chip *chip, unsigned offset)
+{
+	return gpio_chip->gpio_direction_input(chip, offset);
+}
+
+int gpio_direction_output(struct gpio_chip *chip, unsigned offset,
+			int value)
+{
+	return gpio_chip->gpio_direction_output(chip, offset, value);
 }
