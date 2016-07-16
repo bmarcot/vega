@@ -1,5 +1,6 @@
 #include <stdio.h>  //FIXME: for debug purpose..
 
+#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
 #include "linux/list.h"
@@ -7,6 +8,11 @@
 
 static LIST_HEAD(rr_runq);
 extern struct thread_info *thread_idle;
+
+int sched_rr_init(void)
+{
+	return 0;
+}
 
 static struct thread_info *find_next_thread(struct thread_info *thread)
 {
@@ -16,12 +22,14 @@ static struct thread_info *find_next_thread(struct thread_info *thread)
 	return list_next_entry(thread, ti_list);
 }
 
-void sched_rr_add(struct thread_info *thread)
+int sched_rr_add(struct thread_info *thread)
 {
 	list_add(&thread->ti_list, &rr_runq);
+
+	return 0;
 }
 
-void sched_rr_del(struct thread_info *thread)
+int sched_rr_del(struct thread_info *thread)
 {
 	CURRENT_THREAD_INFO(current);
 
@@ -35,12 +43,16 @@ void sched_rr_del(struct thread_info *thread)
 	} else {
 		list_del(&thread->ti_list);
 	}
+
+	return 0;
 }
 
-int sched_rr_elect(void)
+int sched_rr_elect(int switch_type)
 {
 	CURRENT_THREAD_INFO(current);
 	struct thread_info *next;
+
+	(void) switch_type;
 
 #ifdef DEBUG
 	printk("current thread is %p\n", current);
@@ -79,3 +91,10 @@ int sched_rr_elect_reset(void)
 
 	return 0;
 }
+
+const struct sched sched_rr = {
+	.init = sched_rr_init,
+	.add = sched_rr_add,
+	.del = sched_rr_del,
+	.elect = sched_rr_elect
+};

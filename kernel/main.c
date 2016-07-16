@@ -3,7 +3,7 @@
 #include <sys/cdefs.h>
 
 #include <kernel/mm.h>
-#include <kernel/sched-rr.h>
+#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
 #include "uart.h"
@@ -62,6 +62,9 @@ struct thread_info *start_kernel(void)
 	/* initialize the physical memory allocator */
 	page_init();
 
+	/* select a scheduling policy */
+	sched_select(SCHED_CLASS_RR);
+
 	/* the idle thread is not pushed in the rr-runqueue */
 	if ((thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024)) == NULL) {
 		printk("[!] Could not create system idle thread.\n");
@@ -71,7 +74,7 @@ struct thread_info *start_kernel(void)
 	/* thread_main is the user entry point to the system */
 	if ((thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024)) == NULL)
 		printk("[!] Could not create user main thread.\n");
-	sched_rr_add(thread_main);
+	sched_add(thread_main);
 
 	/* SysTick at 1kHz */
 	printk("Processor speed: %3d MHz\n", CPU_FREQ_IN_HZ / 1000000);

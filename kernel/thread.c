@@ -7,7 +7,7 @@
 #include <ucontext.h>
 
 #include <kernel/mm.h>
-#include <kernel/sched-rr.h>
+#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
 #include "utils.h"
@@ -107,8 +107,7 @@ int thread_yield(void)
 	printk("thread: id=%d is yielding\n", thread->ti_id);
 #endif /* DEBUG */
 
-	//FIXME: use a top-level function instead, like sched_elect()
-	return sched_rr_elect();
+	return sched_elect(SAVE_RESTORE);
 }
 
 int thread_self(void)
@@ -125,7 +124,7 @@ void thread_exit(void *retval)
 	thread->ti_retval = retval;
 	printk("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
 	//FIXME: this does not release the resource, and creates a zombie thread
-	sched_rr_del(thread);
+	sched_del(thread);
 }
 
 /* pthread interface */
@@ -172,7 +171,7 @@ static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_
 	}
 	*thread = (pthread_t) thread_info->ti_id;
 
-	sched_rr_add(thread_info);
+	sched_add(thread_info);
 }
 
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
