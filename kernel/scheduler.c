@@ -32,7 +32,7 @@ int sched_del(struct thread_info *thread)
 	return sched->del(thread);
 }
 
-int sched_elect(int switch_type)
+int sched_elect(int flags)
 {
-	return sched->elect(switch_type);
+	return sched->elect(flags);
 }

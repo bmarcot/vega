@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include <kernel/sched-rr.h>
+#include <kernel/scheduler.h>
 #include <kernel/timer.h>
 
 #include "systick.h"
@@ -24,8 +24,8 @@ void systick(void)
 	list_for_each_entry(pos, &timers, list) {
 		if (pos->expire_clocktime < clocktime_in_msecs) {
 			list_del(&pos->list);
-			sched_rr_add(pos->tip);
-			sched_rr_elect_reset();
+			sched_add(pos->tip);
+			sched_elect(SCHED_OPT_RESET);
 			return;
 		}
 	}

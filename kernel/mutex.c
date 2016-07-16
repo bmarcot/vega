@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <kernel/sched-rr.h>
+#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
 #include "linux/types.h"
@@ -52,7 +52,7 @@ int mutex_lock(atomic_t /* __user  */ *lock)
 	   the meantime because the lock value is still positive or equal to 0
 	   and they would enter the locking slow path.    */
 	list_move(&threadp->ti_list, &mutexp->waitq);
-	sched_rr_elect_reset();
+	sched_elect(SCHED_OPT_RESET);
 
 	/* Return to userland with the mutex.     */
 	return 0;
@@ -72,7 +72,7 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 	if (mutexp == NULL)
 		return -1;
 	struct thread_info *waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_list);
-	sched_rr_add(waiter);
+	sched_add(waiter);
 
 	if (list_empty(&mutexp->waitq)) {
 		/* We could free the structure here. However, there is obvious

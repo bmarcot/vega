@@ -107,7 +107,7 @@ int thread_yield(void)
 	printk("thread: id=%d is yielding\n", thread->ti_id);
 #endif /* DEBUG */
 
-	return sched_elect(SAVE_RESTORE);
+	return sched_elect(SCHED_OPT_NONE);
 }
 
 int thread_self(void)

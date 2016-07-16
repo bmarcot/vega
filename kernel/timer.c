@@ -1,6 +1,6 @@
 #include <sys/types.h>
 
-#include <kernel/sched-rr.h>
+#include <kernel/scheduler.h>
 #include <kernel/timer.h> //FIXME: types in libc instead
 #include <kernel/thread.h>
 
@@ -24,7 +24,7 @@ int sys_timer_create(unsigned int msecs)
 	timerp.expire_clocktime = clocktime_in_msecs + msecs;
 	list_add(&timerp.list, &timers);
 	list_del(&threadp->ti_list);
-	sched_rr_elect_reset();
+	sched_elect(SCHED_OPT_RESET);
 
 	return 0;
 }

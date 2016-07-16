@@ -47,12 +47,27 @@ int sched_rr_del(struct thread_info *thread)
 	return 0;
 }
 
+/* This function is used when the runqueue has been modified externally, and it
+   is not possible to fetch the next thread.    */
+static int sched_rr_elect_reset(void)
+{
+	CURRENT_THREAD_INFO(current);
+	struct thread_info *next = thread_idle;
+
+	if (!list_empty(&rr_runq))
+	  next = list_first_entry(&rr_runq, struct thread_info, ti_list);
+	switch_to(next, current);
+
+	return 0;
+}
+
 int sched_rr_elect(int switch_type)
 {
 	CURRENT_THREAD_INFO(current);
 	struct thread_info *next;
 
-	(void) switch_type;
+	if (switch_type & SCHED_OPT_RESET)
+		return sched_rr_elect_reset();
 
 #ifdef DEBUG
 	printk("current thread is %p\n", current);
@@ -73,20 +88,6 @@ int sched_rr_elect(int switch_type)
 	/* Leave _current_ thread for now. The _current_ thread will be elected
 	   again after _next_ thread has run. Inform the caller function (in
 	   _current_ context) that the thread gently gave way.    */
-	switch_to(next, current);
-
-	return 0;
-}
-
-/* This function is used when the runqueue has been modified externally, and it
-   is not possible to fetch the next thread.    */
-int sched_rr_elect_reset(void)
-{
-	CURRENT_THREAD_INFO(current);
-	struct thread_info *next = thread_idle;
-
-	if (!list_empty(&rr_runq))
-	  next = list_first_entry(&rr_runq, struct thread_info, ti_list);
 	switch_to(next, current);
 
 	return 0;
