@@ -22,4 +22,4 @@ script:
 branches:
   only:
     - master
-    - /^devel(-\w+)?$/
+    - /^devel([-\w]+)?$/
