@@ -20,7 +20,7 @@ struct thread_info {
 	struct mthread_info ti_mach;
 
 	/* thread description data */
-	int ti_prio;               /* unused */
+	int ti_priority;
 	int ti_id;
 
 	/* shared by scheduler runq and mutex waitq */
