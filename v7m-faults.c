@@ -1,10 +1,7 @@
+#include <kernel/faults.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"
-#include "utils.h"
-
-extern void fault_enter(const char *s);
-extern void fault_exit(void);
 
 #define UFSR_DIVBYZERO (1 << 9)
 #define UFSR_UNALIGNED (1 << 8)
@@ -13,7 +10,7 @@ extern void fault_exit(void);
 #define UFSR_INVSTATE (1 << 1)
 #define UFSR_UNDEFINSTR 1
 
-void print_gprs(struct kernel_context_regs *noscratch,
+void dump_frame(struct kernel_context_regs *noscratch,
 		struct thread_context_regs *scratch, u32 exc_return)
 {
 	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->r0_r3__r12[0],
@@ -34,7 +31,7 @@ void usagefault(struct kernel_context_regs *noscratch,
 	const char *cause = NULL;
 
 	fault_enter("UsageFault");
-	print_gprs(noscratch, scratch, exc_return);
+	dump_frame(noscratch, scratch, exc_return);
 	if (ufsr & UFSR_DIVBYZERO)
 		cause = "DIVBYZERO";
 	else if (ufsr & UFSR_UNALIGNED)
@@ -58,7 +55,7 @@ void busfault(struct kernel_context_regs *noscratch,
 	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("BusFault");
-	print_gprs(noscratch, scratch, exc_return);
+	dump_frame(noscratch, scratch, exc_return);
 	fault_exit();
 }
 
@@ -66,6 +63,6 @@ void memmanage(struct kernel_context_regs *noscratch,
 	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("MemManage");
-	print_gprs(noscratch, scratch, exc_return);
+	dump_frame(noscratch, scratch, exc_return);
 	fault_exit();
 }

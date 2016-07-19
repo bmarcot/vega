@@ -1,16 +1,9 @@
+#include <kernel/faults.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"
-#include "utils.h"
 
-#define UFSR_DIVBYZERO (1 << 9)
-#define UFSR_UNALIGNED (1 << 8)
-#define UFSR_NOCP (1 << 3)
-#define UFSR_INVPC (1 << 2)
-#define UFSR_INVSTATE (1 << 1)
-#define UFSR_UNDEFINSTR 1
-
-void print_gprs(struct kernel_context_regs *noscratch,
+void dump_frame(struct kernel_context_regs *noscratch,
 		struct thread_context_regs *scratch, u32 exc_return)
 {
 	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->r0_r3__r12[0],
@@ -22,16 +15,4 @@ void print_gprs(struct kernel_context_regs *noscratch,
 	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->r0_r3__r12[4],
 		(u32) scratch, scratch->lr, scratch->ret_addr);
 	printk("\nEXC_RETURN: %08x\n", exc_return);
-}
-
-static void fault_enter(const char *s)
-{
-	printk("\n-------------------------------------------------------------\n");
-	printk(" #%s\n\n", s);
-}
-
-static void fault_exit(void)
-{
-	printk("-------------------------------------------------------------\n");
-	halt();
 }

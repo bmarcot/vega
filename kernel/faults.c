@@ -1,10 +1,8 @@
+#include <kernel/faults.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"
 #include "utils.h"
-
-extern void print_gprs(struct kernel_context_regs *noscratch,
-		struct thread_context_regs *scratch, u32 exc_return);
 
 void fault_enter(const char *s)
 {
@@ -22,6 +20,6 @@ void hardfault(struct kernel_context_regs *noscratch,
 	struct thread_context_regs *scratch, u32 exc_return)
 {
 	fault_enter("HardFault");
-	print_gprs(noscratch, scratch, exc_return);
+	dump_frame(noscratch, scratch, exc_return);
 	fault_exit();
 }
