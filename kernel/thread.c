@@ -135,6 +135,9 @@ void thread_exit(void *retval)
 
 int thread_set_priority(struct thread_info *thread, int priority)
 {
+	//FIXME: Must be called before the sched_add!
+	//if (thread->state != THREAD_STATE_NEW)
+	// return -1;
 	thread->ti_priority = priority;
 
 	return 0;

@@ -97,6 +97,7 @@ struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privile
 int thread_yield(void);
 int thread_self(void);
 void thread_exit(void *);
+int thread_set_priority(struct thread_info *thread, int priority);
 
 // move to assembler.h (no because it's not inlined) / entry.S ?
 struct thread_info *current_thread_info(void);
