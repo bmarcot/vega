@@ -14,7 +14,7 @@
 	@ bits 6:0), alignment shall be handled in the linker script
 	@ note: the SP has been set by the early vector at this point
 	.long	__early_stack_start__		@ SP_main value
-	.long	reset				@ Reset (warm)
+	.long	reset				@ Reset
 	.long	0				@ NMI
 	.long	hardf				@ HardFault
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
