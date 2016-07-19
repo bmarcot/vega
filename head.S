@@ -1,15 +1,14 @@
+#include "arch-v7m.h"
+#include "linux/linkage.h"
 
 	.syntax unified
 	.thumb
 
-#include "arch-v7m.h"
-#include "linux/linkage.h"
 #include "../pseudo.S"
-
-	.section ".vector", "a"
 
 	.set THUMB_MODE, 1
 
+	.section ".vector", "a"
 	@ the vector must be aligned on 128 bytes (see VTOR reserved
 	@ bits 6:0), alignment shall be handled in the linker script
 	@ note: the SP has been set by the early vector at this point
