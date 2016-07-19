@@ -1,19 +1,20 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef KERNEL_TIMER_H
+#define KERNEL_TIMER_H
 
 #include <sys/types.h>
 
-#include "thread.h"
+#include <kernel/thread.h>
+
 #include "linux/types.h"
 #include "linux/list.h"
 
 struct timer {
-	struct thread_info *tip;
+	struct thread_info *owner;
 	u32 expire_clocktime;
-	struct list_head list;
+	struct list_head list;  /* ordering list */
 };
 
 /* system interfaces */
 int timer_create(unsigned int msecs);
 
-#endif /* !TIMER_H */
+#endif /* !KERNEL_TIMER_H */

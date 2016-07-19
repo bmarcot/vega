@@ -20,7 +20,7 @@ int sys_timer_create(unsigned int msecs)
 
 	printk("timer: create a timer t=%dms at %p\n", msecs, &timerp);
 
-	timerp.tip = threadp; //FIXME: rename to timer.owner
+	timerp.owner = threadp;
 	timerp.expire_clocktime = clocktime_in_msecs + msecs;
 	list_add(&timerp.list, &timers);
 	sched_del(threadp);
