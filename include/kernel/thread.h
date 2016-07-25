@@ -99,10 +99,24 @@ int thread_self(void);
 void thread_exit(void *);
 int thread_set_priority(struct thread_info *thread, int priority);
 
-// move to assembler.h (no because it's not inlined) / entry.S ?
+//FIXME: this proc should be in an asm/machine source file
+#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
 struct thread_info *current_thread_info(void);
+#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
+static inline struct thread_info *current_thread_info(void)
+{
+	struct thread_info *this;
 
-#define CURRENT_THREAD_INFO(var)				\
+	__asm__ __volatile__("mov %0, sp \n\t"
+			"bfc %0, #0, %1"
+			: "=r" (this)
+			: "M" (INTR_STACK_ORDER));
+
+	return this;
+}
+#endif
+
+#define CURRENT_THREAD_INFO(var) \
 	struct thread_info *var = current_thread_info();
 
 #endif /* !THREAD_H */

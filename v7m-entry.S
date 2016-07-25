@@ -14,16 +14,6 @@
 	// of space !!!! :) user stack size must be configurable
 	// though
 
-	//FIXME: this value is duplicated in thread.h
-	.set	INTR_STACK_SIZE_ORDER, 8
-
-	@ struct thread_info *current_thread_info(void)
-ENTRY(current_thread_info)
-	mov	r0, sp
-	bfc	r0, #0, #INTR_STACK_SIZE_ORDER
-	bx	lr
-ENDPROC(current_thread_info)
-
 	@ do the thread-context switch
 	@
 	@ r0: struct thread_info *next
