@@ -1,4 +1,13 @@
 
+# control the build verbosity
+ifeq ("$(VERBOSE)","1")
+Q :=
+VECHO = @true
+else
+Q := @
+VECHO = @echo
+endif
+
 # vegaz, compressed kernel
 NAME = vega
 
@@ -41,19 +50,24 @@ OBJS += $(CSRC:.c=.o)
 all: include/cmsis/arm include/version.h $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(VECHO) "LD\t$@"
+	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
-	$(CC) -o $@ $(CFLAGS) -c -W -Wall -std=c11 -D__KERNEL__ $<
+	$(VECHO) "CC\t$@"
+	$(Q)$(CC) -o $@ $(CFLAGS) -c -W -Wall -std=c11 -D__KERNEL__ $<
 
 %.o: %.S
-	$(CC) -o $@ $(CFLAGS) -c $<
+	$(VECHO) "AS\t$@"
+	$(Q)$(CC) -o $@ $(CFLAGS) -c $<
 
 %.lds: %.lds.S
-	$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
+	$(VECHO) "HOSTCC\t$@"
+	$(Q)$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
 
 include/version.h: include/version.template.h
-	cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
+	$(VECHO) "GEN\t$@"
+	$(Q)cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
 	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
 
 include/cmsis/arm:
@@ -62,7 +76,8 @@ include/cmsis/arm:
 	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM0/Include include/cmsis/arm
 
 %.hex: %.elf
-	$(OCPY) -O ihex $< $@
+	$(VECHO) "OBJCOPY\t$@"
+	$(Q)$(OCPY) -O ihex $< $@
 
 EMACS_TRASH = $(foreach dir,$(DIRS),$(wildcard $(dir)/*~))
 
