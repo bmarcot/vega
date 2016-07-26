@@ -9,6 +9,7 @@
 #include <kernel/mm.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
+#include <kernel/types.h>
 
 #include "utils.h"
 #include "arch-v7m.h"
@@ -87,7 +88,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 	if ((kcr = build_intr_stack()) == NULL)
 		return NULL;
-	thread = (struct thread_info *) align_lo((u32) kcr, INTR_STACK_SIZE);
+	thread = (struct thread_info *) align((u32) kcr, INTR_STACK_SIZE);
 	if ((thread->ti_mach.mi_psp = (u32) build_thrd_stack(start_routine, arg, stacksize)) == 0) {
 		//FIXME: free(kcr);
 		return NULL;

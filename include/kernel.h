@@ -33,4 +33,12 @@ int printk(const char *fmt, ...);
 	found:;							\
 	} while (0);
 
+/* alignment macros on a power of 2 */
+
+#define align(x, a)          align_mask(x, (__typeof__(x))((a) - 1))
+#define align_mask(x, mask)  ((x) & ~(mask))
+
+#define align_next(x, a)          align_next_mask(x, (__typeof__(x))((a) - 1))
+#define align_next_mask(x, mask)  (((x) + (mask)) & ~(mask))
+
 #endif /* !KERNEL_H */

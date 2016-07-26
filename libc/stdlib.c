@@ -1,10 +1,11 @@
 #include <stdbool.h>
 
+#include <kernel/types.h>
+
 #include "linux/types.h"
 #include "linux/list.h"
 #include "linux/kernel.h"
 #include "kernel.h"
-#include "utils.h"
 
 /* This is a boundary tag, located at the beginning of the block wether it's
  * free or allocated.    */
@@ -61,7 +62,7 @@ void *malloc(size_t size)
 	struct malloc_tag *free_block, *new_block;
 
 	 /* allocation size is a multiple of 4-byte aligned, plus size of tag */
-	size = align_hi(size, 4) + sizeof(struct malloc_tag);
+	size = align_next(size, 4) + sizeof(struct malloc_tag);
 
 	/* find a free block wich is large enough to fullfill the memory requirement */
 	list_for_each_entry(free_block, &blocks, list) {
