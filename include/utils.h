@@ -1,20 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#ifdef __GNUC__
-#  define MAX(a, b)		 \
-	({ __auto_type _a = (a); \
-	   __auto_type _b = (b); \
-	   _a > _b ? _a : _b; })
-#  define MIN(a, b)		 \
-	({ __auto_type _a = (a); \
-	   __auto_type _b = (b); \
-	   _a < _b ? _a : _b; })
-#else
-#  define MAX(a, b)  ((a) > (b) ? (a) : (b))
-#  define MIN(a, b)  ((a) < (b) ? (a) : (b))
-#endif
-
 #ifndef __LINKER__
 
 #include "cmsis/arm/ARMCM4.h"

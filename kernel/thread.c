@@ -175,7 +175,7 @@ static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_
 	/* get the thread's stack size */
 	sys_getrlimit(RLIMIT_STACK, &stacklimit);
 	if (attr) {
-		stacksize = MIN(attr->stacksize, stacklimit.rlim_max);
+		stacksize = min(attr->stacksize, stacklimit.rlim_max);
 	} else {
 		stacksize = stacklimit.rlim_cur;
 	}
