@@ -45,6 +45,25 @@ enum thread_privilege {
 	THREAD_PRIV_USER       = 1
 };
 
+enum thread_state {
+	/* Thread structure allocated but not enqueued in the system scheduler. */
+	THREAD_STATE_NEW,
+
+	/* Ready to run in the system scheduler. */
+	THREAD_STATE_READY,
+
+	/* Running by the system scheduler. */
+	THREAD_STATE_RUNNING,
+
+	/* The thread has normally exited or has called Pthread_exit to exit. Its
+	 * resources have not been freed and will be freed if it is detached or
+	 * joined.    */
+	THREAD_STATE_TERMINATED,
+
+	/* Waiting for a mutex or resource. */
+	THREAD_BLOCKED
+};
+
 /*
  * This stackframe is built to handle the first scheduling of a task on
  * the CPU. Running a task for the first time is achieved in two stages.
