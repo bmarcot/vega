@@ -56,7 +56,7 @@ int mutex_lock(atomic_t /* __user  */ *lock)
 	   runqueue. By design, no other thread can have acquired the mutex in
 	   the meantime because the lock value is still positive or equal to 0
 	   and they would enter the locking slow path.    */
-	list_add_tail(&threadp->ti_list, &mutexp->waitq);
+	list_add_tail(&threadp->ti_q, &mutexp->waitq);
 	sched_elect(SCHED_OPT_NONE);
 
 	/* Return to userland with the mutex.     */
@@ -77,8 +77,8 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 	list_find_entry(mutexp, &mutexes, list, lock, m_lock);
 	if (mutexp == NULL)
 		return -1;
-	waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_list);
-	list_del(&waiter->ti_list);
+	waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_q);
+	list_del(&waiter->ti_q);
 	sched_add(waiter);
 
 	if (list_empty(&mutexp->waitq)) {

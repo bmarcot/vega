@@ -29,12 +29,12 @@ static struct thread_info *find_next_thread(void)
 
 	/* printk("-- max_pri = %d\n", max_pri); */
 
-	return list_first_entry(&pri_runq[max_pri], struct thread_info, ti_list);
+	return list_first_entry(&pri_runq[max_pri], struct thread_info, ti_q);
 }
 
 static int sched_o1_add(struct thread_info *thread)
 {
-	list_add_tail(&thread->ti_list, &pri_runq[thread->ti_priority]);
+	list_add_tail(&thread->ti_q, &pri_runq[thread->ti_priority]);
 	pri_bitmap |= (1 << thread->ti_priority);
 
 	/* printk("-- add %p to runq [%d]\n", thread, thread->ti_priority); */
@@ -50,7 +50,7 @@ static int sched_o1_del(struct thread_info *thread)
 	if (thread == current)
 		return 0;
 
-	list_del(&thread->ti_list);
+	list_del(&thread->ti_q);
 	if (list_empty(&pri_runq[thread->ti_priority]))
 		pri_bitmap &= ~(1 << thread->ti_priority);
 
@@ -69,7 +69,7 @@ static int sched_o1_elect(int flags)
 
 	if (next != thread_idle) {  // idle_thread
 		/* printk("-- remove %p from runq\n", next); */
-		list_del(&next->ti_list);
+		list_del(&next->ti_q);
 		if (list_empty(&pri_runq[next->ti_priority]))
 			pri_bitmap &= ~(1 << next->ti_priority);
 	}
