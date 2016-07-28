@@ -71,37 +71,38 @@ struct thread_info *start_kernel(void)
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
-	printk("Created idle_thread at %p\n", thread_idle);
+	printk("Created idle_thread at <%p>\n", thread_idle);
 
-	/* The main_thread is the user entry point to the system, and is not added to
-	 * the runqueue because it is implicitly "elected".  */
+	/* The main_thread is the user's entry-point to the system.  It is not
+	 * added to the runqueue because it has been implicitly "elected" when
+	 * start_kernel() returns.    */
 	thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024);
 	if (thread_main == NULL) {
 		printk("[!] Could not create user main thread.\n");
 		return NULL;
 	}
-	printk("Created main_thread at %p with priority=%d\n", thread_main,
+	printk("Created main_thread at <%p> with priority=%d\n", thread_main,
 		thread_main->ti_priority);
 
-	/* SysTick at 1kHz */
+	/* SysTick running at 1kHz */
 	printk("Processor speed: %3d MHz\n", CPU_FREQ_IN_HZ / 1000000);
 	printk("Timer precision: %3d msec\n", SYSTICK_PERIOD_IN_MSECS);
 	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
 
-	/* Reclaim the early stack physical memory. In the current context, no
-	 * page allocation after this point are allowed.  */
+	/* Reclaim the early-stack physical memory.  In the current context, no
+	 * page allocation after this point are allowed.    */
 	printk("Reclaim early stack's physical memory (%d Bytes).\n",
 		&__early_stack_start__ - &__early_stack_end__);
 	page_free(&__early_stack_end__);
 
-	printk("Kernel bootstrap done.\n\n");
+	printk("Kernel bootstrap done.\n--\n");
 
 	return thread_main;
 }
 
 void *cpu_idle(__unused void *arg)
 {
-	printk("-- in cpu idle --\n");
+	printk("[[ idle_thread ]]\n");
 	for (;;)
 		;
 }
