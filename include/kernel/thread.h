@@ -23,9 +23,8 @@ struct thread_info {
 	int ti_priority;
 	int ti_id;
 
-	/* shared by scheduler runq and mutex waitq */
-	//struct list_head ti_list; //XXX: global list of threads
-	struct list_head ti_q;    // shared by sched runq, mutex waitq, thread joinq
+	struct list_head ti_list;  /* global list of threads */
+	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
 
 	/* thread join's data */
 	bool ti_joinable; // init false

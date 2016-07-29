@@ -16,6 +16,8 @@
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 
+static LIST_HEAD(thread_list);
+
 static struct kernel_context_regs *build_intr_stack(void)
 {
 	void *memp;
@@ -98,6 +100,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_id = thread_count++;
 	/* thread->ti_joinable = false; */
 	thread->ti_priority = PRI_MIN;  /* new threads are assigned the lowest priority */
+	list_add(&thread->ti_list, &thread_list);
 
 	return thread;
 }
