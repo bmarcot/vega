@@ -26,14 +26,11 @@ struct thread_info {
 	struct list_head ti_list;  /* global list of threads */
 	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
 
-	/* thread join's data */
-	bool ti_joinable; // init false
-	void *ti_retval;
-	struct list_head ti_joinq;
-	struct list_head *ti_joining;
-
 	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
-	bool ti_detached; // init false
+	void *ti_retval;
+	bool ti_detached;
+	bool ti_joinable;
+	struct thread_info *ti_joining;
 
 	/* /\* local-storage *\/ */
 	/* struct list_head *ti_lsq; // local-storage queue */

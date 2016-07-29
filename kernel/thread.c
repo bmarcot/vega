@@ -98,7 +98,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_mach.mi_msp = (u32) kcr;
 	thread->ti_mach.mi_priv = priv;
 	thread->ti_id = thread_count++;
-	/* thread->ti_joinable = false; */
+	thread->ti_joinable = false;
+	thread->ti_joining = NULL;
+	thread->ti_detached = false;
 	thread->ti_priority = PRI_MIN;  /* new threads are assigned the lowest priority */
 	list_add(&thread->ti_list, &thread_list);
 
@@ -128,12 +130,24 @@ int thread_self(void)
 
 void thread_exit(void *retval)
 {
-	CURRENT_THREAD_INFO(thread);
+	CURRENT_THREAD_INFO(current);
 
-	thread->ti_retval = retval;
-	printk("thread: id=%d is exiting with retval=%d\n", thread->ti_id, (int) retval);
-	//FIXME: this does not release the resource, and creates a zombie thread
-	sched_del(thread);  //FIXME: not needed if by design the current threasd is not in runq
+#ifdef DEBUG
+	printk("thread: id=%d is exiting with retval=%d\n", current->ti_id, (int) retval);
+#endif
+
+	//XXX: free the thread stack
+
+	if (current->ti_detached == false) {
+		current->ti_retval = retval;
+		if (current->ti_joining)
+			sched_add(current->ti_joining);
+		else
+			current->ti_joinable = true;
+	} else {
+		//XXX: free all resources, including the thread info struct (implicitly the interrupt stack)
+	}
+
 	sched_elect(SCHED_OPT_RESTORE_ONLY);
 }
 
@@ -143,6 +157,50 @@ int thread_set_priority(struct thread_info *thread, int priority)
 	//if (thread->state != THREAD_STATE_NEW)
 	// return -1;
 	thread->ti_priority = priority;
+
+	return 0;
+}
+
+static struct thread_info *find_thread_by_id(int id)
+{
+	struct thread_info *tp;
+
+	list_for_each_entry(tp, &thread_list, ti_list) {
+		if (tp->ti_id == id)
+			return tp;
+	}
+
+	return NULL;
+}
+
+int thread_join(pthread_t thread, void **retval)
+{
+	struct thread_info *other;
+
+	other = find_thread_by_id(thread);
+	if (other == NULL) {
+		//errno = ESRCH;  /* No thread with the ID thread could be found. */
+		return -1;
+	}
+	if (other->ti_detached == true) {
+		//errno = EINVAL;  /* thread is not a joinable thread. */
+		return -1;
+	}
+
+	/* the other thread is not yet joinable, the current thread blocks */
+	if (other->ti_joinable == false) {
+		CURRENT_THREAD_INFO(current);
+		if (other->ti_joining) {
+			//errno = EINVAL;  /* Another thread is already waiting to join with this thread. */
+			return -1;
+		}
+		other->ti_joining = current;
+		sched_elect(SCHED_OPT_NONE);
+	}
+
+	*retval = other->ti_retval;
+
+	//XXX: free other's resources, interrupt stack
 
 	return 0;
 }
@@ -207,4 +265,9 @@ int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *att
 	swapcontext(&main_context, &pthread_context);
 
 	return create_ret_code;
+}
+
+void sys_pthread_join(pthread_t thread, void **retval)
+{
+	thread_join(thread, retval);
 }

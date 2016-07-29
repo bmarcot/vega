@@ -8,6 +8,7 @@ pthread_t sys_pthread_self(void);
 void sys_pthread_exit(void *);
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg);
+void sys_pthread_join(pthread_t, void **);
 int sys_timer_create(unsigned int msecs);
 long sys_sysconf(int name);
 
@@ -28,7 +29,9 @@ void *syscall_vector[SYS_MAX] = {
 	sys_timer_create,
 
 	/* unix standards */
-	sys_sysconf
+	sys_sysconf,
+
+	sys_pthread_join,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())

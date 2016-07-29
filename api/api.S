@@ -12,6 +12,7 @@
 	.set SYS_PTHREAD_MUTEX_UNLOCK, 5
 	.set SYS_TIMER_CREATE, 6
 	.set SYS_SYSCONF, 7
+	.set SYS_PTHREAD_JOIN, 8
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -48,3 +49,9 @@ ENTRY(sysconf)
 	svc	#SYS_SYSCONF
 	bx	lr
 ENDPROC(sysconf)
+
+	@ int pthread_join()
+ENTRY(pthread_join)
+	svc	#SYS_PTHREAD_JOIN
+	bx	lr
+ENDPROC(pthread_join)
