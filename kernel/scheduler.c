@@ -22,14 +22,14 @@ int sched_select(int sched_type)
 	return sched->init();
 }
 
-int sched_add(struct thread_info *thread)
+int sched_enqueue(struct thread_info *thread)
 {
-	return sched->add(thread);
+	return sched->enqueue(thread);
 }
 
-int sched_del(struct thread_info *thread)
+int sched_dequeue(struct thread_info *thread)
 {
-	return sched->del(thread);
+	return sched->dequeue(thread);
 }
 
 int sched_elect(int flags)

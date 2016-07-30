@@ -32,7 +32,7 @@ static struct thread_info *find_next_thread(void)
 	return list_first_entry(&pri_runq[max_pri], struct thread_info, ti_q);
 }
 
-static int sched_o1_add(struct thread_info *thread)
+static int sched_o1_enqueue(struct thread_info *thread)
 {
 	list_add_tail(&thread->ti_q, &pri_runq[thread->ti_priority]);
 	pri_bitmap |= (1 << thread->ti_priority);
@@ -42,7 +42,7 @@ static int sched_o1_add(struct thread_info *thread)
 	return 0;
 }
 
-static int sched_o1_del(struct thread_info *thread)
+static int sched_o1_dequeue(struct thread_info *thread)
 {
 	CURRENT_THREAD_INFO(current);
 
@@ -84,7 +84,7 @@ static int sched_o1_elect(int flags)
 
 const struct sched sched_o1 = {
 	.init = sched_o1_init,
-	.add = sched_o1_add,
-	.del = sched_o1_del,
+	.enqueue = sched_o1_enqueue,
+	.dequeue = sched_o1_dequeue,
 	.elect = sched_o1_elect
 };

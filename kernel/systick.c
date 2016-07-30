@@ -26,10 +26,10 @@ void systick(void)
 		if (pos->expire_clocktime < clocktime_in_msecs) {
 			/* printk("timer expired!\n"); */
 			list_del(&pos->list);
-			sched_add(pos->owner);
+			sched_enqueue(pos->owner);
 			CURRENT_THREAD_INFO(current);
 			if (current != thread_idle)
-				sched_add(current);
+				sched_enqueue(current);
 			sched_elect(SCHED_OPT_NONE);
 			return;
 		}

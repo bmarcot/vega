@@ -22,14 +22,14 @@ static struct thread_info *find_next_thread(struct thread_info *thread)
 	return list_next_entry(thread, ti_q);
 }
 
-int sched_rr_add(struct thread_info *thread)
+int sched_rr_enqueue(struct thread_info *thread)
 {
 	list_add(&thread->ti_q, &rr_runq);
 
 	return 0;
 }
 
-int sched_rr_del(struct thread_info *thread)
+int sched_rr_dequeue(struct thread_info *thread)
 {
 	CURRENT_THREAD_INFO(current);
 
@@ -95,7 +95,7 @@ int sched_rr_elect(int switch_type)
 
 const struct sched sched_rr = {
 	.init = sched_rr_init,
-	.add = sched_rr_add,
-	.del = sched_rr_del,
+	.enqueue = sched_rr_enqueue,
+	.dequeue = sched_rr_dequeue,
 	.elect = sched_rr_elect
 };

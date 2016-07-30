@@ -23,7 +23,7 @@ int sys_timer_create(unsigned int msecs)
 	timerp.owner = threadp;
 	timerp.expire_clocktime = clocktime_in_msecs + msecs;
 	list_add(&timerp.list, &timers);
-	sched_del(threadp);
+	sched_dequeue(threadp);
 	sched_elect(SCHED_OPT_NONE);
 
 	return 0;

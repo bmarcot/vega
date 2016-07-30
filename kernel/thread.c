@@ -116,7 +116,7 @@ int thread_yield(void)
 
 	//FIXME: elect iff there is a higher-priority thread ready to run
 	CURRENT_THREAD_INFO(current);
-	sched_add(current);
+	sched_enqueue(current);
 
 	return sched_elect(SCHED_OPT_NONE);
 }
@@ -141,7 +141,7 @@ void thread_exit(void *retval)
 	if (current->ti_detached == false) {
 		current->ti_retval = retval;
 		if (current->ti_joining)
-			sched_add(current->ti_joining);
+			sched_enqueue(current->ti_joining);
 		else
 			current->ti_joinable = true;
 	} else {
@@ -153,7 +153,7 @@ void thread_exit(void *retval)
 
 int thread_set_priority(struct thread_info *thread, int priority)
 {
-	//FIXME: Must be called before the sched_add!
+	//FIXME: Must be called before the sched_enqueue!
 	//if (thread->state != THREAD_STATE_NEW)
 	// return -1;
 	thread->ti_priority = priority;
@@ -249,7 +249,7 @@ static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_
 	}
 	*thread = (pthread_t) thread_info->ti_id;
 
-	sched_add(thread_info);
+	sched_enqueue(thread_info);
 }
 
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,

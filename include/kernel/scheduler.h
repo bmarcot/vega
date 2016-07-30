@@ -16,14 +16,14 @@
 
 struct sched {
 	int (*init)(void);
-	int (*add)(struct thread_info *thread);
-	int (*del)(struct thread_info *thread);
+	int (*enqueue)(struct thread_info *thread);
+	int (*dequeue)(struct thread_info *thread);
 	int (*elect)(int switch_type);
 };
 
 int sched_select(int sched_type);
-int sched_add(struct thread_info *thread);
-int sched_del(struct thread_info *thread);
+int sched_enqueue(struct thread_info *thread);
+int sched_dequeue(struct thread_info *thread);
 int sched_elect(int flags);
 
 #endif /* !SCHEDULER_H */

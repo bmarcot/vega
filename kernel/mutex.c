@@ -79,7 +79,7 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 		return -1;
 	waiter = list_first_entry(&mutexp->waitq, struct thread_info, ti_q);
 	list_del(&waiter->ti_q);
-	sched_add(waiter);
+	sched_enqueue(waiter);
 
 	if (list_empty(&mutexp->waitq)) {
 		/* We could free the structure here. However, there is obvious
@@ -91,7 +91,7 @@ int mutex_unlock(atomic_t /* __user */ *lock)
 
 	//XXX: elect iff one thread of high-prio is blocking on that mutex
 	CURRENT_THREAD_INFO(current);
-	sched_add(current);
+	sched_enqueue(current);
 	sched_elect(SCHED_OPT_NONE);
 
 	return 0;
