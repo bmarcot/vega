@@ -1,9 +1,9 @@
 #ifndef KERNEL_MUTEX_H
 #define KERNEL_MUTEX_H
 
-#include "linux/types.h"
+#include <sys/types.h>
 
-int mutex_lock(atomic_t /* __user  */ *lock);
-int mutex_unlock(atomic_t /* __user */ *lock);
+int __pthread_mutex_lock(pthread_mutex_t *mutex);
+int __pthread_mutex_unlock(pthread_mutex_t *mutex);
 
 #endif /* !KERNEL_MUTEX_H */
