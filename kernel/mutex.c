@@ -45,26 +45,30 @@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
 
 /* The release procedure fetches the first thread in the waiting list.  The user
  * pthread_mutex_unlock() does a syscall iff there is at least one thread in the
- * waiting list, so the waiting list cannot be empty.  The waiting thread runs
- * immediately on the CPU if its priority is greater-equal than the current
- * thread's priority.  */
+ * waiting list, so the waiting list cannot be empty.  The procedure can be
+ * called from the kernel; such that the waiting list may be empty.  Whatever
+ * the call site, only the thread owning the mutex shall release it.  A waiting
+ * thread runs immediately on the CPU if its priority is greater-equal than the
+ * current thread's priority.  */
 int __pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
 	struct thread_info *waiter;
 	CURRENT_THREAD_INFO(cur_thread);
 
 	waiter = list_first_entry_or_null(&mutex->waitq, struct thread_info, ti_q);
-	if (waiter == NULL) {
-		//XXX: list should not be empty
-		return -1;
+	/* if (waiter == NULL) { */
+	/* 	//XXX: list should not be empty */
+	/* 	return -1; */
+	/* } */
+	if (waiter != NULL) {
+		list_del(&waiter->ti_q);
+		sched_enqueue(waiter);
 	}
-	list_del(&waiter->ti_q);
-	sched_enqueue(waiter);
 	mutex->val--;
 
 	if (cur_thread->ti_state == THREAD_STATE_BLOCKED) {
 		sched_elect(SCHED_OPT_NONE);
-	} else if (cur_thread->ti_priority <= waiter->ti_priority) {
+	} else if (waiter && (cur_thread->ti_priority <= waiter->ti_priority)) {
 		sched_enqueue(cur_thread);
 		sched_elect(SCHED_OPT_NONE);
 	}
