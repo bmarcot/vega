@@ -9,5 +9,5 @@ include/version.h
 # CMSIS is managed as an external dependency
 include/cmsis
 
-# Travis-CI and unit test framework
-vega-test
+# Travis-CI, unit test framework, platform tests
+test
