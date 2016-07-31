@@ -13,6 +13,8 @@
 	.set SYS_TIMER_CREATE, 6
 	.set SYS_SYSCONF, 7
 	.set SYS_PTHREAD_JOIN, 8
+	.set SYS_PTHREAD_COND_SIGNAL, 9
+	.set SYS_PTHREAD_COND_WAIT, 10
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -55,3 +57,15 @@ ENTRY(pthread_join)
 	svc	#SYS_PTHREAD_JOIN
 	bx	lr
 ENDPROC(pthread_join)
+
+	@ int pthread_cond_signal()
+ENTRY(pthread_cond_signal)
+	svc	#SYS_PTHREAD_COND_SIGNAL
+	bx	lr
+ENDPROC(pthread_cond_signal)
+
+	@ int pthread_cond_wait()
+ENTRY(pthread_cond_wait)
+	svc	#SYS_PTHREAD_COND_WAIT
+	bx	lr
+ENDPROC(pthread_cond_wait)

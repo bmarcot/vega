@@ -1,5 +1,6 @@
 #include <pthread.h>
 
+#include <kernel/condition.h>
 #include <kernel/mutex.h>
 #include <kernel/timer.h>
 
@@ -32,6 +33,10 @@ void *syscall_vector[SYS_MAX] = {
 	sys_sysconf,
 
 	sys_pthread_join,
+
+	/* condition variable */
+	__pthread_cond_signal,
+	__pthread_cond_wait,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
