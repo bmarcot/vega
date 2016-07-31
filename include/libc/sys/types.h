@@ -48,6 +48,14 @@ typedef int pthread_mutexattr_t;
 /* Used to identify a thread. */
 typedef unsigned int pthread_t;
 
+/* Used for condition variables. */
+typedef struct {
+	struct list_head waitq;
+} pthread_cond_t;
+
+/* Used to identify a condition attribute object. */
+ typedef int pthread_condattr_t;
+
 #ifdef __KERNEL__
 //FIXME: remove that header, and include <kernel/types.h> if just using u32, u16...
 #include <kernel/types.h>
