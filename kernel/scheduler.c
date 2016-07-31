@@ -24,6 +24,8 @@ int sched_select(int sched_type)
 
 int sched_enqueue(struct thread_info *thread)
 {
+	thread->ti_state = THREAD_STATE_READY;
+
 	return sched->enqueue(thread);
 }
 
@@ -34,5 +36,11 @@ int sched_dequeue(struct thread_info *thread)
 
 int sched_elect(int flags)
 {
-	return sched->elect(flags);
+	int r;
+	CURRENT_THREAD_INFO(cur_thread);
+
+	r = sched->elect(flags);
+	cur_thread->ti_state = THREAD_STATE_RUNNING;
+
+	return r;
 }

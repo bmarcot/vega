@@ -35,6 +35,9 @@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
 	   the meantime because the lock value is still positive or equal to 0
 	   and they would enter the locking slow path.    */
 	list_add_tail(&cur_thread->ti_q, &mutex->waitq);
+
+	cur_thread->ti_state = THREAD_STATE_BLOCKED;
+
 	sched_elect(SCHED_OPT_NONE);
 
 	return 0;
@@ -58,7 +61,10 @@ int __pthread_mutex_unlock(pthread_mutex_t *mutex)
 	list_del(&waiter->ti_q);
 	sched_enqueue(waiter);
 	mutex->val--;
-	if (waiter->ti_priority >= cur_thread->ti_priority) {
+
+	if (cur_thread->ti_state == THREAD_STATE_BLOCKED) {
+		sched_elect(SCHED_OPT_NONE);
+	} else if (cur_thread->ti_priority <= waiter->ti_priority) {
 		sched_enqueue(cur_thread);
 		sched_elect(SCHED_OPT_NONE);
 	}
