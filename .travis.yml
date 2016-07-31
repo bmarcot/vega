@@ -14,10 +14,10 @@ before_install:
   - sudo apt-get install -y qemu-system
 
   # download the testsuite
-  - svn export --force https://github.com/bmarcot/vega-test/trunk vega-test
+  - svn export --force https://github.com/bmarcot/vega-test/trunk test
 
 script:
-  - python vega-test/build.py
+  - python test/build.py
 
 branches:
   only:
