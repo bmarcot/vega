@@ -45,3 +45,12 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 
 	return 0;
 }
+
+int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
+{
+	(void)attr;
+
+	INIT_LIST_HEAD(&cond->waitq);
+
+	return 0;
+}
