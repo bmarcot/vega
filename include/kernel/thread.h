@@ -22,6 +22,7 @@ struct thread_info {
 	/* thread description data */
 	int ti_priority;
 	int ti_id;
+	int ti_state;
 
 	struct list_head ti_list;  /* global list of threads */
 	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
@@ -57,7 +58,7 @@ enum thread_state {
 	THREAD_STATE_TERMINATED,
 
 	/* Waiting for a mutex or resource. */
-	THREAD_BLOCKED
+	THREAD_STATE_BLOCKED
 };
 
 /*
