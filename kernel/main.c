@@ -11,11 +11,6 @@
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"
-#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-#include "cmsis/arm/ARMCM0.h"
-#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-#include "cmsis/arm/ARMCM4.h"
-#endif
 
 extern char __early_stack_start__;
 extern char __early_stack_end__;
