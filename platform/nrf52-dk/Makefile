@@ -6,4 +6,4 @@ CFLAGS += -DNRF52 -Iinclude/cmsis/arm -Iinclude/cmsis/nrf52
 ROMSZ = 256k
 RAMSZ = 64k
 
-CSRC += platform/nrf52-dk/uart.c
+CSRC += platform/nrf52-dk/uart.c platform/nrf52-dk/gpio.c
