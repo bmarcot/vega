@@ -1,0 +1,3 @@
+- Install JLink debian package, see https://www.segger.com/downloads/jlink
+- Install pynrfjprog for Linux, see Nordic Semi website
+- Install putty, connect to /dev/ttyACM0, no flow control, 115200bps
