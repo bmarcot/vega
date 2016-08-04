@@ -1,12 +1,14 @@
 
-	.syntax unified
-	.thumb
-
 #include "linux/linkage.h"
+
+	.syntax	unified
+	.thumb
 
 	@ offsets in the frame to the registers saved on interrupt-entry
 	.set	R0, 0
 	.set	RET_ADDRESS, 24
+
+	.global	syscall_return
 
 ENTRY(svcall)
 	push	{r6, r7, lr}
@@ -23,6 +25,7 @@ ENTRY(svcall)
 	ldr.w	r7, [r7, r6, lsl #2]
 #endif
 	blx	r7
+syscall_return:
 	mrs	r6, psp
 	str	r0, [r6, #R0]
 	pop	{r6, r7, pc}

@@ -50,19 +50,21 @@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
  * the call site, only the thread owning the mutex shall release it.  A waiting
  * thread runs immediately on the CPU if its priority is greater-equal than the
  * current thread's priority.  */
+
+extern void *syscall_return;
+
 int __pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
 	struct thread_info *waiter;
 	CURRENT_THREAD_INFO(cur_thread);
 
 	waiter = list_first_entry_or_null(&mutex->waitq, struct thread_info, ti_q);
-	/* if (waiter == NULL) { */
-	/* 	//XXX: list should not be empty */
-	/* 	return -1; */
-	/* } */
 	if (waiter != NULL) {
 		list_del(&waiter->ti_q);
 		sched_enqueue(waiter);
+	} else if (__builtin_return_address(0) == &syscall_return) {
+		//XXX: list cannot be empty when calling from userland
+		return -1;
 	}
 	mutex->val--;
 
