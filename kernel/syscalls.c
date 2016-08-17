@@ -1,6 +1,6 @@
 #include <pthread.h>
 
-#include <kernel/condition.h>
+#include <kernel/cond.h>
 #include <kernel/mutex.h>
 #include <kernel/timer.h>
 
