@@ -7,6 +7,7 @@
 #include <ucontext.h>
 
 #include <kernel/mm.h>
+#include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
@@ -26,7 +27,8 @@ static struct kernel_context_regs *build_intr_stack(void)
 	/* We don't need a huge stack for interrupt handling, however we need the page
 	   to be aligned on a known value to retrieve the Thread Control Block that
 	   is stored at the bottom of the physical page.    */
-	if ((memp = page_alloc(INTR_STACK_SIZE)) == NULL)
+	memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
+	if (memp == NULL)
 		return NULL;
 	kcr = (void *)((u32) memp + INTR_STACK_SIZE - sizeof (struct kernel_context_regs));
 #ifndef DEBUG
@@ -59,7 +61,8 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 	void *memp;
 	struct thread_context_regs *tcr;
 
-	if ((memp = page_alloc(stacksize)) == NULL)
+	memp = alloc_pages(size_to_page_order(stacksize));
+	if (memp == NULL)
 		return NULL;
 	tcr = (void *)((u32) memp + stacksize - sizeof(struct thread_context_regs));
 	tcr->r0_r3__r12[0] = (u32) arg;
