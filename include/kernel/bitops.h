@@ -10,14 +10,14 @@
 #define BITS_PER_CHAR  8
 #define BITS_PER_LONG  (BITS_PER_CHAR * sizeof(long))
 
-static inline unsigned long ffs(unsigned long word)
+static inline unsigned long ffsl(unsigned long word)
 {
-	return __builtin_clz(word);
+	return __builtin_ffsl(word);
 }
 
-static inline unsigned long ffz(unsigned long word)
+static inline unsigned long ffzl(unsigned long word)
 {
-	return __builtin_clz(~word);
+	return __builtin_ffsl(~word);
 }
 
 static inline void clear_bit(unsigned long bit, unsigned long *word)
@@ -32,17 +32,17 @@ static inline void set_bit(unsigned long bit, unsigned long *word)
 
 static inline void bitmap_set_bit(unsigned long *map, unsigned long bit)
 {
-	set_bit(31 - (bit % BITS_PER_LONG), &map[bit / BITS_PER_LONG]);
+	set_bit(bit % BITS_PER_LONG, &map[bit / BITS_PER_LONG]);
 }
 
 static inline void bitmap_clear_bit(unsigned long *map, unsigned long bit)
 {
-	clear_bit(31 - (bit % BITS_PER_LONG), &map[bit / BITS_PER_LONG]);
+	clear_bit(bit % BITS_PER_LONG, &map[bit / BITS_PER_LONG]);
 }
 
 static inline unsigned long bitmap_get_bit(unsigned long *map, unsigned long bit)
 {
-	return (map[bit / BITS_PER_LONG] >> (31 - (bit % BITS_PER_LONG))) & 1;
+	return (map[bit / BITS_PER_LONG] >> (bit % BITS_PER_LONG)) & 1;
 }
 
 unsigned long find_first_bit(const unsigned long *addr, unsigned long size);
