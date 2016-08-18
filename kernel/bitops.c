@@ -4,17 +4,14 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#include <limits.h>
-
 #include <kernel/bitops.h>
 #include "kernel.h"
 
 unsigned long find_first_bit(const unsigned long *addr, unsigned long size)
 {
-	for (int i = 0; i * sizeof(unsigned long) * CHAR_BIT < size; i++) {
+	for (unsigned long i = 0; i * BITS_PER_LONG < size; i++) {
 		if (addr[i])
-			return min(i * sizeof(unsigned long) * CHAR_BIT
-				+ ffs(addr[i]), size);
+			return min(i * BITS_PER_LONG + ffs(addr[i]), size);
 	}
 
 	return size;
@@ -22,10 +19,9 @@ unsigned long find_first_bit(const unsigned long *addr, unsigned long size)
 
 unsigned long find_first_zero_bit(const unsigned long *addr, unsigned long size)
 {
-	for (int i = 0; i * sizeof(unsigned long) * CHAR_BIT < size; i++) {
-		if (addr[i] != ~((unsigned long)0))
-			return min(i * sizeof(unsigned long) * CHAR_BIT
-				+ ffz(addr[i]), size);
+	for (unsigned long i = 0; i * BITS_PER_LONG < size; i++) {
+		if (addr[i] != ~0ul)
+			return min(i * BITS_PER_LONG + ffz(addr[i]), size);
 	}
 
 	return size;
