@@ -17,13 +17,15 @@
  *      -  64 pages of 512B is a  8 bytes map
  *      -  32 pages of 1KiB is a  4 bytes map
  *      -  16 pages of 2KiB is a  2 bytes map
+ *
+ * Last page is reserved by the early stack, and freed after system init.
  */
 
 /* 0 = allocated/undefined, 1 = free */
 static unsigned long *const page_bitmap[] = { (unsigned long []){ 0, 0, 0, 0 },
 					      (unsigned long []){ 0, 0 },
 					      (unsigned long []){ 0 },
-					      (unsigned long []){ 0xffff } };
+					      (unsigned long []){ 0x7fff } };
 
 static const unsigned long page_bitmap_sz[] = { 128, 64, 32, 16 };
 

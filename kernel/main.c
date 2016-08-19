@@ -3,6 +3,7 @@
 #include <sys/cdefs.h>
 
 #include <kernel/mm.h>
+#include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
@@ -55,7 +56,7 @@ struct thread_info *start_kernel(void)
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
 
 	/* initialize the physical memory allocator */
-	page_init();
+	show_page_bitmap(); // init_pages();
 
 	/* select a scheduling policy */
 	sched_select(SCHED_CLASS_O1);
@@ -86,9 +87,10 @@ struct thread_info *start_kernel(void)
 
 	/* Reclaim the early-stack physical memory.  In the current context, no
 	 * page allocation after this point are allowed.    */
-	printk("Reclaim early stack's physical memory (%d Bytes).\n",
-		&__early_stack_start__ - &__early_stack_end__);
-	page_free(&__early_stack_end__);
+	printk("Reclaim early stack's physical memory (%d Bytes, order=%d).\n",
+		&__early_stack_start__ - &__early_stack_end__,
+		size_to_page_order(2048));
+	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
 	printk("Kernel bootstrap done.\n--\n");
 
