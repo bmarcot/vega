@@ -7,10 +7,9 @@
 #include <stddef.h>
 
 #include <kernel/bitops.h>
+#include <kernel/log2.h>
 #include <kernel/page.h>
 #include "kernel.h"
-
-#define ilog2(a)  8  //FIXME: add a constant ilog2 macro
 
 /* .pgmem section is 32KiB:
  *      - 128 pages of 256B is a 16 bytes map
