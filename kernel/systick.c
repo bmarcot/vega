@@ -4,7 +4,7 @@
 #include <kernel/timer.h>
 
 #include "systick.h"
-#include "uart.h"
+#include <if/uart.h>
 #include "linux/types.h"
 #include "cmsis/arm/ARMCM4.h"
 

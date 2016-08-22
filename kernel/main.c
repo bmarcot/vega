@@ -7,7 +7,8 @@
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
-#include "uart.h"
+#include <if/uart.h>
+
 #include "systick.h"
 #include "kernel.h"
 #include "version.h"

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <ucontext.h>
 
-#include "uart.h"
+#include <if/uart.h>
 
 #define PRINTK_BUF_SIZE 512
 
