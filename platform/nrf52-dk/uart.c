@@ -1,5 +1,5 @@
-#include "kernel.h"
-#include "uart.h"
+#include <if/uart.h>
+
 #include "cmsis/nrf52/nrf.h"
 
 static inline void tx_char(char c)
@@ -10,14 +10,14 @@ static inline void tx_char(char c)
 	NRF_UART0->EVENTS_TXDRDY = 0;
 }
 
-void uart_putchar(char c)
+void __uart_putchar(char c)
 {
 	NRF_UARTE0->TASKS_STARTTX = 1;
 	tx_char(c);
 	NRF_UARTE0->TASKS_STOPTX = 1;
 }
 
-void uart_putstring(const char *s)
+void __uart_putstring(const char *s)
 {
 	NRF_UARTE0->TASKS_STARTTX = 1;
 	while (*s) {
@@ -28,7 +28,7 @@ void uart_putstring(const char *s)
 	NRF_UARTE0->TASKS_STOPTX = 1;
 }
 
-void __init uart_init(void)
+void __uart_init(void)
 {
 	/* disable the module while (re)configuring */
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
