@@ -10,6 +10,11 @@
 #define BITS_PER_CHAR  8
 #define BITS_PER_LONG  (BITS_PER_CHAR * sizeof(long))
 
+static inline unsigned long flsl(unsigned long word)
+{
+	return word ? sizeof(long) * BITS_PER_CHAR - __builtin_clz(word) : 0;
+}
+
 static inline unsigned long ffsl(unsigned long word)
 {
 	return __builtin_ffsl(word);
