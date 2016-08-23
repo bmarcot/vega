@@ -15,6 +15,7 @@
 	.set SYS_PTHREAD_JOIN, 8
 	.set SYS_PTHREAD_COND_SIGNAL, 9
 	.set SYS_PTHREAD_COND_WAIT, 10
+	.set SYS_MSLEEP, 11
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -69,3 +70,9 @@ ENTRY(pthread_cond_wait)
 	svc	#SYS_PTHREAD_COND_WAIT
 	bx	lr
 ENDPROC(pthread_cond_wait)
+
+	@ int msleep()
+ENTRY(msleep)
+	svc	#SYS_MSLEEP
+	bx	lr
+ENDPROC(msleep)

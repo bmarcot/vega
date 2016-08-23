@@ -13,6 +13,8 @@ void sys_pthread_join(pthread_t, void **);
 int sys_timer_create(unsigned int msecs);
 long sys_sysconf(int name);
 
+void __msleep(unsigned int);
+
 #define SYS_MAX 16
 
 void *syscall_vector[SYS_MAX] = {
@@ -37,6 +39,8 @@ void *syscall_vector[SYS_MAX] = {
 	/* condition variable */
 	__pthread_cond_signal,
 	__pthread_cond_wait,
+
+	__msleep,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
