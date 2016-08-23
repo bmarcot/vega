@@ -11,20 +11,28 @@
 
 extern u32 clocktime_in_msecs;
 
-int sys_timer_create(unsigned int msecs)
+int sys_timer_create(unsigned int msec)
 {
 	/* XXX: 1 timer per thread, replace wih malloc/free when implementing
 	        timer_create/timer_arm/signals timer management. */
 	struct timer timerp;
 	CURRENT_THREAD_INFO(threadp);
 
-	printk("timer: create a timer t=%dms at %p\n", msecs, &timerp);
+	printk("timer: create a timer t=%dms at %p\n", msec, &timerp);
 
 	timerp.owner = threadp;
-	timerp.expire_clocktime = clocktime_in_msecs + msecs;
+	timerp.expire_clocktime = clocktime_in_msecs + msec;
 	list_add(&timerp.list, &timers);
 	sched_dequeue(threadp);
 	sched_elect(SCHED_OPT_NONE);
+
+	return 0;
+}
+
+int __msleep(unsigned int msec)
+{
+	//FIXME: we are already in the kernel because sleep() is a syscall
+	sys_timer_create(msec);
 
 	return 0;
 }
