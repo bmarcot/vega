@@ -20,7 +20,7 @@ struct systick {
 #define SYST_CSR_CLKSOURCE_CPU (1 << 2)
 
 void systick_init(u32);
-u32 gettick(void);
+unsigned long get_clocktime_in_msec(void);
 void systick(void);
 
 static struct systick *const syst = (void *) 0xe000e010;

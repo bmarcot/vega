@@ -9,46 +9,21 @@
 #include "cmsis/arm/ARMCM4.h"
 
 static volatile u32 overflow = 0;
-u32 clocktime_in_msecs;
+static unsigned long clocktime_in_msec;
 
-extern struct list_head timers;
-extern struct thread_info *thread_idle;
+void __systick(unsigned long clocktime_in_msec);
 
 void systick(void)
 {
-	clocktime_in_msecs += SYSTICK_PERIOD_IN_MSECS;
+	clocktime_in_msec += SYSTICK_PERIOD_IN_MSECS;
 	if (overflow == 0xff)
 		overflow = 0;
 	overflow++;
 
-	struct timer *pos;
-	list_for_each_entry(pos, &timers, list) {
-		if (pos->expire_clocktime < clocktime_in_msecs) {
-			/* printk("timer expired!\n"); */
-			list_del(&pos->list);
-			sched_enqueue(pos->owner);
-			CURRENT_THREAD_INFO(current);
-			if (current != thread_idle)
-				sched_enqueue(current);
-			sched_elect(SCHED_OPT_NONE);
-			return;
-		}
-	}
+	__systick(clocktime_in_msec);
 }
 
-u32 gettick(void)
+unsigned long get_clocktime_in_msec(void)
 {
-	u32 of = overflow;
-	u32 val = syst->syst_cvr;
-	u32 new_of = overflow;
-
-	if (of != new_of) {
-		val = syst->syst_cvr;
-		of = new_of;
-		uart_putstring("SysTick overflowed.\n");
-	}
-
-	return (of << 24) | (SYST_RELOAD_VAL - val);
+	return clocktime_in_msec;
 }
-
-//TODO: calib_pseudo_10ms_wait()
