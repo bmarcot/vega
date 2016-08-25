@@ -10,4 +10,10 @@
    * clocktime.  */
 #define CONFIG_HAVE_SYSTICK
 
+static inline void __platform_init(void)
+{
+	while (0)
+		;
+}
+
 #endif /* !PLATFORM_H */

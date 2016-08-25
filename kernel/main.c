@@ -88,6 +88,9 @@ struct thread_info *start_kernel(void)
 	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
 #endif
 
+	/* do the platform-specific inits */
+	__platform_init();
+
 	/* Reclaim the early-stack physical memory.  In the current context, no
 	 * page allocation after this point are allowed.    */
 	printk("Reclaim early stack's physical memory (%d Bytes, order=%d).\n",
