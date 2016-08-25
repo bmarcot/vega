@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <ucontext.h>
 
-#include <kernel/mm.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>

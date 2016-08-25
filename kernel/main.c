@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
-#include <kernel/mm.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
