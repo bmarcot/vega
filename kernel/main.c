@@ -15,7 +15,19 @@
 
 extern char __early_stack_start__;
 extern char __early_stack_end__;
+extern char __text_start__;
+extern char __text_end__;
+extern char __rodata_start__;
+extern char __rodata_end__;
+extern char __data_start__;
+extern char __data_end__;
+extern char __bss_start__;
+extern char __bss_end__;
+extern char __pgmem_start__;
+extern char __pgmem_end__;
+extern char __pgmem_size__;
 extern char __heap_start__;
+extern char __heap_end__;
 extern char __heap_size__;
 
 void *cpu_idle(void *);
@@ -40,6 +52,23 @@ static void v7m_init(void)
 }
 #endif
 
+void print_linker_sections(void)
+{
+	printk("Memory map:\n");
+	printk("  .text	  = %08x--%08x	%6d Bytes\n", &__text_start__,
+		&__text_end__, &__text_end__ - &__text_start__);
+	printk("  .rodata = %08x--%08x	%6d Bytes\n", &__rodata_start__,
+		&__rodata_end__, &__rodata_end__ - &__rodata_start__);
+	printk("  .data	  = %08x--%08x	%6d Bytes\n", &__data_start__,
+		&__data_end__, &__data_end__ - &__data_start__);
+	printk("  .bss	  = %08x--%08x	%6d Bytes\n", &__bss_start__,
+		&__bss_end__, &__bss_end__ - &__bss_start__);
+	printk("  .heap	  = %08x--%08x	%6d Bytes\n", &__heap_start__,
+		&__heap_end__, &__heap_end__ - &__heap_start__);
+	printk("  .pgmem  = %08x--%08x	%6d Bytes\n", &__pgmem_start__,
+		&__pgmem_end__, &__pgmem_end__ - &__pgmem_start__);
+}
+
 struct thread_info *start_kernel(void)
 {
 	struct thread_info *thread_main;
@@ -54,6 +83,7 @@ struct thread_info *start_kernel(void)
 
 	printk("Version:    %s\n", VER_SLUG);
 	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
+	print_linker_sections();
 
 	/* initialize the physical memory allocator */
 	show_page_bitmap(); // init_pages();
