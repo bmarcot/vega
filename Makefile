@@ -44,7 +44,7 @@ endif
 SSRC += head.S common.S api/api.S
 CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
-CSRC += $(wildcard kernel/*.c)
+CSRC += $(wildcard kernel/*.c) $(wildcard kernel/fs/*.c)
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 
