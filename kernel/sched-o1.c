@@ -1,3 +1,10 @@
+/*
+ * kernel/sched-o1.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
+#include <kernel/bitops.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
@@ -6,7 +13,7 @@
 
 extern struct thread_info *thread_idle;
 
-static unsigned int pri_bitmap;
+static unsigned long pri_bitmap;
 static struct list_head pri_runq[32];
 
 static int sched_o1_elect(int flags);
@@ -21,7 +28,7 @@ static int sched_o1_init(void)
 
 static struct thread_info *find_next_thread(void)
 {
-	int max_pri = __builtin_ctz(pri_bitmap);
+	int max_pri = find_first_bit(&pri_bitmap, 32);
 
 	/* all runqueues are empty, return the idle_thread */
 	if (max_pri == 32)
@@ -35,7 +42,7 @@ static struct thread_info *find_next_thread(void)
 static int sched_o1_enqueue(struct thread_info *thread)
 {
 	list_add_tail(&thread->ti_q, &pri_runq[thread->ti_priority]);
-	pri_bitmap |= (1 << thread->ti_priority);
+	bitmap_set_bit(&pri_bitmap, thread->ti_priority);
 
 	/* printk("-- add %p to runq [%d]\n", thread, thread->ti_priority); */
 
@@ -52,7 +59,7 @@ static int sched_o1_dequeue(struct thread_info *thread)
 
 	list_del(&thread->ti_q);
 	if (list_empty(&pri_runq[thread->ti_priority]))
-		pri_bitmap &= ~(1 << thread->ti_priority);
+		bitmap_clear_bit(&pri_bitmap, thread->ti_priority);
 
 	return 0;
 }
@@ -71,7 +78,7 @@ static int sched_o1_elect(int flags)
 		/* printk("-- remove %p from runq\n", next); */
 		list_del(&next->ti_q);
 		if (list_empty(&pri_runq[next->ti_priority]))
-			pri_bitmap &= ~(1 << next->ti_priority);
+			bitmap_clear_bit(&pri_bitmap, next->ti_priority);
 	}
 
 	if (flags & SCHED_OPT_RESTORE_ONLY)
