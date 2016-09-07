@@ -1,7 +1,13 @@
-#ifndef SCHEDULER_H
-#define SCHEDULER_H
+/*
+ * include/kernel/scheduler.h
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
 
-#include <kernel/thread.h>
+#ifndef KERNEL_SCHEDULER_H
+#define KERNEL_SCHEDULER_H
+
+struct thread_info;
 
 /* 0 <= PRI_MAX <= PRI_MIN */
 #define PRI_MAX  0
@@ -26,4 +32,4 @@ int sched_enqueue(struct thread_info *thread);
 int sched_dequeue(struct thread_info *thread);
 int sched_elect(int flags);
 
-#endif /* !SCHEDULER_H */
+#endif /* !KERNEL_SCHEDULER_H */
