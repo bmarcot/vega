@@ -6,8 +6,8 @@
 #include "pthread.h"
 #include "kernel.h"
 
-#define INTR_STACK_ORDER 8    /* 0x100 = 256 Bytes */
-#define INTR_STACK_SIZE (1 << INTR_STACK_ORDER)
+#define INTR_STACK_ORDER  9  /* 512 Bytes */
+#define INTR_STACK_SIZE   (1 << INTR_STACK_ORDER)
 
 /* machine-specific thread info on ARM */
 struct mthread_info {
