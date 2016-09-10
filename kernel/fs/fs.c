@@ -285,7 +285,7 @@ static int ls_aux(struct vnode *vn, int offset)
 		print_offset(offset);
 		printk("|-- ");
 	}
-	printk("%s\n", vn->v_path);
+	printk("%s [%d]\n", vn->v_path, vn->v_type);
 	if (vn->v_type == VDIR) {
 		list_for_each_entry(vp, &vn->v_head, v_list) {
 			ls_aux(vp, offset + 1);
