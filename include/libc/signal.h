@@ -1,5 +1,5 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef LIBC_SIGNAL_H
+#define LIBC_SIGNAL_H
 
 #include <sys/types.h>
 
@@ -33,4 +33,44 @@ struct sigevent {
 	pid_t sigev_notify_thread_id;
 };
 
-#endif /* !SIGNAL_H */
+/* sigaction - used to change the action taken by a process on receipt of a
+     specific signal  */
+
+typedef struct {
+	int si_signo;
+	int si_code;
+	union sigval si_value;
+	int si_errno;
+	pid_t si_pid;
+	uid_t si_uid;
+	void *si_addr;
+	int si_status;
+	int si_band;
+} siginfo_t;
+
+typedef int sigset_t;
+
+struct sigaction {
+	void (*sa_handler)(int);  /* Pointer to a signal-catching function
+				     or one of the SIG_IGN or SIG_DFL.  */
+
+	sigset_t sa_mask;  /* Set of signals to be blocked during execution
+			      of the signal handling function.  */
+
+	int sa_flags;  /* Special flags.  */
+
+	/* Pointer to a signal-catching function.  */
+	void (*sa_sigaction)(int, siginfo_t *, void *);
+};
+
+#define SA_SIGINFO  (1 << 0)
+
+#define SIGUSR1  0  /* User defined signal 1 (POSIX) */
+#define SIGUSR2  1  /* User defined signal 2 (POSIX) */
+
+int sigaction(int sig, const struct sigaction *restrict act,
+	struct sigaction *restrict oact);
+
+int raise(int sig);
+
+#endif /* !LIBC_SIGNAL_H */
