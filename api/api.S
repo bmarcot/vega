@@ -16,6 +16,8 @@
 	.set SYS_PTHREAD_COND_SIGNAL, 9
 	.set SYS_PTHREAD_COND_WAIT, 10
 	.set SYS_MSLEEP, 11
+	.set SYS_SIGACTION, 12
+	.set SYS_RAISE, 13
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -76,3 +78,15 @@ ENTRY(msleep)
 	svc	#SYS_MSLEEP
 	bx	lr
 ENDPROC(msleep)
+
+	@ int sigaction()
+ENTRY(sigaction)
+	svc	#SYS_SIGACTION
+	bx	lr
+ENDPROC(sigaction)
+
+	@ int raise()
+ENTRY(raise)
+	svc	#SYS_RAISE
+	bx	lr
+ENDPROC(raise)

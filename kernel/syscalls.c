@@ -15,6 +15,14 @@ long sys_sysconf(int name);
 
 void __msleep(unsigned int);
 
+/* signal declarations */
+
+struct sigaction;
+
+int __sigaction(int sig, const struct sigaction *restrict act,
+	struct sigaction *restrict oact);
+int __raise(int n);
+
 #define SYS_MAX 16
 
 void *syscall_vector[SYS_MAX] = {
@@ -41,6 +49,10 @@ void *syscall_vector[SYS_MAX] = {
 	__pthread_cond_wait,
 
 	__msleep,
+
+	/* signal handling */
+	__sigaction,
+	__raise,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
