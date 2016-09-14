@@ -6,6 +6,8 @@
 #include "pthread.h"
 #include "kernel.h"
 
+#include <signal.h>  //FIXME: could be replaced with 'struct sigaction;'
+
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
 #define INTR_STACK_SIZE   (1 << INTR_STACK_ORDER)
 
@@ -33,6 +35,10 @@ struct thread_info {
 	bool ti_detached;
 	bool ti_joinable;
 	struct thread_info *ti_joining;
+
+	/* XXX: Allocate a small array for now, but this should be
+	   dynamically alocated when calling sigation.  */
+	struct sigaction ti_sigactions[2];
 
 	/* /\* local-storage *\/ */
 	/* struct list_head *ti_lsq; // local-storage queue */
