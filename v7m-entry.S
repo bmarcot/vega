@@ -37,14 +37,14 @@ ENDPROC(thread_restore)
 ENDPROC(switch_to)
 
 	 @ emulate a return from interrupt
-ENTRY(return_from_irqaction)
+ENTRY(return_from_sigaction)
 	ldrd	r0, r1, [sp, #24]	/* r0 = ret_addr, r1 = xpsr */
 	orr	r0, #1
 	str	r0, [sp, #24]
 	msr	apsr_nzcvq, r1		/* restore flags */
 	pop	{r0-r3, r12, lr}
 	ldr	pc, [sp], #8		/* return into user thread */
-END(return_from_irqaction)
+END(return_from_sigaction)
 
 	.set MC_SP, 0
 	.set MC_LR, 4

@@ -12,7 +12,7 @@
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 
-extern void return_from_irqaction(void);
+extern void return_from_sigaction(void);
 
 static void stage_sigaction(struct sigaction *sigaction, void *arg)
 {
@@ -35,7 +35,7 @@ static void stage_sigaction(struct sigaction *sigaction, void *arg)
 	tcr->r0_r3__r12[2] = 0;
 	tcr->r0_r3__r12[3] = 0;
 	tcr->r0_r3__r12[4] = 0;
-	tcr->lr = (u32)return_from_irqaction | 1;  /* return in Thumb Mode */
+	tcr->lr = (u32)return_from_sigaction | 1;  /* return in Thumb Mode */
 	tcr->ret_addr = (u32)sigaction->sa_handler & 0xfffffffe;
 	tcr->xpsr = xPSR_T_Msk;
 
