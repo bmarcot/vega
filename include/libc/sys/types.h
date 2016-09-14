@@ -9,6 +9,12 @@
 typedef signed int off_t;
 #endif
 
+/* Used for process IDs and process group IDs. */
+#ifndef _PID_T
+#define _PID_T
+typedef unsigned int pid_t;
+#endif
+
 /* Used for sizes of objects. */
 #ifndef _SIZE_T
 #define _SIZE_T
