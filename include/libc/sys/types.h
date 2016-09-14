@@ -27,6 +27,12 @@ typedef unsigned int size_t;
 typedef signed int ssize_t;
 #endif
 
+/* Used for user IDs. */
+#ifndef _UID_T
+#define _UID_T
+typedef unsigned int uid_t;
+#endif
+
 /* Used to identify a thread attribute object. */
 typedef struct {
 	int    flags;
