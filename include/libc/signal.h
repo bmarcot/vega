@@ -65,8 +65,10 @@ struct sigaction {
 
 #define SA_SIGINFO  (1 << 0)
 
-#define SIGUSR1  0  /* User defined signal 1 (POSIX) */
-#define SIGUSR2  1  /* User defined signal 2 (POSIX) */
+#define SIGKILL  9   /* Kill (can't be caught or ignored) (POSIX) */
+#define SIGUSR1  10  /* User defined signal 1 (POSIX) */
+#define SIGUSR2  12  /* User defined signal 2 (POSIX) */
+#define SIGSTOP  19  /* Stop executing(can't be caught or ignored) (POSIX) */
 
 int sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);

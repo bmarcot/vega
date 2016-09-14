@@ -39,7 +39,7 @@ static void stage_sigaction(struct sigaction *sigaction, void *arg)
 	tcr->ret_addr = (u32)sigaction->sa_handler & 0xfffffffe;
 	tcr->xpsr = xPSR_T_Msk;
 
-	/* We staged the irqaction on the current thread context, update the
+	/* We staged the sigaction on the current thread context, so update the
 	   SP_process before returning to thread.  */
 	__set_PSP(threadp->ti_mach.mi_psp);
 }
@@ -47,16 +47,21 @@ static void stage_sigaction(struct sigaction *sigaction, void *arg)
 int __sigaction(int sig, const struct sigaction *restrict act,
 		struct sigaction *restrict oact)
 {
-	(void)oact;
-
 	CURRENT_THREAD_INFO(threadp);
+
+	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
+		//erno = EINVAL;
+		return -1;
+	}
+
+	if (oact)
+		memcpy(oact, &threadp->ti_sigactions[sig], sizeof(struct sigaction));
 
 	if (act->sa_flags & SA_SIGINFO) {
 		//FIXME: we handle sa_handler only, at the moment
 		;
 	} else {
-		memcpy(&threadp->ti_sigactions[sig], act,
-			sizeof(struct sigaction));
+		memcpy(&threadp->ti_sigactions[sig], act, sizeof(struct sigaction));
 	}
 
 	return 0;
