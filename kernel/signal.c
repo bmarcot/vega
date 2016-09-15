@@ -14,12 +14,12 @@
 
 extern void return_from_sigaction(void);
 
-static void stage_sigaction(struct sigaction *sigaction, void *arg)
+static void stage_sigaction(struct sigaction *sigaction, int sig)
 {
 	CURRENT_THREAD_INFO(threadp);
 	struct thread_context_regs *tcr;
 
-	printk("signal(%d): Staging %p\n", (int)arg, sigaction->sa_handler);
+	printk("signal(%d): Staging %p\n", sig, sigaction->sa_handler);
 
 	/* SP_process for the Current thread control block has not been updated,
 	   need to update it because we are pushing data to the process stack.  */
@@ -30,7 +30,7 @@ static void stage_sigaction(struct sigaction *sigaction, void *arg)
 
 	/* build the sigaction trampoline */
 	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = (u32)arg;
+	tcr->r0_r3__r12[0] = sig;
 	tcr->r0_r3__r12[1] = 0;
 	tcr->r0_r3__r12[2] = 0;
 	tcr->r0_r3__r12[3] = 0;
@@ -70,7 +70,7 @@ int __sigaction(int sig, const struct sigaction *restrict act,
 int __raise(int sig)
 {
 	CURRENT_THREAD_INFO(threadp);
-	stage_sigaction(&threadp->ti_sigactions[sig], (void *)sig);
+	stage_sigaction(&threadp->ti_sigactions[sig], sig);
 
 	return 0;
 }
