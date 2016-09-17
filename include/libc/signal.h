@@ -38,14 +38,14 @@ struct sigevent {
 
 typedef struct {
 	int si_signo;
-	int si_code;
+	/* int si_code; */
 	union sigval si_value;
-	int si_errno;
-	pid_t si_pid;
-	uid_t si_uid;
-	void *si_addr;
-	int si_status;
-	int si_band;
+	/* int si_errno; */
+	/* pid_t si_pid; */
+	/* uid_t si_uid; */
+	/* void *si_addr; */
+	/* int si_status; */
+	/* int si_band; */
 } siginfo_t;
 
 typedef int sigset_t;
@@ -74,7 +74,7 @@ struct sigaction {
 
 int sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);
-
 int raise(int sig);
+int sigqueue(pid_t pid, int sig, const union sigval value);
 
 #endif /* !LIBC_SIGNAL_H */
