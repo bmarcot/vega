@@ -41,7 +41,7 @@ typedef struct {
 	/* int si_code; */
 	union sigval si_value;
 	/* int si_errno; */
-	/* pid_t si_pid; */
+	pid_t si_pid;
 	/* uid_t si_uid; */
 	/* void *si_addr; */
 	/* int si_status; */

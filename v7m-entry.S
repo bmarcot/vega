@@ -46,7 +46,7 @@ ENDPROC(switch_to)
 	.endm
 
 ENTRY(return_from_sigaction)
-	add	sp, #8 //sizeof(siginfo_t) // reclaim siginfo memory
+	add	sp, #12 //sizeof(siginfo_t) // reclaim siginfo memory
 	emulate_iret
 END(return_from_sigaction)
 

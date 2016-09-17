@@ -77,6 +77,7 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 	siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
 	siginfo_ptr->si_signo = sig;
 	siginfo_ptr->si_value = value;
+	siginfo_ptr->si_pid = threadp->ti_id;
 
 	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
