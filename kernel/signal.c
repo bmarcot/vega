@@ -15,6 +15,20 @@
 extern void return_from_sighandler(void);
 extern void return_from_sigaction(void);
 
+void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
+{
+	tip->ti_mach.mi_psp -= len;
+
+	return (void *)tip->ti_mach.mi_psp;
+}
+
+void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
+{
+	void *stack_pointer = v7m_alloca_thread_context(tip, len);
+
+	memcpy(stack_pointer, data, len);
+}
+
 static void stage_sighandler(struct sigaction *sigaction, int sig)
 {
 	CURRENT_THREAD_INFO(threadp);
@@ -27,7 +41,7 @@ static void stage_sighandler(struct sigaction *sigaction, int sig)
 	threadp->ti_mach.mi_psp = __get_PSP();
 
 	/* the sigaction context will be poped by cpu on exception return */
-	threadp->ti_mach.mi_psp -= sizeof(struct thread_context_regs);
+	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
 
 	/* build the sigaction trampoline */
 	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
@@ -45,25 +59,12 @@ static void stage_sighandler(struct sigaction *sigaction, int sig)
 	__set_PSP(threadp->ti_mach.mi_psp);
 }
 
-void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
-{
-	tip->ti_mach.mi_psp -= len;
-
-	return (void *)tip->ti_mach.mi_psp;
-}
-
-void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
-{
-	void *stack_pointer = v7m_alloca_thread_context(tip, len);
-
-	memcpy(stack_pointer, data, len);
-}
-
 static void stage_sigaction(const struct sigaction *sigaction, int sig,
 			union sigval value)
 {
 	CURRENT_THREAD_INFO(threadp);
 	struct thread_context_regs *tcr;
+	siginfo_t *siginfo_ptr;
 
 	printk("signal(%d): Staging sigaction %p\n", sig, sigaction->sa_sigaction);
 
@@ -73,7 +74,7 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 	/* allocate the siginfo_t struct on thread's stack (SP_process); that
 	   memory will be reclaimed during return_from_sigaction */
-	siginfo_t *siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
+	siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
 	siginfo_ptr->si_signo = sig;
 	siginfo_ptr->si_value = value;
 
