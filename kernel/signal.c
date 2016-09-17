@@ -6,6 +6,7 @@
 
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include <kernel/thread.h>
 
