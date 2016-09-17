@@ -18,6 +18,7 @@
 	.set SYS_MSLEEP, 11
 	.set SYS_SIGACTION, 12
 	.set SYS_RAISE, 13
+	.set SYS_SIGQUEUE, 14
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
@@ -90,3 +91,9 @@ ENTRY(raise)
 	svc	#SYS_RAISE
 	bx	lr
 ENDPROC(raise)
+
+	@ int sigqueue()
+ENTRY(sigqueue)
+	svc	#SYS_SIGQUEUE
+	bx	lr
+ENDPROC(sigqueue)

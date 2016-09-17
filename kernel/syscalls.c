@@ -22,6 +22,7 @@ struct sigaction;
 int __sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);
 int __raise(int n);
+int __sigqueue(pid_t pid, int sig, const union sigval value);
 
 #define SYS_MAX 16
 
@@ -53,6 +54,7 @@ void *syscall_vector[SYS_MAX] = {
 	/* signal handling */
 	__sigaction,
 	__raise,
+	__sigqueue,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
