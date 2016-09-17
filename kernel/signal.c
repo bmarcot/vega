@@ -104,10 +104,10 @@ int __sigaction(int sig, const struct sigaction *restrict act,
 {
 	CURRENT_THREAD_INFO(threadp);
 
-	/* if ((sig == SIGKILL) || (sig == SIGSTOP)) { */
-	/* 	//erno = EINVAL; */
-	/* 	return -1; */
-	/* } */
+	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
+		//erno = EINVAL;
+		return -1;
+	}
 
 	if (oact)
 		memcpy(oact, &threadp->ti_sigactions[sig], sizeof(struct sigaction));

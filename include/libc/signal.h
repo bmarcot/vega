@@ -71,6 +71,8 @@ struct sigaction {
 /* #define SIGSTOP  19  /\* Stop executing(can't be caught or ignored) (POSIX) *\/ */
 #define SIGUSR1  0
 #define SIGUSR2  1
+#define SIGKILL  2
+#define SIGSTOP  3
 
 int sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);
