@@ -6,8 +6,6 @@
 #include "pthread.h"
 #include "kernel.h"
 
-#include <signal.h>  //FIXME: could be replaced with 'struct sigaction;'
-
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
 #define INTR_STACK_SIZE   (1 << INTR_STACK_ORDER)
 
@@ -17,6 +15,8 @@ struct mthread_info {
 	u32 mi_psp;     /* +4 */
 	u32 mi_priv;    /* +8 */
 };
+
+struct sigaction;
 
 struct thread_info {
 	/* machine-specific thread info */
