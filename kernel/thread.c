@@ -105,6 +105,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_detached = false;
 	thread->ti_priority = PRI_MIN;  /* new threads are assigned the lowest priority */
 	thread->ti_state = THREAD_STATE_NEW;
+	INIT_LIST_HEAD(&thread->ti_sigactions);
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;

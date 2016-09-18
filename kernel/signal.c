@@ -102,9 +102,28 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 /* static stage_sigevent(); ... */
 
-int __sigaction(int sig, const struct sigaction *restrict act,
-		struct sigaction *restrict oact)
+static struct sigaction *find_sigaction_by_sig(struct thread_info *tip, int sig)
 {
+	struct sigaction *act;
+
+	list_for_each_entry(act, &tip->ti_sigactions, sa_list) {
+		if (act->sa_signo == sig)
+			return act;
+	}
+
+	return NULL;
+}
+
+/* This prototype differs from the actual POSIX standard protoype.  Removing the
+   const qualifier on `act' variable greatly reduces the pain to allocate the
+   memory storage.  If the const qualifier was to be kept; the kernel would need
+   to dynamically allocate some storage for the sigaction struct.  */
+/* This is a tradeoff between standard compliance and speed of execution.  */
+/* int __sigaction(int sig, const struct sigaction *restrict act, */
+/* 		struct sigaction *restrict oact) */
+int __sigaction(int sig, struct sigaction *act, struct sigaction *restrict oact)
+{
+	struct sigaction *old_act;
 	CURRENT_THREAD_INFO(threadp);
 
 	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
@@ -112,22 +131,31 @@ int __sigaction(int sig, const struct sigaction *restrict act,
 		return -1;
 	}
 
-	if (oact)
-		memcpy(oact, &threadp->ti_sigactions[sig], sizeof(struct sigaction));
-	memcpy(&threadp->ti_sigactions[sig], act, sizeof(struct sigaction));
+	if (oact) {
+		old_act = find_sigaction_by_sig(threadp, sig);
+		if (old_act != NULL)
+			memcpy(oact, old_act, sizeof(struct sigaction));
+	}
+	act->sa_signo = sig;
+	list_add(&act->sa_list, &threadp->ti_sigactions);
 
 	return 0;
 }
 
 int __raise(int sig)
 {
+	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
-	if (threadp->ti_sigactions[sig].sa_flags & SA_SIGINFO)
-		stage_sigaction(&threadp->ti_sigactions[sig], sig,
-				(union sigval){ .sival_int = 0 });
+	act = find_sigaction_by_sig(threadp, sig);
+	if (act == NULL)
+		return -1;
+	stage_sighandler(act, sig);
+
+	if (act->sa_flags & SA_SIGINFO)
+		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
-		stage_sighandler(&threadp->ti_sigactions[sig], sig);
+		stage_sighandler(act, sig);
 
 	return 0;
 }
@@ -136,12 +164,17 @@ int __sigqueue(pid_t pid, int sig, const union sigval value)
 {
 	(void)pid;
 
+	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
+
+	act = find_sigaction_by_sig(threadp, sig);
+	if (act == NULL)
+		return -1;
 
 	//FIXME: must check if a handler with SA_SIGINFO has been installed
 
 	//FIXME: stage on supplied task/thread id, use pid...
-	stage_sigaction(&threadp->ti_sigactions[sig], sig, value);
+	stage_sigaction(act, sig, value);
 
 	return 0;
 }

@@ -36,9 +36,10 @@ struct thread_info {
 	bool ti_joinable;
 	struct thread_info *ti_joining;
 
-	/* XXX: Allocate a small array for now, but this should be
-	   dynamically alocated when calling sigation.  */
-	struct sigaction ti_sigactions[2];
+	/* XXX: Storage for structs is provided by the user, however that does
+	   not comply with the POSIX specs.  Structs are given by the user as
+	   const.  Revisit later with dynamic allocation in th kernel.  */
+	struct list_head ti_sigactions;
 
 	/* /\* local-storage *\/ */
 	/* struct list_head *ti_lsq; // local-storage queue */
