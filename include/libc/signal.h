@@ -51,16 +51,12 @@ typedef struct {
 typedef int sigset_t;
 
 struct sigaction {
-	void (*sa_handler)(int);  /* Pointer to a signal-catching function
-				     or one of the SIG_IGN or SIG_DFL.  */
-
-	sigset_t sa_mask;  /* Set of signals to be blocked during execution
-			      of the signal handling function.  */
-
-	int sa_flags;  /* Special flags.  */
-
-	/* Pointer to a signal-catching function.  */
-	void (*sa_sigaction)(int, siginfo_t *, void *);
+	union {
+		void (*sa_handler)(int);
+		void (*sa_sigaction)(int, siginfo_t *, void *);
+	};
+	sigset_t sa_mask;
+	int sa_flags;
 
 	/* Storage for kernel fields.  Not compliant with the POSIX specs.  */
 	struct list_head sa_list;
