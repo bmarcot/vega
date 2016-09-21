@@ -5,9 +5,11 @@
  */
 
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include <kernel/signal.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"
@@ -104,26 +106,22 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 static struct sigaction *find_sigaction_by_sig(struct thread_info *tip, int sig)
 {
-	struct sigaction *act;
+	struct ksignal *kact;
 
-	list_for_each_entry(act, &tip->ti_sigactions, sa_list) {
-		if (act->sa_signo == sig)
-			return act;
+	list_for_each_entry(kact, &tip->ti_sigactions, ksig_list) {
+		if (kact->ksig_signo == sig)
+			return &kact->ksig_struct;
 	}
 
 	return NULL;
 }
 
-/* This prototype differs from the actual POSIX standard protoype.  Removing the
-   const qualifier on `act' variable greatly reduces the pain to allocate the
-   memory storage.  If the const qualifier was to be kept; the kernel would need
-   to dynamically allocate some storage for the sigaction struct.  */
-/* This is a tradeoff between standard compliance and speed of execution.  */
-/* int __sigaction(int sig, const struct sigaction *restrict act, */
-/* 		struct sigaction *restrict oact) */
-int __sigaction(int sig, struct sigaction *act, struct sigaction *restrict oact)
+int __sigaction(int sig, const struct sigaction *restrict act,
+		struct sigaction *restrict oact)
 {
 	struct sigaction *old_act;
+	struct ksignal *ksig;
+
 	CURRENT_THREAD_INFO(threadp);
 
 	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
@@ -136,8 +134,13 @@ int __sigaction(int sig, struct sigaction *act, struct sigaction *restrict oact)
 		if (old_act != NULL)
 			memcpy(oact, old_act, sizeof(struct sigaction));
 	}
-	act->sa_signo = sig;
-	list_add(&act->sa_list, &threadp->ti_sigactions);
+
+	ksig = malloc(sizeof(struct ksignal));
+	if (ksig == NULL)
+		return -1;
+	ksig->ksig_signo = sig;
+	list_add(&ksig->ksig_list, &threadp->ti_sigactions);
+	memcpy(&ksig->ksig_struct, act, sizeof(struct sigaction));
 
 	return 0;
 }
@@ -150,8 +153,6 @@ int __raise(int sig)
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL)
 		return -1;
-	stage_sighandler(act, sig);
-
 	if (act->sa_flags & SA_SIGINFO)
 		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
@@ -160,21 +161,32 @@ int __raise(int sig)
 	return 0;
 }
 
-int __sigqueue(pid_t pid, int sig, const union sigval value)
+int __do_sigqueue(pid_t pid, int sig, const union sigval value,
+		unsigned long *offset_to_retval)
 {
-	(void)pid;
-
+	int err = 0;
 	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
+	//FIXME: we don't handle staging to a different PID
+	pid = (pid_t)threadp->ti_id;
+
 	act = find_sigaction_by_sig(threadp, sig);
-	if (act == NULL)
-		return -1;
+	if (act == NULL) {
+		err = -1;
+		goto leave;
+	}
 
 	//FIXME: must check if a handler with SA_SIGINFO has been installed
-
 	//FIXME: stage on supplied task/thread id, use pid...
+	//FIXME: must check there is enough space on user thread stack
 	stage_sigaction(act, sig, value);
 
-	return 0;
+leave:
+	if (err || (pid != (pid_t)threadp->ti_id))
+		*offset_to_retval = 0;
+	else
+		*offset_to_retval = sizeof(struct thread_context_regs) + sizeof(siginfo_t);
+
+	return err;
 }

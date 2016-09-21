@@ -46,7 +46,7 @@ ENDPROC(switch_to)
 	.endm
 
 ENTRY(return_from_sigaction)
-	add	sp, #12 //sizeof(siginfo_t) // reclaim siginfo memory
+	add	sp, #12			/* reclaim siginfo_t storage */
 	emulate_iret
 END(return_from_sigaction)
 
@@ -132,3 +132,21 @@ ENDPROC(busf)
 ENTRY(usgf)
 	fault_handler usagefault
 ENDPROC(usgf)
+
+ENTRY(__sigqueue)
+	@ Reserve storage for offset_to_retval variable, and pass its pointer
+	@ as a parameter.
+	sub	sp, #4
+	mov	r3, sp
+
+	bl	__do_sigqueue
+
+	@ Early return to the thread, effectively bypassing the syscall_return.
+	@ Depending on where the signal action has been staged (this thread, or
+	@ another thread), we need to access a different location in the stack
+	@ to update the return value of __sigqueue() syscall.
+	pop	{r1}
+	mrs	r2, psp
+	str	r0, [r2, r1]
+	pop	{r6, r7, pc}
+ENDPROC(__sigqueue)

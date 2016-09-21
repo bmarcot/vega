@@ -18,6 +18,7 @@ void __msleep(unsigned int);
 /* signal declarations */
 
 struct sigaction;
+union sigval;
 
 int __sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);
