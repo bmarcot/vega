@@ -193,7 +193,7 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 
 	if (!is_signal_supported(sig)) {
 		err = ERR_SIGNAL_UNSUPPORTED;
-		goto leave;
+		goto out;
 	}
 
 	//FIXME: we don't handle staging to a different PID
@@ -202,7 +202,7 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL) {
 		err = ERR_SIGNAL_UNHANDLED;
-		goto leave;
+		goto out;
 	}
 
 	//FIXME: must check if a handler with SA_SIGINFO has been installed
@@ -211,7 +211,7 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 	stage_sigaction(act, sig, value);
 
 	/* r0 can be clobbered by the signal handling function */
-leave:
+out:
 	if (err || (pid != (pid_t)threadp->ti_id))
 		*offset_to_retval = 0;
 	else
