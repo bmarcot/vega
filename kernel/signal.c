@@ -32,6 +32,16 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 	memcpy(stack_pointer, data, len);
 }
 
+static inline void *v7m_set_thumb_bit(void *addr)
+{
+    return (void *)((unsigned long)addr | 1ul);
+}
+
+static inline void *v7m_clear_thumb_bit(void *addr)
+{
+    return (void *)((unsigned long)addr & ~1ul);
+}
+
 static void stage_sighandler(struct sigaction *sigaction, int sig)
 {
 	CURRENT_THREAD_INFO(threadp);
@@ -53,8 +63,8 @@ static void stage_sighandler(struct sigaction *sigaction, int sig)
 	tcr->r0_r3__r12[2] = 0;
 	tcr->r0_r3__r12[3] = 0;
 	tcr->r0_r3__r12[4] = 0;
-	tcr->lr = (u32)return_from_sighandler | 1 ;  /* return in Thumb Mode */
-	tcr->ret_addr = (u32)sigaction->sa_handler & 0xfffffffe;
+	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
+	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_handler);
 	tcr->xpsr = xPSR_T_Msk;
 
 	/* We staged the sigaction on the current thread context, so update the
@@ -93,8 +103,8 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 	tcr->r0_r3__r12[2] = 0;  /* POSIX says it's a ucontext_t *, but commonly unused */
 	tcr->r0_r3__r12[3] = 0;
 	tcr->r0_r3__r12[4] = 0;
-	tcr->lr = (u32)return_from_sigaction | 1;  /* return in Thumb Mode */
-	tcr->ret_addr = (u32)sigaction->sa_sigaction & 0xfffffffe;
+	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sigaction);
+	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_sigaction);
 	tcr->xpsr = xPSR_T_Msk;
 
 	/* We staged the sigaction on the current thread context, so update the
