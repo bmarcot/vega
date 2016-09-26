@@ -115,6 +115,38 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 /* static stage_sigevent(); ... */
 
+static void do_sigevent(const struct sigevent *sigevent)
+{
+	CURRENT_THREAD_INFO(threadp);
+	struct thread_context_regs *tcr;
+
+	//printk("signal(%d): Staging sigaction %p\n", sig, sigaction->sa_sigaction);
+
+	//if (sigevent->sigev_notify == SIGEV_THREAD) {
+
+	/* SP_process for the Current thread control block has not been updated,
+	   need to update it because we are pushing data to the process stack.  */
+	threadp->ti_mach.mi_psp = __get_PSP();
+
+	/* the sigaction context will be poped by cpu on exception return */
+	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
+
+	/* build the sigaction trampoline */ /* build_context() */
+	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
+	tcr->r0_r3__r12[0] = sigevent->sigev_value.sival_int;
+	tcr->r0_r3__r12[1] = 0;
+	tcr->r0_r3__r12[2] = 0;
+	tcr->r0_r3__r12[3] = 0;
+	tcr->r0_r3__r12[4] = 0;
+	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
+	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
+	tcr->xpsr = xPSR_T_Msk;
+
+	/* We staged the sigaction on the current thread context, so update the
+	   SP_process before returning to thread.  */
+	__set_PSP(threadp->ti_mach.mi_psp);
+}
+
 static struct sigaction *find_sigaction_by_sig(struct thread_info *tip, int sig)
 {
 	struct ksignal *kact;
@@ -181,7 +213,7 @@ int __raise(int sig)
 	else
 		stage_sighandler(act, sig);
 
-	return 0;
+	return 0; //FIXME: OFFSET TO RETVAL???
 }
 
 int __do_sigqueue(pid_t pid, int sig, const union sigval value,
