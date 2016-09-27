@@ -5,7 +5,7 @@
 
 #ifdef __ASSEMBLER__
 
-	@ movl	rd, imm32
+	@ loads a 32-bit value into a register without a data access
 	.macro	movl rd, imm32
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
 	.if 	\imm32 & 0xffffff00
@@ -14,9 +14,9 @@
 	movs	\rd, \imm32
 	.endif
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	movw	\rd, #(\imm32 & 0xffff)
+	movw	\rd, #:lower16:\imm32
 	.if	\imm32 & 0xffff0000
-	movt	\rd, #(\imm32 >> 16)
+	movt	\rd, #:upper16:\imm32
 	.endif
 #endif
 	.endm
