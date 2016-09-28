@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <kernel/bitops.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
 
@@ -155,14 +156,26 @@ int __sigaction(int sig, const struct sigaction *restrict act,
 	return 0;
 }
 
+static unsigned long supported_signal_mask = (1 << SIGKILL) | (1 << SIGUSR1)
+	| (1 << SIGUSR2) | (1 << SIGSTOP);
+
+static int is_signal_supported(int sig)
+{
+	if (sig > SIGMAX)
+		return 0;
+	return bitmap_get_bit(&supported_signal_mask, sig);
+}
+
 int __raise(int sig)
 {
 	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
+	if (!is_signal_supported(sig))
+		return ERR_SIGNAL_UNSUPPORTED;
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL)
-		return -1;
+		return ERR_SIGNAL_UNHANDLED;
 	if (act->sa_flags & SA_SIGINFO)
 		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
@@ -178,12 +191,17 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
+	if (!is_signal_supported(sig)) {
+		err = ERR_SIGNAL_UNSUPPORTED;
+		goto leave;
+	}
+
 	//FIXME: we don't handle staging to a different PID
 	pid = (pid_t)threadp->ti_id;
 
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL) {
-		err = -1;
+		err = ERR_SIGNAL_UNHANDLED;
 		goto leave;
 	}
 
@@ -192,6 +210,7 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 	//FIXME: must check there is enough space on user thread stack
 	stage_sigaction(act, sig, value);
 
+	/* r0 can be clobbered by the signal handling function */
 leave:
 	if (err || (pid != (pid_t)threadp->ti_id))
 		*offset_to_retval = 0;
