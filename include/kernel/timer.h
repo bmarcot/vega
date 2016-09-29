@@ -7,6 +7,8 @@
 #ifndef KERNEL_TIMER_H
 #define KERNEL_TIMER_H
 
+//FIXME: move to time.h
+
 #include <sys/types.h>
 
 #include <kernel/thread.h>
@@ -20,10 +22,13 @@ enum timer_type {
 };
 
 struct timer {
+	timer_t timer_id; // harvest storage! timer_id + timer type
 	struct thread_info *owner;
-	u32 expire_clocktime;
+	u32 expire_clocktime;  //FIXME: rename to 'timeout'
 	struct list_head list;  /* unordered list */
 	enum timer_type timer_type;
+	void *timer_data;
+	char __timer_data[0];
 };
 
 /* system interfaces */
