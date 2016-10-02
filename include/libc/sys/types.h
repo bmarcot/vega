@@ -3,6 +3,12 @@
 
 /* http://pubs.opengroup.org/onlinepubs/009696699/basedefs/sys/types.h.html */
 
+/* Used for clock ID type in the clock and timer functions. */
+#ifndef _CLOCKID_T
+#define _CLOCKID_T
+typedef unsigned int clockid_t;
+#endif
+
 /* Used for file sizes. */
 #ifndef _OFF_T
 #define _OFF_T
