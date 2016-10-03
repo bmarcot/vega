@@ -47,6 +47,7 @@ CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c) $(wildcard kernel/fs/*.c)
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
+OBJS := $(sort $(OBJS))
 
 all: include/cmsis/arm include/version.h $(NAME).lds $(NAME).hex
 
