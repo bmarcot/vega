@@ -26,6 +26,7 @@ int sys_sigqueue(pid_t pid, int sig, const union sigval value);
 
 int sys_open();
 int sys_read();
+int sys_write();
 int sys_seek();
 int sys_stat();
 int sys_mount();
@@ -65,6 +66,7 @@ void *syscall_vector[SYS_MAX] = {
 	/* filesystem */
 	sys_open,
 	sys_read,
+	sys_write,
 	sys_seek,
 	sys_stat,
 	sys_mount,

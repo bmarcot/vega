@@ -95,6 +95,12 @@ ENTRY(read)
 	bx	lr
 ENDPROC(read)
 
+	@ int write()
+ENTRY(write)
+	svc	#SYS_WRITE
+	bx	lr
+ENDPROC(write)
+
 	@ int seek()
 ENTRY(seek)
 	svc	#SYS_SEEK

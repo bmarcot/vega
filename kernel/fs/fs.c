@@ -61,7 +61,7 @@ static struct vnode vn_root = {
 	.v_parent = NULL
 };
 
-static struct vnode vn_dev = {
+/* static */ struct vnode vn_dev = {
 	.v_path = "dev",
 	.v_type = VDIR,
 	.v_head = LIST_HEAD_INIT(vn_dev.v_head)
@@ -138,6 +138,22 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 	if (file == NULL)
 		return -1;
 	VOP_READ(file->f_vnode, buf, count, file->f_pos, &n);
+	file->f_pos += n;
+
+	return n;
+}
+
+ssize_t sys_write(int fd, void *buf, size_t count)
+{
+	size_t n;
+	struct file *file;
+
+	if (!fd_validate(fd))
+		return -1;
+	file = file_table[fd];
+	if (file == NULL)
+		return -1;
+	VOP_WRITE(file->f_vnode, buf, count, file->f_pos, &n);
 	file->f_pos += n;
 
 	return n;

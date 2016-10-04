@@ -24,8 +24,9 @@
 #define SYS_SIGQUEUE              14
 #define SYS_OPEN                  15
 #define SYS_READ                  16
-#define SYS_SEEK                  17
-#define SYS_STAT                  18
-#define SYS_MOUNT                 19
+#define SYS_WRITE                 17
+#define SYS_SEEK                  18
+#define SYS_STAT                  19
+#define SYS_MOUNT                 20
 
 #endif /* !KERNEL_SYSCALLS_H */

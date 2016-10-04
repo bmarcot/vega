@@ -18,7 +18,7 @@ struct vnodeops {
 	int (*vop_open)();
 	int (*vop_close)();
 	int (*vop_read)();
-	/* int (*vop_write)(); */
+	int (*vop_write)();
 	int (*vop_lookup)();
 	int (*vop_seek)();
 	int (*vop_getattr)();
@@ -124,6 +124,17 @@ static inline
 int fop_getattr(struct vnode *vp, struct vattr *vap, int flags/* , cred_t *cr */)
 {
 	return vp->v_ops->vop_getattr(vp, vap, flags);
+}
+
+/* http://www.manualpages.de/OpenBSD/OpenBSD-5.0/man9/VOP_WRITE.9.html */
+
+#define VOP_WRITE(vp, buf, count, off, n) \
+	fop_write(vp, buf, count, off, n)
+
+static inline
+int fop_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+{
+	return vp->v_ops->vop_write(vp, buf, count, off, n);
 }
 
 #endif /* !KERNEL_FS_VNODE_H */
