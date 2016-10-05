@@ -115,7 +115,7 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 /* static stage_sigevent(); ... */
 
-static void do_sigevent(const struct sigevent *sigevent)
+void do_sigevent(const struct sigevent *sigevent)
 {
 	CURRENT_THREAD_INFO(threadp);
 	struct thread_context_regs *tcr;
@@ -188,6 +188,7 @@ int __sigaction(int sig, const struct sigaction *restrict act,
 	return 0;
 }
 
+/* enabled signal mask */
 static unsigned long supported_signal_mask = (1 << SIGKILL) | (1 << SIGUSR1)
 	| (1 << SIGUSR2) | (1 << SIGSTOP);
 
