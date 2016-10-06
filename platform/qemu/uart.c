@@ -4,7 +4,9 @@
 
 struct lm3s6965_uart {
 	unsigned int uartdr;
-	char pad[0x28];
+	char pad_0[0x14];
+	unsigned int uartfr;
+	char pad_1[0x10];
 	unsigned int uartlcrh;
 	unsigned int uartctl;
 };
@@ -19,7 +21,7 @@ void __uart_enable(void)
 
 void __uart_putchar(char c)
 {
-	while ((*(volatile int *) 0x4000c018) & (1 << 3))
+	while (uart0->uartfr & (1 << 3))
 		;
 	uart0->uartdr = c;
 }
@@ -46,7 +48,7 @@ static void lm3s6965_init(struct lm3s6965_uart *uart)
 
 static void lm3s6965_putchar(char c, struct lm3s6965_uart *uart)
 {
-	while ((*(volatile int *) 0x4000c018) & (1 << 3))
+	while (uart->uartfr & (1 << 3))
 		;
 	uart->uartdr = c;
 }
