@@ -38,19 +38,33 @@ void __uart_init(void)
 	__uart_enable();
 }
 
-int qemu_uart_open(struct vnode *vp, int flags)
+static void lm3s6965_init(struct lm3s6965_uart *uart)
 {
-	(void)vp;
+	uart->uartctl |= 1;
+	uart->uartlcrh |= (3 << 5);
+}
+
+static void lm3s6965_putchar(char c, struct lm3s6965_uart *uart)
+{
+	while ((*(volatile int *) 0x4000c018) & (1 << 3))
+		;
+	uart->uartdr = c;
+}
+
+
+//int qemu_uart_open(struct vnode *vp, int flags)
+int qemu_uart_open(struct device *dev, int flags)
+{
 	(void)flags;
 
-	__uart_init();
+	lm3s6965_init(dev->drvdata);
 
 	return 0;
 }
 
-int qemu_uart_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+//int qemu_uart_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+int qemu_uart_write(struct device *dev, void *buf, size_t count, off_t off, size_t *n)
 {
-	(void)vp;
 	(void)off;
 
 	size_t initial_count = count;
@@ -58,8 +72,8 @@ int qemu_uart_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t
 
 	for (; count; count--) {
 		if ('\n' == *bufp)
-			__uart_putchar('\r');
-		__uart_putchar(*bufp++);
+			lm3s6965_putchar('\r', dev->drvdata);
+		lm3s6965_putchar(*bufp++, dev->drvdata);
 	}
 	*n = initial_count - count;
 
@@ -76,9 +90,11 @@ struct cdev qemu_uart_cdev = {
 	.cdev_ops = &qemu_uart_cdevops,
 };
 
+#define LM3S6965_UART0_BASE  0x4000c000
+
 struct device qemu_uart0_dev = {
 	.char_dev = &qemu_uart_cdev,
-	.drvdata = (void *)0xdeadbeef,
+	.drvdata = (void *)LM3S6965_UART0_BASE,
 };
 
 int qemu_uart_init(void)
