@@ -7,22 +7,16 @@
 #ifndef KERNEL_DEVICE_H
 #define KERNEL_DEVICE_H
 
+#include <kernel/fs/vnode.h>
 #include "linux/list.h"
 
 #define CDEV_NAME_SIZE  32
 
 typedef unsigned long dev_t;
 
-struct cdevops {
-	int (*cdevop_open)();
-	int (*cdevop_close)();
-	int (*cdevop_read)();
-	int (*cdevop_write)();
-};
-
 struct cdev {
 	char cdev_name[CDEV_NAME_SIZE];
-	const struct cdevops *cdev_ops; // should be vnodeops/fileops like Linux
+	const struct vnodeops *cdev_vops;
 	dev_t cdev_major;
 	//struct list_head cdev_list;
 };

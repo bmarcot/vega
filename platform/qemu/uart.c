@@ -54,23 +54,24 @@ static void lm3s6965_putchar(char c, struct lm3s6965_uart *uart)
 }
 
 
-//int qemu_uart_open(struct vnode *vp, int flags)
-int qemu_uart_open(struct device *dev, int flags)
+int qemu_uart_open(struct vnode *vp, int flags)
 {
 	(void)flags;
+
+	struct device *dev = vp->v_data;
 
 	lm3s6965_init(dev->drvdata);
 
 	return 0;
 }
 
-//int qemu_uart_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
-int qemu_uart_write(struct device *dev, void *buf, size_t count, off_t off, size_t *n)
+int qemu_uart_write(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	(void)off;
 
 	size_t initial_count = count;
 	const char *bufp = buf;
+	struct device *dev = vp->v_data;
 
 	for (; count; count--) {
 		if ('\n' == *bufp)
@@ -82,14 +83,14 @@ int qemu_uart_write(struct device *dev, void *buf, size_t count, off_t off, size
 	return 0;
 }
 
-struct cdevops qemu_uart_cdevops = {
-	.cdevop_open = qemu_uart_open,
-	.cdevop_write = qemu_uart_write,
+struct vnodeops qemu_uart_vops = {
+	.vop_open = qemu_uart_open,
+	.vop_write = qemu_uart_write,
 };
 
 struct cdev qemu_uart_cdev = {
 	.cdev_name = "lm3s6965_uart",
-	.cdev_ops = &qemu_uart_cdevops,
+	.cdev_vops = &qemu_uart_vops,
 };
 
 #define LM3S6965_UART0_BASE  0x4000c000
