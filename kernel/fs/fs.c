@@ -263,13 +263,14 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 }
 
 extern struct vnode vn_dev_rand;
-extern struct vnode vn_dev_zero;
+
+extern void devfs_mem_init(void);
 
 void fs_init(void)
 {
 	vn_insert(&vn_dev, &vn_root);
 	vn_insert(&vn_dev_rand, &vn_dev);
-	vn_insert(&vn_dev_zero, &vn_dev);
+	devfs_mem_init();
 }
 
 /*
