@@ -10,4 +10,6 @@
 
 #define VER_SLUG "vega-"VER_MAJOR"."VER_MINOR"."VER_MICRO"-"VER_BRANCH"-"VER_COMMIT
 
+#define VER_MILESTONE  "far-paper"
+
 #endif /* !VERSION_H */

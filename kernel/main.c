@@ -81,8 +81,11 @@ struct thread_info *start_kernel(void)
 	/* initialize the kernel's malloc */
 	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
 
-	printk("Version:    %s\n", VER_SLUG);
-	printk("Created:    %s  %s UTC\n", __DATE__, __TIME__);
+	printk("Vega Kernel Release 1.0rc1 (%s) Version %s ARMv7e-m\n"
+		"Copyright 2015-2016 Benoit Marcot.\n\n", VER_MILESTONE,
+		VER_COMMIT);
+	printk("Version slug: %s\n", VER_SLUG);
+	printk("Created: %s  %s UTC\n", __DATE__, __TIME__);
 	print_linker_sections();
 
 	/* initialize the physical memory allocator */
