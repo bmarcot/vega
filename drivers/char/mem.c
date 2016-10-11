@@ -16,6 +16,17 @@ int mem_open(struct vnode *vp, int flags)
 	return 0;
 }
 
+int write_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+{
+	(void)vp;
+	(void)buf;
+	(void)off;
+
+	*n = count;
+
+	return 0;
+}
+
 int read_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	(void)vp;
@@ -43,11 +54,13 @@ int read_zero(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 static const struct vnodeops null_vops = {
 	.vop_open = mem_open,
 	.vop_read = read_null,
+	.vop_write = write_null,
 };
 
 static const struct vnodeops zero_vops = {
 	.vop_open = mem_open,
 	.vop_read = read_zero,
+	.vop_write = write_null,
 };
 
 struct memdev {
