@@ -16,6 +16,18 @@ int mem_open(struct vnode *vp, int flags)
 	return 0;
 }
 
+int read_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+{
+	(void)vp;
+	(void)buf;
+	(void)count;
+	(void)off;
+
+	*n = 0;
+
+	return 0;
+}
+
 int read_zero(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	(void)vp;
@@ -28,6 +40,11 @@ int read_zero(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 	return 0;
 }
 
+static const struct vnodeops null_vops = {
+	.vop_open = mem_open,
+	.vop_read = read_null,
+};
+
 static const struct vnodeops zero_vops = {
 	.vop_open = mem_open,
 	.vop_read = read_zero,
@@ -39,6 +56,7 @@ struct memdev {
 };
 
 struct memdev devlist[] = {
+	{ "null", &null_vops },
 	{ "zero", &zero_vops },
 };
 
@@ -49,7 +67,7 @@ extern struct vnode vn_dev;
 void devfs_mem_init(void)
 {
 	//FIXME: replace with device_create_with_prealloc()
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 2; i++) {
 		memvns[i].v_path = (char *)devlist[i].name;
 		memvns[i].v_type = VCHR;
 		INIT_LIST_HEAD(&memvns[i].v_head);
