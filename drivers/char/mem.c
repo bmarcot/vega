@@ -96,10 +96,13 @@ struct memdev {
 	const struct vnodeops *vops;
 };
 
+extern struct vnodeops random_vops;
+
 struct memdev devlist[] = {
 	{ "mem", &mem_vops },
 	{ "null", &null_vops },
 	{ "zero", &zero_vops },
+	{ "random", &random_vops },
 };
 
 static struct vnode memvns[8];
@@ -109,7 +112,7 @@ extern struct vnode vn_dev;
 void devfs_mem_init(void)
 {
 	//FIXME: replace with device_create_with_prealloc()
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		memvns[i].v_path = (char *)devlist[i].name;
 		memvns[i].v_type = VCHR;
 		INIT_LIST_HEAD(&memvns[i].v_head);

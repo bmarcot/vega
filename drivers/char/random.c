@@ -1,20 +1,19 @@
 /*
- * kernel/fs/dev-rand.c
+ * drivers/char/random.c
  *
  * Copyright (c) 2016 Benoit Marcot
  */
 
 #include <stdint.h>
 #include <string.h>
-#include <sys/types.h>
 
-#include "kernel.h"
 #include <kernel/fs/vnode.h>
+#include "kernel.h"
 
 typedef unsigned long long u64;
 
 /* xorshift1024* generator, http://vigna.di.unimi.it/ftp/papers/xorshift.pdf */
-u64 next(void)
+static u64 next(void)
 {
 	static int p;
 	static u64 s[16] = {
@@ -34,15 +33,7 @@ u64 next(void)
 	return s[p] * UINT64_C(1181783497276652981);
 }
 
-
-int dev_rand_init(void)
-{
-	/* init device, driver, seed, hal... */
-
-	return 0;
-}
-
-int dev_rand_open(struct vnode *vp, int flags)
+int open_random(struct vnode *vp, int flags)
 {
 	(void)vp;
 	(void)flags;
@@ -50,18 +41,11 @@ int dev_rand_open(struct vnode *vp, int flags)
 	return 0;
 }
 
-int dev_rand_close(struct vnode *vp, int flags)
-{
-	(void)vp;
-	(void)flags;
-
-	return 0;
-}
-
-int dev_rand_read(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+int read_random(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	(void)vp;
 	(void)off;
+
 	static u64 m;
 	static int remaining_bytes = 0;
 
@@ -80,28 +64,7 @@ int dev_rand_read(struct vnode *vp, void *buf, size_t count, off_t off, size_t *
 	return 0;
 }
 
-static const struct vnodeops dev_rand_vops = {
-	.vop_open = dev_rand_open,
-	.vop_read = dev_rand_read,
+const struct vnodeops random_vops = {
+	.vop_open = open_random,
+	.vop_read = read_random,
 };
-
-struct vnode vn_dev_rand = {
-	.v_path = "random",
-	.v_type = VCHR,
-	.v_head = LIST_HEAD_INIT(vn_dev_rand.v_head),
-	.v_ops = &dev_rand_vops
-};
-
-/* ------------ libc ------------ */
-
-/* int rand(void); */
-/* { */
-/* 	int r; */
-
-/* 	int dev_fd = open("/dev/random"); */
-/* 	read_1(dev_fd, &r, sizeof (int)); */
-//close(dev_fd);
-
-/* 	return r; */
-/* } */
-
