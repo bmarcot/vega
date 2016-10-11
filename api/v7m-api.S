@@ -2,10 +2,8 @@
 	.syntax unified
 	.thumb
 
+#include <kernel/sysno.h>
 #include "linux/linkage.h"
-
-	.set SYS_PTHREAD_MUTEX_LOCK, 4
-	.set SYS_PTHREAD_MUTEX_UNLOCK, 5
 
 	// -1: unlocked, 0: locked, positive: locked, possible waiters
 

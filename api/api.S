@@ -2,23 +2,8 @@
 	.syntax unified
 	.thumb
 
+#include <kernel/sysno.h>
 #include "linux/linkage.h"
-
-	.set SYS_PTHREAD_YIELD, 0
-	.set SYS_PTHREAD_SELF, 1
-	.set SYS_PTHREAD_EXIT, 2
-	.set SYS_PTHREAD_CREATE, 3
-	.set SYS_PTHREAD_MUTEX_LOCK, 4
-	.set SYS_PTHREAD_MUTEX_UNLOCK, 5
-	.set SYS_TIMER_CREATE, 6
-	.set SYS_SYSCONF, 7
-	.set SYS_PTHREAD_JOIN, 8
-	.set SYS_PTHREAD_COND_SIGNAL, 9
-	.set SYS_PTHREAD_COND_WAIT, 10
-	.set SYS_MSLEEP, 11
-	.set SYS_SIGACTION, 12
-	.set SYS_RAISE, 13
-	.set SYS_SIGQUEUE, 14
 
 	@ int pthread_yield(void)
 ENTRY(pthread_yield)
