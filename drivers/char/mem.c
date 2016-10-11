@@ -16,6 +16,28 @@ int mem_open(struct vnode *vp, int flags)
 	return 0;
 }
 
+int write_mem(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+{
+	(void)vp;
+
+	//FIXME: Add checks, valid_phys_addr_range()
+	memcpy((void *)off, buf, count);
+	*n = count;
+
+	return 0;
+}
+
+int read_mem(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+{
+	(void)vp;
+
+	//FIXME: Add checks, valid_phys_addr_range()
+	memcpy(buf, (void *)off, count);
+	*n = count;
+
+	return 0;
+}
+
 int write_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	(void)vp;
@@ -51,6 +73,12 @@ int read_zero(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 	return 0;
 }
 
+static const struct vnodeops mem_vops = {
+	.vop_open = mem_open,
+	.vop_read = read_mem,
+	.vop_write = write_mem,
+};
+
 static const struct vnodeops null_vops = {
 	.vop_open = mem_open,
 	.vop_read = read_null,
@@ -69,6 +97,7 @@ struct memdev {
 };
 
 struct memdev devlist[] = {
+	{ "mem", &mem_vops },
 	{ "null", &null_vops },
 	{ "zero", &zero_vops },
 };
@@ -80,7 +109,7 @@ extern struct vnode vn_dev;
 void devfs_mem_init(void)
 {
 	//FIXME: replace with device_create_with_prealloc()
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
 		memvns[i].v_path = (char *)devlist[i].name;
 		memvns[i].v_type = VCHR;
 		INIT_LIST_HEAD(&memvns[i].v_head);
