@@ -2,7 +2,6 @@
 
 #include <kernel/cond.h>
 #include <kernel/mutex.h>
-#include <kernel/timer.h>
 
 int sys_pthread_yield(void);
 pthread_t sys_pthread_self(void);

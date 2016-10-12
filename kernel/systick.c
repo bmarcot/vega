@@ -1,7 +1,6 @@
 #include <stdint.h>
 
 #include <kernel/scheduler.h>
-#include <kernel/timer.h>
 
 #include "systick.h"
 #include <if/uart.h>

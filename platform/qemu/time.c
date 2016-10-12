@@ -6,7 +6,6 @@
 #include <kernel/scheduler.h>
 #include <kernel/signal.h>
 #include <kernel/time.h>
-#include <kernel/timer.h> //FIXME: types in libc instead
 #include <kernel/thread.h>
 
 #include "linux/list.h"

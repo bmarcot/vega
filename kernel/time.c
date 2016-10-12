@@ -1,6 +1,13 @@
+/*
+ * kernel/time.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 #include <sys/types.h>
+
 #include <kernel/bitops.h>
-#include <kernel/timer.h> // struct timer
+#include <kernel/time.h>
 #include "linux/list.h"
 
 struct timer *find_timer_by_id(timer_t timer_id, struct list_head *timer_list)
