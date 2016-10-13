@@ -8,4 +8,5 @@ RAMSZ = 64k
 
 CSRC += platform/nrf52-dk/uart.c	\
 	platform/nrf52-dk/gpio.c	\
-	platform/nrf52-dk/time.c
+	platform/nrf52-dk/time.c	\
+	platform/nrf52-dk/spim.c
