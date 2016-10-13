@@ -132,6 +132,9 @@ struct thread_info *start_kernel(void)
 
 	printk("Kernel bootstrap done.\n--\n");
 
+	printk("EPD demo NRF52DK\n");
+	init_nrf52dk();
+
 	return thread_main;
 }
 

@@ -85,7 +85,7 @@ static void nrf52_timer0_irq(void) { nrf52_timer_irq(0); }
 static void nrf52_timer1_irq(void) { nrf52_timer_irq(1); }
 static void nrf52_timer2_irq(void) { nrf52_timer_irq(2); }
 static void nrf52_timer3_irq(void) { nrf52_timer_irq(3); }
-static void nrf52_timer4_irq(void) { nrf52_timer_irq(4); }
+/* static void nrf52_timer4_irq(void) { nrf52_timer_irq(4); } */
 
 void nrf52_timer_init(void)
 {
@@ -96,8 +96,8 @@ void nrf52_timer_init(void)
 	timer_list[1].nrf_timer = NRF_TIMER1;
 	timer_list[2].nrf_timer = NRF_TIMER2;
 	timer_list[3].nrf_timer = NRF_TIMER3;
-	timer_list[4].nrf_timer = NRF_TIMER4;
-	for (int i = 4; i >= 0; i--)
+	//timer_list[4].nrf_timer = NRF_TIMER4;
+	for (int i = 3; i >= 0; i--)
 		list_add(&timer_list[i].list, &timers);
 
 	/* configure each timer */
@@ -113,18 +113,18 @@ void nrf52_timer_init(void)
 	irq_attach(TIMER1_IRQn, nrf52_timer1_irq);
 	irq_attach(TIMER2_IRQn, nrf52_timer2_irq);
 	irq_attach(TIMER3_IRQn, nrf52_timer3_irq);
-	irq_attach(TIMER4_IRQn, nrf52_timer4_irq);
+	/* irq_attach(TIMER4_IRQn, nrf52_timer4_irq); */
 
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	NVIC_EnableIRQ(TIMER2_IRQn);
 	NVIC_EnableIRQ(TIMER3_IRQn);
-	NVIC_EnableIRQ(TIMER4_IRQn);
+	/* NVIC_EnableIRQ(TIMER4_IRQn); */
 }
 
 int get_bitmode(unsigned long cc)
 {
-	printk("  cc=%x\n", cc);
+	//printk("  cc=%x\n", cc);
 	if (cc & 0xff000000)
 		return TIMER_BITMODE_BITMODE_32Bit;
 	else if (cc & 0xff0000)
@@ -158,6 +158,8 @@ int __usleep(unsigned int usec)
 {
 	struct timer_list *timer;
 
+	printk("usleep(%d)\n", usec);
+	
 	/* if (usec >= 10e6) */
 	/* 	return -1; //FXIME: and errno = EINVAL; */
 
@@ -186,6 +188,8 @@ int __usleep(unsigned int usec)
 
 int __msleep(unsigned int msec)
 {
+	printk("msleep(%d)\n", msec);
+
 	return __usleep(msec * USEC_PER_MSEC);
 }
 

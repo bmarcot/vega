@@ -41,12 +41,26 @@
 #include "conf_EPD.h"
 #include "image_data.h"
 
+void TimerBaseIntHandler(void);
+
+void init_nrf52dk()
+{
+	irq_attach(TIMER4_IRQn, TimerBaseIntHandler);
+	NVIC_EnableIRQ(TIMER4_IRQn);
+}
+
 int
 main()
 {
+	printk("Starting EPD demo...\n");
 
   //  PinMuxConfig();
-    EPD_display_hardware_init();
+    /* EPD_display_hardware_init(); */
+    /* 	for (;;) { */
+    /* 		printk("top\n"); */
+    /* 		msleep(5000); */
+    /* 	} */
+    printk("After hardware init\n");
     for(;;) {
     	/* User selects which EPD size to run demonstration by changing the
     		 * USE_EPD_Type in conf_EPD.h
@@ -70,7 +84,9 @@ main()
     #endif
 
     		/* The interval of two images alternatively change is 5 seconds */
+	    printk("change image\n");
     		delay_ms(5000);
+		printk("return from delay\n");
 
     #if(USE_EPD_Type==EPD_144)
     		EPD_display_from_pointer(EPD_144,(uint8_t *)&image_array_144_1,(uint8_t *)&image_array_144_2);
