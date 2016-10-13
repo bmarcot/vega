@@ -50,7 +50,7 @@ CSRC += drivers/pervasive/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb/EPD_
 
 CFLAGS += -Idrivers/pervasive
 CFLAGS += -Idrivers/pervasive/Pervasive_Displays_small_EPD
-CFLAGS += -Idrivers/pervasive/Pervasive_Displays_small_EPD/COG_FPL/
+CFLAGS += -Idrivers/pervasive/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb
 
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
