@@ -20,6 +20,12 @@
 #include "cmsis/nrf52/nrf.h"
 #include "linux/list.h"
 
+
+#include <signal.h>
+#include <string.h>
+#include <kernel/errno-base.h>
+#include <kernel/time.h>
+
 static const u8 prescalers[] = { 9, 4, 5, 4, 6, 4, 5, 4,
 				 7, 4, 5, 4, 6, 4, 5, 4,
 				 8, 4, 5, 4, 6, 4, 5, 4,
@@ -36,11 +42,15 @@ struct timer_list {
 	NRF_TIMER_Type *nrf_timer;
 	struct thread_info *owner;
 	struct list_head list;
+	enum timer_type timer_type;
+	void *timer_data;
 };
 
 static struct timer_list timer_list[5];    /* TIMER0 to TIMER4 */
 
-static LIST_HEAD(timers);
+static struct sigevent sigevents[5];
+
+static LIST_HEAD(timers); // free_timers
 
 #define ACTIVE_THREAD ({				  \
 	struct thread_info *__tp = current_thread_info(); \
@@ -53,11 +63,22 @@ static void nrf52_timer_irq(int irq)
 	/* acknowledge interrupt in the peripheral */
 	timer_list[irq].nrf_timer->EVENTS_COMPARE[0] = 0;
 
-	/* get the owner thread, add to runqueue */
-	owner = timer_list[irq].owner;
-	sched_enqueue(owner);
-	if (owner->ti_priority >= ACTIVE_THREAD->ti_priority)
-		sched_elect(SCHED_OPT_NONE);
+	if (timer_list[irq].timer_type == TT_SLEEP) {
+		/* get the owner thread, add to runqueue */
+		owner = timer_list[irq].owner;
+		sched_enqueue(owner);
+		if (owner->ti_priority >= ACTIVE_THREAD->ti_priority)
+			sched_elect(SCHED_OPT_NONE);
+	} else {
+		printk("OK! OK! OK! timer exprired!\n");
+		/* FIXME: Sigevent handler is staged in current thread
+		   at the moment. It should be staged in timer's owner
+		   thread instead. */
+		do_sigevent(&sigevents[irq]);
+
+		/* return the timer to the list of free timers */
+		list_add(&timer_list[irq].list, &timers);
+	}
 }
 
 static void nrf52_timer0_irq(void) { nrf52_timer_irq(0); }
@@ -101,10 +122,40 @@ void nrf52_timer_init(void)
 	NVIC_EnableIRQ(TIMER4_IRQn);
 }
 
+int get_bitmode(unsigned long cc)
+{
+	printk("  cc=%x\n", cc);
+	if (cc & 0xff000000)
+		return TIMER_BITMODE_BITMODE_32Bit;
+	else if (cc & 0xff0000)
+		return TIMER_BITMODE_BITMODE_24Bit;
+	else if (cc & 0xff00)
+		return TIMER_BITMODE_BITMODE_16Bit;
+	return TIMER_BITMODE_BITMODE_08Bit;
+}
+
+static void configure_timer(unsigned long usec, struct timer_list *timerp)
+{
+	int prescaler, bitmode, cc;
+
+	/* compute the minimum number of comparisons */
+	prescaler = prescalers[usec % 32];
+	cc = usec / usec_per_tick[prescaler - 4];
+	//bitmode = bitmodes[__builtin_clz(cc) / 4];
+	bitmode = get_bitmode(cc);
+
+	printk("nrf52: allocated timer X - ps=%d, cc=%d, bm=%d\n", prescaler, cc, bitmode);
+
+	/* setup the peripheral */
+	timerp->nrf_timer->CC[0] = cc;
+	timerp->nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
+	timerp->nrf_timer->PRESCALER = prescaler << TIMER_PRESCALER_PRESCALER_Pos;
+	timerp->nrf_timer->TASKS_START = 1;
+}
+
 // deprecated in POSIX, should use nanosleep instead
 int __usleep(unsigned int usec)
 {
-	int prescaler, bitmode, cc;
 	struct timer_list *timer;
 
 	/* if (usec >= 10e6) */
@@ -116,16 +167,8 @@ int __usleep(unsigned int usec)
 		return -1;  //FIXME: and ERrNO = ENOTIMER;
 	list_del(&timer->list);
 
-	/* compute the minimum number of comparisons */
-	prescaler = prescalers[usec % 32];
-	cc = usec / usec_per_tick[prescaler - 4];
-	bitmode = bitmodes[__builtin_clz(cc) / 4];
-
-	/* setup the peripheral */
-	timer->nrf_timer->CC[0] = cc;
-	timer->nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
-	timer->nrf_timer->PRESCALER = prescaler << TIMER_PRESCALER_PRESCALER_Pos;
-	timer->nrf_timer->TASKS_START = 1;
+	timer->timer_type = TT_SLEEP;
+	configure_timer(usec, timer);
 
 	/* update thread's control block */
 	timer->owner = current_thread_info();
@@ -155,13 +198,64 @@ int __msleep(unsigned int msec)
 /* 	NVIC_ClearPendingIRQ(TIMER0_IRQn); */
 /* } */
 
-int sys_timer_create(unsigned int msec)
-{
-	(void)msec;
+/* int sys_timer_create(unsigned int msec) */
+/* { */
+/* 	(void)msec; */
 
-	return -1;
-}
+/* 	return -1; */
+/* } */
 
 void __systick(void)
 {
+}
+
+#define ARRAY_INDEX(x, xs) \
+	(((unsigned long)x - (unsigned long)xs) / sizeof(__typeof__(*x)))
+
+int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
+		timer_t *timerid)
+{
+	struct timer_list *timer;
+	CURRENT_THREAD_INFO(tip);
+
+	(void)clockid;
+
+	printk("Sys Timer Create - NRF52\n");
+
+	/* pick a timer in the list of free timers */
+	timer = list_first_entry_or_null(&timers, struct timer_list, list);
+	if (timer == NULL)
+		return -1;  //FIXME: and ERrNO = ENOTIMER;
+	list_del(&timer->list);
+
+	//*timerid = (int)((char *)timer - (char *)timer_list) / sizeof(struct timer_list);
+	*timerid = ARRAY_INDEX(timer, timer_list);
+	timer->owner = tip;
+	timer->timer_type = TT_TIMER;
+	timer->timer_data = &sigevents[*timerid];
+	memcpy(&sigevents[*timerid], sevp, sizeof(struct sigevent));
+	//list_add(&timerp->list, &inactive_timers); // add to list of non-armed timer
+
+	return 0;
+}
+
+/* int timer_settime(timer_t timerid, int flags, */
+/* 		const struct itimerspec *new_value, */
+/* 		struct itimerspec * old_value) */
+int timer_settime(timer_t timerid, int flags, int new_value)
+{
+	(void)flags;
+
+	struct timer_list *timerp = &timer_list[timerid];
+
+	if (timerp == NULL) {
+		printk("timer_settime: No timer found with id=%d\n", timerid);
+		return -EINVAL;
+	}
+	/* timerp->expire_clocktime = get_clocktime_in_msec() + new_value; */
+	/* list_move(&timerp->list, &timers); */
+	configure_timer(new_value, timerp);
+
+	return 0;
+
 }
