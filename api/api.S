@@ -65,6 +65,12 @@ ENTRY(msleep)
 	bx	lr
 ENDPROC(msleep)
 
+	@ int usleep()
+ENTRY(usleep)
+	svc	#SYS_USLEEP
+	bx	lr
+ENDPROC(usleep)
+
 	@ int sigaction()
 ENTRY(sigaction)
 	svc	#SYS_SIGACTION

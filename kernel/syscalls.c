@@ -13,6 +13,7 @@ int sys_timer_create(unsigned int msecs);
 long sys_sysconf(int name);
 
 void __msleep(unsigned int);
+void __usleep(unsigned int);
 
 /* signal declarations */
 
@@ -55,6 +56,8 @@ void *syscall_vector[SYS_MAX] = {
 	__sigaction,
 	__raise,
 	__sigqueue,
+
+	__usleep,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
