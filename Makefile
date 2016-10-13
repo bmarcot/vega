@@ -44,7 +44,14 @@ endif
 SSRC += head.S common.S api/api.S
 CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
-CSRC += $(wildcard kernel/*.c) $(wildcard kernel/fs/*.c)
+CSRC += $(wildcard kernel/*.c) $(wildcard kernel/fs/*.c) $(wildcard drivers/pervasive/*.c)
+CSRC += $(wildcard drivers/pervasive/Pervasive_Displays_small_EPD/*.c)
+CSRC += drivers/pervasive/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb/EPD_G2_Aurora_Mb.c
+
+CFLAGS += -Idrivers/pervasive
+CFLAGS += -Idrivers/pervasive/Pervasive_Displays_small_EPD
+CFLAGS += -Idrivers/pervasive/Pervasive_Displays_small_EPD/COG_FPL/
+
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
