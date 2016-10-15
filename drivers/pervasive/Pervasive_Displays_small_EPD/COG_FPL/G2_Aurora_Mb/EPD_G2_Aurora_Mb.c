@@ -226,18 +226,18 @@ uint8_t EPD_initialize_driver (void) {
 	
 	i = 0;
 
-	printk("Checking if device is BUSY...");
+	//printk("Checking if device is BUSY...");
 	while (EPD_IsBusy()) {
 		if((i++) >= 0x0FFF) return ERROR_BUSY;
 	}
-	printk("  OK!\n");
+	//printk("  OK!\n");
 
 	//Check COG ID
 	if((SPI_R(0x72,0x00) & 0x0f) !=0x02) {
 		printk("Unknown COG ID\n");
 		return ERROR_COG_ID;
 	} else {
-		printk("Found COG ID\n");
+		//printk("Found COG ID\n");
 	}
 
 	//Disable OE
