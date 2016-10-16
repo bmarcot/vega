@@ -15,7 +15,7 @@
 
 /* The acquire procedures adds the current thread to the waiting list for that
  * mutex.  When the syscall returns, the user thread owns the mutex.  */
-int __pthread_mutex_lock(pthread_mutex_t *mutex)
+int sys_pthread_mutex_lock(pthread_mutex_t *mutex)
 {
 	CURRENT_THREAD_INFO(cur_thread);
 
@@ -53,7 +53,7 @@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
 
 extern void *syscall_return;
 
-int __pthread_mutex_unlock(pthread_mutex_t *mutex)
+int sys_pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
 	struct thread_info *waiter;
 	CURRENT_THREAD_INFO(cur_thread);

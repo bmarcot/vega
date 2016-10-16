@@ -34,8 +34,8 @@ void *syscall_vector[SYS_MAX] = {
 	sys_pthread_create,
 
 	/* mutex */
-	__pthread_mutex_lock,
-	__pthread_mutex_unlock,
+	sys_pthread_mutex_lock,
+	sys_pthread_mutex_unlock,
 
 	/* timers */
 	sys_timer_create,

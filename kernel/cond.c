@@ -18,13 +18,13 @@ int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 	CURRENT_THREAD_INFO(cur_thread);
 	list_add_tail(&cur_thread->ti_q, &cond->waitq);
 	cur_thread->ti_state = THREAD_STATE_BLOCKED;
-	__pthread_mutex_unlock(mutex);
+	sys_pthread_mutex_unlock(mutex);
 
 	//XXX: yield IS NOT mandatory; previous unlock may have rescheduled!
 	//__pthread_yield();
 
 	/* contend for the lock */
-	__pthread_mutex_lock(mutex);
+	sys_pthread_mutex_lock(mutex);
 
 	return 0;
 }
