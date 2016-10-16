@@ -50,51 +50,51 @@
 #define	input_get(GPIO_BASE,Pin)          gpio_get(Pin)       /**< get current value of an IOPORT pin */
 
 #define Temper_PinIO            PIN_59
-#define Temper_PIN              4
+#define Temper_PIN              0
 #define Temper_PORT             GPIOA0_BASE       /**< LaunchPad P6.6 */
 
 #define SPICLK_PinIO            PIN_05
-#define SPICLK_PIN              14
+#define SPICLK_PIN              3
 #define SPICLK_PORT             GPIOA1_BASE       /**< LaunchPad P3.2 */
 
 #define EPD_BUSY_PinIO          PIN_62
-#define EPD_BUSY_PIN            7
+#define EPD_BUSY_PIN            4
 #define EPD_BUSY_PORT           GPIOA0_BASE       /**< LaunchPad P2.7  */
 
 #define PWM_PinIO               PIN_01
-#define PWM_PIN                 10
+#define PWM_PIN                 23
 #define PWM_PORT                GPIOA1_BASE       /**< LaunchPad P4.2  */
 
 #define EPD_RST_PinIO           PIN_02
-#define EPD_RST_PIN             11
+#define EPD_RST_PIN             28
 #define EPD_RST_PORT            GPIOA1_BASE       /**< LaunchPad P4.1 */
 
 #define EPD_PANELON_PinIO       PIN_15
-#define EPD_PANELON_PIN         22
+#define EPD_PANELON_PIN         29
 #define EPD_PANELON_PORT        GPIOA2_BASE       /**< LaunchPad P8.1  */
 
 #define EPD_DISCHARGE_PinIO     PIN_55
-#define EPD_DISCHARGE_PIN       1
+#define EPD_DISCHARGE_PIN       30
 #define EPD_DISCHARGE_PORT      GPIOA0_BASE       /**< LaunchPad P2.3  */
 
 #define EPD_BORDER_PinIO        PIN_21
-#define EPD_BORDER_PIN          25
+#define EPD_BORDER_PIN          31
 #define EPD_BORDER_PORT         GPIOA3_BASE       /**< LaunchPad P2.6  */
 
 #define SPIMISO_PinIO           PIN_06
-#define SPIMISO_PIN             15
+#define SPIMISO_PIN             11
 #define SPIMISO_PORT            GPIOA1_BASE       /**< LaunchPad P3.1  */
 
 #define SPIMOSI_PinIO           PIN_07
-#define SPIMOSI_PIN             16
+#define SPIMOSI_PIN             12
 #define SPIMOSI_PORT            GPIOA2_BASE       /**< LaunchPad P3.0  */
 
 #define Flash_CS_PinIO          PIN_08
-#define Flash_CS_PIN            17
+#define Flash_CS_PIN            0
 #define Flash_CS_PORT           GPIOA2_BASE       /**< LaunchPad P2.2  */
 
 #define EPD_CS_PinIO            PIN_18
-#define EPD_CS_PIN              28
+#define EPD_CS_PIN              21
 #define EPD_CS_PORT             GPIOA3_BASE       /**< LaunchPad P2.0  */
 
 
