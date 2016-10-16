@@ -144,7 +144,7 @@ static void configure_timer(unsigned long usec, struct timer_list *timerp)
 	//bitmode = bitmodes[__builtin_clz(cc) / 4];
 	bitmode = get_bitmode(cc);
 
-	printk("nrf52: allocated timer X - ps=%d, cc=%d, bm=%d\n", prescaler, cc, bitmode);
+	//printk("nrf52: allocated timer X - ps=%d, cc=%d, bm=%d\n", prescaler, cc, bitmode);
 
 	/* setup the peripheral */
 	timerp->nrf_timer->CC[0] = cc;
@@ -158,7 +158,7 @@ int __usleep(unsigned int usec)
 {
 	struct timer_list *timer;
 
-	printk("usleep(%d)\n", usec);
+	//printk("usleep(%d)\n", usec);
 	
 	/* if (usec >= 10e6) */
 	/* 	return -1; //FXIME: and errno = EINVAL; */
@@ -188,7 +188,7 @@ int __usleep(unsigned int usec)
 
 int __msleep(unsigned int msec)
 {
-	printk("msleep(%d)\n", msec);
+	//printk("msleep(%d)\n", msec);
 
 	return __usleep(msec * USEC_PER_MSEC);
 }
