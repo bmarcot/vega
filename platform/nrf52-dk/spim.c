@@ -4,15 +4,17 @@
 
 NRF_SPIM_Type * spim_instance = NRF_SPIM0;
 
-#define PIN_SCK   10
-#define PIN_MOSI  11
-#define PIN_MISO  12
+#define PIN_SCK   3
+#define PIN_MOSI  12
+#define PIN_MISO  11
 
 #define SPI_MODE0_CPOL  0  /* active high */
 #define SPI_MODE0_CPHA  0  /* leading */
 
-void init()
+void spim_init()
 {
+	printk("-- init SPIM\n");
+
 	/* disable the SPIM */
 	NRF_SPIM0->ENABLE = SPIM_ENABLE_ENABLE_Disabled << SPIM_ENABLE_ENABLE_Pos;
 
@@ -30,7 +32,7 @@ void init()
 		| (SPIM_PSEL_MISO_CONNECT_Connected << SPIM_PSEL_MISO_CONNECT_Pos);
 
 	/* configure the SPI mode (Mode 0), and frequency (8 Mbps) */
-	NRF_SPIM0->FREQUENCY = SPIM_FREQUENCY_FREQUENCY_M8 << SPIM_FREQUENCY_FREQUENCY_Pos;
+	NRF_SPIM0->FREQUENCY = SPIM_FREQUENCY_FREQUENCY_M4 << SPIM_FREQUENCY_FREQUENCY_Pos;
 	NRF_SPIM0->CONFIG = (SPIM_CONFIG_ORDER_MsbFirst << SPIM_CONFIG_ORDER_Pos)
 		| (SPIM_CONFIG_CPHA_Leading << SPIM_CONFIG_CPHA_Pos)
 		| (SPIM_CONFIG_CPOL_ActiveHigh << SPIM_CONFIG_CPOL_Pos);
