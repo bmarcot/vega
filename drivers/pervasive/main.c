@@ -55,7 +55,7 @@ main()
 	printk("Starting EPD demo...\n");
 
   //  PinMuxConfig();
-    /* EPD_display_hardware_init(); */
+    EPD_display_hardware_init();
     /* 	for (;;) { */
     /* 		printk("top\n"); */
     /* 		msleep(5000); */
