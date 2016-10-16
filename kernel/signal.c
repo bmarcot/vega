@@ -159,7 +159,7 @@ static struct sigaction *find_sigaction_by_sig(struct thread_info *tip, int sig)
 	return NULL;
 }
 
-int __sigaction(int sig, const struct sigaction *restrict act,
+int sys_sigaction(int sig, const struct sigaction *restrict act,
 		struct sigaction *restrict oact)
 {
 	struct sigaction *old_act;
@@ -199,7 +199,7 @@ static int is_signal_supported(int sig)
 	return bitmap_get_bit(&supported_signal_mask, sig);
 }
 
-int __raise(int sig)
+int sys_raise(int sig)
 {
 	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);

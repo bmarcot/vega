@@ -133,7 +133,7 @@ ENTRY(usgf)
 	fault_handler usagefault
 ENDPROC(usgf)
 
-ENTRY(__sigqueue)
+ENTRY(sys_sigqueue)
 	@ Reserve storage for offset_to_retval variable, and pass its pointer
 	@ as a parameter.
 	sub	sp, #4
@@ -149,4 +149,4 @@ ENTRY(__sigqueue)
 	mrs	r2, psp
 	str	r0, [r2, r1]
 	pop	{r6, r7, pc}
-ENDPROC(__sigqueue)
+ENDPROC(sys_sigqueue)

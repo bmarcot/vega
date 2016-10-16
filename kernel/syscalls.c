@@ -19,10 +19,10 @@ void __msleep(unsigned int);
 struct sigaction;
 union sigval;
 
-int __sigaction(int sig, const struct sigaction *restrict act,
+int sys_sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact);
-int __raise(int n);
-int __sigqueue(pid_t pid, int sig, const union sigval value);
+int sys_raise(int n);
+int sys_sigqueue(pid_t pid, int sig, const union sigval value);
 
 #define SYS_MAX 16
 
@@ -52,9 +52,9 @@ void *syscall_vector[SYS_MAX] = {
 	__msleep,
 
 	/* signal handling */
-	__sigaction,
-	__raise,
-	__sigqueue,
+	sys_sigaction,
+	sys_raise,
+	sys_sigqueue,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
