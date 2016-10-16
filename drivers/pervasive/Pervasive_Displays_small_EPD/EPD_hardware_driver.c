@@ -113,8 +113,12 @@ void delay_ms(unsigned int ms) {
 	//UtilsDelay(1);
 
 	 //FIXME: Specs says CS low-high-low should be greater-equal 80ns
+	 //usleep(10);
+	 /* for (int i = 0; i < 10; i++) */
+	 /* 	 __asm__ __volatile("nop"); */
 	 usleep(10);
 }
+
 
 //******************************************************************
 //* PWM  Configuration/Control //PWM output : PD3
@@ -156,8 +160,9 @@ void delay_ms(unsigned int ms) {
 /**
  * \brief Configure SPI
  */
+void spim_init();
 void epd_spi_init(void) {
-	
+	spim_init();
     /* MAP_PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);   */
 }
 
@@ -222,8 +227,9 @@ uint8_t epd_spi_read(unsigned char data) {
  * \brief SPI synchronous write
  */
 void epd_spi_write(unsigned char data) {
-
-	epd_spi_read(data);
+	unsigned char volatile data2 = data;
+	spi_transaction(&data2, 1, NULL, 0);
+	//epd_spi_read(data);
 }
 
 /**
@@ -244,6 +250,8 @@ uint8_t epd_spi_write_ex(unsigned char Data) {
 * \return the SPI read value
 */
 uint8_t SPI_R(uint8_t Register, uint8_t Data) {
+
+	//printk("In SPI_R\n");
 
 	uint8_t result;
 	EPD_cs_low ();
@@ -359,7 +367,7 @@ void EPD_initialize_gpio(void) {
  * \brief Initialize the EPD hardware setting
  */
 void EPD_display_hardware_init(void) {
-	
+	printk("Hardware init...\n");
 	EPD_initialize_gpio();
 	EPD_Vcc_turn_off();
 	epd_spi_init();
