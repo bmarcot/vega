@@ -13,7 +13,7 @@
 
 /* The cond variable storage is provided by the user, and the kernel must check
  * the addresses provided in the struct. See issue #8 (LDRT/STRT).  */
-int __pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
 	CURRENT_THREAD_INFO(cur_thread);
 	list_add_tail(&cur_thread->ti_q, &cond->waitq);
@@ -29,7 +29,7 @@ int __pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 	return 0;
 }
 
-int __pthread_cond_signal(pthread_cond_t *cond)
+int sys_pthread_cond_signal(pthread_cond_t *cond)
 {
 	struct thread_info *waiter;
 	CURRENT_THREAD_INFO(cur_thread);

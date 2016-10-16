@@ -46,8 +46,8 @@ void *syscall_vector[SYS_MAX] = {
 	sys_pthread_join,
 
 	/* condition variable */
-	__pthread_cond_signal,
-	__pthread_cond_wait,
+	sys_pthread_cond_signal,
+	sys_pthread_cond_wait,
 
 	__msleep,
 
