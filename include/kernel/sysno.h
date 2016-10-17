@@ -22,5 +22,6 @@
 #define SYS_SIGACTION             12
 #define SYS_RAISE                 13
 #define SYS_SIGQUEUE              14
+#define SYS_OPEN                  15
 
 #endif /* !KERNEL_SYSNO_H */

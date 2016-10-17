@@ -81,8 +81,7 @@ int lookup_1(struct vnode *dvp, struct vnode **vpp, const char *name)
 	return VOP_LOOKUP(dvp, vpp, name);
 }
 
-/* copen - common open in Solaris */
-int open_1(const char *pathname, int flags)
+int sys_open(const char *pathname, int flags)
 {
 	int fd;
 	struct vnode *vp;

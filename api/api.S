@@ -82,3 +82,9 @@ ENTRY(sigqueue)
 	svc	#SYS_SIGQUEUE
 	bx	lr
 ENDPROC(sigqueue)
+
+	@ int open()
+ENTRY(open)
+	svc	#SYS_OPEN
+	bx	lr
+ENDPROC(open)

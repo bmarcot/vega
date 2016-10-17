@@ -24,7 +24,9 @@ int sys_sigaction(int sig, const struct sigaction *restrict act,
 int sys_raise(int n);
 int sys_sigqueue(pid_t pid, int sig, const union sigval value);
 
-#define SYS_MAX 16
+int sys_open();
+
+#define SYS_MAX 32
 
 void *syscall_vector[SYS_MAX] = {
 	/* multithreading */
@@ -55,6 +57,9 @@ void *syscall_vector[SYS_MAX] = {
 	sys_sigaction,
 	sys_raise,
 	sys_sigqueue,
+
+	/* filesystem */
+	sys_open,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
