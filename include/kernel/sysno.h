@@ -23,5 +23,6 @@
 #define SYS_RAISE                 13
 #define SYS_SIGQUEUE              14
 #define SYS_OPEN                  15
+#define SYS_READ                  16
 
 #endif /* !KERNEL_SYSNO_H */

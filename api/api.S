@@ -88,3 +88,9 @@ ENTRY(open)
 	svc	#SYS_OPEN
 	bx	lr
 ENDPROC(open)
+
+	@ int read()
+ENTRY(read)
+	svc	#SYS_READ
+	bx	lr
+ENDPROC(read)

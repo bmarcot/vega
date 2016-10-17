@@ -127,7 +127,7 @@ int sys_open(const char *pathname, int flags)
 	return fd;
 }
 
-ssize_t read_1(int fd, void *buf, size_t count)
+ssize_t sys_read(int fd, void *buf, size_t count)
 {
 	size_t n;
 	struct file *file;
