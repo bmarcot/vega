@@ -1,7 +1,11 @@
+/*
+ * vega.lds.S
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
-
-ENTRY(reset)
 
 #define RAMORG 0x20000000
 
