@@ -2,7 +2,7 @@
 	.syntax unified
 	.thumb
 
-#include <kernel/sysno.h>
+#include <kernel/syscalls.h>
 #include "linux/linkage.h"
 
 	@ int pthread_yield(void)

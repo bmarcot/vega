@@ -2,7 +2,7 @@
 	.syntax unified
 	.thumb
 
-#include <kernel/sysno.h>
+#include <kernel/syscalls.h>
 #include "linux/linkage.h"
 
 	// -1: unlocked, 0: locked, positive: locked, possible waiters
