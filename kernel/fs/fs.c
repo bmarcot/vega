@@ -198,12 +198,19 @@ int sys_stat(const char *pathname, struct stat *buf)
 	return 0;
 }
 
+//XXX: needed to retrieve fourth arg in a syscall
+#include "cmsis/arm/ARMCM4.h"
+
 /* Linux protoype */
 int sys_mount(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data)
 {
 	(void)source;
 	(void)mountflags;
+
+	//XXX: data has been pushed to thread stack, not kernel stack
+	//XXX: 0x20 == INTERRUPT FRAME pushed by the CPU
+	data = (void *)(*(unsigned long *)(__get_PSP() + 0x20));
 
 	struct vfsdef *vfsdefp = vfsdef_find(filesystemtype);
 
