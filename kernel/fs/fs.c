@@ -143,7 +143,7 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 	return n;
 }
 
-off_t seek_1(int fd, off_t offset, int whence)
+off_t sys_seek(int fd, off_t offset, int whence)
 {
 	struct file *file = file_table[fd];
 	struct vattr vap;

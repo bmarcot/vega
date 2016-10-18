@@ -34,7 +34,7 @@ void fd_release(int fd);
 /* syscall entry points */
 int     sys_open(const char *pathname, int flags);
 ssize_t sys_read(int fd, void *buf, size_t count);
-off_t seek_1(int fd, off_t offset, int whence);
+off_t   sys_seek(int fd, off_t offset, int whence);
 int stat_1(const char *pathname, struct stat *buf);
 int mount_1(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data);

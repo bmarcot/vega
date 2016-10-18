@@ -94,3 +94,9 @@ ENTRY(read)
 	svc	#SYS_READ
 	bx	lr
 ENDPROC(read)
+
+	@ int seek()
+ENTRY(seek)
+	svc	#SYS_SEEK
+	bx	lr
+ENDPROC(seek)
