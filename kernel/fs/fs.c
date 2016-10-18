@@ -180,7 +180,7 @@ off_t sys_seek(int fd, off_t offset, int whence)
 	return 0;
 }
 
-int stat_1(const char *pathname, struct stat *buf)
+int sys_stat(const char *pathname, struct stat *buf)
 {
 	struct vnode *vp;
 	struct vattr vap;

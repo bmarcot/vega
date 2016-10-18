@@ -27,6 +27,7 @@ int sys_sigqueue(pid_t pid, int sig, const union sigval value);
 int sys_open();
 int sys_read();
 int sys_seek();
+int sys_stat();
 
 #define SYS_MAX 32
 
@@ -64,6 +65,7 @@ void *syscall_vector[SYS_MAX] = {
 	sys_open,
 	sys_read,
 	sys_seek,
+	sys_stat,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())

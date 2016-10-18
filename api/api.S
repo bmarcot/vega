@@ -100,3 +100,9 @@ ENTRY(seek)
 	svc	#SYS_SEEK
 	bx	lr
 ENDPROC(seek)
+
+	@ int stat()
+ENTRY(stat)
+	svc	#SYS_STAT
+	bx	lr
+ENDPROC(stat)

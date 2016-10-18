@@ -25,5 +25,6 @@
 #define SYS_OPEN                  15
 #define SYS_READ                  16
 #define SYS_SEEK                  17
+#define SYS_STAT                  17
 
 #endif /* !KERNEL_SYSNO_H */
