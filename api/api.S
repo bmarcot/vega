@@ -106,3 +106,9 @@ ENTRY(stat)
 	svc	#SYS_STAT
 	bx	lr
 ENDPROC(stat)
+
+	@ int mount()
+ENTRY(mount)
+	svc	#SYS_MOUNT
+	bx	lr
+ENDPROC(mount)

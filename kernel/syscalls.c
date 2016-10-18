@@ -28,6 +28,7 @@ int sys_open();
 int sys_read();
 int sys_seek();
 int sys_stat();
+int sys_mount();
 
 #define SYS_MAX 32
 
@@ -66,6 +67,7 @@ void *syscall_vector[SYS_MAX] = {
 	sys_read,
 	sys_seek,
 	sys_stat,
+	sys_mount,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())

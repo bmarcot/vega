@@ -26,5 +26,6 @@
 #define SYS_READ                  16
 #define SYS_SEEK                  17
 #define SYS_STAT                  17
+#define SYS_MOUNT                 18
 
 #endif /* !KERNEL_SYSNO_H */

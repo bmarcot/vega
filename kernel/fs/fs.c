@@ -199,7 +199,7 @@ int sys_stat(const char *pathname, struct stat *buf)
 }
 
 /* Linux protoype */
-int mount_1(const char *source, const char *target, const char *filesystemtype,
+int sys_mount(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data)
 {
 	(void)source;
