@@ -62,6 +62,8 @@ int __msleep(unsigned int msec)
 
 extern struct thread_info *thread_idle;
 
+void do_sigevent(const struct sigevent *sigevent);
+
 void __systick(unsigned long clocktime_in_msec)
 {
 	struct timer *pos, *pos1;
