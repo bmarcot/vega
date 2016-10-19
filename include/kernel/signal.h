@@ -11,9 +11,6 @@
 
 #include "linux/types.h"
 
-#define ERR_SIGNAL_UNSUPPORTED  -1
-#define ERR_SIGNAL_UNHANDLED    -2
-
 #define SIGMAX  31
 
 struct ksignal {

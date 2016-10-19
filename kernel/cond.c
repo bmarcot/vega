@@ -16,6 +16,11 @@
 int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
 	CURRENT_THREAD_INFO(cur_thread);
+
+	/* if (cond->owner != cur_thread) { */
+	/* 	errno = EINVAL; */
+	/* 	return -1; */
+	/* } */
 	list_add_tail(&cur_thread->ti_q, &cond->waitq);
 	cur_thread->ti_state = THREAD_STATE_BLOCKED;
 	sys_pthread_mutex_unlock(mutex);

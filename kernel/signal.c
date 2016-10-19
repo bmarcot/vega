@@ -4,12 +4,15 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+
+#include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include <kernel/bitops.h>
+#include <kernel/errno-base.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
 
@@ -168,19 +171,23 @@ int sys_sigaction(int sig, const struct sigaction *restrict act,
 	CURRENT_THREAD_INFO(threadp);
 
 	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
-		//erno = EINVAL;
+		errno = EINVAL;
 		return -1;
 	}
-
+	if (act == NULL) {
+		errno = EFAULT;
+		return -1;
+	}
 	if (oact) {
 		old_act = find_sigaction_by_sig(threadp, sig);
 		if (old_act != NULL)
 			memcpy(oact, old_act, sizeof(struct sigaction));
 	}
-
 	ksig = malloc(sizeof(struct ksignal));
-	if (ksig == NULL)
+	if (ksig == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 	ksig->ksig_signo = sig;
 	list_add(&ksig->ksig_list, &threadp->ti_sigactions);
 	memcpy(&ksig->ksig_struct, act, sizeof(struct sigaction));
@@ -205,10 +212,10 @@ int sys_raise(int sig)
 	CURRENT_THREAD_INFO(threadp);
 
 	if (!is_signal_supported(sig))
-		return ERR_SIGNAL_UNSUPPORTED;
+		return -EINVAL;
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL)
-		return ERR_SIGNAL_UNHANDLED;
+		return -EINVAL;
 	if (act->sa_flags & SA_SIGINFO)
 		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
@@ -225,7 +232,8 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 	CURRENT_THREAD_INFO(threadp);
 
 	if (!is_signal_supported(sig)) {
-		err = ERR_SIGNAL_UNSUPPORTED;
+		err = -1;
+		errno = EINVAL;
 		goto out;
 	}
 
@@ -234,7 +242,8 @@ int __do_sigqueue(pid_t pid, int sig, const union sigval value,
 
 	act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL) {
-		err = ERR_SIGNAL_UNHANDLED;
+		err = -1;
+		errno = EINVAL;
 		goto out;
 	}
 
@@ -248,7 +257,8 @@ out:
 	if (err || (pid != (pid_t)threadp->ti_id))
 		*offset_to_retval = 0;
 	else
-		*offset_to_retval = sizeof(struct thread_context_regs) + sizeof(siginfo_t);
+		*offset_to_retval = sizeof(struct thread_context_regs)
+			+ sizeof(siginfo_t);
 
 	return err;
 }

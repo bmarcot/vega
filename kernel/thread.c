@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <ucontext.h>
 
+#include <kernel/errno-base.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
@@ -186,26 +187,20 @@ int thread_join(pthread_t thread, void **retval)
 	struct thread_info *other;
 
 	other = find_thread_by_id(thread);
-	if (other == NULL) {
-		//errno = ESRCH;  /* No thread with the ID thread could be found. */
-		return -1;
-	}
-	if (other->ti_detached == true) {
-		//errno = EINVAL;  /* thread is not a joinable thread. */
-		return -1;
-	}
+	if (other == NULL)
+		return -ESRCH;  /* No thread with the ID thread could be found. */
+	if (other->ti_detached == true)
+		return -EINVAL;  /* thread is not a joinable thread. */
 
 	/* the other thread is not yet joinable, the current thread blocks */
 	if (other->ti_joinable == false) {
 		CURRENT_THREAD_INFO(current);
-		if (other->ti_joining) {
-			//errno = EINVAL;  /* Another thread is already waiting to join with this thread. */
-			return -1;
-		}
+		if (other->ti_joining)
+			return -EINVAL;  /* Another thread is already waiting to
+					    join with this thread. */
 		other->ti_joining = current;
 		sched_elect(SCHED_OPT_NONE);
 	}
-
 	*retval = other->ti_retval;
 
 	//XXX: free other's resources, interrupt stack
