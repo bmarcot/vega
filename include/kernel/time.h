@@ -17,17 +17,14 @@ enum timer_type {
 	TT_TIMER
 };
 
-struct timer {
-	timer_t timer_id; //FIXME: harvest storage, timer_id + timer_type
-	struct thread_info *owner;
-	u32 expire_clocktime;
-	struct list_head list;  /* unordered list */
-	enum timer_type timer_type;
-	void *timer_data;
-	char __timer_data[0];
+struct timer_common {
+	timer_t            timerid;  //FIXME: harvest storage, timer_id + timer_type
+	u32                expire_clocktime;
+	enum timer_type    timer_type;
+	union {
+		struct thread_info *owner;  /* for sleep */
+		struct sigevent *sigev;     /* for timer */
+	};
 };
-
-struct timer *find_timer_by_id(timer_t timer_id, struct list_head *timer_list);
-int reserve_timer_id(timer_t *timerid);
 
 #endif /* !KERNEL_TIME_H */
