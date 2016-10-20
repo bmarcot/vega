@@ -81,7 +81,7 @@ void *alloc_pages(unsigned long order)
 	page_idx = find_first_bit(page_bitmap[order], page_bitmap_sz[order]);
 	bitmap_clear_bit(page_bitmap[order], page_idx);
 
-	printk("Returning address %p\n", page_idx_to_addr(page_idx, order));
+	/* printk("Returning address %p\n", page_idx_to_addr(page_idx, order)); */
 
 	return page_idx_to_addr(page_idx, order);
 }
