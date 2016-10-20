@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/scheduler.h>
 #include <kernel/signal.h>
@@ -12,10 +13,45 @@
 #include "kernel.h"
 #include "systick.h"
 
-static LIST_HEAD(timers);  /* active_timers */
+/* unordered lists of active/inactive timers */
+static LIST_HEAD(timers);
 static LIST_HEAD(inactive_timers);
 
 extern u32 clocktime_in_msecs;
+
+struct timer {
+	struct timer_common common;
+	struct list_head list;
+	struct sigevent __sigev[0];
+};
+
+static struct timer *find_timer_by_id(timer_t timerid, struct list_head *timer_list)
+{
+	struct timer *pos;
+
+	list_for_each_entry(pos, timer_list, list) {
+		if (pos->common.timerid == timerid)
+			return pos;
+	}
+
+	return NULL;
+}
+
+static int reserve_timer_id(timer_t *timerid)
+{
+	static unsigned long timerid_bitmap = 0;
+	unsigned long bit;
+
+	if (timerid == NULL)
+		return -1;
+	bit = find_first_zero_bit(&timerid_bitmap, BITS_PER_LONG);
+	if (bit == BITS_PER_LONG)
+		return -1;
+	bitmap_set_bit(&timerid_bitmap, bit);
+	*timerid = bit;
+
+	return 0;
+}
 
 int __msleep(unsigned int msec)
 {
@@ -23,15 +59,15 @@ int __msleep(unsigned int msec)
 
 	/* XXX: 1 timer per thread, replace wih malloc/free when implementing
 	        timer_create/timer_arm/signals timer management. */
-	struct timer timerp;
+	struct timer timer;
 	CURRENT_THREAD_INFO(threadp);
 
-	printk("timer: create a timer t=%dms at %p\n", msec, &timerp);
+	printk("timer: create a timer t=%dms at %p\n", msec, &timer);
 
-	timerp.owner = threadp;
-	timerp.expire_clocktime = get_clocktime_in_msec() + msec;
-	timerp.timer_type = TT_SLEEP;
-	list_add(&timerp.list, &timers); // add to list of armed timer
+	timer.common.owner = threadp;
+	timer.common.expire_clocktime = get_clocktime_in_msec() + msec;
+	timer.common.timer_type = TT_SLEEP;
+	list_add(&timer.list, &timers); // add to list of armed timer
 	sched_dequeue(threadp);
 	sched_elect(SCHED_OPT_NONE);
 
@@ -48,17 +84,17 @@ void __systick(unsigned long clocktime_in_msec)
 	int goto_sleep = 0;
 
 	list_for_each_entry_safe(pos, pos1, &timers, list) {
-		if (pos->expire_clocktime < clocktime_in_msec) {
-			if (pos->timer_type == TT_SLEEP) {
+		if (pos->common.expire_clocktime < clocktime_in_msec) {
+			if (pos->common.timer_type == TT_SLEEP) {
 				goto_sleep++;
-				sched_enqueue(pos->owner);
+				sched_enqueue(pos->common.owner);
 				list_del(&pos->list);
 			} else {
 				printk("OK! OK! OK! timer exprired!\n");
 				/* FIXME: Sigevent handler is staged in current thread
 				   at the moment. It should be staged in timer's owner
 				   thread instead. */
-				do_sigevent(pos->timer_data);
+				do_sigevent(pos->common.sigev);
 				// if timer periodic
 				//    list_move()
 				// else
@@ -78,26 +114,24 @@ void __systick(unsigned long clocktime_in_msec)
 int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 		timer_t *timerid)
 {
-	struct timer *timerp;
-	CURRENT_THREAD_INFO(tip);
-
 	(void)clockid;
+
+	struct timer *timer;
 
 	printk("Sys Timer Create\n");
 
-	timerp = malloc(sizeof(struct timer) + sizeof(struct sigevent));
-	if (timerp == NULL)
-		return -1;
-	if (reserve_timer_id(&timerp->timer_id)) {
-		free(timerp);
+	timer = malloc(sizeof(struct timer) + sizeof(struct sigevent));
+	if (timer == NULL)
+		return -ENOMEM;
+	if (reserve_timer_id(&timer->common.timerid)) {
+		free(timer);
 		return -1;
 	}
-	*timerid = timerp->timer_id;
-	timerp->owner = tip;
-	timerp->timer_type = TT_TIMER;
-	timerp->timer_data = timerp->__timer_data;
-	memcpy(timerp->__timer_data, sevp, sizeof(struct sigevent));
-	list_add(&timerp->list, &inactive_timers); // add to list of non-armed timer
+	*timerid = timer->common.timerid;
+	timer->common.timer_type = TT_TIMER;
+	timer->common.sigev = timer->__sigev;
+	memcpy(timer->__sigev, sevp, sizeof(struct sigevent));
+	list_add(&timer->list, &inactive_timers); // add to list of non-armed timer
 
 	return 0;
 }
@@ -109,14 +143,14 @@ int timer_settime(timer_t timerid, int flags, int new_value)
 {
 	(void)flags;
 
-	struct timer *timerp = find_timer_by_id(timerid, &inactive_timers);
+	struct timer *timer = find_timer_by_id(timerid, &inactive_timers);
 
-	if (timerp == NULL) {
+	if (timer == NULL) {
 		printk("timer_settime: No timer found with id=%d\n", timerid);
 		return -EINVAL;
 	}
-	timerp->expire_clocktime = get_clocktime_in_msec() + new_value;
-	list_move(&timerp->list, &timers);
+	timer->common.expire_clocktime = get_clocktime_in_msec() + new_value;
+	list_move(&timer->list, &timers);
 
 	return 0;
 
