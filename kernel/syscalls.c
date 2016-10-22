@@ -1,7 +1,14 @@
+/*
+ * kernel/syscalls.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 #include <pthread.h>
 
 #include <kernel/cond.h>
 #include <kernel/mutex.h>
+#include <kernel/syscalls.h>
 
 int sys_pthread_yield(void);
 pthread_t sys_pthread_self(void);
@@ -35,46 +42,45 @@ int sys_mount();
 
 void *syscall_vector[SYS_MAX] = {
 	/* multithreading */
-	sys_pthread_yield,
-	sys_pthread_self,
-	sys_pthread_exit,
-	sys_pthread_create,
+	[SYS_PTHREAD_YIELD] = sys_pthread_yield,
+	[SYS_PTHREAD_SELF] = sys_pthread_self,
+	[SYS_PTHREAD_EXIT] = sys_pthread_exit,
+	[SYS_PTHREAD_CREATE] = sys_pthread_create,
+	[SYS_PTHREAD_JOIN] = sys_pthread_join,
 
 	/* mutex */
-	sys_pthread_mutex_lock,
-	sys_pthread_mutex_unlock,
-
-	/* timers */
-	sys_timer_create,
-
-	/* unix standards */
-	sys_sysconf,
-
-	sys_pthread_join,
+	[SYS_PTHREAD_MUTEX_LOCK] = sys_pthread_mutex_lock,
+	[SYS_PTHREAD_MUTEX_UNLOCK] = sys_pthread_mutex_unlock,
 
 	/* condition variable */
-	sys_pthread_cond_signal,
-	sys_pthread_cond_wait,
+	[SYS_PTHREAD_COND_SIGNAL] = sys_pthread_cond_signal,
+	[SYS_PTHREAD_COND_WAIT] = sys_pthread_cond_wait,
 
-	__msleep,
+	/* time */
+	[SYS_TIMER_CREATE] = sys_timer_create,
+	//[SYS_SETTIMER] = sys_settimer,
+	[SYS_MSLEEP] = __msleep,
 
-	/* signal handling */
-	sys_sigaction,
-	sys_raise,
-	sys_sigqueue,
+	/* unix standards */
+	[SYS_SYSCONF] = sys_sysconf,
+
+	/* signals */
+	[SYS_SIGACTION] = sys_sigaction,
+	[SYS_RAISE] = sys_raise,
+	[SYS_SIGQUEUE] = sys_sigqueue,
 
 	/* filesystem */
-	sys_open,
-	sys_read,
-	sys_write,
-	sys_seek,
-	sys_stat,
-	sys_mount,
+	[SYS_OPEN] = sys_open,
+	[SYS_READ] = sys_read,
+	[SYS_WRITE] = sys_write,
+	[SYS_SEEK] = sys_seek,
+	[SYS_STAT] = sys_stat,
+	[SYS_MOUNT] = sys_mount,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
 {
-	if (ix >= SYS_MAX)
+	if (ix >= SYS_MAX) //SYSMAX = ARRAY_SIZE(syscall_vect)
 		return -1;
 	syscall_vector[ix] = fn;
 
