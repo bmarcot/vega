@@ -248,7 +248,7 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 	vfsp->vfs_data = (void *)data;
 
 	/* create the mounted-over vnode with target pathname */
-	struct vnode *mvp = vn_alloc();
+	struct vnode *mvp = vnode_alloc();
 	if (mvp == NULL)
 		return -1;
 	mvp->v_path = (char *)target;

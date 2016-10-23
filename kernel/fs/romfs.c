@@ -124,7 +124,7 @@ int romfs_mount(struct vfs *vfsp, struct vnode *mvp)
 	INIT_LIST_HEAD(&mvp->v_head);
 
 	list_for_each_entry(ip, &fs_root->r_inodes, i_list) {
-		vp = vn_alloc();
+		vp = vnode_alloc();
 		if (vp == NULL)
 			return -1;
 		vp->v_data = ip;

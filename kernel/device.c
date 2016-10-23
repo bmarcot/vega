@@ -55,7 +55,7 @@ extern struct vnodeops cdev_vops;
 /* make a char device */
 int mkdev(struct device *dev, const char *devname)
 {
-	struct vnode *vn = vn_alloc();
+	struct vnode *vn = vnode_alloc();
 
 	if (vn == NULL)
 		return -1;
