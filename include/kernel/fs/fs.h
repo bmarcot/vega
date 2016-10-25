@@ -25,20 +25,15 @@ struct file {
 	struct vnode *f_vnode;
 };
 
-/* filedesc */
-
-int fd_find(void);
-void fd_reserve(int fd);
-void fd_release(int fd);
-
 /* syscall entry points */
 int     sys_open(const char *pathname, int flags);
 ssize_t sys_read(int fd, void *buf, size_t count);
 ssize_t sys_write(int fd, void *buf, size_t count);
 off_t   sys_seek(int fd, off_t offset, int whence);
 int     sys_stat(const char *pathname, struct stat *buf);
-int     sys_mount(const char *source, const char *target, const char *filesystemtype,
-		unsigned long mountflags, const void *data);
+int     sys_mount(const char *source, const char *target,
+		  const char *filesystemtype,
+		  unsigned long mountflags, const void *data);
 
 /* initialization, object creation, etc. */
 void fs_init(void);

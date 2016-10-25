@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#include <kernel/bitops.h>
 #include <kernel/fs/fs.h>
 #include <kernel/fs/pathname.h>
 #include <kernel/fs/vfs.h>
@@ -14,34 +15,35 @@
 
 #include "kernel.h"
 
-static int slots = 0;    //FIXME: limit the global number of files to 32
-
 //FIXME: the file table is shall be part of the process struct
 static struct file *file_table[FD_MAX];
 
 /* filedesc manipulation functions */
 
-int fd_find(void)
-{
-	for (int i = 0; i < FD_MAX; i++) {
-		if ((slots & (1 << i)) == 0)
-			return i;
-	}
+static unsigned long fd_bitmap = 0;
 
-	return -1;
+static int find_free_fd(void)
+{
+	unsigned long bit;
+
+	bit = find_first_zero_bit(&fd_bitmap, BITS_PER_LONG);
+	if (bit == BITS_PER_LONG)
+		return -1;
+
+	return 0;
 }
 
-void fd_reserve(int fd)
+static void reserve_fd(int fd)
 {
-	slots |= (1 << fd);
+	bitmap_set_bit(&fd_bitmap, fd);
 }
 
-void fd_release(int fd)
+static void release_fd(int fd)
 {
-	slots &= ~(1 << fd);
+	bitmap_clear_bit(&fd_bitmap, fd);
 }
 
-int fd_validate(int fd)
+static int validate_fd(int fd)
 {
 	if ((fd >= 0) && (fd < FD_MAX))
 		return 1;
@@ -104,19 +106,19 @@ int sys_open(const char *pathname, int flags)
 	printk("(fs) VOP_OPEN success\n");
 
 	/* find and reserve a file descriptor */
-	fd = fd_find();
+	fd = find_free_fd();
 	if (fd < 0) {
 		printk("(fs) can't find a free fd\n");
 		VOP_CLOSE(vp, 0);
 		return -1;
 	}
-	fd_reserve(fd);
+	reserve_fd(fd);
 
 	/* stitch together file structure, file descriptor, and vnode */
 	struct file *file;
 	file = malloc(sizeof(struct file));
 	if (file == NULL) { //FIXME: use kmem_cache
-		fd_release(fd);
+		release_fd(fd);
 		VOP_CLOSE(vp, 0);
 		return -1;
 	}
@@ -132,7 +134,7 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 	size_t n;
 	struct file *file;
 
-	if (!fd_validate(fd))
+	if (!validate_fd(fd))
 		return -1;
 	file = file_table[fd];
 	if (file == NULL)
@@ -148,7 +150,7 @@ ssize_t sys_write(int fd, void *buf, size_t count)
 	size_t n;
 	struct file *file;
 
-	if (!fd_validate(fd))
+	if (!validate_fd(fd))
 		return -1;
 	file = file_table[fd];
 	if (file == NULL)
