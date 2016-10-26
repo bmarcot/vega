@@ -4,10 +4,12 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
 #include <kernel/bitops.h>
+#include <kernel/errno-base.h>
 #include <kernel/fs/fs.h>
 #include <kernel/fs/pathname.h>
 #include <kernel/fs/vfs.h>
@@ -15,12 +17,10 @@
 
 #include "kernel.h"
 
-//FIXME: the file table is shall be part of the process struct
+//FIXME: the file table is part of the task structure
 static struct file *file_table[FD_MAX];
 
-/* filedesc manipulation functions */
-
-static unsigned long fd_bitmap = 0;
+static unsigned long fd_bitmap = 0; /* 32 files */
 
 static int find_free_fd(void)
 {
@@ -45,7 +45,7 @@ static void release_fd(int fd)
 
 static int validate_fd(int fd)
 {
-	if ((fd >= 0) && (fd < FD_MAX))
+	if ((fd >= 0) && (fd < FD_MAX) && (bitmap_get_bit(&fd_bitmap, fd)))
 		return 1;
 
 	return 0;
@@ -120,6 +120,7 @@ int sys_open(const char *pathname, int flags)
 	if (file == NULL) { //FIXME: use kmem_cache
 		release_fd(fd);
 		VOP_CLOSE(vp, 0);
+		errno = ENOMEM;
 		return -1;
 	}
 	file->f_vnode = vp;
@@ -134,11 +135,11 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 	size_t n;
 	struct file *file;
 
-	if (!validate_fd(fd))
+	if (!validate_fd(fd)) {
+		errno = EBADF;
 		return -1;
+	}
 	file = file_table[fd];
-	if (file == NULL)
-		return -1;
 	VOP_READ(file->f_vnode, buf, count, file->f_pos, &n);
 	file->f_pos += n;
 
@@ -150,11 +151,11 @@ ssize_t sys_write(int fd, void *buf, size_t count)
 	size_t n;
 	struct file *file;
 
-	if (!validate_fd(fd))
+	if (!validate_fd(fd)) {
+		errno = EBADF;
 		return -1;
+	}
 	file = file_table[fd];
-	if (file == NULL)
-		return -1;
 	VOP_WRITE(file->f_vnode, buf, count, file->f_pos, &n);
 	file->f_pos += n;
 
@@ -233,7 +234,8 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 	struct vfsdef *vfsdefp = vfsdef_find(filesystemtype);
 
 	if (vfsdefp == NULL) {
-		printk("(fs) can 't find VFS\n");
+	  printk("error: fs: filesystemtype not configured in the kernel\n");
+		errno = ENODEV;
 		return -1;
 	}
 	printk("(fs) Found VFS %s\n", filesystemtype);
@@ -244,15 +246,19 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 
 	/* create the VFS struct according to fstype */
 	struct vfs *vfsp = malloc(sizeof(struct vfs));
-	if (vfsp == NULL)
+	if (vfsp == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 	vfsp->vfs_ops = vfsdefp->vfsops;
 	vfsp->vfs_data = (void *)data;
 
 	/* create the mounted-over vnode with target pathname */
 	struct vnode *mvp = vnode_alloc();
-	if (mvp == NULL)
+	if (mvp == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 	mvp->v_path = (char *)target;
 	//mvp->v_data = (void *) data;
 
