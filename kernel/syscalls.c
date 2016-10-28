@@ -38,7 +38,7 @@ int sys_seek();
 int sys_stat();
 int sys_mount();
 
-#define SYS_MAX 32
+#define SYS_MAX 48
 
 void *syscall_vector[SYS_MAX] = {
 	/* multithreading */
