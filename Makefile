@@ -37,11 +37,11 @@ ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	SSRC += v7m-entry.S api/v7m-api.S
+	SSRC += v7m-entry.S api/v7m-api.S v7m-svcall.S
 	CSRC += v7m-faults.c
 endif
 
-SSRC += head.S common.S api/api.S
+SSRC += head.S api/api.S
 CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)		\
