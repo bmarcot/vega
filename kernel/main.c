@@ -47,6 +47,10 @@ static void v7m_init(void)
 	SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk
 		| SCB_SHCSR_MEMFAULTENA_Msk);
 
+	/* Configure the System Control Register to ensure 8-byte stack
+	   alignment */
+	SCB->CCR |= SCB_CCR_STKALIGN_Msk;
+
 	/* follow the architectural requirements */
 	__DSB();
 }
