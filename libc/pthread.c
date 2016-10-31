@@ -54,3 +54,45 @@ int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 
 	return 0;
 }
+
+/* syscall wrappers */
+
+#include <kernel/syscalls.h>
+#include "vega/syscalls.h"
+
+int pthread_yield(void)
+{
+	return do_syscall0(SYS_PTHREAD_YIELD);
+}
+
+pthread_t pthread_self(void)
+{
+	return (pthread_t)do_syscall0(SYS_PTHREAD_SELF);
+}
+
+void pthread_exit(void *retval)
+{
+	do_syscall1((void *)retval, SYS_PTHREAD_EXIT);
+}
+
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+		void *(*start_routine)(void *), void *arg)
+{
+	return do_syscall4((void *)thread, (void *)attr, (void *)start_routine,
+			arg, SYS_PTHREAD_CREATE);
+}
+
+int pthread_join(pthread_t thread, void **retval)
+{
+	return do_syscall2((void *)thread, (void *)retval, SYS_PTHREAD_JOIN);
+}
+
+int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+{
+	return do_syscall2((void *)cond, (void *)mutex, SYS_PTHREAD_COND_WAIT);
+}
+
+int pthread_cond_signal(pthread_cond_t *cond)
+{
+	return do_syscall1((void *)cond, SYS_PTHREAD_COND_SIGNAL);
+}

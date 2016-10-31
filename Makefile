@@ -41,7 +41,7 @@ else
 	CSRC += v7m-faults.c
 endif
 
-SSRC += head.S api/api.S
+SSRC += head.S $(wildcard libc/vega/*.S)
 CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)		\
