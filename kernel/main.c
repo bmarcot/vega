@@ -30,6 +30,7 @@ extern char __heap_start__;
 extern char __heap_end__;
 extern char __heap_size__;
 
+void cpu_do_idle(void);
 void *cpu_idle(void *);
 
 void __weak *main(__unused void *arg)
@@ -139,11 +140,13 @@ struct thread_info *start_kernel(void)
 	return thread_main;
 }
 
-void *cpu_idle(__unused void *arg)
+void *cpu_idle(void *arg)
 {
+	(void)arg;
+
 	printk("[[ idle_thread ]]\n");
 	for (;;)
-		;
+		cpu_do_idle();
 }
 
 void system_reset(__unused int reason)

@@ -150,3 +150,8 @@ ENTRY(sys_sigqueue)
 	str	r0, [r2, r1]
 	pop	{r6, r7, pc}
 ENDPROC(sys_sigqueue)
+
+ENTRY(cpu_do_idle)
+	wfi
+	bx	lr
+ENDPROC(cpu_do_idle)
