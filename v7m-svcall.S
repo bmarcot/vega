@@ -12,9 +12,7 @@
 	@ offsets in the frame to the registers saved on interrupt-entry
 	.set	R0, 0
 	.set    RET_ADDRESS, 24
-	.set	XPSR, 0x1c
-
-	.global syscall_return
+	.set	xPSR, 0x1c
 
 ENTRY(svcall)
 	push	{lr}
@@ -48,7 +46,7 @@ $3:	ldr	lr, =syscall_vector
 	blx	lr
 	b	0f
 
-$4:	ldr	lr, [r12, #0x1c]	@ is stack 4 or 8-byte aligned?
+$4:	ldr	lr, [r12, #xPSR]	@ check stack alignment
 	tst	lr, #1 << 9
 	ite	eq
 	ldreq	r12, [r12, #0x20]	@ load syscall id
@@ -58,7 +56,7 @@ $4:	ldr	lr, [r12, #0x1c]	@ is stack 4 or 8-byte aligned?
 	blx	lr
 	b	0f
 
-$5:	ldr	lr, [r12, #0x1c]	@ is stack 4 or 8-byte aligned?
+$5:	ldr	lr, [r12, #xPSR]	@ check stack alignment
 	tst	lr, #1 << 9
 	ite	eq
 	addeq	r12, #0x20
@@ -70,7 +68,7 @@ $5:	ldr	lr, [r12, #0x1c]	@ is stack 4 or 8-byte aligned?
 	blx	lr
 	add	sp, #4
 
-	// we dont care about the scratch registers at this point
+	.global syscall_return
 syscall_return:
 0:	mrs	r1, psp
 	str	r0, [r1, #R0]           @ update return value in exception frame
