@@ -227,10 +227,6 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 	(void)source;
 	(void)mountflags;
 
-	//XXX: data has been pushed to thread stack, not kernel stack
-	//XXX: 0x20 == INTERRUPT FRAME pushed by the CPU
-	data = (void *)(*(unsigned long *)(__get_PSP() + 0x20));
-
 	struct vfsdef *vfsdefp = vfsdef_find(filesystemtype);
 
 	if (vfsdefp == NULL) {
