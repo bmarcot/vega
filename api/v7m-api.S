@@ -12,8 +12,9 @@ ENTRY(pthread_mutex_lock)
 	movs	r2, #0
 0:	ldrex	r1, [r0]
 	tst	r1, r1
-	itt	pl
-	svcpl	#SYS_PTHREAD_MUTEX_LOCK
+	ittt	pl
+	movpl	r1, #SYS_PTHREAD_MUTEX_LOCK
+	svcpl	#1
 	bxpl	lr
 	strex	r1, r2, [r0]
 	tst	r1, r1
@@ -46,8 +47,9 @@ ENTRY(pthread_mutex_unlock)
 	movs	r2, #-1
 0:	ldrex	r1, [r0]
 	tst	r1, r1
-	itt	ne
-	svcne	#SYS_PTHREAD_MUTEX_UNLOCK
+	ittt	ne
+	movne	r1, #SYS_PTHREAD_MUTEX_UNLOCK
+	svcne	#1
 	bxne	lr
 	strex	r1, r2, [r0]
 	tst	r1, r1
