@@ -16,56 +16,56 @@
 
 ENTRY(svcall)
 	push	{lr}
-	mrs	r12, psp
-	ldr	lr, [r12, #RET_ADDRESS]
-	ldrb	lr, [lr, #-2]           @ address of the SVC call site
-	tbb	[pc, lr]
+	mrs	lr, psp
+	ldr	r12, [lr, #RET_ADDRESS]
+	ldrb	r12, [r12, #-2]		@ address of the SVC call site
+	tbb	[pc, r12]
 
 0:	.irpc	argc, 012345
 	.byte	($\argc - 0b) / 2
 	.endr
 	.balign 2
 
-$0:	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r0, lsl #2]
-	blx	lr
+$0:	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, r0, lsl #2]
+	blx	r12
 	b	0f
 
-$1:	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r1, lsl #2]
-	blx	lr
+$1:	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, r1, lsl #2]
+	blx	r12
 	b	0f
 
-$2:	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r2, lsl #2]
-	blx	lr
+$2:	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, r2, lsl #2]
+	blx	r12
 	b	0f
 
-$3:	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r3, lsl #2]
-	blx	lr
+$3:	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, r3, lsl #2]
+	blx	r12
 	b	0f
 
-$4:	ldr	lr, [r12, #xPSR]	@ check stack alignment
-	tst	lr, #1 << 9
+$4:	ldr	r12, [lr, #xPSR]	@ test stack alignment
+	tst	r12, #1 << 9
 	ite	eq
-	ldreq	r12, [r12, #0x20]	@ load syscall id
-	ldrne	r12, [r12, #0x24]
-	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r12, lsl #2]
-	blx	lr
+	ldreq	lr, [lr, #0x20]		@ load syscall id
+	ldrne	lr, [lr, #0x24]
+	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, lr, lsl #2]
+	blx	r12
 	b	0f
 
-$5:	ldr	lr, [r12, #xPSR]	@ check stack alignment
-	tst	lr, #1 << 9
+$5:	ldr	r12, [lr, #xPSR]	@ test stack alignment
+	tst	r12, #1 << 9
 	ite	eq
-	addeq	r12, #0x20
-	addne	r12, #0x24
-	ldm	r12, {r12, lr}		@ load syscall id, arg4
-	push	{lr}			@ copy arg4 to kernel stack
-	ldr	lr, =syscall_vector
-	ldr.w	lr, [lr, r12, lsl #2]
-	blx	lr
+	addeq	lr, #0x20
+	addne	lr, #0x24
+	ldm	lr, {r12, lr}		@ load syscall id, arg4
+	push	{r12}			@ copy arg4 to kernel stack
+	ldr	r12, =syscall_vector
+	ldr.w	r12, [r12, lr, lsl #2]
+	blx	r12
 	add	sp, #4
 
 	.global syscall_return
