@@ -16,6 +16,9 @@ int timer_create(clockid_t clockid, struct sigevent *sevp,
 /* int timer_settime(timer_t timerid, int flags, */
 /* 		const struct itimerspec *new_value, */
 /* 		struct itimerspec * old_value) */
-/* int timer_settime(timer_t timerid, int flags, int new_value) */
-/* { */
-/* } */
+int timer_settime(timer_t timerid, int flags, int new_value)
+{
+	return do_syscall3((void *)timerid, (void *)flags, (void *)new_value,
+			SYS_TIMER_SETTIME);
+
+}

@@ -14,6 +14,7 @@ xs = [
 
     # <time.h>
     'timer_create',
+    'timer_settime',
 
     # <unistd.h>
     'msleep',
