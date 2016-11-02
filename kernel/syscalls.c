@@ -41,7 +41,7 @@ int sys_mount();
 
 #define SYS_MAX 48
 
-void *syscall_vector[SYS_MAX] = {
+void *syscall_vect[SYS_MAX] = {
 	//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
 	//XXX: Change definitions in scripts/sysc.py
 	//XXX: Created on 2016-11-02 16:24
@@ -73,7 +73,7 @@ int syscall_register(unsigned ix, void *(*fn)())
 {
 	if (ix >= SYS_MAX) //SYSMAX = ARRAY_SIZE(syscall_vect)
 		return -1;
-	syscall_vector[ix] = fn;
+	syscall_vect[ix] = fn;
 
 	return 0;
 }

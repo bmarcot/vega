@@ -26,22 +26,22 @@ ENTRY(svcall)
 	.endr
 	.balign 2
 
-$0:	ldr	r12, =syscall_vector
+$0:	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, r0, lsl #2]
 	blx	r12
 	b	0f
 
-$1:	ldr	r12, =syscall_vector
+$1:	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, r1, lsl #2]
 	blx	r12
 	b	0f
 
-$2:	ldr	r12, =syscall_vector
+$2:	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, r2, lsl #2]
 	blx	r12
 	b	0f
 
-$3:	ldr	r12, =syscall_vector
+$3:	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, r3, lsl #2]
 	blx	r12
 	b	0f
@@ -51,7 +51,7 @@ $4:	ldr	r12, [lr, #xPSR]	@ test stack alignment
 	ite	eq
 	ldreq	lr, [lr, #0x20]		@ load syscall id
 	ldrne	lr, [lr, #0x24]
-	ldr	r12, =syscall_vector
+	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, lr, lsl #2]
 	blx	r12
 	b	0f
@@ -63,7 +63,7 @@ $5:	ldr	r12, [lr, #xPSR]	@ test stack alignment
 	addne	lr, #0x24
 	ldm	lr, {r12, lr}		@ load syscall id, arg4
 	push	{r12}			@ copy arg4 to kernel stack
-	ldr	r12, =syscall_vector
+	ldr	r12, =syscall_vect
 	ldr.w	r12, [r12, lr, lsl #2]
 	blx	r12
 	add	sp, #4
