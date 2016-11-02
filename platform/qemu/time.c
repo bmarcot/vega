@@ -135,7 +135,7 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 /* int timer_settime(timer_t timerid, int flags, */
 /* 		const struct itimerspec *new_value, */
 /* 		struct itimerspec * old_value) */
-int timer_settime(timer_t timerid, int flags, int new_value)
+int sys_timer_settime(timer_t timerid, int flags, int new_value)
 {
 	(void)flags;
 
