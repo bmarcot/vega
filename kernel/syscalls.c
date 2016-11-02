@@ -19,7 +19,7 @@ void sys_pthread_join(pthread_t, void **);
 int sys_timer_create(unsigned int msecs);
 long sys_sysconf(int name);
 
-void __msleep(unsigned int);
+int sys_msleep();
 
 /* signal declarations */
 
@@ -41,35 +41,24 @@ int sys_mount();
 #define SYS_MAX 48
 
 void *syscall_vector[SYS_MAX] = {
-	/* multithreading */
-	[SYS_PTHREAD_YIELD] = sys_pthread_yield,
-	[SYS_PTHREAD_SELF] = sys_pthread_self,
+	//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
+	//XXX: Change definitions in scripts/sysc.py
+	//XXX: Created on 2016-11-02 15:48
 	[SYS_PTHREAD_EXIT] = sys_pthread_exit,
+	[SYS_PTHREAD_SELF] = sys_pthread_self,
+	[SYS_PTHREAD_YIELD] = sys_pthread_yield,
 	[SYS_PTHREAD_CREATE] = sys_pthread_create,
 	[SYS_PTHREAD_JOIN] = sys_pthread_join,
-
-	/* mutex */
 	[SYS_PTHREAD_MUTEX_LOCK] = sys_pthread_mutex_lock,
 	[SYS_PTHREAD_MUTEX_UNLOCK] = sys_pthread_mutex_unlock,
-
-	/* condition variable */
 	[SYS_PTHREAD_COND_SIGNAL] = sys_pthread_cond_signal,
 	[SYS_PTHREAD_COND_WAIT] = sys_pthread_cond_wait,
-
-	/* time */
 	[SYS_TIMER_CREATE] = sys_timer_create,
-	//[SYS_SETTIMER] = sys_settimer,
-	[SYS_MSLEEP] = __msleep,
-
-	/* unix standards */
+	[SYS_MSLEEP] = sys_msleep,
 	[SYS_SYSCONF] = sys_sysconf,
-
-	/* signals */
 	[SYS_SIGACTION] = sys_sigaction,
 	[SYS_RAISE] = sys_raise,
 	[SYS_SIGQUEUE] = sys_sigqueue,
-
-	/* filesystem */
 	[SYS_OPEN] = sys_open,
 	[SYS_READ] = sys_read,
 	[SYS_WRITE] = sys_write,
