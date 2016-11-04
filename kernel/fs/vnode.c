@@ -5,14 +5,13 @@
  */
 
 #include <stdlib.h>
-#include <string.h>
 
 #include <kernel/fs/vnode.h>
 
 int vnode_reinit(struct vnode *vn)
 {
-	memset(vn, 0, sizeof(struct vnode));
 	vn->v_type = VNON;
+	vn->v_count = 0;
 	INIT_LIST_HEAD(&vn->v_head);
 
 	return 0;
@@ -41,11 +40,10 @@ void vnode_free(struct vnode *vn)
 	free(vn);
 }
 
-//XXX: is it a helper function?
-int vn_insert(struct vnode *vp, struct vnode *vp_head)
+int vnode_attach(struct vnode *vn, struct vnode *parent_vn)
 {
-	list_add(&vp->v_list, &vp_head->v_head);
-	vp->v_parent = vp_head;
+	list_add(&vn->v_list, &parent_vn->v_head);
+	vn->v_parent = parent_vn;
 
 	return 0;
 }

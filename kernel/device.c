@@ -64,7 +64,7 @@ int mkdev(struct device *dev, const char *devname)
 	vn->v_ops = dev->char_dev->cdev_vops;
 	vn->v_data = dev; /* union { v_data,  v_dev}; */
 	INIT_LIST_HEAD(&vn->v_head);
-	vn_insert(vn, &vn_dev);
+	vnode_attach(vn, &vn_dev);
 
 	return 0;
 }

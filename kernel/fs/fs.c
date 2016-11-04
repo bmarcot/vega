@@ -270,7 +270,7 @@ extern void devfs_mem_init(void);
 
 void init_filesystem(void)
 {
-	vn_insert(&vn_dev, &vn_root);
+	vnode_attach(&vn_dev, &vn_root);
 	devfs_mem_init();
 	printk("$ ls\n");
 	ls();

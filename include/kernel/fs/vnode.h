@@ -61,14 +61,12 @@ struct vattr {
 	off_t va_size;
 };
 
-/* vnode manipulations */
+/* vnode manipulation functions */
 
 struct vnode *vnode_alloc(void);
 void vnode_free(struct vnode *vn);
 int vnode_reinit(struct vnode *vn);
-
-//XXX: Is it a helper function?
-int vn_insert(struct vnode *vp, struct vnode *vp_head);
+int vnode_attach(struct vnode *vn, struct vnode *parent_vn);
 
 /* vnode operations */
 

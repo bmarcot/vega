@@ -117,6 +117,6 @@ void devfs_mem_init(void)
 		memvns[i].v_type = VCHR;
 		INIT_LIST_HEAD(&memvns[i].v_head);
 		memvns[i].v_ops = devlist[i].vops;
-		vn_insert(&memvns[i], &vn_dev);
+		vnode_attach(&memvns[i], &vn_dev);
 	}
 }
