@@ -36,7 +36,7 @@ int     sys_mount(const char *source, const char *target,
 		  unsigned long mountflags, const void *data);
 
 /* initialization, object creation, etc. */
-void fs_init(void);
+void init_filesystem(void);
 
 /* debug functions */
 void ls(void);

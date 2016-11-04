@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
+#include <kernel/fs/fs.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
@@ -134,6 +135,8 @@ struct thread_info *start_kernel(void)
 		&__early_stack_start__ - &__early_stack_end__,
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
+
+	init_filesystem();
 
 	printk("Kernel bootstrap done.\n--\n");
 

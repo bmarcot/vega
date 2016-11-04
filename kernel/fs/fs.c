@@ -45,7 +45,7 @@ static void release_fd(int fd)
 
 static int validate_fd(int fd)
 {
-	if ((fd >= 0) && (fd < FD_MAX) && (bitmap_get_bit(&fd_bitmap, fd)))
+	if ((fd >= 0) && (fd < FD_MAX) && bitmap_get_bit(&fd_bitmap, fd))
 		return 1;
 
 	return 0;
@@ -268,10 +268,13 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 
 extern void devfs_mem_init(void);
 
-void fs_init(void)
+void init_filesystem(void)
 {
 	vn_insert(&vn_dev, &vn_root);
 	devfs_mem_init();
+	printk("$ ls\n");
+	ls();
+	printk("\n");
 }
 
 /*
@@ -292,27 +295,26 @@ void fs_init(void)
      VFS_MOUNT(...)
 */
 
-/* some tools: ls, touch, rm.. */
+/* fstools -- ls, touch, rm, mkdir.. */
 
-static void print_offset(int offset)
-{
-	for (int u = 0; u < offset - 1; u++)
-		printk("    ");
-}
+#include <string.h>
 
-/* Recursive function! Run this in a thread or in a coroutine. */
-static int ls_aux(struct vnode *vn, int offset)
+/* Recursive function! Careful with the stack, run from thread
+ * with a big enough stack, or from coroutine. */
+static int ls_aux(struct vnode *vn, char *pathbuf)
 {
+	int pathlen;
 	struct vnode *vp;
 
-	if (offset) {
-		print_offset(offset);
-		printk("|-- ");
-	}
-	printk("%s [%d]\n", vn->v_path, vn->v_type);
+	if (strlen(pathbuf))
+		printk("%s\n", pathbuf);
+	else
+		printk("/\n");
 	if (vn->v_type == VDIR) {
 		list_for_each_entry(vp, &vn->v_head, v_list) {
-			ls_aux(vp, offset + 1);
+			pathlen = strlen(pathbuf);
+			ls_aux(vp, strcat(strcat(pathbuf, "/"),	vp->v_path));
+			pathbuf[pathlen] = '\0';
 		}
 	}
 
@@ -321,6 +323,8 @@ static int ls_aux(struct vnode *vn, int offset)
 
 void ls(void)
 {
-	ls_aux(&vn_root, 0);
+	char pathbuf[128] = {[0] = 0};
+
+	ls_aux(&vn_root, pathbuf);
 }
 
