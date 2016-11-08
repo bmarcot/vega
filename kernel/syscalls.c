@@ -16,6 +16,7 @@ void sys_pthread_exit(void *);
 int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg);
 void sys_pthread_join(pthread_t, void **);
+int sys_pthread_detach();
 int sys_timer_create(unsigned int msecs);
 int sys_timer_settime();
 long sys_sysconf(int name);
@@ -44,12 +45,13 @@ int sys_mount();
 void *syscall_vect[SYS_MAX] = {
 	//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
 	//XXX: Change definitions in scripts/sysc.py
-	//XXX: Created on 2016-11-02 16:24
+	//XXX: Created on 2016-11-08 16:24
 	[SYS_PTHREAD_EXIT] = sys_pthread_exit,
 	[SYS_PTHREAD_SELF] = sys_pthread_self,
 	[SYS_PTHREAD_YIELD] = sys_pthread_yield,
 	[SYS_PTHREAD_CREATE] = sys_pthread_create,
 	[SYS_PTHREAD_JOIN] = sys_pthread_join,
+	[SYS_PTHREAD_DETACH] = sys_pthread_detach,
 	[SYS_PTHREAD_MUTEX_LOCK] = sys_pthread_mutex_lock,
 	[SYS_PTHREAD_MUTEX_UNLOCK] = sys_pthread_mutex_unlock,
 	[SYS_PTHREAD_COND_SIGNAL] = sys_pthread_cond_signal,

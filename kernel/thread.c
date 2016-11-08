@@ -237,6 +237,11 @@ void sys_pthread_exit(void *retval)
 	thread_exit(retval);
 }
 
+int sys_pthread_detach(pthread_t thread)
+{
+	return thread_detach(thread);
+}
+
 static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
