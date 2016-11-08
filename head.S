@@ -1,12 +1,9 @@
-#include "arch-v7m.h"
 #include "linux/linkage.h"
 
 	.syntax unified
 	.thumb
 
 #include "../pseudo.S"
-
-	.set THUMB_MODE, 1
 
 	.section ".vector", "a"
 	@ the vector must be aligned on 128 bytes (see VTOR reserved
@@ -103,26 +100,26 @@
 	.text
 
 ENTRY(reset)
-	movl	r0, V7M_SCB_BASE
+	movl	r0, 0xe000ed00			/* SCB_BASE */
 
 	@ switch to Handler_Mode
 	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
-	str	r1, [r0, #V7M_VTOR]
+	str	r1, [r0, #8]			/* update VTOR */
 	ldr	r2, =0f
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-	movs	r3, #THUMB_MODE
+	movs	r3, #1				/* set thumb bit */
 	orrs	r2, r3
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	orr	r2, #THUMB_MODE
+	orr	r2, #1				/* set thumb bit */
 #endif
-	str	r2, [r1, #V7M_VTOR_OFFSET_SVC]
+	str	r2, [r1, #11 * 4]		/* offset to SVC entry */
 	dsb					/* [1] */
 	svc	#0
 0:
 
 	@ restore the early vector
 	ldr	r1, =__vector_start__
-	str	r1, [r0, #V7M_VTOR]
+	str	r1, [r0, #8]			/* restore VTOR */
 	dsb					/* [1] */
 
 	@ Copy the .data section from Flash to RAM.
