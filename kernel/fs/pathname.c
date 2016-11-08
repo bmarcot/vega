@@ -82,3 +82,38 @@ int lookuppn(struct vnode *dvp, struct vnode **vpp, const char *pathname)
 	return 0;
 }
 
+#include <stdlib.h>
+
+char *dirname(char *path)
+{
+	int len = strlen(path);
+	char *p, *dirpath = malloc(len);
+
+	if (!dirpath)
+		return NULL;
+	strcpy(dirpath, path);
+	p = dirpath + len - 1;
+	while (*p != '/')
+		p--;
+	*p = '\0';
+
+	return dirpath;
+}
+
+#define FILENAME_MAX 32
+
+char *basename(char *path)
+{
+	int len = strlen(path);
+	char *name = malloc(FILENAME_MAX);
+
+	if (!name)
+		return NULL;
+	path += len - 1;
+	while (*path != '/') {
+		path--;
+	}
+	strcpy(name, path + 1);
+
+	return name;
+}
