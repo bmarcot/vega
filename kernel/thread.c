@@ -1,3 +1,9 @@
+/*
+ * kernel/thread.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 #include <pthread.h>  /* include pthread.h because lr loaded with pthread_exit() */
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +23,7 @@
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 
-static LIST_HEAD(thread_list);
+static LIST_HEAD(thread_list); /* global linked-list of all threads */
 
 static struct kernel_context_regs *build_intr_stack(void)
 {
@@ -30,24 +36,14 @@ static struct kernel_context_regs *build_intr_stack(void)
 	memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
 	if (memp == NULL)
 		return NULL;
-	kcr = (void *)((u32) memp + INTR_STACK_SIZE - sizeof (struct kernel_context_regs));
-#ifndef DEBUG
+	kcr = (struct kernel_context_regs *)
+		((unsigned long)memp + INTR_STACK_SIZE - sizeof(struct kernel_context_regs));
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-	memset(kcr->r4_r7, 0, 4 * sizeof (u32));
-	memset(kcr->r8_r11, 0, 4 * sizeof (u32));
+	memset(kcr->r4_r7, 0, 4 * sizeof(u32));
+	memset(kcr->r8_r11, 0, 4 * sizeof(u32));
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	memset(kcr->r4_r11, 0, 8 * sizeof (u32));
+	memset(kcr->r4_r11, 0, 8 * sizeof(u32));
 #endif
-#else
-	kcr->gprs[0] = 0xcafe0004;
-	kcr->gprs[1] = 0xcafe0005;
-	kcr->gprs[2] = 0xcafe0006;
-	kcr->gprs[3] = 0xcafe0007;
-	kcr->gprs[4] = 0xcafe0008;
-	kcr->gprs[5] = 0xcafe0009;
-	kcr->gprs[5] = 0xcafe0010;
-	kcr->gprs[7] = 0xcafe0011;
-#endif /* !DEBUG */
 	kcr->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
 	return kcr;
@@ -62,23 +58,17 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 	struct thread_context_regs *tcr;
 
 	memp = alloc_pages(size_to_page_order(stacksize));
-	if (memp == NULL)
+	if (!memp)
 		return NULL;
-	tcr = (void *)((u32) memp + stacksize - sizeof(struct thread_context_regs));
-	tcr->r0_r3__r12[0] = (u32) arg;
-#ifndef DEBUG
-	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof (u32));
-#else
-	printk("thread sp = %p\n", ts);
-	tcr->gprs[1] = 0xcafe0001;
-	tcr->gprs[2] = 0xcafe0002;
-	tcr->gprs[3] = 0xcafe0003;
-	tcr->gprs[4] = 0xcafe0012;
-#endif /* !DEBUG */
+	tcr = (struct thread_context_regs*)
+		((unsigned long)memp + stacksize - sizeof(struct thread_context_regs));
+	tcr->r0_r3__r12[0] = (u32)arg;
+	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof(u32));
+
 	/* Calls pthread_exit() on return keyword. This might need to be fixed at
 	   runtime in the future.    */
-	tcr->lr = (u32) pthread_exit /* & (u32) ~1 */;
-	tcr->ret_addr = (u32) start_routine & 0xfffffffe;
+	tcr->lr = (u32)pthread_exit;
+	tcr->ret_addr = (u32)start_routine & 0xfffffffe;
 	tcr->xpsr = xPSR_T_Msk;
 
 	return tcr;
@@ -91,14 +81,16 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	struct kernel_context_regs *kcr;
 	static int thread_count = 0;
 
-	if ((kcr = build_intr_stack()) == NULL)
+	kcr = build_intr_stack();
+	if (!kcr)
 		return NULL;
-	thread = (struct thread_info *) align((u32) kcr, INTR_STACK_SIZE);
-	if ((thread->ti_mach.mi_psp = (u32) build_thrd_stack(start_routine, arg, stacksize)) == 0) {
+	thread = (struct thread_info *)align((unsigned long)kcr, INTR_STACK_SIZE);
+	thread->ti_mach.mi_psp = (u32)build_thrd_stack(start_routine, arg, stacksize);
+	if (!thread->ti_mach.mi_psp) {
 		//FIXME: free(kcr);
 		return NULL;
 	}
-	thread->ti_mach.mi_msp = (u32) kcr;
+	thread->ti_mach.mi_msp = (u32)kcr;
 	thread->ti_mach.mi_priv = priv;
 	thread->ti_id = thread_count++;
 	thread->ti_joinable = false;
@@ -238,19 +230,19 @@ static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_
 
 	/* get the thread's stack size */
 	sys_getrlimit(RLIMIT_STACK, &stacklimit);
-	if (attr) {
+	if (attr)
 		stacksize = min(attr->stacksize, stacklimit.rlim_max);
-	} else {
+	else
 		stacksize = stacklimit.rlim_cur;
-	}
 
 	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
 	   to this process user-space.    */
-	if ((thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize)) == NULL) {
+	thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
+	if (!thread_info) {
 		create_ret_code = -1;
 		return;
 	}
-	*thread = (pthread_t) thread_info->ti_id;
+	*thread = (pthread_t)thread_info->ti_id;
 
 	sched_enqueue(thread_info);
 }
