@@ -127,6 +127,7 @@ int thread_yield(void);
 int thread_self(void);
 void thread_exit(void *);
 int thread_set_priority(struct thread_info *thread, int priority);
+int thread_detach(pthread_t thread);
 
 //FIXME: this proc should be in an asm/machine source file
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */

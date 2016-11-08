@@ -206,6 +206,16 @@ int thread_join(pthread_t thread, void **retval)
 	return 0;
 }
 
+int thread_detach(pthread_t thread)
+{
+	struct thread_info *tip;
+
+	tip = find_thread_by_id(thread);
+	tip->ti_detached = true;
+
+	return 0;
+}
+
 /* pthread interface */
 
 static ucontext_t main_context, pthread_context;
