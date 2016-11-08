@@ -220,6 +220,8 @@ int sys_stat(const char *pathname, struct stat *buf)
 //XXX: needed to retrieve fourth arg in a syscall
 #include "cmsis/arm/ARMCM4.h"
 
+int mkdir(const char *pathname);
+
 /* Linux protoype */
 int sys_mount(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data)
@@ -228,6 +230,7 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 	(void)mountflags;
 
 	struct vfsdef *vfsdefp = vfsdef_find(filesystemtype);
+	struct vnode *mvp;
 
 	if (vfsdefp == NULL) {
 	  printk("error: fs: filesystemtype not configured in the kernel\n");
@@ -249,19 +252,13 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 	vfsp->vfs_ops = vfsdefp->vfsops;
 	vfsp->vfs_data = (void *)data;
 
-	/* create the mounted-over vnode with target pathname */
-	struct vnode *mvp = vnode_alloc();
-	if (mvp == NULL) {
-		errno = ENOMEM;
+	/* allocate the mounted-over vnode, with target pathname */
+	if (mkdir(target))
 		return -1;
-	}
-	mvp->v_path = (char *)target;
-	//mvp->v_data = (void *) data;
+	lookuppn(&vn_root, &mvp, target);
 
 	/* call the filesystem-dependent mount function */
 	VFS_MOUNT(vfsp, mvp);
-
-	list_add(&mvp->v_list, &vn_root.v_head);
 
 	return 0;
 }
