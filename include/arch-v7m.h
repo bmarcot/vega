@@ -1,10 +1,6 @@
 #ifndef ARCH_V7M_H
 #define ARCH_V7M_H
 
-#define V7M_EXC_RETURN_HANDLER_MAIN   0xfffffff1
-#define V7M_EXC_RETURN_THREAD_MAIN    0xfffffff9
-#define V7M_EXC_RETURN_THREAD_PROCESS 0xfffffffd
-
 #define V7M_XPSR_T (1 << 24)
 
 #define V7M_SCB_BASE 0xe000ed00

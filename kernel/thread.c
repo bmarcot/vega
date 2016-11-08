@@ -20,7 +20,6 @@
 #include <kernel/v7m-helper.h>
 
 #include "utils.h"
-#include "arch-v7m.h"
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
 
