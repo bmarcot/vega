@@ -92,6 +92,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	}
 	thread->ti_mach.mi_msp = (u32)kcr;
 	thread->ti_mach.mi_priv = priv;
+	thread->ti_stacksize = stacksize;
 	thread->ti_id = thread_count++;
 	thread->ti_joinable = false;
 	thread->ti_joining = NULL;
@@ -137,7 +138,9 @@ void thread_exit(void *retval)
 	printk("thread: id=%d is exiting with retval=%d\n", current->ti_id, (int) retval);
 #endif
 
-	//XXX: free the thread stack
+	/* free thread stack memory */
+	free_pages(align(current->ti_mach.mi_psp, current->ti_stacksize),
+		size_to_page_order(current->ti_stacksize));
 
 	if (current->ti_detached == false) {
 		current->ti_retval = retval;
@@ -146,7 +149,10 @@ void thread_exit(void *retval)
 		else
 			current->ti_joinable = true;
 	} else {
-		//XXX: free all resources, including the thread info struct (implicitly the interrupt stack)
+		/* We are freeing the stack we are running on, no kernel preemption
+		 * is allowed until we call sched_elect().  */
+		free_pages((unsigned long)current,
+			size_to_page_order(INTR_STACK_SIZE));
 	}
 
 	sched_elect(SCHED_OPT_RESTORE_ONLY);

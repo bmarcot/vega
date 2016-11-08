@@ -26,6 +26,7 @@ struct thread_info {
 	int ti_priority;
 	int ti_id;
 	int ti_state;
+	size_t ti_stacksize; /* user thread stacksize */
 
 	struct list_head ti_list;  /* global list of threads */
 	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
