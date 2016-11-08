@@ -15,6 +15,7 @@
 #include <kernel/errno-base.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
+#include <kernel/v7m-helper.h>
 
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"
@@ -34,16 +35,6 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 	void *stack_pointer = v7m_alloca_thread_context(tip, len);
 
 	memcpy(stack_pointer, data, len);
-}
-
-static inline void *v7m_set_thumb_bit(void *addr)
-{
-    return (void *)((unsigned long)addr | 1ul);
-}
-
-static inline void *v7m_clear_thumb_bit(void *addr)
-{
-    return (void *)((unsigned long)addr & ~1ul);
 }
 
 static void stage_sighandler(struct sigaction *sigaction, int sig)
