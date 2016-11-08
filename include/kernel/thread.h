@@ -105,7 +105,7 @@ struct kernel_context_regs {
 	//       u32 r8__r12[5];
 	u32 r4_r7[4];
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	u32 r4_r11[8];  /* r4 to r11, zero-filled */
+	u32 r4_r12[9];  /* r4 to r12, zero-filled */
 #endif
 	u32 lr;         /* initially loaded with EXC_RETURN value */
 };

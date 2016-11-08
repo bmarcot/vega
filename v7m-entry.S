@@ -21,7 +21,7 @@
 	@ (r1), r2, r3, r12: scratch registers
 ENTRY(switch_to)
 	/* save previous thread context */
-	push	{r4-r11, lr}
+	push	{r4-r12, lr}
 	mov	r2, sp
 	mrs	r3, psp
 	stm	r1!, {r2, r3}
@@ -32,7 +32,7 @@ ENTRY(thread_restore)
 	mov	sp, r1
 	msr	psp, r2
 	msr	control, r3		@ write to SPSEL is ignored in Handler_Mode
-	pop	{r4-r11, pc}
+	pop	{r4-r12, pc}
 ENDPROC(thread_restore)
 ENDPROC(switch_to)
 

@@ -42,7 +42,7 @@ static struct kernel_context_regs *build_intr_stack(void)
 	memset(kcr->r4_r7, 0, 4 * sizeof(u32));
 	memset(kcr->r8_r11, 0, 4 * sizeof(u32));
 #elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	memset(kcr->r4_r11, 0, 8 * sizeof(u32));
+	memset(kcr->r4_r12, 0, 9 * sizeof(u32));
 #endif
 	kcr->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
