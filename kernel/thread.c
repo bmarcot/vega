@@ -17,6 +17,7 @@
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
+#include <kernel/v7m-helper.h>
 
 #include "utils.h"
 #include "arch-v7m.h"
@@ -68,7 +69,7 @@ static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void 
 	/* Calls pthread_exit() on return keyword. This might need to be fixed at
 	   runtime in the future.    */
 	tcr->lr = (u32)pthread_exit;
-	tcr->ret_addr = (u32)start_routine & 0xfffffffe;
+	tcr->ret_addr = (u32)v7m_clear_thumb_bit(start_routine);
 	tcr->xpsr = xPSR_T_Msk;
 
 	return tcr;
