@@ -321,10 +321,46 @@ static int ls_aux(struct vnode *vn, char *pathbuf)
 	return 0;
 }
 
+#define PATH_MAX 128
+
 void ls(void)
 {
-	char pathbuf[128] = {[0] = 0};
+	char pathbuf[PATH_MAX] = {[0] = 0};
 
 	ls_aux(&vn_root, pathbuf);
 }
 
+#include <errno.h>
+
+char *dirname(char *path);
+char *basename(char *path);
+
+int mkdir(const char *pathname/* , mode_t mode */)
+{
+	/* (void)mode; */
+
+	struct vnode *vn;
+	struct vnode *parent_vn;
+	char *dname;
+
+	vn = vnode_alloc();
+	if (!vn) {
+		errno = ENOMEM;
+		return -1;
+	}
+	vn->v_type = VDIR;
+	vn->v_path = basename((char *)pathname);
+
+	dname = dirname((char *)pathname);
+	if (!strlen(dname)) {
+		//FIXME: lookuppn() must handle '/' path
+		parent_vn = &vn_root;
+	} else {
+		//lookuppn(fsroot(), &parent_vn, dirpath);
+		lookuppn(&vn_root, &parent_vn, dname);
+	}
+	vnode_attach(vn, parent_vn);
+	/* free(dname); */
+
+	return 0;
+}
