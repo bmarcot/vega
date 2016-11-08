@@ -217,9 +217,6 @@ int sys_stat(const char *pathname, struct stat *buf)
 	return 0;
 }
 
-//XXX: needed to retrieve fourth arg in a syscall
-#include "cmsis/arm/ARMCM4.h"
-
 int mkdir(const char *pathname);
 
 /* Linux protoype */
