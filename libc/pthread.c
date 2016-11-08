@@ -75,6 +75,11 @@ void pthread_exit(void *retval)
 	do_syscall1((void *)retval, SYS_PTHREAD_EXIT);
 }
 
+int pthread_detach(pthread_t thread)
+{
+	return do_syscall1((void *)thread, SYS_PTHREAD_DETACH);
+}
+
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
