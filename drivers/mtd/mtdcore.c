@@ -36,7 +36,7 @@ int mtd_point(struct mtd_info *mtd, off_t from, size_t len, size_t *retlen,
 	*virt = NULL;
 	if (!mtd->mtd_point)
 		return -1;//return -EOPNOTSUPP;
-	if ((from < 0) || (from >= mtd->size) || (len > mtd->size - from))
+	if ((from < 0) || ((unsigned long)from >= mtd->size) || (len > mtd->size - from))
 		return -EINVAL;
 	if (!len)
 		return 0;
@@ -48,7 +48,7 @@ int mtd_read(struct mtd_info *mtd, off_t from, size_t len, size_t *retlen,
 	unsigned char *buf)
 {
 	*retlen = 0;
-	if ((from < 0) || (from >= mtd->size) || (len > mtd->size - from))
+	if ((from < 0) || ((unsigned long)from >= mtd->size) || (len > mtd->size - from))
 		return -EINVAL;
 	if (!len)
 		return 0;
@@ -60,7 +60,7 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 	const unsigned char *buf)
 {
 	*retlen = 0;
-	if ((to < 0) || (to >= mtd->size) || (len > mtd->size - to))
+	if ((to < 0) || ((unsigned long)to >= mtd->size) || (len > mtd->size - to))
 		return -EINVAL;
 	/* if (!mtd->mtd_write || !(mtd->flags & MTD_WRITEABLE)) { */
 	/* 	printk("EROFS\n"); */
@@ -72,13 +72,12 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 	return mtd->mtd_write(mtd, to, len, retlen, buf);
 }
 
-// read file instead?
+//FIXME: read file instead?
+#include "kernel.h"
 void mtd_info(struct mtd_info *mtd)
 {
 	printk("Dump MTD device info:\n");
 	printk("  Name            %s\n", mtd->name);
 	printk("  Size            %d\n", mtd->size);
 	printk("  Mapped address  %p\n", mtd->priv);
-
-	return 0;
 }
