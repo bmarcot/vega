@@ -33,6 +33,7 @@ extern char __heap_size__;
 
 void cpu_do_idle(void);
 void *cpu_idle(void *);
+void mtdram_init(void);
 
 void __weak *main(__unused void *arg)
 {
@@ -136,6 +137,7 @@ struct thread_info *start_kernel(void)
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
+	mtdram_init(); /* create a test mtdram device */
 	init_filesystem();
 
 	printk("Kernel bootstrap done.\n--\n");

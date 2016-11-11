@@ -26,7 +26,7 @@ OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -Iplatform/$(PLATFORM) \
+CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Iplatform/$(PLATFORM) \
 	 -Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
 
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
@@ -46,7 +46,8 @@ CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
-	$(wildcard drivers/char/*.c)
+	$(wildcard drivers/char/*.c)	\
+	$(wildcard drivers/mtd/*.c)
 OBJS += $(SSRC:.S=.o)
 OBJS += $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
