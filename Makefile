@@ -37,7 +37,7 @@ ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	SSRC += v7m-entry.S api/v7m-api.S v7m-svcall.S
+	SSRC += v7m-entry.S v7m-svcall.S libc/v7m-pthread.S
 	CSRC += v7m-faults.c
 endif
 
