@@ -218,10 +218,6 @@ int thread_detach(pthread_t thread)
 
 /* pthread interface */
 
-static ucontext_t main_context, pthread_context;
-static unsigned int ctx_stack[256];
-static int create_ret_code;
-
 int sys_pthread_yield(void)
 {
 	return thread_yield();
@@ -242,7 +238,7 @@ int sys_pthread_detach(pthread_t thread)
 	return thread_detach(thread);
 }
 
-static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
+int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
 	struct thread_info *thread_info;
@@ -259,28 +255,12 @@ static void pthread_create_2(/* __user */ pthread_t *thread, const pthread_attr_
 	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
 	   to this process user-space.    */
 	thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
-	if (!thread_info) {
-		create_ret_code = -1;
-		return;
-	}
+	if (thread_info == NULL)
+		return -1;
 	*thread = (pthread_t)thread_info->ti_id;
-
 	sched_enqueue(thread_info);
-}
 
-int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
-		void *(*start_routine)(void *), void *arg)
-{
-	/* link the current context to the print context */
-	pthread_context.uc_link = &main_context;
-	pthread_context.uc_stack.ss_sp = &ctx_stack[256];
-
-	/* pass the arguments to the new context, and swap */
-	makecontext(&pthread_context, pthread_create_2, 4, thread, attr, start_routine,
-		arg);
-	swapcontext(&main_context, &pthread_context);
-
-	return create_ret_code;
+	return 0;
 }
 
 void sys_pthread_join(pthread_t thread, void **retval)
