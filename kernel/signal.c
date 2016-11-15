@@ -200,6 +200,17 @@ static int is_signal_supported(int sig)
 	return bitmap_get_bit(&supported_signal_mask, sig);
 }
 
+/* How signal works?
+ *
+ * - A fake exception return context is allocated to the user thread stack.
+ * - This context is a trampoline to the signal handler.
+ * - When the syscall handler returns, the return value is pushed to the user
+ *   stack in r0.  For signal handling, r0 must contain the first parameter to
+ *   the signal handler function.  The actual return code of the syscall must
+ *   be written into the auto-pushed stack context.  The staging functions
+ *   handle the update of the error code in the cpu-pushed stackframe.
+ */
+
 int sys_raise(int sig)
 {
 	CURRENT_THREAD_INFO(threadp);
@@ -214,46 +225,33 @@ int sys_raise(int sig)
 	else
 		stage_sighandler(act);
 
-	/* Instead of returning the syscall return value, we return the first
-	 * parameter of the signal handler function. */
 	return sig;
 }
 
-int __do_sigqueue(pid_t pid, int sig, const union sigval value,
-		unsigned long *offset_to_retval)
+int sys_sigqueue(pid_t pid, int sig, const union sigval value)
 {
-	int err = 0;
-	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
 	if (!is_signal_supported(sig)) {
-		err = -1;
 		errno = EINVAL;
-		goto out;
+		return -1;
 	}
 
-	//FIXME: we don't handle staging to a different PID
-	pid = (pid_t)threadp->ti_id;
+	//FIXME: support sending signal to a different task
+	if (pid != (pid_t)threadp->ti_id)
+		printk("warning: sigqueue() cannot send signal to a different task\n");
 
-	act = find_sigaction_by_sig(threadp, sig);
+	struct sigaction *act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL) {
-		err = -1;
 		errno = EINVAL;
-		goto out;
+		return -1;
 	}
 
-	//FIXME: must check if a handler with SA_SIGINFO has been installed
-	//FIXME: stage on supplied task/thread id, use pid...
 	//FIXME: must check there is enough space on user thread stack
-	stage_sigaction(act, sig, value);
-
-	/* r0 can be clobbered by the signal handling function */
-out:
-	if (err || (pid != (pid_t)threadp->ti_id))
-		*offset_to_retval = 0;
+	if (act->sa_flags & SA_SIGINFO)
+		stage_sigaction(act, sig, value);
 	else
-		*offset_to_retval = sizeof(struct thread_context_regs)
-			+ sizeof(siginfo_t);
+		stage_sighandler(act);
 
-	return err;
+	return sig;
 }

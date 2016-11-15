@@ -133,24 +133,6 @@ ENTRY(usgf)
 	fault_handler usagefault
 ENDPROC(usgf)
 
-ENTRY(sys_sigqueue)
-	@ Reserve storage for offset_to_retval variable, and pass its pointer
-	@ as a parameter.
-	sub	sp, #4
-	mov	r3, sp
-
-	bl	__do_sigqueue
-
-	@ Early return to the thread, effectively bypassing the syscall_return.
-	@ Depending on where the signal action has been staged (this thread, or
-	@ another thread), we need to access a different location in the stack
-	@ to update the return value of __sigqueue() syscall.
-	pop	{r1}
-	mrs	r2, psp
-	str	r0, [r2, r1]
-	pop	{pc}
-ENDPROC(sys_sigqueue)
-
 ENTRY(cpu_do_idle)
 	wfi
 	bx	lr
