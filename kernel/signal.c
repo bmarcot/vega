@@ -37,27 +37,30 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 	memcpy(stack_pointer, data, len);
 }
 
-static void stage_sighandler(struct sigaction *sigaction, int sig)
+static void stage_sighandler(struct sigaction *sigaction)
 {
 	CURRENT_THREAD_INFO(threadp);
 	struct thread_context_regs *tcr;
 
-	printk("signal(%d): Staging handler %p\n", sig, sigaction->sa_handler);
-
 	/* SP_process for the Current thread control block has not been updated,
 	   need to update it because we are pushing data to the process stack.  */
 	threadp->ti_mach.mi_psp = __get_PSP();
+
+	/* this is the exception stacked-context */
+	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
+	tcr->r0_r3__r12[0] = 0; /* return value of syscall, cannot fail after this point */
 
 	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
 
 	/* build the sigaction trampoline */
 	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = sig;
+/* #ifdef SECURE_KERNEL */
 	tcr->r0_r3__r12[1] = 0;
 	tcr->r0_r3__r12[2] = 0;
 	tcr->r0_r3__r12[3] = 0;
 	tcr->r0_r3__r12[4] = 0;
+/* #endif */
 	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
 	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_handler);
 	tcr->xpsr = xPSR_T_Msk;
@@ -72,17 +75,18 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 {
 	CURRENT_THREAD_INFO(threadp);
 	struct thread_context_regs *tcr;
-	siginfo_t *siginfo_ptr;
-
-	printk("signal(%d): Staging sigaction %p\n", sig, sigaction->sa_sigaction);
 
 	/* SP_process for the Current thread control block has not been updated,
 	   need to update it because we are pushing data to the process stack.  */
 	threadp->ti_mach.mi_psp = __get_PSP();
 
+	/* this is the exception stacked-context */
+	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
+	tcr->r0_r3__r12[0] = 0; /* return value of syscall, cannot fail after this point */
+
 	/* allocate the siginfo_t struct on thread's stack (SP_process); that
 	   memory will be reclaimed during return_from_sigaction */
-	siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
+	siginfo_t *siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
 	siginfo_ptr->si_signo = sig;
 	siginfo_ptr->si_value = value;
 	siginfo_ptr->si_pid = threadp->ti_id;
@@ -92,7 +96,6 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 	/* build the sigaction trampoline */ /* build_context() */
 	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = sig;
 	tcr->r0_r3__r12[1] = (u32)siginfo_ptr; /* XXX: allocate on the process stack?
 						  and cleanup on return_from_sigaction? */
 	tcr->r0_r3__r12[2] = 0;  /* POSIX says it's a ucontext_t *, but commonly unused */
@@ -199,20 +202,21 @@ static int is_signal_supported(int sig)
 
 int sys_raise(int sig)
 {
-	struct sigaction *act;
 	CURRENT_THREAD_INFO(threadp);
 
 	if (!is_signal_supported(sig))
 		return -EINVAL;
-	act = find_sigaction_by_sig(threadp, sig);
+	struct sigaction *act = find_sigaction_by_sig(threadp, sig);
 	if (act == NULL)
 		return -EINVAL;
 	if (act->sa_flags & SA_SIGINFO)
 		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
-		stage_sighandler(act, sig);
+		stage_sighandler(act);
 
-	return 0; //FIXME: OFFSET TO RETVAL???
+	/* Instead of returning the syscall return value, we return the first
+	 * parameter of the signal handler function. */
+	return sig;
 }
 
 int __do_sigqueue(pid_t pid, int sig, const union sigval value,
