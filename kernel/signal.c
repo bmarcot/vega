@@ -11,11 +11,12 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <arch/v7m-helper.h>
+
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
-#include <kernel/v7m-helper.h>
 
 #include "kernel.h"
 #include "cmsis/arm/ARMCM4.h"

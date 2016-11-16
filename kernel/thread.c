@@ -12,12 +12,13 @@
 #include <sys/types.h>
 #include <ucontext.h>
 
+#include <arch/v7m-helper.h>
+
 #include <kernel/errno-base.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
-#include <kernel/v7m-helper.h>
 
 #include "utils.h"
 #include "kernel.h"
