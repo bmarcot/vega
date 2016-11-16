@@ -52,3 +52,9 @@ print('')
 for x in list(enumerate(xs)):
     name = 'sys_' + x[1]
     print('#define {} {}'.format(name.upper(), x[0]))
+
+print('')
+
+for x in list(enumerate(xs)):
+    name = 'sys_' + x[1]
+    print('int {}();'.format(name))
