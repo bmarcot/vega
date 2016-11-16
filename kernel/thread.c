@@ -263,7 +263,7 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	return 0;
 }
 
-void sys_pthread_join(pthread_t thread, void **retval)
+int sys_pthread_join(pthread_t thread, void **retval)
 {
-	thread_join(thread, retval);
+	return thread_join(thread, retval);
 }
