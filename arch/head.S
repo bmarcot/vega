@@ -3,7 +3,7 @@
 	.syntax unified
 	.thumb
 
-#include "../pseudo.S"
+#include "pseudo.S"
 
 	.section ".vector", "a"
 	@ the vector must be aligned on 128 bytes (see VTOR reserved

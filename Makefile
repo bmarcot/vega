@@ -37,11 +37,11 @@ ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	SSRC += v7m-entry.S v7m-svcall.S libc/v7m-pthread.S
-	CSRC += v7m-faults.c
+	SSRC += arch/v7m-entry.S arch/v7m-svcall.S libc/v7m-pthread.S
+	CSRC += arch/v7m-faults.c
 endif
 
-SSRC += head.S $(wildcard libc/vega/*.S)
+SSRC += arch/head.S $(wildcard libc/vega/*.S)
 CSRC += utils.c
 CSRC += $(wildcard libc/*.c)
 CSRC += $(wildcard kernel/*.c)		\
