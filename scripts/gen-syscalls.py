@@ -37,7 +37,7 @@ xs = [
 
 import datetime
 print('//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!')
-print('//XXX: Change definitions in scripts/sysc.py')
+print('//XXX: Change definitions in scripts/gen-syscalls.py')
 print('//XXX: Created on ' +
       datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
 
