@@ -241,11 +241,10 @@ int sys_pthread_detach(pthread_t thread)
 int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
-	struct thread_info *thread_info;
 	struct rlimit stacklimit;
 	size_t stacksize;
 
-	/* get the thread's stack size */
+	/* get the thread default stack size */
 	sys_getrlimit(RLIMIT_STACK, &stacklimit);
 	if (attr)
 		stacksize = min(attr->stacksize, stacklimit.rlim_max);
@@ -254,9 +253,10 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
 	   to this process user-space.    */
-	thread_info = thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
+	struct thread_info *thread_info =
+		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
 	if (thread_info == NULL)
-		return -1;
+		return EAGAIN; /* insufficient resources to create another thread */
 	*thread = (pthread_t)thread_info->ti_id;
 	sched_enqueue(thread_info);
 
