@@ -4,35 +4,25 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#include <pthread.h>
-
-#include <kernel/cond.h>
-#include <kernel/mutex.h>
 #include <kernel/syscalls.h>
 
-int sys_pthread_yield(void);
-pthread_t sys_pthread_self(void);
-void sys_pthread_exit(void *);
-int sys_pthread_create(/* __user */ pthread_t *thread, const pthread_attr_t *attr,
-		void *(*start_routine)(void *), void *arg);
-void sys_pthread_join(pthread_t, void **);
+int sys_pthread_exit();
+int sys_pthread_self();
+int sys_pthread_yield();
+int sys_pthread_create();
+int sys_pthread_join();
 int sys_pthread_detach();
-int sys_timer_create(unsigned int msecs);
+int sys_pthread_mutex_lock();
+int sys_pthread_mutex_unlock();
+int sys_pthread_cond_signal();
+int sys_pthread_cond_wait();
+int sys_timer_create();
 int sys_timer_settime();
-long sys_sysconf(int name);
-
 int sys_msleep();
-
-/* signal declarations */
-
-struct sigaction;
-union sigval;
-
-int sys_sigaction(int sig, const struct sigaction *restrict act,
-	struct sigaction *restrict oact);
-int sys_raise(int n);
-int sys_sigqueue(pid_t pid, int sig, const union sigval value);
-
+int sys_sysconf();
+int sys_sigaction();
+int sys_raise();
+int sys_sigqueue();
 int sys_open();
 int sys_read();
 int sys_write();
