@@ -51,4 +51,12 @@ int printk(const char *fmt, ...);
 	   __typeof__(b) _b = (b);	\
 	   _a < _b ? _a : _b; })
 
+#define ARRAY_SIZE(arr) \
+	(sizeof(arr) / sizeof(*(arr)))
+
+#define ARRAY_INDEX(elt, arr)				\
+	({ unsigned int _elt = (unsigned int)(elt);	\
+	   unsigned int _arr = (unsigned int)(arr);	\
+	   (_elt - _arr) / sizeof(*(elt)); })
+
 #endif /* !KERNEL_H */
