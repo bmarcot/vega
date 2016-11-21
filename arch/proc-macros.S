@@ -1,12 +1,15 @@
-/* pseudo.S
+/*
+ * proc-macros.S
  *
  * Copyright (c) 2016 Benoit Marcot
  */
 
 #ifdef __ASSEMBLER__
 
-	@ loads a 32-bit value into a register without a data access
-	.macro	movl rd, imm32
+/*
+ * mov32 - loads a 32-bit value into a register without a data access
+ */
+	.macro	mov32 rd, imm32
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
 	.if 	\imm32 & 0xffffff00
 	ldr	\rd, =\imm32

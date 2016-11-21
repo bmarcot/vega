@@ -3,7 +3,7 @@
 	.syntax unified
 	.thumb
 
-#include "pseudo.S"
+#include "proc-macros.S"
 
 	.section ".vector", "a"
 	@ the vector must be aligned on 128 bytes (see VTOR reserved
@@ -100,7 +100,7 @@
 	.text
 
 ENTRY(reset)
-	movl	r0, 0xe000ed00			/* SCB_BASE */
+	mov32	r0, 0xe000ed00			/* SCB_BASE */
 
 	@ switch to Handler_Mode
 	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
