@@ -6,4 +6,3 @@ ROMSZ	= 256k
 RAMSZ	= 64k
 
 CSRC += platform/qemu/uart.c	\
-	platform/qemu/time.c
