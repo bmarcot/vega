@@ -42,14 +42,14 @@ else
 endif
 
 SSRC += arch/head.S $(wildcard libc/vega/*.S)
-CSRC += utils.c
-CSRC += $(wildcard libc/*.c)
-CSRC += $(wildcard kernel/*.c)		\
+CSRC += utils.c				\
+	$(wildcard libc/*.c)		\
+	$(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard drivers/char/*.c)	\
-	$(wildcard drivers/mtd/*.c)
-OBJS += $(SSRC:.S=.o)
-OBJS += $(CSRC:.c=.o)
+	$(wildcard drivers/mtd/*.c)	\
+
+OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
 all: include/cmsis/arm include/version.h $(NAME).lds $(NAME).hex
