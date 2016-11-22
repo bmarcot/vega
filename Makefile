@@ -48,6 +48,7 @@ CSRC += utils.c				\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
+	$(wildcard drivers/timer/*.c)	\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
