@@ -4,6 +4,9 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#ifndef DRIVERS_MTD_MTD_H
+#define DRIVERS_MTD_MTD_H
+
 #include <sys/types.h>
 
 #include <kernel/errno-base.h>
@@ -64,3 +67,5 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 	const unsigned char *buf);
 
 void mtd_erase_callback(struct erase_info *instr);
+
+#endif /* !DRIVERS_MTD_MTD_H */
