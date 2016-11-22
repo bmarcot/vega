@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <stddef.h> //FIXME: NULL is part of stdlib.h
 #include <stdlib.h>
+#include <time.h>
 
 #include <kernel/errno-base.h>
 #include <kernel/time.h>
@@ -44,11 +45,10 @@ int timer_configure(struct timer_info *timer,
 	return timer->tops->timer_configure(timer, callback);
 }
 
- //FIXME: take a 'struct timeval' in parameter
-int timer_set(struct timer_info *timer, unsigned int usec)
+int timer_set(struct timer_info *timer, const struct itimerspec *value)
 {
 	timer->running = 1;
-	return timer->tops->timer_set(timer, usec);
+	return timer->tops->timer_set(timer, value);
 }
 
 int timer_cancel(struct timer_info *timer)

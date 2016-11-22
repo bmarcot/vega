@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
@@ -40,7 +41,10 @@ int sys_msleep(unsigned int msec)
 	CURRENT_THREAD_INFO(cur_thread);
 	timer->priv = cur_thread;
 	timer_configure(timer, msleep_callback);
-	timer_set(timer, msec * 1000);
+	struct itimerspec value = {
+		.it_value = { .tv_sec = msec / 1000,
+			      .tv_nsec = (msec % 1000) * 1000000 } };
+	timer_set(timer, &value);
 	sched_dequeue(cur_thread);
 	sched_elect(SCHED_OPT_NONE);
 	timer_free(timer);
@@ -117,12 +121,11 @@ static void timer_callback(struct timer_info *timer)
 	do_sigevent(timer->priv);
 }
 
-/* int timer_settime(timer_t timerid, int flags, */
-/* 		const struct itimerspec *new_value, */
-/* 		struct itimerspec * old_value) */
-int sys_timer_settime(timer_t timerid, int flags, int new_value)
+int sys_timer_settime(timer_t timerid, int flags,
+		const struct itimerspec *new_value,
+		struct itimerspec *old_value)
 {
-	(void)flags;
+	(void)flags, (void)old_value;
 
 	/* printk(">> sys_ timer_settime()\n"); */
 

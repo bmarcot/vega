@@ -9,6 +9,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <kernel/errno-base.h>
 #include <kernel/time.h>
@@ -48,12 +49,15 @@ int systick_timer_configure(struct timer_info *timer,
 	return 0;
 }
 
-int systick_timer_set(struct timer_info *timer, unsigned int usec)
+int systick_timer_set(struct timer_info *timer,
+		const struct itimerspec *new_value)
 {
 	struct systick_timer *systick_timer =
 		(struct systick_timer *)timer->dev;
 
-	systick_timer->expire_clocktime = clocktime_in_msec + usec / 1000;
+	systick_timer->expire_clocktime = clocktime_in_msec
+		+ new_value->it_value.tv_sec * 1000
+		+ new_value->it_value.tv_nsec / 1000000;
 	list_add(&systick_timer->list, &systick_timers);
 
 	return 0;
