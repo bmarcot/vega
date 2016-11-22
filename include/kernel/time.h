@@ -46,6 +46,8 @@ struct timer_info {
 	struct timer_operations *tops;
 	void (*callback)(struct timer_info *self);
 	//struct thread_info *owner;
+	struct list_head list;
+	timer_t id;
 
 	//XXX: what goes in there?
 	//struct device *dev;
