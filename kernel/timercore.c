@@ -65,3 +65,9 @@ int timer_free(struct timer_info *timer)
 
 	return 0;
 }
+
+void timer_expire_callback(struct timer_info *timer)
+{
+	if (timer->callback)
+		timer->callback(timer);
+}

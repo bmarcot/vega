@@ -62,4 +62,6 @@ int timer_set(struct timer_info *timer, unsigned int usec); //FIXME: struct time
 int timer_cancel(struct timer_info *timer);
 int timer_free(struct timer_info *timer);
 
+void timer_expire_callback(struct timer_info *timer);
+
 #endif /* !KERNEL_TIME_H */

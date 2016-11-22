@@ -86,7 +86,7 @@ void systick(void)
 		if (pos->expire_clocktime < clocktime_in_msec) {
 			//printk("timer expired!\n");
 			list_del(&pos->list);
-			pos->timer->callback(pos->timer);
+			timer_expire_callback(pos->timer);
 		}
 	}
 }
