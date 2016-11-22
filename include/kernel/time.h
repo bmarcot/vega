@@ -1,7 +1,7 @@
 /*
  * include/kernel/time.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (C) 2016 Benoit Marcot
  */
 
 #ifndef KERNEL_TIME_H
@@ -26,5 +26,38 @@ struct timer_common {
 		struct sigevent *sigev;     /* for timer */
 	};
 };
+
+/* common timer interface */
+
+struct timer_info;
+
+struct timer_operations {
+	int (*timer_alloc)(struct timer_info *timer/* , int flags */);
+	int (*timer_configure)(struct timer_info *timer,
+			void (*callback)(struct timer_info *self));
+	int (*timer_set)(struct timer_info *timer, unsigned int usec); //FIXME: struct timeval
+	int (*timer_cancel)(struct timer_info *timer);
+	int (*timer_free)(struct timer_info *timer);
+};
+
+struct timer_info {
+	u32 flags;
+	int running;
+	struct timer_operations *tops;
+	void (*callback)(struct timer_info *self);
+	//struct thread_info *owner;
+
+	//XXX: what goes in there?
+	//struct device *dev;
+	void *dev;
+	void *priv;
+};
+
+struct timer_info *timer_alloc(void);
+int timer_configure(struct timer_info *timer,
+		void (*callback)(struct timer_info *self));
+int timer_set(struct timer_info *timer, unsigned int usec); //FIXME: struct timeval
+int timer_cancel(struct timer_info *timer);
+int timer_free(struct timer_info *timer);
 
 #endif /* !KERNEL_TIME_H */
