@@ -13,6 +13,8 @@
 #include "kernel.h"
 #include "systick.h"
 
+#define get_clocktime_in_msec() 0
+
 /* unordered lists timers */
 static LIST_HEAD(running_timers);
 static LIST_HEAD(unarmed_timers);
