@@ -1,12 +1,10 @@
 /*
- * kernel/timercore.c
+ * drivers/timer/timercore.c
  *
- * Copyright (C) 2016 Benoit Marcot
- *
+ * Copyright (c) 2016 Benoit Marcot
  */
 
 #include <errno.h>
-#include <stddef.h> //FIXME: NULL is part of stdlib.h
 #include <stdlib.h>
 #include <time.h>
 
