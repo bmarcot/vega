@@ -13,7 +13,12 @@
 #include <kernel/errno-base.h>
 #include <kernel/time.h>
 
-extern struct timer_operations systick_tops;
+static struct timer_operations *timer_operations;
+
+void config_timer_operations(struct timer_operations *tops)
+{
+	timer_operations = tops;
+}
 
 // timer_alloc(struct vnode *device_root)
 // timer_alloc("/dev/timers/systick")
@@ -28,7 +33,7 @@ struct timer_info *timer_alloc(void)
 		errno = ENOMEM;
 		return NULL;
 	}
-	timer->tops = &systick_tops; //FIXME: see above, get from vnode or device
+	timer->tops = timer_operations; //FIXME: see above, get from vnode or device
 	if (timer->tops->timer_alloc(timer)) {
 		free(timer);
 		return NULL;

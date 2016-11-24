@@ -120,13 +120,6 @@ struct thread_info *start_kernel(void)
 	printk("Created main_thread at <%p> with priority=%d\n", thread_main,
 		thread_main->ti_priority);
 
-#ifdef CONFIG_HAVE_SYSTICK
-	/* SysTick running at 1kHz */
-	printk("Processor speed: %3d MHz\n", CPU_FREQ_IN_HZ / 1000000);
-	printk("Timer precision: %3d msec\n", SYSTICK_PERIOD_IN_MSECS);
-	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
-#endif
-
 	/* do the platform-specific inits */
 	__platform_init();
 
