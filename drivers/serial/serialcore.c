@@ -8,6 +8,12 @@
 
 #include <kernel/serial.h>
 
+void serial_activity_callback(struct serial_info *serial)
+{
+	if (serial->callback)
+		serial->callback(serial);
+}
+
 int serial_getc(struct serial_info *serial, char *c)
 {
 	return serial->serial_getc(serial, c);
