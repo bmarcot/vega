@@ -12,6 +12,7 @@
 #include <sys/types.h>
 
 struct device;
+struct thread_info;
 
 struct serial_info {
 	unsigned int rx_count;
@@ -30,6 +31,10 @@ struct serial_info {
 
 	struct device *dev;
 	void *priv;
+
+	//XXX: owner thread pointer could go to priv, and device pripheral
+	// base address should be linked to private data for the device
+	struct thread_info *owner;
 };
 
 int serial_getc(struct serial_info *serial, char *c);
