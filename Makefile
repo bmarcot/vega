@@ -42,8 +42,7 @@ else
 endif
 
 SSRC += arch/head.S $(wildcard libc/vega/*.S)
-CSRC += utils.c				\
-	$(wildcard libc/*.c)		\
+CSRC += $(wildcard libc/*.c)		\
 	$(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard drivers/char/*.c)	\
