@@ -29,6 +29,8 @@ int cat(const char *pathname)
 		count = read(fd, buf, 31);
 		buf[count] = '\0';
 		printk("%s", buf);
+		if (count < 31)
+			break;
 	}
 
 	if (close(fd)) {
