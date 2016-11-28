@@ -217,9 +217,10 @@ int romfs_seek(struct vnode *vp, off_t oldoff, off_t *newoffp)
 int romfs_read(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 {
 	struct inode *ip = vp->v_data;
+	size_t filesize = ntohl(ip->i_ic->ic_size);
 
-	if (off + count >= ip->i_ic->ic_size)
-		count = ip->i_ic->ic_size - off;
+	if (off + count >= filesize)
+		count = filesize - off;
 	memcpy(buf, &ip->i_data[off], count);
 	*n = count;
 
