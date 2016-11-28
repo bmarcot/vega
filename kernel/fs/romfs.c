@@ -27,6 +27,7 @@
 
 static const struct vnodeops romfs_vops = {
 	.vop_open = romfs_open,
+	.vop_close = romfs_close,
 	.vop_lookup = romfs_lookup,
 	.vop_read = romfs_read,
 	.vop_seek = romfs_seek,
