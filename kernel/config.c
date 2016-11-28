@@ -1,13 +1,22 @@
 #include <unistd.h>
-#include <systick.h>
+
+struct sys_param {
+	const char *name;
+	long value;
+};
+
+struct sys_param sys_params[] = {
+	{"pagesize", 2048},
+	{"clock_tick", 0}, //FIXME: set by systick_init()
+};
 
 long sys_sysconf(int name)
 {
 	switch (name) {
 	case PAGESIZE:
-		return 2048;
+		return sys_params[0].value;
 	case _SC_CLK_TCK:
-		return 1000 / SYSTICK_PERIOD_IN_MSECS;
+		return sys_params[1].value;
 	}
 
 	return -1;

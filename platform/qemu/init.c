@@ -1,9 +1,10 @@
 /* Qemu system init */
 
 #include "kernel.h"
-
-#include "systick.h"
 #include "platform.h"
+
+#define SYSTICK_FREQ_IN_HZ 1000
+#define SYSTICK_PERIOD_IN_MSECS (SYSTICK_FREQ_IN_HZ / 1000)
 
 struct timer_operations;
 

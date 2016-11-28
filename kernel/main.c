@@ -9,7 +9,6 @@
 
 #include <if/uart.h>
 
-#include "systick.h"
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"
