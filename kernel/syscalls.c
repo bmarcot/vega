@@ -6,6 +6,10 @@
 
 #include <kernel/syscalls.h>
 
+//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
+//XXX: Change definitions in scripts/gen-syscalls.py
+//XXX: Created on 2016-11-28 21:52
+
 int sys_pthread_exit();
 int sys_pthread_self();
 int sys_pthread_yield();
@@ -24,6 +28,7 @@ int sys_sigaction();
 int sys_raise();
 int sys_sigqueue();
 int sys_open();
+int sys_close();
 int sys_read();
 int sys_write();
 int sys_seek();
@@ -33,9 +38,6 @@ int sys_mount();
 #define SYS_MAX 48
 
 void *syscall_vect[SYS_MAX] = {
-	//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
-	//XXX: Change definitions in scripts/sysc.py
-	//XXX: Created on 2016-11-08 16:24
 	[SYS_PTHREAD_EXIT] = sys_pthread_exit,
 	[SYS_PTHREAD_SELF] = sys_pthread_self,
 	[SYS_PTHREAD_YIELD] = sys_pthread_yield,
@@ -54,6 +56,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_RAISE] = sys_raise,
 	[SYS_SIGQUEUE] = sys_sigqueue,
 	[SYS_OPEN] = sys_open,
+	[SYS_CLOSE] = sys_close,
 	[SYS_READ] = sys_read,
 	[SYS_WRITE] = sys_write,
 	[SYS_SEEK] = sys_seek,

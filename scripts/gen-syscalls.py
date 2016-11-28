@@ -28,6 +28,7 @@ xs = [
 
     # <fcntl.h>, <unistd.h>, <sys/mount.h>...
     'open',
+    'close',
     'read',
     'write',
     'seek',

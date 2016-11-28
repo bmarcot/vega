@@ -7,9 +7,8 @@
 #ifndef KERNEL_SYSCALLS_H
 #define KERNEL_SYSCALLS_H
 
-//XXX: GENERATED TABLE, DO NOT EDIT FROM HERE!
-//XXX: Change definitions in scripts/sysc.py
-//XXX: Created on 2016-11-08 16:24
+//XXX: GENERATED, DO NOT EDIT!
+
 #define SYS_PTHREAD_EXIT 0
 #define SYS_PTHREAD_SELF 1
 #define SYS_PTHREAD_YIELD 2
@@ -28,10 +27,11 @@
 #define SYS_RAISE 15
 #define SYS_SIGQUEUE 16
 #define SYS_OPEN 17
-#define SYS_READ 18
-#define SYS_WRITE 19
-#define SYS_SEEK 20
-#define SYS_STAT 21
-#define SYS_MOUNT 22
+#define SYS_CLOSE 18
+#define SYS_READ 19
+#define SYS_WRITE 20
+#define SYS_SEEK 21
+#define SYS_STAT 22
+#define SYS_MOUNT 23
 
 #endif /* !KERNEL_SYSCALLS_H */

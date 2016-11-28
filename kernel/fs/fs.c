@@ -199,6 +199,18 @@ off_t sys_seek(int fd, off_t offset, int whence)
 	return 0;
 }
 
+int sys_close(int fd)
+{
+	if (!validate_fd(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+	struct file *file = file_table[fd];
+	VOP_CLOSE(file->f_vnode, 0);
+
+	return 0;
+}
+
 int sys_stat(const char *pathname, struct stat *buf)
 {
 	struct vnode *vp;
