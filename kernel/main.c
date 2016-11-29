@@ -38,8 +38,12 @@ void lm3s6965_init(void);
 
 struct task_info top_task;
 
+int vash(void *options);
+
 void __weak *main(__unused void *arg)
 {
+	vash(NULL);
+
 	return 0;
 }
 
@@ -148,7 +152,9 @@ void *cpu_idle(void *arg)
 {
 	(void)arg;
 
+#ifndef HAVE_SHELL
 	printk("[[ idle_thread ]]\n");
+#endif
 	for (;;)
 		cpu_do_idle();
 }
