@@ -152,19 +152,19 @@ static struct sigaction *find_sigaction_by_sig(pid_t pid, int sig)
 {
 	(void)pid; //XXX: Multi-tasking not implemented yet
 
-	struct ksignal *ks;
-	list_for_each_entry(ks, &top_task.signal_head, ksig_list) {
-		if (ks->ksig_signo == sig)
-			return &ks->ksig_struct;
+	struct signal_info *signal;
+	list_for_each_entry(signal, &top_task.signal_head, list) {
+		if (signal->signo == sig)
+			return &signal->act_storage;
 	}
 
 	return NULL;
 }
 
-int sys_sigaction(int sig, const struct sigaction *restrict act,
+int sys_sigaction(int signo, const struct sigaction *restrict act,
 		struct sigaction *restrict oldact)
 {
-	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
+	if ((signo == SIGKILL) || (signo == SIGSTOP)) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -174,20 +174,20 @@ int sys_sigaction(int sig, const struct sigaction *restrict act,
 	}
 
 	if (oldact) {
-		struct sigaction *oact = find_sigaction_by_sig(0, sig);
+		struct sigaction *oact = find_sigaction_by_sig(0, signo);
 		if (oact != NULL)
 			memcpy(oldact, oact, sizeof(struct sigaction));
 	}
 
-	struct ksignal *ksignal = malloc(sizeof(struct ksignal));
-	if (ksignal == NULL) {
+	struct signal_info *signal = malloc(sizeof(struct signal_info));
+	if (signal == NULL) {
 		errno = ENOMEM;
 		return -1;
 	}
 
-	ksignal->ksig_signo = sig;
-	list_add(&ksignal->ksig_list, &top_task.signal_head);
-	memcpy(&ksignal->ksig_struct, act, sizeof(struct sigaction));
+	signal->signo = signo;
+	list_add(&signal->list, &top_task.signal_head);
+	memcpy(&signal->act_storage, act, sizeof(struct sigaction));
 
 	return 0;
 }
