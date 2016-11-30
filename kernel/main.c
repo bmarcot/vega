@@ -5,6 +5,7 @@
 #include <kernel/fs/fs.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
+#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include <if/uart.h>
@@ -34,6 +35,8 @@ void cpu_do_idle(void);
 void *cpu_idle(void *);
 void mtdram_init(void);
 void lm3s6965_init(void);
+
+struct task_info top_task;
 
 void __weak *main(__unused void *arg)
 {
@@ -84,6 +87,8 @@ struct thread_info *start_kernel(void)
 	v7m_init();
 #endif
 	uart_init();
+
+	INIT_LIST_HEAD(&top_task.signal_head);
 
 	/* initialize the kernel's malloc */
 	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
