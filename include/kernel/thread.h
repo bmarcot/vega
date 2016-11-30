@@ -37,11 +37,6 @@ struct thread_info {
 	bool ti_joinable;
 	struct thread_info *ti_joining;
 
-	/* XXX: Storage for structs is provided by the user, however that does
-	   not comply with the POSIX specs.  Structs are given by the user as
-	   const.  Revisit later with dynamic allocation in th kernel.  */
-	struct list_head ti_sigactions;
-
 	/* /\* local-storage *\/ */
 	/* struct list_head *ti_lsq; // local-storage queue */
 

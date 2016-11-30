@@ -16,6 +16,7 @@
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/signal.h>
+#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"
@@ -145,26 +146,24 @@ void do_sigevent(const struct sigevent *sigevent)
 	__set_PSP(threadp->ti_mach.mi_psp);
 }
 
-static struct sigaction *find_sigaction_by_sig(struct thread_info *tip, int sig)
-{
-	struct ksignal *kact;
+extern struct task_info top_task;
 
-	list_for_each_entry(kact, &tip->ti_sigactions, ksig_list) {
-		if (kact->ksig_signo == sig)
-			return &kact->ksig_struct;
+static struct sigaction *find_sigaction_by_sig(pid_t pid, int sig)
+{
+	(void)pid; //XXX: Multi-tasking not implemented yet
+
+	struct ksignal *ks;
+	list_for_each_entry(ks, &top_task.signal_head, ksig_list) {
+		if (ks->ksig_signo == sig)
+			return &ks->ksig_struct;
 	}
 
 	return NULL;
 }
 
 int sys_sigaction(int sig, const struct sigaction *restrict act,
-		struct sigaction *restrict oact)
+		struct sigaction *restrict oldact)
 {
-	struct sigaction *old_act;
-	struct ksignal *ksig;
-
-	CURRENT_THREAD_INFO(threadp);
-
 	if ((sig == SIGKILL) || (sig == SIGSTOP)) {
 		errno = EINVAL;
 		return -1;
@@ -173,19 +172,22 @@ int sys_sigaction(int sig, const struct sigaction *restrict act,
 		errno = EFAULT;
 		return -1;
 	}
-	if (oact) {
-		old_act = find_sigaction_by_sig(threadp, sig);
-		if (old_act != NULL)
-			memcpy(oact, old_act, sizeof(struct sigaction));
+
+	if (oldact) {
+		struct sigaction *oact = find_sigaction_by_sig(0, sig);
+		if (oact != NULL)
+			memcpy(oldact, oact, sizeof(struct sigaction));
 	}
-	ksig = malloc(sizeof(struct ksignal));
-	if (ksig == NULL) {
+
+	struct ksignal *ksignal = malloc(sizeof(struct ksignal));
+	if (ksignal == NULL) {
 		errno = ENOMEM;
 		return -1;
 	}
-	ksig->ksig_signo = sig;
-	list_add(&ksig->ksig_list, &threadp->ti_sigactions);
-	memcpy(&ksig->ksig_struct, act, sizeof(struct sigaction));
+
+	ksignal->ksig_signo = sig;
+	list_add(&ksignal->ksig_list, &top_task.signal_head);
+	memcpy(&ksignal->ksig_struct, act, sizeof(struct sigaction));
 
 	return 0;
 }
@@ -214,13 +216,13 @@ static int is_signal_supported(int sig)
 
 int sys_raise(int sig)
 {
-	CURRENT_THREAD_INFO(threadp);
-
 	if (!is_signal_supported(sig))
 		return -EINVAL;
-	struct sigaction *act = find_sigaction_by_sig(threadp, sig);
+
+	struct sigaction *act = find_sigaction_by_sig(0, sig);
 	if (act == NULL)
 		return -EINVAL;
+
 	if (act->sa_flags & SA_SIGINFO)
 		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
 	else
@@ -231,18 +233,14 @@ int sys_raise(int sig)
 
 int sys_sigqueue(pid_t pid, int sig, const union sigval value)
 {
-	CURRENT_THREAD_INFO(threadp);
+	(void)pid; //XXX: Multi-tasking not implemented yet
 
 	if (!is_signal_supported(sig)) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	//FIXME: support sending signal to a different task
-	if (pid != (pid_t)threadp->ti_id)
-		printk("warning: sigqueue() cannot send signal to a different task\n");
-
-	struct sigaction *act = find_sigaction_by_sig(threadp, sig);
+	struct sigaction *act = find_sigaction_by_sig(0, sig);
 	if (act == NULL) {
 		errno = EINVAL;
 		return -1;
