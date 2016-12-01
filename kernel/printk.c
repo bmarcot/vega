@@ -1,36 +1,40 @@
+/*
+ * kernel/printk.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ */
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <ucontext.h>
 
-#include <if/uart.h>
+#define VSNPRINTF_BUF_SIZE 256
 
-#define PRINTK_BUF_SIZE 512
-
-static char printk_buf[PRINTK_BUF_SIZE];
-static ucontext_t main_context, print_context;
+static ucontext_t printk_context;
+static ucontext_t vsnprintf_context = { .uc_link = &printk_context };
 static unsigned int ctx_stack[128];
-static int printed;
+static char vsnprintf_buf[VSNPRINTF_BUF_SIZE];
+static int retval;
 
-/* this function is not thread-safe, nor it is reentrant */
-void printk_1(const char *format, va_list ap)
+/* this coroutine is not thread-safe, not reentrant */
+void co_vsnprintf(const char *format, va_list ap)
 {
-	printed = vsnprintf(printk_buf, PRINTK_BUF_SIZE, format, ap);
-	uart_putstring(printk_buf);
+	retval = vsnprintf(vsnprintf_buf, VSNPRINTF_BUF_SIZE, format, ap);
 }
+
+void __printk_putchar(char c);
 
 int printk(const char *format, ...)
 {
 	va_list ap;
 
-	/* link the current context to the print context */
-	print_context.uc_link = &main_context;
-	print_context.uc_stack.ss_sp = &ctx_stack[128];
-
-	/* pass 4 arguments to the new context, and swap */
 	va_start(ap, format);
-	makecontext(&print_context, printk_1, 2, format, ap);
-	swapcontext(&main_context, &print_context);
+	vsnprintf_context.uc_stack.ss_sp = &ctx_stack[128];
+	makecontext(&vsnprintf_context, co_vsnprintf, 2, format, ap);
+	swapcontext(&printk_context, &vsnprintf_context);
+	for (char *c = vsnprintf_buf; *c != '\0'; c++)
+		__printk_putchar(*c);
 	va_end(ap);
 
-	return printed;
+	return retval;
 }

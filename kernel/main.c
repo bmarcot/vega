@@ -35,6 +35,7 @@ void cpu_do_idle(void);
 void *cpu_idle(void *);
 void mtdram_init(void);
 void lm3s6965_init(void);
+void __printk_init(void);
 
 struct task_info top_task;
 
@@ -85,12 +86,11 @@ void print_linker_sections(void)
 
 struct thread_info *start_kernel(void)
 {
-	struct thread_info *thread_main;
-
 #if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
 	v7m_init();
 #endif
-	uart_init();
+
+	__printk_init();
 
 	INIT_LIST_HEAD(&top_task.signal_head);
 
@@ -121,7 +121,8 @@ struct thread_info *start_kernel(void)
 	/* The main_thread is the user's entry-point to the system.  It is not
 	 * added to the runqueue because it has been implicitly "elected" when
 	 * start_kernel() returns.    */
-	thread_main = thread_create(main, NULL, THREAD_PRIV_USER, 1024);
+	struct thread_info *thread_main = thread_create(main, NULL,
+							THREAD_PRIV_USER, 1024);
 	if (thread_main == NULL) {
 		printk("[!] Could not create user main thread.\n");
 		return NULL;
