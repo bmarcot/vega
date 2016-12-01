@@ -127,3 +127,16 @@ int lm3s6965_init(void)
 
 	return 0;
 }
+
+void __printk_init(void)
+{
+	uart0->uartctl |= 1; /* UART enabled */
+	uart0->uartlcrh |= (3 << 5); /* 8 bits word length, no parity */
+}
+
+void __printk_putchar(char c)
+{
+	while (uart0->uartfr & (1 << 3))
+		;
+	uart0->uartdr = c;
+}
