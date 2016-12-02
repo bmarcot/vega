@@ -1,6 +1,0 @@
-ifeq ($(shell lsb_release -c -s),trusty)
-REDIRECT_SERIAL = -serial stdio
-endif
-
-run: $(NAME).elf
-	qemu-system-arm -semihosting $(REDIRECT_SERIAL) -nographic -cpu $(CPU) -machine $(MACHINE) -kernel $^
