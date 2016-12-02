@@ -10,6 +10,7 @@
 #include <sys/types.h>
 
 #include "kernel.h"
+#include "platform.h"
 
 int open(const char *pathname, int flags);
 ssize_t read(int fd, void *buf, size_t count);
@@ -53,7 +54,7 @@ int minishell(void *options)
 				printk("Requesting system reboot\n");
 				//NVIC_Reset();
 			} else if (!strncmp(BUILTIN_HALT, buf, 4)) {
-				semih_exit(0);
+				__platform_halt();
 			} else {
 				write(fd, NOT_FOUND, NOT_FOUND_LEN - 1);
 				write(fd, buf, count - 1);

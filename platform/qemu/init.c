@@ -21,3 +21,10 @@ void __platform_init(void)
 	printk("Timer precision: %3d msec\n", SYSTICK_PERIOD_IN_MSECS);
 	SysTick_Config(CPU_FREQ_IN_HZ / SYSTICK_FREQ_IN_HZ);
 }
+
+#include <arch/semihosting.h>
+
+void __platform_halt(void)
+{
+	v7m_semih_exit();
+}
