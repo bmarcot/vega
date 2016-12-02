@@ -8,8 +8,6 @@
 #include <kernel/task.h>
 #include <kernel/thread.h>
 
-#include <if/uart.h>
-
 #include "kernel.h"
 #include "version.h"
 #include "platform.h"
