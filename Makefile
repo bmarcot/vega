@@ -49,7 +49,7 @@ CSRC += $(wildcard libc/*.c)		\
 	$(wildcard drivers/mtd/*.c)	\
 	$(wildcard drivers/timer/*.c)	\
 	$(wildcard drivers/serial/*.c)	\
-	$(wildcard system/vash/*.c)	\
+	$(wildcard system/*.c)		\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))

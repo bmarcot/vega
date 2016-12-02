@@ -1,8 +1,23 @@
-/* the vega shell */
+/*
+ * system/minish.c
+ *
+ * Copyright (c) 2016 Benoit Marcot
+ *
+ * A minishell.
+ */
 
-#include "platform/qemu/qemu.h"
+#include <string.h>
+#include <sys/types.h>
 
-int vash(void *options)
+#include "kernel.h"
+
+int open(const char *pathname, int flags);
+ssize_t read(int fd, void *buf, size_t count);
+ssize_t write(int fd, const void *buf, size_t count);
+
+void ls(void);
+
+int minishell(void *options)
 {
 	(void)options;
 

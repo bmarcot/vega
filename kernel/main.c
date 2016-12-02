@@ -39,11 +39,11 @@ void __printk_init(void);
 
 struct task_info top_task;
 
-int vash(void *options);
+int minishell(void *options);
 
 void __weak *main(__unused void *arg)
 {
-	vash(NULL);
+	minishell(NULL);
 
 	return 0;
 }
