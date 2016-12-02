@@ -1,5 +1,5 @@
 
-# control the build verbosity
+# Control the build verbosity
 ifeq ("$(VERBOSE)","1")
 Q :=
 VECHO = @true
@@ -11,13 +11,13 @@ endif
 # vegaz, compressed kernel
 NAME = vega
 
-# QEMU is our default platform
-PLATFORM ?= qemu
+# Build and run on Qemu when the target is unspecified
+TARGET ?= qemu
 
 DIRS = . kernel libc api include include/libc include/libc/sys
 
-# platform Makefile contains hw details and flags
-include platform/$(PLATFORM)/Makefile
+# The platform Makefile contains hw details and flags
+include target/$(TARGET)/Makefile
 
 CROSS = arm-none-eabi-
 CC = $(CROSS)gcc
@@ -26,7 +26,7 @@ OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Iplatform/$(PLATFORM) \
+CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	 -Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
 
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
@@ -95,4 +95,4 @@ distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
 
 # platform Makefile.rules contains flashing and running rules
-include platform/$(PLATFORM)/Makefile.rules
+include target/$(TARGET)/Makefile.rules
