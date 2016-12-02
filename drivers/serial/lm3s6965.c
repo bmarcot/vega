@@ -12,26 +12,10 @@
 #include <kernel/serial.h>
 #include <kernel/types.h>
 
-#define LM3S_UART0_BASE       0x4000c000
+#include <cmsis/lm3s6965/lm3s_cmsis.h>
+
 #define LM3S_UARTIM_RXIM_Pos  4
 #define LM3S_UARTICR_RXIC_Pos 4
-#define LM3S_UART0_IRQn       5
-
-struct lm3s6965_uart {
-	u32 uartdr;      /* 0 */
-	u8 pad_0[0x14];
-	u32 uartfr;      /* 0x18 */
-	u8 pad_1[0x10];
-	u32 uartlcrh;    /* 0x2c */
-	u32 uartctl;     /* 0x30 */
-	u8 pad_2[4];
-	u32 uartim;      /* 0x38 */
-	u8 pad_3[8];
-	u32 uarticr;     /* 0x44 */
-};
-
-static struct lm3s6965_uart *const uart0 =
-	(struct lm3s6965_uart *)LM3S_UART0_BASE;
 
 static char rx_cbuf[16];
 static int pos_begin;
@@ -64,11 +48,11 @@ int lm3s6965_getc(struct serial_info *serial, char *c)
 
 int lm3s6965_putc(struct serial_info *serial, char c)
 {
-	struct lm3s6965_uart *uart = serial->priv;
+	UART_Type *uart = serial->priv;
 
-	while (uart->uartfr & (1 << 3))
+	while (uart->FR & (1 << 3))
 		;
-	uart->uartdr = c;
+	uart->DR = c;
 
 	return 0;
 }
@@ -92,7 +76,7 @@ struct serial_info lm3s6965_uart0 = {
 	.serial_puts = lm3s6965_puts,
 
 	.dev = &lm3s6965_uart0_dev,
-	.priv = (void *)LM3S_UART0_BASE,
+	.priv = UART0,
 };
 
 struct device lm3s6965_uart0_dev = {
@@ -102,41 +86,38 @@ struct device lm3s6965_uart0_dev = {
 
 static void lm3s6965_uart0_isr(void)
 {
-	char c = (char)uart0->uartdr;
+	char c = (char)UART0->DR;
 	cbuf_putc(c);
 	lm3s6965_uart0.rx_count++;
-	uart0->uarticr = 1 << LM3S_UARTICR_RXIC_Pos; /* ack */
+	UART0->ICR = 1 << LM3S_UARTICR_RXIC_Pos; /* ack */
 	serial_activity_callback(&lm3s6965_uart0);
 }
-
-#include "cmsis/arm/ARMCM4.h"
-#include "cmsis/arm/core_cm4.h"
 
 int lm3s6965_init(void)
 {
 	mkdev(&lm3s6965_uart0_dev, "ttyS0");
 
 	/* configure link */
-	uart0->uartctl |= 1;
-	uart0->uartlcrh |= (3 << 5);
+	UART0->CTL |= 1;
+	UART0->LCRH |= (3 << 5);
 
 	/* enable rx interrupt */
-	irq_attach(LM3S_UART0_IRQn, lm3s6965_uart0_isr);
-	NVIC_EnableIRQ(LM3S_UART0_IRQn);
-	uart0->uartim = 1 << LM3S_UARTIM_RXIM_Pos;
+	irq_attach(UART0_IRQn, lm3s6965_uart0_isr);
+	NVIC_EnableIRQ(UART0_IRQn);
+	UART0->IM = 1 << LM3S_UARTIM_RXIM_Pos;
 
 	return 0;
 }
 
 void __printk_init(void)
 {
-	uart0->uartctl |= 1; /* UART enabled */
-	uart0->uartlcrh |= (3 << 5); /* 8 bits word length, no parity */
+	UART0->CTL |= 1; /* UART enabled */
+	UART0->LCRH |= (3 << 5); /* 8 bits word length, no parity */
 }
 
 void __printk_putchar(char c)
 {
-	while (uart0->uartfr & (1 << 3))
+	while (UART0->FR & (1 << 3))
 		;
-	uart0->uartdr = c;
+	UART0->DR = c;
 }
