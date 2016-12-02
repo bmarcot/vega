@@ -153,9 +153,6 @@ void *cpu_idle(void *arg)
 {
 	(void)arg;
 
-#ifndef HAVE_SHELL
-	printk("[[ idle_thread ]]\n");
-#endif
 	for (;;)
 		cpu_do_idle();
 }
