@@ -20,7 +20,7 @@
 #include <kernel/thread.h>
 
 #include "kernel.h"
-#include "cmsis/arm/ARMCM4.h"
+#include "platform.h"
 
 extern void return_from_sighandler(void);
 extern void return_from_sigaction(void);

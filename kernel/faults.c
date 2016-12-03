@@ -3,6 +3,7 @@
 
 #include "kernel.h"
 #include "utils.h"
+#include "platform.h"
 
 void fault_enter(const char *s)
 {
@@ -13,7 +14,7 @@ void fault_enter(const char *s)
 void fault_exit(void)
 {
 	printk("-------------------------------------------------------------\n");
-	halt();
+	__platform_halt();
 }
 
 void hardfault(struct kernel_context_regs *noscratch,

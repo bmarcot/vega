@@ -54,7 +54,7 @@ CSRC += $(wildcard libc/*.c)		\
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
-all: include/cmsis/arm include/version.h $(NAME).lds $(NAME).hex
+all: include/version.h $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
 	$(VECHO) "LD\t$@"
@@ -76,11 +76,6 @@ include/version.h: include/version.template.h
 	$(VECHO) "GEN\t$@"
 	$(Q)cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
 	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
-
-include/cmsis/arm:
-	svn export --force https://github.com/ARM-software/CMSIS/trunk/CMSIS/Include include/cmsis/arm
-	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM4/Include include/cmsis/arm
-	svn export --force https://github.com/ARM-software/CMSIS/trunk/Device/ARM/ARMCM0/Include include/cmsis/arm
 
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"

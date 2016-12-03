@@ -3,18 +3,10 @@
 
 #ifndef __LINKER__
 
-#include "cmsis/arm/ARMCM4.h"
-
 static inline void infinite_loop(void)
 {
 	for (;;)
 		;
-}
-
-static inline void halt(void)
-{
-	for (;;)
-		__WFI();
 }
 
 char *strrev(char *s);

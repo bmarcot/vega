@@ -22,7 +22,7 @@
 
 #include "utils.h"
 #include "kernel.h"
-#include "cmsis/arm/ARMCM4.h"
+#include "platform.h"
 
 static LIST_HEAD(thread_list); /* global linked-list of all threads */
 
