@@ -47,8 +47,8 @@ CSRC += $(wildcard libc/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
-	$(wildcard drivers/timer/*.c)	\
-	$(wildcard drivers/serial/*.c)	\
+	$(wildcard drivers/timer/timercore.c) \
+	$(wildcard drivers/serial/serial*.c) \
 	$(wildcard system/*.c)		\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)

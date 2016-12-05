@@ -9,4 +9,12 @@ CFLAGS	+= -Iplatform/lm3s6965
 CSRC	+=				\
 	target/qemu/halt.c		\
 	platform/lm3s6965/init.c	\
-	cmsis/lm3s6965/system_lm3s.c	\
+
+# CMSIS files
+CSRC	+= cmsis/lm3s6965/system_lm3s.c
+
+# Timer driver files
+CSRC	+= drivers/timer/systick.c
+
+# Serial driver files
+CSRC	+= drivers/serial/lm3s6965.c
