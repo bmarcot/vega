@@ -158,4 +158,8 @@ ENTRY(irq_entry)
 	pop	{pc}
 ENDPROC(irq_entry)
 
+	.weak systick
+systick:
+	bx	lr
+
 	.balign 16
