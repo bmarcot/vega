@@ -6,14 +6,17 @@
 
 #include <sys/cdefs.h>
 
-#include <platform/lm3s6965/platform.h>
 #include "kernel.h"
+
+#include "platform.h"
 
 #define SYSTICK_FREQ_IN_HZ 1000
 #define SYSTICK_PERIOD_IN_MSECS (SYSTICK_FREQ_IN_HZ / 1000)
 
 struct timer_operations;
+
 void config_timer_operations(struct timer_operations *tops);
+
 extern struct timer_operations systick_tops;
 
 __weak void __platform_init(void)
