@@ -1,4 +1,4 @@
-#include "linux/linkage.h"
+#include <kernel/linkage.h>
 
 	.syntax unified
 	.thumb

@@ -4,10 +4,10 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#include <kernel/linkage.h>
+
 	.syntax unified
 	.thumb
-
-#include "linux/linkage.h"
 
 	@ get task control block
 	@ this works as long as the TCB is effectively at the

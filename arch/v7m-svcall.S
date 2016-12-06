@@ -4,10 +4,10 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#include <kernel/linkage.h>
+
 	.syntax unified
 	.thumb
-
-#include "linux/linkage.h"
 
 	@ offsets in the frame to the registers saved on interrupt-entry
 	.set	R0, 0

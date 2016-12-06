@@ -1,9 +1,8 @@
+#include <kernel/syscalls.h>
+#include <kernel/linkage.h>
 
 	.syntax unified
 	.thumb
-
-#include <kernel/syscalls.h>
-#include "linux/linkage.h"
 
 	// -1: unlocked, 0: locked, positive: locked, possible waiters
 

@@ -1,9 +1,8 @@
+#include <kernel/linkage.h>
+#include <kernel/syscalls.h>
 
 	.syntax unified
 	.thumb
-
-#include <kernel/syscalls.h>
-#include "linux/linkage.h"
 
 	@ int do_syscall0(void, int no)
 ENTRY(do_syscall0)
