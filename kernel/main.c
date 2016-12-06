@@ -32,7 +32,6 @@ extern char __heap_size__;
 void cpu_do_idle(void);
 void *cpu_idle(void *);
 void mtdram_init(void);
-void lm3s6965_init(void);
 void __printk_init(void);
 
 struct task_info top_task;
@@ -128,9 +127,6 @@ struct thread_info *start_kernel(void)
 	printk("Created main_thread at <%p> with priority=%d\n", thread_main,
 		thread_main->ti_priority);
 
-	/* do the platform-specific inits */
-	__platform_init();
-
 	/* Reclaim the early-stack physical memory.  In the current context, no
 	 * page allocation after this point are allowed.    */
 	printk("Reclaim early stack's physical memory (%d Bytes, order=%d).\n",
@@ -139,8 +135,10 @@ struct thread_info *start_kernel(void)
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
 	mtdram_init(); /* create a test mtdram device */
-	lm3s6965_init(); /* create /dev/ttyS0, pointing to Qemu UART0 */
 	init_filesystem();
+
+	/* do the platform-specific inits */
+	__platform_init();
 
 	printk("Kernel bootstrap done.\n--\n");
 
