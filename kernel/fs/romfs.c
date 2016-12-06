@@ -7,6 +7,7 @@
 /* Design document:
  *   https://www.kernel.org/doc/Documentation/filesystems/romfs.txt  */
 
+#include <inet.h> /* words are big endian in romfs */
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +15,6 @@
 
 #include "linux/list.h"
 #include "utils.h"
-
-/* #include <arpa/inet.h> */
-#include "inet.h" // words are big endian in romfs
 
 #include <kernel/fs/fs.h>
 #include <kernel/fs/romfs.h>
