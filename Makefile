@@ -26,8 +26,10 @@ OCPY = $(CROSS)objcopy
 HOSTCC=gcc
 
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += -mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Icmsis/arm \
-	 -Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
+CFLAGS += \
+	-mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Icmsis/arm \
+	-Iinclude/kernel \
+	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
 
 # ld must know the architecture because we use the stdlib (printf, memcpy..)
 LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds
