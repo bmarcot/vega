@@ -33,6 +33,10 @@
 	   unsigned int _arr = (unsigned int)(arr);	\
 	   (_elt - _arr) / sizeof(*(elt)); })
 
+#define container_of(ptr, type, member) ({				\
+	    const __typeof__( ((type *)0)->member ) *__mptr = (ptr);	\
+	    (type *)( (char *)__mptr - offsetof(type,member) );})
+
 int printk(const char *fmt, ...);
 
 #endif /* !_KERNEL_KERNEL_H */

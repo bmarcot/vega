@@ -8,10 +8,11 @@
 
 #include <stdbool.h>
 
+#include <kernel/kernel.h>
+
 #include "linux/types.h"
 #include "linux/stddef.h"
 #include "linux/poison.h"
-#include "linux/kernel.h"
 #include "linux/compiler.h" /* for READ_ONCE and WRITE_ONCE definitions */
 
 /*
