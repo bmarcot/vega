@@ -38,6 +38,7 @@ int     sys_mount(const char *source, const char *target,
 /* initialization, object creation, etc. */
 void init_filesystem(void);
 struct vnode *fsroot(void);
+void proc_init(void);
 
 /* debug functions */
 void ls(void);

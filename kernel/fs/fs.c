@@ -281,6 +281,7 @@ extern void devfs_mem_init(void);
 
 void init_filesystem(void)
 {
+	proc_init(); /* procfs */
 	vnode_attach(&vn_dev, &vn_root);
 	devfs_mem_init();
 	printk("$ ls\n");
