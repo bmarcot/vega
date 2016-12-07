@@ -4,9 +4,8 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#include <sys/cdefs.h>
-
-#include "kernel.h"
+#include <kernel/compiler.h>
+#include <kernel/kernel.h>
 
 #include "platform.h"
 
@@ -38,4 +37,17 @@ __weak void __platform_halt(void)
 {
 	for (;;)
 		;
+}
+
+void __printk_init(void)
+{
+	UART0->CTL |= 1; /* UART enabled */
+	UART0->LCRH |= (3 << 5); /* 8 bits word length, no parity */
+}
+
+void __printk_putchar(char c)
+{
+	while (UART0->FR & (1 << 3))
+		;
+	UART0->DR = c;
 }
