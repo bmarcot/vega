@@ -10,8 +10,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <kernel/fs/vnode.h>
-
 #define SEEK_SET  0  /* seek relative to beginning of file */
 #define SEEK_CUR  1  /* seek relative to current file position */
 #define SEEK_END  2  /* seek relative to end of file */
@@ -19,6 +17,8 @@
 #define FD_MAX  32  /* 32 files can be opened cocurrently  */
 
 #define MAX_FILES_PER_DEV  8
+
+struct vnode;
 
 struct file {
 	off_t f_pos;
@@ -37,6 +37,7 @@ int     sys_mount(const char *source, const char *target,
 
 /* initialization, object creation, etc. */
 void init_filesystem(void);
+struct vnode *fsroot(void);
 
 /* debug functions */
 void ls(void);

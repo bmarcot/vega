@@ -69,6 +69,11 @@ static struct vnode vn_root = {
 	.v_head = LIST_HEAD_INIT(vn_dev.v_head)
 };
 
+struct vnode *fsroot(void)
+{
+	return &vn_root;
+}
+
 // clookup ?? this is not part of the user interface (i.e. not a syscall)
 int lookup_1(struct vnode *dvp, struct vnode **vpp, const char *name)
 /* int vnop_lookup(struct vnode *dvp, struct vnode **vpp, char *name, */
