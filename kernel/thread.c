@@ -15,16 +15,17 @@
 #include <arch/v7m-helper.h>
 
 #include <kernel/errno-base.h>
+#include <kernel/kernel.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
+#include <kernel/task.h>
 #include <kernel/types.h>
 
 #include "utils.h"
-#include "kernel.h"
 #include "platform.h"
 
-static LIST_HEAD(thread_list); /* global linked-list of all threads */
+extern struct task_info top_task;
 
 static struct kernel_context_regs *build_intr_stack(void)
 {
@@ -104,7 +105,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;
 #endif
-	list_add(&thread->ti_list, &thread_list);
+	list_add(&thread->ti_list, &top_task.thread_head);
 
 	return thread;
 }
@@ -172,7 +173,7 @@ static struct thread_info *find_thread_by_id(int id)
 {
 	struct thread_info *tp;
 
-	list_for_each_entry(tp, &thread_list, ti_list) {
+	list_for_each_entry(tp, &top_task.thread_head, ti_list) {
 		if (tp->ti_id == id)
 			return tp;
 	}
