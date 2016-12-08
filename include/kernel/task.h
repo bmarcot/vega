@@ -10,6 +10,7 @@
 #include "linux/list.h"
 
 struct task_info {
+	struct list_head thread_head;
 	struct list_head signal_head; /* list of installed handlers */
 };
 
