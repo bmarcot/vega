@@ -55,6 +55,8 @@ int minishell(void *options)
 				//NVIC_Reset();
 			} else if (!strncmp(BUILTIN_HALT, buf, 4)) {
 				__platform_halt();
+			} else if (!strncmp("exit", buf, 4)) {
+				__platform_halt();
 			} else {
 				write(fd, NOT_FOUND, NOT_FOUND_LEN - 1);
 				write(fd, buf, count - 1);
