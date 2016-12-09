@@ -7,51 +7,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <kernel/fs/vfs.h>
+#include <kernel/fs.h>
+#include <kernel/kernel.h>
 
 #include "linux/list.h"
 
-static LIST_HEAD(vfsdefs);
-
-int vfsdef_register(const char *name, const struct vfsops *vfsops)
+int vfs_iterate(struct file *file, struct dir_context *ctx)
 {
-	struct vfsdef *vfsdefp;
+	if (file->f_op->iterate == NULL)
+		return -1; // -ENOTDIR
 
-	vfsdefp = malloc(sizeof(struct vfsdef));
-	if (vfsdefp == NULL)
-		return -1;
-	vfsdefp->name = name;
-	vfsdefp->vfsops = vfsops;
-	list_add(&vfsdefp->list, &vfsdefs);
-
-	return 0;
+	return file->f_op->iterate(file, ctx);
 }
 
-int vfsdef_deregister(const char *name)
+struct dentry *vfs_lookup(struct inode *dir, struct dentry *target)
 {
-	struct vfsdef *vfsdefp;
+	struct dentry *dentry;
 
-	list_for_each_entry(vfsdefp, &vfsdefs, list) {
-		if (!strcmp(vfsdefp->name, name)) {
-			list_del(&vfsdefp->list);
-			free(vfsdefp);
-			break;
-		}
+	if (!S_ISDIR(dir->i_mode)) {
+		printk("Not a dir\n");
+		return NULL;
 	}
+	dentry = dir->i_op->lookup(dir, target);
+	if (dentry)
+		dentry->d_count++;
 
-	return 0;
+	return dentry;
 }
-
-struct vfsdef *vfsdef_find(const char *name)
-{
-	struct vfsdef *vfsdefp;
-
-	list_for_each_entry(vfsdefp, &vfsdefs, list) {
-		if (!strcmp(vfsdefp->name, name))
-			return vfsdefp;
-	}
-
-	return NULL;
-}
-
-
