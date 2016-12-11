@@ -65,6 +65,13 @@ int minishell(void *options)
 		null_cmd:
 			count = 0;
 			write(fd, SHELL_PROMPT, SHELL_PROMPT_LEN - 1);
+		} else if (buf[count-1] == 127) {
+			static const char move_cursor_backward[] = "\033[1D";
+			static const char clear_to_eol[] = "\033[K";
+			write(fd, move_cursor_backward, 4);
+			write(fd, clear_to_eol, 4);
+			count = count - 2;
+			buf[count] = '\0';
 		} else {
 			write(fd, &buf[count - 1], 1);
 		}
