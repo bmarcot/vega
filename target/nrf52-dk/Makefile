@@ -20,3 +20,6 @@ SSRC	+= drivers/timer/nrf52-entry.S
 
 # Gpio driver files
 CSRC	+= platform/nrf52/gpio.c
+
+# Master SPIM
+CSRC	+= platform/nrf52/spim.c
