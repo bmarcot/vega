@@ -17,4 +17,4 @@ for i in range(32, 0, -1):
     else:
         xs.append(4)
 
-print ', '.join(map(lambda x: str(x), xs))
+print(", ".join(map(lambda x: str(x), xs)))
