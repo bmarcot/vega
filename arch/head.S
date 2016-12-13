@@ -100,6 +100,9 @@
 	.text
 
 ENTRY(reset)
+	ldr	r0, =SystemInit			/* CMSIS system init */
+	blx	r0
+
 	mov32	r0, 0xe000ed00			/* SCB_BASE */
 
 	@ switch to Handler_Mode
