@@ -40,7 +40,7 @@ int serialchar_read(struct vnode *vn, void *buf, size_t count, off_t off, size_t
 	struct device *dev = vn->v_data;
 	struct serial_info *serial = dev->drvdata;
 
-	while (serial->rx_count != count) {
+	while (serial->rx_count < count) {
 		CURRENT_THREAD_INFO(cur_thread);
 		sched_dequeue(cur_thread);
 		sched_elect(0);
