@@ -31,4 +31,14 @@ typedef unsigned char u8;
 typedef char s8;
 #endif
 
+#ifndef _INO_T
+#define _INO_T
+typedef unsigned int ino_t;
+#endif
+
+#ifndef _UMODE_T
+#define _UMODE_T
+typedef unsigned short umode_t;
+#endif
+
 #endif /* !KERNEL_TYPES_H */
