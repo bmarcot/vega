@@ -56,7 +56,7 @@ OBJS := $(sort $(OBJS))
 
 all: include/version.h $(NAME).lds $(NAME).hex
 
-$(NAME).elf: $(OBJS)
+$(NAME).elf: $(OBJS) kernel/fs/version.o
 	$(VECHO) "LD\t$@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
@@ -77,6 +77,20 @@ include/version.h: include/version.template.h
 	$(Q)cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
 	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
 
+kernel/fs/version:
+	$(VECHO) "GEN\t$@"
+	$(Q)python3 scripts/gen-proc-version.py --cc-version --git-branch	\
+	--git-commit --user $(shell whoami) --host $(shell hostname)		\
+	-a $(ARCH) -c $(CPU) -n 'Vega' > $@
+
+kernel/fs/version.o: kernel/fs/version
+	$(VECHO) "OBJCOPY\t$@"
+	$(Q)$(OBJCOPY) -I binary -O elf32-littlearm -B arm		\
+	--rename-section .data=.rodata					\
+        --redefine-sym _binary_$(subst /,_,$<)_start=_version_ptr	\
+        --redefine-sym _binary_$(subst /,_,$<)_size=_version_len	\
+	$< $@
+
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OBJCOPY) -O ihex $< $@
@@ -84,6 +98,7 @@ include/version.h: include/version.template.h
 clean::
 	find . -name "*.o" -type f -delete
 	rm -f $(NAME).map $(NAME).lds include/version.h
+	rm -f kernel/proc/version
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
