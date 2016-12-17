@@ -48,6 +48,16 @@ static void exec_command(const char *buf, int fd)
 	}
 }
 
+static void cursor_backward(int n, int fd)
+{
+	char ebuf[8];
+
+	if (n > 0) {
+		sprintf(ebuf, "\033[%dD", n);
+		write(fd, ebuf, strlen(ebuf));
+	}
+}
+
 static int cur;
 static int cur_eol;
 static char buf_line[MINISH_LINE_MAX];
@@ -60,7 +70,7 @@ static void readline(int fd)
 	switch (c) {
 	case ASCII_CARRIAGE_RETURN:
 		write(fd, TERM_CRLF, sizeof(TERM_CRLF) - 1);
-		if (cur) {
+		if (cur_eol > 0) {
 			exec_command(buf_line, fd);
 			cur = 0; /* relative position to prompt's last char */
 			cur_eol = 0;
@@ -69,13 +79,18 @@ static void readline(int fd)
 		break;
 	case ASCII_BACKSPACE:
 	case ASCII_DELETE: //XXX: Qemu sends DEL instead of BS
-		if (cur) {
-			write(fd, ESC_SEQ_CURSOR_BACKWARD,
-				sizeof(ESC_SEQ_CURSOR_BACKWARD) - 1);
+		if (cur > 0) {
+			if (cur < cur_eol) {
+				for (int i = cur; i <= cur_eol; i++)
+					buf_line[i - 1] = buf_line[i];
+			}
+			buf_line[--cur_eol] = ASCII_NULL;
+			cur--;
+			cursor_backward(1, fd);
 			write(fd, ESC_SEQ_ERASE_LINE,
 				sizeof(ESC_SEQ_ERASE_LINE) - 1);
-			buf_line[--cur] = ASCII_NULL;
-			cur_eol--;
+			write(fd, &buf_line[cur], strlen(&buf_line[cur]));
+			cursor_backward(cur_eol - cur, fd);
 		}
 		break;
 	case ' ' ... '~':
@@ -85,12 +100,8 @@ static void readline(int fd)
 		}
 		buf_line[cur++] = c;
 		buf_line[++cur_eol] = '\0';
-		char ebuf[8];
 		write(fd, &buf_line[cur - 1], strlen(&buf_line[cur - 1]));
-		if (cur < cur_eol) {
-			sprintf(ebuf, "\033[%dD", cur_eol - cur);
-			write(fd, ebuf, strlen(ebuf));
-		}
+		cursor_backward(cur_eol - cur, fd);
 		break;
 	case ASCII_ESCAPE:
 		read(fd, &c, 1);
@@ -103,7 +114,7 @@ static void readline(int fd)
 				cur++;
 				write(fd, "\033[C", 3);
 			}
-				break;
+			break;
 		case 'D':
 			if (cur > 0) {
 				cur--;
