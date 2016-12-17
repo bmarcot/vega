@@ -8,7 +8,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "kernel.h" //XXX: printk()
+#include <kernel/kernel.h> //XXX: printk()
+
 #include "minish.h"
 #include "platform.h"
 
@@ -51,8 +52,7 @@ static int cur;
 static int cur_eol;
 static char buf_line[MINISH_LINE_MAX];
 
-
-static void process_input(int fd)
+static void readline(int fd)
 {
 	char c;
 
@@ -85,7 +85,7 @@ static void process_input(int fd)
 		}
 		buf_line[cur++] = c;
 		buf_line[++cur_eol] = '\0';
-		char ebuf[16];
+		char ebuf[8];
 		write(fd, &buf_line[cur - 1], strlen(&buf_line[cur - 1]));
 		if (cur < cur_eol) {
 			sprintf(ebuf, "\033[%dD", cur_eol - cur);
@@ -118,7 +118,7 @@ int minishell(void *options)
 
 	write(fd, TERM_PROMPT, sizeof(TERM_PROMPT) - 1);
 	for (;;) {
-		process_input(fd);
+		readline(fd);
 	}
 
 	return 0;
