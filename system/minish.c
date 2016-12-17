@@ -97,12 +97,23 @@ static void readline(int fd)
 		if (c != '[') // this is not an escape sequence
 			return;
 		read(fd, &c, 1);
-		if (c != 'D') {
+		switch (c) {
+		case 'C':
+			if (cur < cur_eol) {
+				cur++;
+				write(fd, "\033[C", 3);
+			}
+				break;
+		case 'D':
+			if (cur > 0) {
+				cur--;
+				write(fd, "\033[D", 3);
+			}
+			break;
+		default:
 			printk("Unhandled escape sequence!\n");
 			return;
 		}
-		cur--;
-		write(fd, "\033[D", 3);
 	default:
 		;
 	}
