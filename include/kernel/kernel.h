@@ -26,7 +26,7 @@
 	   _a < _b ? _a : _b; })
 
 #define ARRAY_SIZE(arr) \
-	(sizeof(arr) / sizeof(*(arr)))
+	((size_t)(sizeof(arr) / sizeof(*(arr))))
 
 #define ARRAY_INDEX(elt, arr)				\
 	({ unsigned int _elt = (unsigned int)(elt);	\
