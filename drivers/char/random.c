@@ -7,8 +7,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <kernel/fs/vnode.h>
-#include "kernel.h"
+#include <kernel/fs.h>
+#include <kernel/kernel.h>
 
 typedef unsigned long long u64;
 
@@ -33,18 +33,16 @@ static u64 next(void)
 	return s[p] * UINT64_C(1181783497276652981);
 }
 
-int open_random(struct vnode *vp, int flags)
+int open_random(struct inode *inode, struct file *file)
 {
-	(void)vp;
-	(void)flags;
+	(void)inode, (void)file;
 
 	return 0;
 }
 
-int read_random(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+ssize_t read_random(struct file *file, char *buf, size_t count, off_t offset)
 {
-	(void)vp;
-	(void)off;
+	(void)file, (void)offset;
 
 	static u64 m;
 	static int remaining_bytes = 0;
@@ -59,12 +57,11 @@ int read_random(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
 			remaining_bytes = 8 - min(i, 8);
 		}
 	}
-	*n = count;
 
-	return 0;
+	return count;
 }
 
-const struct vnodeops random_vops = {
-	.vop_open = open_random,
-	.vop_read = read_random,
+const struct file_operations random_fops = {
+	.open = open_random,
+	.read = read_random,
 };

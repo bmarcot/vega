@@ -6,117 +6,98 @@
 
 #include <string.h>
 
-#include <kernel/fs/vnode.h>
+#include <kernel/fs.h>
+#include <kernel/kernel.h>
 
-int mem_open(struct vnode *vp, int flags)
+int mem_open(struct inode *inode, struct file *file)
 {
-	(void)vp;
-	(void)flags;
+	(void)inode, (void)file;
 
 	return 0;
 }
 
-int write_mem(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+ssize_t write_mem(struct file *file, const char *buf, size_t count,
+		off_t *offset)
 {
-	(void)vp;
+	(void)file;
 
-	//FIXME: Add checks, valid_phys_addr_range()
-	memcpy((void *)off, buf, count);
-	*n = count;
+	memcpy((void *)offset, buf, count);
+
+	return count;
+}
+
+ssize_t read_mem(struct file *file, char *buf, size_t count, off_t offset)
+{
+	(void)file;
+
+	memcpy(buf, (void *)offset, count);
+
+	return count;
+}
+
+ssize_t write_null(struct file *file, const char *buf, size_t count,
+		off_t *offset)
+{
+	(void)file, (void)buf, (void)offset;
+
+	return count;
+}
+
+ssize_t read_null(struct file *file, char *buf, size_t count, off_t offset)
+{
+	(void)file, (void)buf, (void)count, (void)offset;
 
 	return 0;
 }
 
-int read_mem(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
+ssize_t read_zero(struct file *file, char *buf, size_t count, off_t offset)
 {
-	(void)vp;
-
-	//FIXME: Add checks, valid_phys_addr_range()
-	memcpy(buf, (void *)off, count);
-	*n = count;
-
-	return 0;
-}
-
-int write_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
-{
-	(void)vp;
-	(void)buf;
-	(void)off;
-
-	*n = count;
-
-	return 0;
-}
-
-int read_null(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
-{
-	(void)vp;
-	(void)buf;
-	(void)count;
-	(void)off;
-
-	*n = 0;
-
-	return 0;
-}
-
-int read_zero(struct vnode *vp, void *buf, size_t count, off_t off, size_t *n)
-{
-	(void)vp;
-	(void)off;
-	(void)n;
+	(void)file, (void)offset;
 
 	memset(buf, 0, count);
-	*n = count;
 
-	return 0;
+	return count;
 }
 
-static const struct vnodeops mem_vops = {
-	.vop_open = mem_open,
-	.vop_read = read_mem,
-	.vop_write = write_mem,
+static const struct file_operations mem_fops = {
+	.open = mem_open,
+	.read = read_mem,
+	.write = write_mem,
 };
 
-static const struct vnodeops null_vops = {
-	.vop_open = mem_open,
-	.vop_read = read_null,
-	.vop_write = write_null,
+static const struct file_operations null_fops = {
+	.open = mem_open,
+	.read = read_null,
+	.write = write_null,
 };
 
-static const struct vnodeops zero_vops = {
-	.vop_open = mem_open,
-	.vop_read = read_zero,
-	.vop_write = write_null,
+static const struct file_operations zero_fops = {
+	.open = mem_open,
+	.read = read_zero,
+	.write = write_null,
 };
 
 struct memdev {
 	const char *name;
-	const struct vnodeops *vops;
+	const struct file_operations *fops;
 };
 
-extern struct vnodeops random_vops;
+extern struct file_operations random_fops;
 
 struct memdev devlist[] = {
-	{ "mem", &mem_vops },
-	{ "null", &null_vops },
-	{ "zero", &zero_vops },
-	{ "random", &random_vops },
+	{ "mem",    &mem_fops    },
+	{ "null",   &null_fops   },
+	{ "zero",   &zero_fops   },
+	{ "random", &random_fops },
 };
 
-static struct vnode memvns[8];
-
-extern struct vnode vn_dev;
+struct inode *create_dev_inode(const char *name,
+			const struct file_operations *fops);
 
 void devfs_mem_init(void)
 {
-	//FIXME: replace with device_create_with_prealloc()
 	for (int i = 0; i < 4; i++) {
-		memvns[i].v_path = (char *)devlist[i].name;
-		memvns[i].v_type = VCHR;
-		INIT_LIST_HEAD(&memvns[i].v_head);
-		memvns[i].v_ops = devlist[i].vops;
-		vnode_attach(&memvns[i], &vn_dev);
+		printk("Creating /dev/%s\n", devlist[i].name);
+		create_dev_inode(devlist[i].name, devlist[i].fops);
 	}
 }
