@@ -14,15 +14,15 @@
 
 int mtdchar_open(struct inode *inode, struct file *file)
 {
-	(void)inode, (void)file;
+	file->f_private = inode->i_private;
 
 	return 0;
 }
 
 ssize_t mtdchar_read(struct file *file, char *buf, size_t count, off_t offset)
 {
-	size_t retlen = -1;
-	struct mtd_info *mtd = file->f_dentry->d_inode->i_private;
+	size_t retlen;
+	struct mtd_info *mtd = file->f_private;
 
 	if (mtd_read(mtd, offset, count, &retlen, (unsigned char *)buf) < 0)
 		return -1;
@@ -32,8 +32,8 @@ ssize_t mtdchar_read(struct file *file, char *buf, size_t count, off_t offset)
 
 ssize_t mtdchar_write(struct file *file, const char *buf, size_t count, off_t *offset)
 {
-	size_t retlen = -1;
-	struct mtd_info *mtd = file->f_dentry->d_inode->i_private;
+	size_t retlen;
+	struct mtd_info *mtd = file->f_private;
 
 	if (mtd_write(mtd, *offset, count, &retlen, (const unsigned char *)buf) < 0)
 		return -1;
