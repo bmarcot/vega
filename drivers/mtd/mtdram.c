@@ -5,6 +5,10 @@
  */
 
 #include <string.h>
+
+#include <kernel/fs.h>
+#include <kernel/kernel.h>
+
 #include <drivers/mtd/mtd.h>
 
 #define SIZE_1KB 1024
@@ -70,30 +74,22 @@ int mtdram_init_device(struct mtd_info *mtd, void *mapped_address,
 	return 0;
 }
 
-/* static struct mtd_info mtdram = { */
-/* 	.dev  = call create_decice() -- /dev/mtd0 */
-/* 	.priv = 0 + user_offset */
-/* }; */
-
-#include "kernel.h"
-#include <kernel/device.h>
-
-extern struct cdev mtdchar_cdev;
-
-static struct device dev = {
-	.char_dev = &mtdchar_cdev,
-};
-
 struct mtd_info mtdram;
 
 extern char __mtdram_start__;
 extern char __mtdram_size__;
 
+extern const struct file_operations mtdchar_fops;
+
+struct inode *create_dev_inode(const char *name,
+			const struct file_operations *fops);
+
 void mtdram_init(void)
 {
+	const char *devicename = "mtd0";
+	printk("Creating MTD device %s\n", devicename);
 	mtdram_init_device(&mtdram, &__mtdram_start__,
-			(unsigned long)&__mtdram_size__, "mtd0");
-	printk("Inited mtd device %s\n", mtdram.name);
-	dev.drvdata = &mtdram;
-	mkdev(&dev, "mtd0");
+			(unsigned long)&__mtdram_size__, devicename);
+	struct inode *inode = create_dev_inode(devicename, &mtdchar_fops);
+	inode->i_private = &mtdram;
 }

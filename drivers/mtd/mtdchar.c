@@ -6,63 +6,43 @@
 
 #include <sys/types.h>
 
-#include <kernel/device.h>
-#include <kernel/fs/vnode.h>
+#include <kernel/fs.h>
 
 #include <drivers/mtd/mtd.h>
 
 //note: romfs will use these functions
 
-int mtdchar_open(struct vnode *vn, int flags)
+int mtdchar_open(struct inode *inode, struct file *file)
 {
-	(void)vn, (void)flags;
+	(void)inode, (void)file;
 
 	return 0;
 }
 
-int mtdchar_read(struct vnode *vn, void *buf, size_t count, off_t off, size_t *n)
+ssize_t mtdchar_read(struct file *file, char *buf, size_t count, off_t offset)
 {
-	struct device *dev = vn->v_data;
-	struct mtd_info *mtd = dev->drvdata;
+	size_t retlen = -1;
+	struct mtd_info *mtd = file->f_dentry->d_inode->i_private;
 
-	return mtd_read(mtd, off, count, n, buf);
+	if (mtd_read(mtd, offset, count, &retlen, (unsigned char *)buf) < 0)
+		return -1;
+
+	return retlen;
 }
 
-int mtdchar_write(struct vnode *vn, void *buf, size_t count, off_t off, size_t *n)
+ssize_t mtdchar_write(struct file *file, const char *buf, size_t count, off_t *offset)
 {
-	struct device *dev = vn->v_data;
-	struct mtd_info *mtd = dev->drvdata;
+	size_t retlen = -1;
+	struct mtd_info *mtd = file->f_dentry->d_inode->i_private;
 
-	return mtd_write(mtd, off, count, n, buf);
+	if (mtd_write(mtd, *offset, count, &retlen, (const unsigned char *)buf) < 0)
+		return -1;
+
+	return retlen;
 }
 
-int mtdchar_getattr(struct vnode *vn, struct vattr *vap, int flags)
-{
-	(void) flags;
-
-	struct device *dev = vn->v_data;
-	struct mtd_info *mtd = dev->drvdata;
-
-	vap->va_size = mtd->size;
-
-	return 0;
-}
-
-int mtdchar_seek(struct vnode *vn, off_t oldoff, off_t *newoffp)
-{
-	(void)vn, (void)oldoff, (void)newoffp;
-
-	return 0;
-}
-
-static const struct vnodeops mtdchar_vops = {
-	.vop_open = mtdchar_open,
-	.vop_read = mtdchar_read,
-	.vop_write = mtdchar_write,
-	.vop_getattr = mtdchar_getattr,
-	.vop_seek = mtdchar_seek,
-};
-
-struct cdev mtdchar_cdev = {
-	.cdev_vops = &mtdchar_vops,
+const struct file_operations mtdchar_fops = {
+	.open  = mtdchar_open,
+	.read  = mtdchar_read,
+	.write = mtdchar_write,
 };

@@ -4,8 +4,8 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#ifndef DRIVERS_MTD_MTD_H
-#define DRIVERS_MTD_MTD_H
+#ifndef _DRIVERS_MTD_MTD_H
+#define _DRIVERS_MTD_MTD_H
 
 #include <sys/types.h>
 
@@ -54,7 +54,7 @@ struct mtd_info {
 	int (*mtd_write)(struct mtd_info *mtd, off_t to, size_t len,
 			size_t *retlen, const void *buf);
 
-	struct device *dev;
+	/* struct device *dev; */
 	void *priv; // can be the physical address of the flash device
 };
 
@@ -68,4 +68,4 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 
 void mtd_erase_callback(struct erase_info *instr);
 
-#endif /* !DRIVERS_MTD_MTD_H */
+#endif /* !_DRIVERS_MTD_MTD_H */

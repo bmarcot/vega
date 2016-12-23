@@ -5,6 +5,7 @@
  */
 
 #include <stddef.h>
+
 #include <drivers/mtd/mtd.h>
 
 void mtd_erase_callback(struct erase_info *instr)
@@ -70,14 +71,4 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 		return 0;
 
 	return mtd->mtd_write(mtd, to, len, retlen, buf);
-}
-
-//FIXME: read file instead?
-#include "kernel.h"
-void mtd_info(struct mtd_info *mtd)
-{
-	printk("Dump MTD device info:\n");
-	printk("  Name            %s\n", mtd->name);
-	printk("  Size            %d\n", mtd->size);
-	printk("  Mapped address  %p\n", mtd->priv);
 }
