@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
-#include <kernel/fs/fs.h>
+#include <kernel/fs.h>
+#include <kernel/kernel.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/task.h>
 #include <kernel/thread.h>
 
-#include "kernel.h"
 #include "version.h"
 #include "platform.h"
 
@@ -33,10 +33,10 @@ void cpu_do_idle(void);
 void *cpu_idle(void *);
 void mtdram_init(void);
 void __printk_init(void);
+int minishell(void *options);
+void devfs_mem_init(void);
 
 struct task_info top_task;
-
-int minishell(void *options);
 
 void __weak *main(__unused void *arg)
 {
@@ -135,7 +135,7 @@ struct thread_info *start_kernel(void)
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
 	mtdram_init(); /* create a test mtdram device */
-	init_filesystem();
+	devfs_mem_init();
 
 	/* do the platform-specific inits */
 	__platform_init();
