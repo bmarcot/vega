@@ -6,8 +6,7 @@
 
 #include <sys/types.h>
 
-#include <kernel/device.h>
-#include <kernel/fs/vnode.h>
+#include <kernel/fs.h>
 #include <kernel/scheduler.h>
 #include <kernel/serial.h>
 #include <kernel/thread.h>
@@ -18,59 +17,54 @@ void serialchar_callback(struct serial_info *serial)
 	sched_elect(0);
 }
 
-int serialchar_open(struct vnode *vn, int flags)
+int serialchar_open(struct inode *inode, struct file *file)
 {
-	(void)vn, (void)flags;
-
-	struct device *dev = vn->v_data;
-	struct serial_info *serial = dev->drvdata;
-
-	serial->callback = serialchar_callback;
-
+	file->f_private = inode->i_private;
+	struct serial_info *serial = file->f_private;
 	CURRENT_THREAD_INFO(cur_thread);
 	serial->owner = cur_thread;
+	serial->callback = serialchar_callback;
 
 	return 0;
 }
 
-int serialchar_read(struct vnode *vn, void *buf, size_t count, off_t off, size_t *n)
+ssize_t serialchar_read(struct file *file, char *buf, size_t count, off_t offset)
 {
-	(void)off;
+	(void)offset;
 
-	struct device *dev = vn->v_data;
-	struct serial_info *serial = dev->drvdata;
+	size_t retlen;
+	struct serial_info *serial = file->f_private;
 
 	while (serial->rx_count < count) {
 		CURRENT_THREAD_INFO(cur_thread);
 		sched_dequeue(cur_thread);
 		sched_elect(0);
 	}
-
 	if (count == 1)
 		return serial_getc(serial, buf);
+	if (serial_gets(serial, count, &retlen, buf) < 0)
+		return -1;
 
-	return serial_gets(serial, count, n, buf);
+	return retlen;
 }
 
-int serialchar_write(struct vnode *vn, void *buf, size_t count, off_t off, size_t *n)
+ssize_t serialchar_write(struct file *file, const char *buf, size_t count, off_t *offset)
 {
-	(void)off;
+	(void)offset;
 
-	struct device *dev = vn->v_data;
-	struct serial_info *serial = dev->drvdata;
+	size_t retlen;
+	struct serial_info *serial = file->f_private;
 
 	if (count == 1)
 		return serial_putc(serial, *((char *)buf));
+	if (serial_puts(serial, count, &retlen, buf) < 0)
+		return -1;
 
-	return serial_puts(serial, count, n, buf);
+	return retlen;
 }
 
-static const struct vnodeops serialchar_vops = {
-	.vop_open = serialchar_open,
-	.vop_read = serialchar_read,
-	.vop_write = serialchar_write,
-};
-
-struct cdev serialchar_cdev = {
-	.cdev_vops = &serialchar_vops,
+const struct file_operations serialchar_fops = {
+	.open  = serialchar_open,
+	.read  = serialchar_read,
+	.write = serialchar_write,
 };

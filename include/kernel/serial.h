@@ -29,7 +29,6 @@ struct serial_info {
 	/* callback on device activity, set by ioctl() */
 	void (*callback)(struct serial_info *self);
 
-	struct device *dev;
 	void *priv;
 
 	//XXX: owner thread pointer could go to priv, and device pripheral

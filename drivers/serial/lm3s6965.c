@@ -6,8 +6,7 @@
 
 #include <sys/types.h>
 
-#include <kernel/device.h>
-#include <kernel/fs/vnode.h>
+#include <kernel/fs.h>
 #include <kernel/irq.h>
 #include <kernel/serial.h>
 #include <kernel/types.h>
@@ -57,8 +56,8 @@ int lm3s6965_putc(struct serial_info *serial, char c)
 	return 0;
 }
 
-int lm3s6965_puts(struct serial_info *serial, size_t len,
-		size_t *retlen, const char *buf)
+int lm3s6965_puts(struct serial_info *serial, size_t len, size_t *retlen,
+		const char *buf)
 {
 	*retlen = len;
 	for (int i = 0; len > 0; len--, i++)
@@ -67,21 +66,12 @@ int lm3s6965_puts(struct serial_info *serial, size_t len,
 	return 0;
 }
 
-struct device lm3s6965_uart0_dev;
-extern struct cdev serialchar_cdev;
-
 struct serial_info lm3s6965_uart0 = {
 	.serial_getc = lm3s6965_getc,
 	.serial_putc = lm3s6965_putc,
 	.serial_puts = lm3s6965_puts,
 
-	.dev = &lm3s6965_uart0_dev,
 	.priv = UART0,
-};
-
-struct device lm3s6965_uart0_dev = {
-	.char_dev = &serialchar_cdev,
-	.drvdata = &lm3s6965_uart0,
 };
 
 static void lm3s6965_uart0_isr(void)
@@ -93,9 +83,15 @@ static void lm3s6965_uart0_isr(void)
 	serial_activity_callback(&lm3s6965_uart0);
 }
 
+extern const struct file_operations serialchar_fops;
+
+struct inode *create_dev_inode(const char *name,
+			const struct file_operations *fops);
+
 int lm3s6965_init(void)
 {
-	mkdev(&lm3s6965_uart0_dev, "ttyS0");
+	struct inode *inode = create_dev_inode("ttyS0", &serialchar_fops);
+	inode->i_private = &lm3s6965_uart0;
 
 	/* configure link */
 	UART0->CTL |= 1;
