@@ -4,11 +4,13 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <kernel/bitops.h>
+#include <kernel/errno-base.h>
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
 
@@ -49,6 +51,11 @@ int sys_open(const char *pathname, int flags)
 		if (dentry == NULL)
 			return -1;
 		inode = dentry->d_inode;
+	}
+
+	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {
+		errno = ENOTDIR;
+		return -1;
 	}
 
 	int fd = getfd();

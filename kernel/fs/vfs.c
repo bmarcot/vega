@@ -15,7 +15,7 @@
 int vfs_iterate(struct file *file, struct dir_context *ctx)
 {
 	if (file->f_op->iterate == NULL)
-		return -1; // -ENOTDIR
+		return -1;
 
 	return file->f_op->iterate(file, ctx);
 }
@@ -24,10 +24,8 @@ struct dentry *vfs_lookup(struct inode *dir, struct dentry *target)
 {
 	struct dentry *dentry;
 
-	if (!S_ISDIR(dir->i_mode)) {
-		printk("Not a dir\n");
+	if (!S_ISDIR(dir->i_mode))
 		return NULL;
-	}
 	dentry = dir->i_op->lookup(dir, target);
 	if (dentry)
 		dentry->d_count++;
