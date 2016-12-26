@@ -8,9 +8,14 @@
 
 typedef void DIR;
 
-struct file *filetable[8];
+extern struct file filetable[8];
 
 extern struct inode rootdir_inodes[];
+
+int sys_opendir(const char *name)
+{
+	return sys_open(name, O_DIRECTORY);
+}
 
 static int fillonedir(struct dir_context *ctx, const char *name, int namlen,
 		off_t offset, unsigned int ino, unsigned int d_type)
@@ -30,14 +35,12 @@ static int fillonedir(struct dir_context *ctx, const char *name, int namlen,
 
 int sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 {
-	struct file *file = filetable[(int)dirp];
+	struct file *file = &filetable[(int)dirp];
 	struct readdir_callback buf = {
 		.ctx    = {.actor = fillonedir, .pos = 0},
 		.dirent = (struct vega_dirent *)entry,
 	};
 
-	if (file == NULL)
-		return -1; // -EBADF
 	vfs_iterate(file, &buf.ctx);
 	*result = entry;
 
@@ -46,12 +49,7 @@ int sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 
 int sys_closedir(DIR *dirp)
 {
-	int fd = (int)dirp;
-
-	if (filetable[fd] == NULL)
-		return -1;
-	free(filetable[fd]);
-	filetable[fd] = NULL;
+	(void)dirp;
 
 	return 0;
 }

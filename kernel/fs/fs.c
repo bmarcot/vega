@@ -19,7 +19,7 @@ extern struct dentry rootdir_dentries[];
 
 //FIXME: the file table is part of the task structure
 #define FILE_MAX 8
-static struct file filetable[FILE_MAX];
+/* static */ struct file filetable[FILE_MAX];
 
 unsigned long filemap;
 
@@ -122,29 +122,6 @@ int sys_close(int fd)
 	(void)fd;
 
 	return 0;
-}
-
-#include <stdlib.h>
-
-extern struct inode rootdir_inodes[];
-
-// move back to readdir.c
-int sys_opendir(const char *name)
-{
-	struct dentry target;
-	struct dentry *dentry;
-	struct file *file;
-
-	strncpy(target.d_name, name, NAME_MAX);
-	dentry = rootdir_inodes[0].i_op->lookup(&rootdir_inodes[0], &target);
-
-	int fd = getfd();
-	file = &filetable[fd];
-	file->f_dentry = dentry;
-	file->f_op = dentry->d_inode->i_fop;
-	file->f_pos = 0;
-
-	return fd;
 }
 
 int sys_stat(const char *pathname, struct stat *buf)
