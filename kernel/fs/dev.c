@@ -51,7 +51,7 @@ int dev_iterate(struct file *file, struct dir_context *ctx)
 		struct dev_pair *pair;
 		int i = 0;
 		list_for_each_entry(pair, &dev_pairs, list) {
-			if (i == pos) {
+			if (i++ == pos) {
 				res = dir_emit(ctx, pair->dentry.d_name,
 					strlen(pair->dentry.d_name), pair->inode.i_ino, 0);
 				break;
