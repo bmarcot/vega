@@ -157,3 +157,8 @@ void system_reset(__unused int reason)
 {
 	NVIC_SystemReset();
 }
+
+int ls()
+{
+	return 0;
+}

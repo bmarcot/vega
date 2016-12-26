@@ -6,8 +6,6 @@
 
 #include "linux/list.h"
 
-typedef void DIR;
-
 extern struct file filetable[8];
 
 extern struct inode rootdir_inodes[];

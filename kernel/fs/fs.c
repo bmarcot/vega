@@ -138,14 +138,3 @@ int sys_mount(const char *source, const char *target, const char *filesystemtype
 
 	return 0;
 }
-
-// 0000000
-
-void init_filesystem(void)
-{
-}
-
-int ls()
-{
-	return 0;
-}

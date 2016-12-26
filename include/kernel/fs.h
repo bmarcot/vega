@@ -142,4 +142,16 @@ static inline int dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 int vfs_iterate(struct file *file, struct dir_context *ctx);
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target);
 
+typedef void DIR;
+
+/* syscall entries */
+
+int     sys_opendir(const char *name);
+int     sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+int     sys_open(const char *pathname, int flags);
+ssize_t sys_read(int fd, void *buf, size_t count);
+ssize_t sys_write(int fd, void *buf, size_t count);
+off_t   sys_seek(int fd, off_t offset, int whence);
+int     sys_close(int fd);
+
 #endif /* !_KERNEL_FS_H */
