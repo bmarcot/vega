@@ -39,8 +39,10 @@ int sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 		.dirent = (struct vega_dirent *)entry,
 	};
 
-	vfs_iterate(file, &buf.ctx);
-	*result = entry;
+	if (vfs_iterate(file, &buf.ctx))
+		*result = NULL;
+	else
+		*result = entry;
 
 	return 0;
 }

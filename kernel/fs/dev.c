@@ -34,6 +34,7 @@ struct inode *create_dev_inode(const char *name, const struct file_operations *f
 	dev->dentry.d_parent = &rootdir_dentries[1];
 	dev->dentry.d_inode = &dev->inode;
 	list_add(&dev->list, &dev_pairs);
+	rootdir_dentries[1].d_inode->i_size++;
 
 	return &dev->inode;
 }
@@ -43,7 +44,9 @@ int dev_iterate(struct file *file, struct dir_context *ctx)
 	int res = -1;
 	int pos = file->f_pos;
 
-	if (!pos) {
+	if (pos == rootdir_dentries[1].d_inode->i_size + 2) {
+		return -1;
+	} else if (!pos) {
 		res = dir_emit_dot(file, ctx);
 	} else if (file->f_pos == 1) {
 		res = dir_emit_dotdot(file, ctx);
