@@ -10,11 +10,6 @@ extern struct file filetable[8];
 
 extern struct inode rootdir_inodes[];
 
-int sys_opendir(const char *name)
-{
-	return sys_open(name, O_DIRECTORY);
-}
-
 static int fillonedir(struct dir_context *ctx, const char *name, int namlen,
 		off_t offset, unsigned int ino, unsigned int d_type)
 {
@@ -52,11 +47,6 @@ int sys_closedir(DIR *dirp)
 	(void)dirp;
 
 	return 0;
-}
-
-DIR *opendir(const char *name)
-{
-	return (DIR *)sys_opendir(name);
 }
 
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
