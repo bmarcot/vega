@@ -34,6 +34,7 @@ xs = [
     'seek',
     'stat',
     'mount',
+    'readdir_r',
 ]
 
 import datetime

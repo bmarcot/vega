@@ -33,5 +33,6 @@
 #define SYS_SEEK 21
 #define SYS_STAT 22
 #define SYS_MOUNT 23
+#define SYS_READDIR_R 24
 
 #endif /* !KERNEL_SYSCALLS_H */
