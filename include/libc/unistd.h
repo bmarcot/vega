@@ -24,7 +24,9 @@ int mount(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data);
 
 typedef void DIR;
+struct dirent;
 
 DIR *opendir(const char *name);
+int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
 
 #endif /* !UNISTD_H */

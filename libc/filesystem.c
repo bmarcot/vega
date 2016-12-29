@@ -44,3 +44,9 @@ DIR *opendir(const char *name)
 {
 	return (DIR *)do_syscall2((void *)name, (void *)O_DIRECTORY, SYS_OPEN);
 }
+
+int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
+{
+	return do_syscall3((void *)dirp, (void *)entry, (void *)result,
+		SYS_READDIR_R);
+}
