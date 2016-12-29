@@ -23,4 +23,8 @@ int stat(const char *pathname, struct stat *buf);
 int mount(const char *source, const char *target, const char *filesystemtype,
 	unsigned long mountflags, const void *data);
 
+typedef void DIR;
+
+DIR *opendir(const char *name);
+
 #endif /* !UNISTD_H */

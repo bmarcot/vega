@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <kernel/fs.h>
 #include <kernel/syscalls.h>
 #include "vega/syscalls.h"
 
@@ -37,4 +38,9 @@ int mount(const char *source, const char *target, const char *filesystemtype,
 {
 	return do_syscall5((void *)source, (void *)target, (void *)filesystemtype,
 			(void *)mountflags, (void *)data, SYS_MOUNT);
+}
+
+DIR *opendir(const char *name)
+{
+	return (DIR *)do_syscall2((void *)name, (void *)O_DIRECTORY, SYS_OPEN);
 }
