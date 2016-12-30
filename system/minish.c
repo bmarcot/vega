@@ -36,7 +36,7 @@ static void exec_command(const char *buf, int fd)
 		ls(NULL);
 	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
 		printk("Requesting system reboot\n");
-		//NVIC_Reset(); // platform_reset();
+		NVIC_SystemReset();
 	} else if (!strncmp(BUILTIN_HALT, buf, sizeof(BUILTIN_HALT))) {
 		__platform_halt();
 	} else if (!strncmp(BUILTIN_EXIT, buf, sizeof(BUILTIN_EXIT))) {
