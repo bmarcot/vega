@@ -16,7 +16,7 @@
 int open(const char *pathname, int flags);
 ssize_t read(int fd, void *buf, size_t count);
 ssize_t write(int fd, const void *buf, size_t count);
-void ls(void);
+int ls(char *pathname);
 
 static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
@@ -33,7 +33,7 @@ static const char BUILTIN_LS[]     = "ls";
 static void exec_command(const char *buf, int fd)
 {
 	if (!strncmp(BUILTIN_LS, buf, sizeof(BUILTIN_LS) - 1)) {
-		ls();
+		ls(NULL);
 	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
 		printk("Requesting system reboot\n");
 		//NVIC_Reset(); // platform_reset();
