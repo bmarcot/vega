@@ -62,6 +62,26 @@ int release_dentries(struct dentry *dentry)
 	return 0;
 }
 
+struct inode *inode_from_pathname(const char *pathname/* , struct dentry *from */)
+{
+	struct inode *inode = root_inode();
+	struct dentry *dentry = root_dentry();
+	struct dentry target;
+
+	/* remove the trailing slash, relative path is not supported */
+	pathname++;
+
+	for (size_t i = 0; i < strlen(pathname);) {
+		i += path_head(target.d_name, &pathname[i]);
+		dentry = vfs_lookup(inode, &target);
+		if (dentry == NULL)
+			return NULL;
+		inode = dentry->d_inode;
+	}
+
+	return inode;
+}
+
 int sys_open(const char *pathname, int flags)
 {
 	struct inode *inode = root_inode();
