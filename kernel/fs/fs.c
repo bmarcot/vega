@@ -35,6 +35,11 @@ static int getfd(void)
 	return fd;
 }
 
+static void releasefd(int fd)
+{
+	bitmap_clear_bit(&filemap, fd);
+}
+
 int sys_open(const char *pathname, int flags)
 {
 	(void)flags;
@@ -119,7 +124,7 @@ off_t sys_seek(int fd, off_t offset, int whence)
 
 int sys_close(int fd)
 {
-	(void)fd;
+	releasefd(fd);
 
 	return 0;
 }

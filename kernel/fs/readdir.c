@@ -41,15 +41,3 @@ int sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 
 	return 0;
 }
-
-int sys_closedir(DIR *dirp)
-{
-	(void)dirp;
-
-	return 0;
-}
-
-int closedir(DIR *dirp)
-{
-	return sys_closedir(dirp);
-}
