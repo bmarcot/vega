@@ -1,5 +1,5 @@
 /*
- * system/minish.c
+ * system/sh.c
  *
  * Copyright (c) 2016 Benoit Marcot
  */
@@ -10,7 +10,7 @@
 
 #include <kernel/kernel.h> //XXX: printk()
 
-#include "minish.h"
+#include "sh.h"
 #include "platform.h"
 
 int open(const char *pathname, int flags);
@@ -60,7 +60,7 @@ static void cursor_backward(int n, int fd)
 
 static int cur;
 static int cur_eol;
-static char buf_line[MINISH_LINE_MAX];
+static char buf_line[BUF_LINE_LEN];
 
 static void readline(int fd)
 {

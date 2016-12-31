@@ -1,13 +1,13 @@
 /*
- * minish.h
+ * system/sh.h
  *
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#ifndef _MINISH_H
-#define _MINISH_H
+#ifndef _SH_H
+#define _SH_H
 
-#define MINISH_LINE_MAX 128
+#define BUF_LINE_LEN 128
 
 enum ascii_control_char {
 	ASCII_NULL            =  000,
@@ -17,4 +17,4 @@ enum ascii_control_char {
 	ASCII_DELETE          = 0177,
 };
 
-#endif /* !_MINISH_H */
+#endif /* !_SH_H */
