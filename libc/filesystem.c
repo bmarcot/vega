@@ -50,3 +50,8 @@ int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 	return do_syscall3((void *)dirp, (void *)entry, (void *)result,
 		SYS_READDIR_R);
 }
+
+int closedir(DIR *dirp)
+{
+	return do_syscall1((void *)dirp, SYS_CLOSE);
+}

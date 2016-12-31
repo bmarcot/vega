@@ -28,5 +28,6 @@ struct dirent;
 
 DIR *opendir(const char *name);
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+int closedir(DIR *dirp);
 
 #endif /* !UNISTD_H */
