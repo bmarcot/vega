@@ -16,7 +16,7 @@
 int open(const char *pathname, int flags);
 ssize_t read(int fd, void *buf, size_t count);
 ssize_t write(int fd, const void *buf, size_t count);
-int ls(char *pathname);
+int ls(int argc, char *argv[]);
 
 static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
@@ -30,10 +30,29 @@ static const char BUILTIN_REBOOT[] = "reboot";
 static const char BUILTIN_EXIT[]   = "exit";
 static const char BUILTIN_LS[]     = "ls";
 
+static int parse_command_line(const char *buf, char *argv[])
+{
+	int buflen = strlen(buf);
+
+	int argc = 1;
+	argv[0] = (char *)buf;
+	for (int i = 0; i < buflen; i++) {
+		if (buf[i] == ' ') {
+			while (buf[i] == ' ')
+				i++;
+			argv[argc++] = (char *)&buf[i];
+		}
+	}
+
+	return argc;
+}
+
 static void exec_command(const char *buf, int fd)
 {
 	if (!strncmp(BUILTIN_LS, buf, sizeof(BUILTIN_LS) - 1)) {
-		ls(NULL);
+		char *argv[8];
+		int argc = parse_command_line(buf, argv);
+		ls(argc, argv);
 	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
 		printk("Requesting system reboot\n");
 		NVIC_SystemReset();

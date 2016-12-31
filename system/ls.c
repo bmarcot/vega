@@ -5,21 +5,17 @@
  */
 
 #include <stdio.h>
-/* #include <string.h> */
-/* #include <sys/types.h> */
 #include <unistd.h>
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 
-int ls(char *pathname)
+int ls(int argc, char *argv[])
 {
-	(void)pathname;
-
 	struct dirent dirent;
 	struct dirent *result;
 
-	DIR *dir = opendir("/dev");
+	DIR *dir = opendir(argv[1]);
 	do {
 		readdir_r(dir, &dirent, &result);
 		if (result != NULL)
