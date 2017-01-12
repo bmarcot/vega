@@ -77,27 +77,58 @@ static const struct file_operations zero_fops = {
 	.write = write_null,
 };
 
-struct memdev {
-	const char *name;
-	const struct file_operations *fops;
+extern struct inode tmpfs_inodes[];
+extern struct dentry tmpfs_dentries[];
+extern const struct file_operations random_fops;
+extern const struct inode_operations tmpfs_iops;
+
+static struct inode memdev_inodes[] = {
+	{	/* /dev/mem */
+		.i_ino  = 101,
+		.i_op   = &tmpfs_iops,
+		.i_fop  = &mem_fops,
+	},
+	{	/* /dev/null */
+		.i_ino  = 102,
+		.i_op   = &tmpfs_iops,
+		.i_fop  = &null_fops,
+	},
+	{	/* /dev/zero */
+		.i_ino  = 103,
+		.i_op   = &tmpfs_iops,
+		.i_fop  = &zero_fops,
+	},
+	{	/* /dev/random */
+		.i_ino  = 104,
+		.i_op   = &tmpfs_iops,
+		.i_fop  = &random_fops,
+	},
 };
 
-extern struct file_operations random_fops;
-
-struct memdev devlist[] = {
-	{ "mem",    &mem_fops    },
-	{ "null",   &null_fops   },
-	{ "zero",   &zero_fops   },
-	{ "random", &random_fops },
+static struct dentry memdev_dentries[] = {
+	{	.d_inode  = &memdev_inodes[0],
+		.d_parent = &tmpfs_dentries[1],
+		.d_name   = "mem",
+	},
+	{	.d_inode  = &memdev_inodes[1],
+		.d_parent = &tmpfs_dentries[1],
+		.d_name   = "null",
+	},
+	{	.d_inode  = &memdev_inodes[2],
+		.d_parent = &tmpfs_dentries[1],
+		.d_name   = "zero",
+	},
+	{	.d_inode  = &memdev_inodes[3],
+		.d_parent = &tmpfs_dentries[1],
+		.d_name   = "random",
+	},
 };
 
-struct inode *create_dev_inode(const char *name,
-			const struct file_operations *fops);
-
-void devfs_mem_init(void)
+void memdev_init(void)
 {
 	for (int i = 0; i < 4; i++) {
-		printk("Creating /dev/%s\n", devlist[i].name);
-		create_dev_inode(devlist[i].name, devlist[i].fops);
+		printk("Creating /dev/%s\n", memdev_dentries[i].d_name);
+		tmpfs_mkdir(&memdev_inodes[i], &memdev_dentries[i], 0);
+		tmpfs_link(NULL, &tmpfs_inodes[1], &memdev_dentries[i]);
 	}
 }
