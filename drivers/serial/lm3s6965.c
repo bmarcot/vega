@@ -83,15 +83,27 @@ static void lm3s6965_uart0_isr(void)
 	serial_activity_callback(&lm3s6965_uart0);
 }
 
+extern struct inode tmpfs_inodes[];
+extern struct dentry tmpfs_dentries[];
 extern const struct file_operations serialchar_fops;
+extern const struct inode_operations tmpfs_iops;
 
-struct inode *create_dev_inode(const char *name,
-			const struct file_operations *fops);
+static struct inode lm3s6965_inode = {
+	.i_ino     = 1200,
+	.i_op      = &tmpfs_iops,
+	.i_fop     = &serialchar_fops,
+	.i_private = &lm3s6965_uart0,
+};
+
+static struct dentry lm3s6965_dentry = {
+	.d_inode  = &lm3s6965_inode,
+ 	.d_parent = &tmpfs_dentries[1],
+	.d_name   = "mtd0",
+};
 
 int lm3s6965_init(void)
 {
-	struct inode *inode = create_dev_inode("ttyS0", &serialchar_fops);
-	inode->i_private = &lm3s6965_uart0;
+	tmpfs_link(0, &tmpfs_inodes[1], &lm3s6965_dentry);
 
 	/* configure link */
 	UART0->CTL |= 1;
