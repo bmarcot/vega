@@ -14,8 +14,8 @@
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
 
-extern struct inode rootdir_inodes[];
-extern struct dentry rootdir_dentries[];
+extern struct inode tmpfs_inodes[];
+extern struct dentry tmpfs_dentries[];
 
 //FIXME: the file table is part of the task structure
 #define FILE_MAX 8
@@ -45,13 +45,14 @@ int sys_open(const char *pathname, int flags)
 	(void)flags;
 
 	char buf[NAME_MAX];
-	struct inode *inode = &rootdir_inodes[0]; // fsroot_inode();
+	struct inode *inode = &tmpfs_inodes[0]; // fsroot_inode();
 	struct dentry target;
-	struct dentry *dentry;
+	struct dentry *dentry = &tmpfs_dentries[0];
 
 	for (size_t i = 0; i < strlen(pathname);) {
 		i += path_head(buf, &pathname[i]);
 		strcpy(target.d_name, buf);
+		target.d_parent = dentry;
 		dentry = vfs_lookup(inode, &target);
 		if (dentry == NULL)
 			return -1;

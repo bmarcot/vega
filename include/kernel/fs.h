@@ -47,10 +47,8 @@ struct inode {
 	off_t                         i_size;        /* file size in bytes */
 	const struct inode_operations *i_op;         /* inode ops table */
 	const struct file_operations  *i_fop;        /* default inode ops */
-	union {
-		void                  *i_private;
-		char                  i_data[0];
-	};
+	void                          *i_private;
+	char                          i_data[0];
 };
 
 struct dentry;
@@ -90,6 +88,9 @@ struct dentry {
 	//struct dentry_operations *d_op;        /* dentry operations table */
 	struct dentry            *d_parent;          /* dentry object of parent */
 	/* unsigned */ char            d_name[NAME_MAX];   /* short name */
+
+	struct list_head d_child;       /* child of parent list */
+	struct list_head d_subdirs;     /* our children */
 };
 
 /* readdir */

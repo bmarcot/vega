@@ -34,7 +34,6 @@ void *cpu_idle(void *);
 void mtdram_init(void);
 void __printk_init(void);
 int minishell(void *options);
-void devfs_mem_init(void);
 
 struct task_info top_task;
 
@@ -134,8 +133,9 @@ struct thread_info *start_kernel(void)
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
+	tmpfs_init();
+	memdev_init();
 	mtdram_init(); /* create a test mtdram device */
-	devfs_mem_init();
 
 	/* do the platform-specific inits */
 	__platform_init();
