@@ -106,7 +106,10 @@ int nrf52_timer_cancel(struct timer_info *timer)
 
 int nrf52_timer_free(struct timer_info *timer)
 {
-	(void)timer;
+	struct nrf52_timer *nrf52_timer = timer->dev;
+	unsigned int bit = ARRAY_INDEX(nrf52_timer, nrf52_timers);
+
+	clear_bit(bit, &timer_bitmap);
 
 	return 0;
 }
