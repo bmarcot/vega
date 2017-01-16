@@ -4,8 +4,8 @@
 # also defines NRFJPROG with the path to the nrfjprog binary.
 include target/nrf52-dk/Makefile.config
 
-flash:  $(NAME).hex
+run:  $(NAME).hex
 	$(NRFJPROG) --family NRF52 --program $^ --chiperase -s $(DEBUGGER_SERIAL)
 
-run: flash
+reset:
 	$(NRFJPROG) --family NRF52 --reset -s $(DEBUGGER_SERIAL)
