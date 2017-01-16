@@ -1,7 +1,7 @@
 /*
  * kernel/fs/dev.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <stdlib.h>
@@ -14,6 +14,12 @@
 
 /* static int tmpfs_ino = 0xbabe; */
 
+struct tmpfs_dirent {
+	struct inode     *inode;
+	const char       *name;
+	struct list_head list;
+};
+
 int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	/* struct inode *inode; */
@@ -25,7 +31,10 @@ int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 
 	dir->i_mode = mode | S_IFDIR;
 	dentry->d_inode = dir;
-	INIT_LIST_HEAD(&dentry->d_subdirs);
+	/* INIT_LIST_HEAD(&dentry->d_subdirs); */
+
+	struct list_head *dirlist = (struct list_head *)dir->i_private;
+	INIT_LIST_HEAD(dirlist);
 
 	return 0;
 }
@@ -35,7 +44,12 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 	(void)old_dentry;
 
 	dir->i_size++;
-	list_add_tail(&dentry->d_child, &dentry->d_parent->d_subdirs);
+
+	struct list_head *dirlist = (struct list_head *)dir->i_private;
+	struct tmpfs_dirent *new = malloc(sizeof(struct tmpfs_dirent));
+	new->inode = dentry->d_inode;
+	new->name = dentry->d_name;
+	list_add_tail(&new->list, dirlist);
 
 	return 0;
 }
@@ -43,9 +57,9 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 {
 	int res = -1;
-	struct dentry *dentry = file->f_dentry;
+	struct inode *inode = file->f_dentry->d_inode;
 
-	if (file->f_pos == dentry->d_inode->i_size + 2)
+	if (file->f_pos == inode->i_size + 2)
 		return -1;
 	switch (file->f_pos) {
 	case 0:
@@ -55,12 +69,13 @@ int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 		res = dir_emit_dotdot(file, ctx);
 		break;
 	default:;
-		struct dentry *dent;
+		struct tmpfs_dirent *dirent;
+		struct list_head *dirlist = (struct list_head *)inode->i_private;
 		int i = 2;
-		list_for_each_entry(dent, &dentry->d_subdirs, d_child) {
+		list_for_each_entry(dirent, dirlist, list) {
 			if (i++ == file->f_pos) {
-				res = dir_emit(ctx, dent->d_name,
-					strlen(dent->d_name), dent->d_inode->i_ino, 0);
+				res = dir_emit(ctx, dirent->name,
+					strlen(dirent->name), dirent->inode->i_ino, 0);
 				break;
 			}
 		}
@@ -72,15 +87,13 @@ int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 
 struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 {
-	//FIXME: entrie should be stored at dir->i_private, and dentries should
-	//       be created dynamically
-	(void)dir;
+	struct list_head *dirlist = (struct list_head *)dir->i_private;
+	struct tmpfs_dirent *dirent;
 
-	struct dentry *dentry;
-
-	list_for_each_entry(dentry, &target->d_parent->d_subdirs, d_child) {
-		if (!strcmp(target->d_name, dentry->d_name)) {
-			return dentry;
+	list_for_each_entry(dirent, dirlist, list) {
+		if (!strcmp(target->d_name, dirent->name)) {
+			target->d_inode = dirent->inode;
+			return target;
 		}
 	}
 
@@ -97,42 +110,44 @@ const struct file_operations tmpfs_fops = {
 
 struct inode tmpfs_inodes[] = {
 	{	/* /      - the root directory */
-		.i_ino  = 1,
-		.i_op   = &tmpfs_iops,
-		.i_fop  = &tmpfs_fops,
+		.i_ino     = 1,
+		.i_op      = &tmpfs_iops,
+		.i_fop     = &tmpfs_fops,
+		.i_mode    = S_IFDIR,
+		.i_size    = 2,
+		.i_private = &((struct list_head){}),
 	},
 	{	/* /dev   - essential device files */
-		.i_ino  = 2,
-		.i_op   = &tmpfs_iops,
-		.i_fop  = &tmpfs_fops,
+		.i_ino     = 2,
+		.i_op      = &tmpfs_iops,
+		.i_fop     = &tmpfs_fops,
+		.i_mode    = S_IFDIR,
+		.i_private = &((struct list_head){}),
 	},
 	{	/* /proc  - process and kernel information as files */
-		.i_ino  = 3,
-		.i_op   = &tmpfs_iops,
-		.i_fop  = &tmpfs_fops,
+		.i_ino     = 3,
+		.i_op      = &tmpfs_iops,
+		.i_fop     = &tmpfs_fops,
+		.i_mode    = S_IFDIR,
+		.i_private = &((struct list_head){}),
 	},
 };
 
-struct dentry tmpfs_dentries[] = {
-	{	.d_inode  = &tmpfs_inodes[0],
-		.d_parent = &tmpfs_dentries[0],
-	},
-	{	.d_inode  = &tmpfs_inodes[1],
-		.d_parent = &tmpfs_dentries[0],
-		.d_name   = "dev",
-	},
-	{	.d_inode  = &tmpfs_inodes[2],
-		.d_parent = &tmpfs_dentries[0],
-		.d_name   = "proc",
-	},
+static struct tmpfs_dirent dirents[] = {
+	{ .inode = &tmpfs_inodes[1], .name = "dev",  },
+	{ .inode = &tmpfs_inodes[2], .name = "proc", },
 };
+
+struct dentry root_dent = { .d_inode  = &tmpfs_inodes[0],
+			    .d_parent = &root_dent };
 
 void tmpfs_init(void)
 {
-	tmpfs_mkdir(&tmpfs_inodes[0], &tmpfs_dentries[0], 0);
-	tmpfs_mkdir(&tmpfs_inodes[1], &tmpfs_dentries[1], 0);
-	tmpfs_mkdir(&tmpfs_inodes[2], &tmpfs_dentries[2], 0);
+	struct list_head *rootdir = (struct list_head *)tmpfs_inodes[0].i_private;
+	INIT_LIST_HEAD(rootdir);
+	list_add_tail(&dirents[0].list, rootdir);
+	list_add_tail(&dirents[1].list, rootdir);
 
-	tmpfs_link(NULL, &tmpfs_inodes[0], &tmpfs_dentries[1]);
-	tmpfs_link(NULL, &tmpfs_inodes[0], &tmpfs_dentries[2]);
+	struct list_head *devdir = (struct list_head *)tmpfs_inodes[1].i_private;
+	INIT_LIST_HEAD(devdir);
 }

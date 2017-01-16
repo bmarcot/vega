@@ -1,7 +1,7 @@
 /*
  * kernel/fs/fs.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <errno.h>
@@ -40,23 +40,26 @@ static void releasefd(int fd)
 	bitmap_clear_bit(&filemap, fd);
 }
 
+#include <stdlib.h>
+extern struct dentry root_dent;
+
 int sys_open(const char *pathname, int flags)
 {
 	(void)flags;
 
-	char buf[NAME_MAX];
 	struct inode *inode = &tmpfs_inodes[0]; // fsroot_inode();
-	struct dentry target;
-	struct dentry *dentry = &tmpfs_dentries[0];
+	struct dentry *dentry;
+	struct dentry *parent = &root_dent;
 
 	for (size_t i = 0; i < strlen(pathname);) {
-		i += path_head(buf, &pathname[i]);
-		strcpy(target.d_name, buf);
-		target.d_parent = dentry;
-		dentry = vfs_lookup(inode, &target);
+		dentry = malloc(sizeof(struct dentry));
+		dentry->d_parent = parent;
+		i += path_head(dentry->d_name, &pathname[i]);
+		dentry = vfs_lookup(inode, dentry);
 		if (dentry == NULL)
 			return -1;
 		inode = dentry->d_inode;
+		parent = dentry;
 	}
 
 	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {

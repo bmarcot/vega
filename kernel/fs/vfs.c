@@ -1,7 +1,7 @@
 /*
  * kernel/fs/vfs.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <stdlib.h>
