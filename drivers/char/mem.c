@@ -1,7 +1,7 @@
 /*
  * drivers/char/mem.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <string.h>
@@ -78,7 +78,6 @@ static const struct file_operations zero_fops = {
 };
 
 extern struct inode tmpfs_inodes[];
-extern struct dentry tmpfs_dentries[];
 extern const struct file_operations random_fops;
 extern const struct inode_operations tmpfs_iops;
 
@@ -107,19 +106,15 @@ static struct inode memdev_inodes[] = {
 
 static struct dentry memdev_dentries[] = {
 	{	.d_inode  = &memdev_inodes[0],
-		.d_parent = &tmpfs_dentries[1],
 		.d_name   = "mem",
 	},
 	{	.d_inode  = &memdev_inodes[1],
-		.d_parent = &tmpfs_dentries[1],
 		.d_name   = "null",
 	},
 	{	.d_inode  = &memdev_inodes[2],
-		.d_parent = &tmpfs_dentries[1],
 		.d_name   = "zero",
 	},
 	{	.d_inode  = &memdev_inodes[3],
-		.d_parent = &tmpfs_dentries[1],
 		.d_name   = "random",
 	},
 };
@@ -128,7 +123,8 @@ void memdev_init(void)
 {
 	for (int i = 0; i < 4; i++) {
 		printk("Creating /dev/%s\n", memdev_dentries[i].d_name);
-		tmpfs_mkdir(&memdev_inodes[i], &memdev_dentries[i], 0);
-		tmpfs_link(NULL, &tmpfs_inodes[1], &memdev_dentries[i]);
+		//tmpfs_mkdir(&memdev_inodes[i], &memdev_dentries[i], 0);
+		//tmpfs_link(NULL, &tmpfs_inodes[1], devnames[i]);
+		tmpfs_link(0, &tmpfs_inodes[1], &memdev_dentries[i]);
 	}
 }
