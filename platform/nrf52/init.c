@@ -45,6 +45,11 @@ void __printk_init(void)
 
 void __printk_putchar(char c)
 {
+	if (c == '\n')
+		__printk_putchar('\r');
+
+	NRF_UARTE0->EVENTS_ENDTX = 0;
+	NRF_UARTE0->EVENTS_TXSTOPPED = 0;
 	NRF_UARTE0->TXD.MAXCNT = 1;
 	NRF_UARTE0->TXD.PTR = (uint32_t)&c;
 	NRF_UARTE0->TASKS_STARTTX = 1;
