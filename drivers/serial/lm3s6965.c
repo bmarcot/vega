@@ -84,7 +84,6 @@ static void lm3s6965_uart0_isr(void)
 }
 
 extern struct inode tmpfs_inodes[];
-extern struct dentry tmpfs_dentries[];
 extern const struct file_operations serialchar_fops;
 extern const struct inode_operations tmpfs_iops;
 
@@ -95,11 +94,8 @@ static struct inode lm3s6965_inode = {
 	.i_private = &lm3s6965_uart0,
 };
 
-static struct dentry lm3s6965_dentry = {
-	.d_inode  = &lm3s6965_inode,
- 	.d_parent = &tmpfs_dentries[1],
-	.d_name   = "mtd0",
-};
+static struct dentry lm3s6965_dentry = { .d_inode = &lm3s6965_inode,
+					 .d_name  = "ttyS0" };
 
 int lm3s6965_init(void)
 {
