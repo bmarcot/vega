@@ -22,3 +22,9 @@ int timer_settime(timer_t timerid, int flags,
 			 (void *)old_value, SYS_TIMER_SETTIME);
 
 }
+
+int timer_gettime(timer_t timerid, struct itimerspec *curr_value)
+{
+	return do_syscall2((void *)timerid, (void *)curr_value,
+			SYS_TIMER_GETTIME);
+}

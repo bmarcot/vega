@@ -34,5 +34,6 @@ int timer_create(clockid_t clockid, struct sigevent *sevp,
 int timer_settime(timer_t timerid, int flags,
 		const struct itimerspec *new_value,
 		struct itimerspec *old_value);
+int timer_gettime(timer_t timerid, struct itimerspec *curr_value);
 
 #endif /* !LIBC_TIME_H */
