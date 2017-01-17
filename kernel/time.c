@@ -140,3 +140,16 @@ int sys_timer_settime(timer_t timerid, int flags,
 	return 0;
 
 }
+
+int sys_timer_gettime(timer_t timerid, struct itimerspec *curr_value)
+{
+	struct timer_info *timer = find_timer_by_id(timerid, &kernel_timers);
+
+	if (timer == NULL) {
+		printk("timer_gettime: No timer found with id=%d\n", timerid);
+		return EINVAL;
+	}
+	timer_get(timer, curr_value);
+
+	return 0;
+}

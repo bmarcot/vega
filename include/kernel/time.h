@@ -18,6 +18,7 @@ struct timer_operations {
 	int (*timer_configure)(struct timer_info *timer,
 			void (*callback)(struct timer_info *self));
 	int (*timer_set)(struct timer_info *timer, const struct itimerspec *value);
+	int (*timer_get)(struct timer_info *timer, struct itimerspec *value);
 	int (*timer_cancel)(struct timer_info *timer);
 	int (*timer_free)(struct timer_info *timer);
 };
@@ -41,6 +42,7 @@ struct timer_info *timer_alloc(void);
 int timer_configure(struct timer_info *timer,
 		void (*callback)(struct timer_info *self));
 int timer_set(struct timer_info *timer, const struct itimerspec *value);
+int timer_get(struct timer_info *timer, struct itimerspec *value);
 int timer_cancel(struct timer_info *timer);
 int timer_free(struct timer_info *timer);
 
