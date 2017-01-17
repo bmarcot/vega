@@ -17,8 +17,9 @@
 #include "linux/list.h"
 
 struct systick_timer {
-	unsigned long expire_clocktime;
-	struct list_head list;
+	unsigned long     start_clocktime;
+	unsigned long     expire_clocktime;
+	struct list_head  list;
 	struct timer_info *timer; /* backlink */
 };
 
@@ -55,10 +56,23 @@ int systick_timer_set(struct timer_info *timer,
 	struct systick_timer *systick_timer =
 		(struct systick_timer *)timer->dev;
 
+	systick_timer->start_clocktime = clocktime_in_msec;
 	systick_timer->expire_clocktime = clocktime_in_msec
 		+ new_value->it_value.tv_sec * 1000
 		+ new_value->it_value.tv_nsec / 1000000;
 	list_add(&systick_timer->list, &systick_timers);
+
+	return 0;
+}
+
+int systick_timer_get(struct timer_info *timer, struct itimerspec *curr_value)
+{
+	struct systick_timer *systick_timer =
+		(struct systick_timer *)timer->dev;
+	unsigned long msecs = clocktime_in_msec - systick_timer->start_clocktime;
+
+	curr_value->it_value.tv_sec = msecs / 1000;
+	curr_value->it_value.tv_nsec = (msecs % 1000) * 1000000;
 
 	return 0;
 }
@@ -99,6 +113,7 @@ struct timer_operations systick_tops = {
 	.timer_alloc = systick_timer_alloc,
 	.timer_configure = systick_timer_configure,
 	.timer_set = systick_timer_set,
+	.timer_get = systick_timer_get,
 	.timer_cancel = systick_timer_cancel,
 	.timer_free = systick_timer_free,
 };

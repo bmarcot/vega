@@ -54,6 +54,11 @@ int timer_set(struct timer_info *timer, const struct itimerspec *value)
 	return timer->tops->timer_set(timer, value);
 }
 
+int timer_get(struct timer_info *timer, struct itimerspec *value)
+{
+	return timer->tops->timer_get(timer, value);
+}
+
 int timer_cancel(struct timer_info *timer)
 {
 	return timer->tops->timer_cancel(timer);
