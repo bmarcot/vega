@@ -22,6 +22,7 @@ int sys_pthread_cond_signal();
 int sys_pthread_cond_wait();
 int sys_timer_create();
 int sys_timer_settime();
+int sys_timer_gettime();
 int sys_msleep();
 int sys_sysconf();
 int sys_sigaction();
@@ -51,6 +52,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_PTHREAD_COND_WAIT] = sys_pthread_cond_wait,
 	[SYS_TIMER_CREATE] = sys_timer_create,
 	[SYS_TIMER_SETTIME] = sys_timer_settime,
+	[SYS_TIMER_GETTIME] = sys_timer_gettime,
 	[SYS_MSLEEP] = sys_msleep,
 	[SYS_SYSCONF] = sys_sysconf,
 	[SYS_SIGACTION] = sys_sigaction,
