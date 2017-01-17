@@ -1,7 +1,7 @@
 /*
  * drivers/mtd/mtdram.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <string.h>
@@ -82,24 +82,17 @@ extern char __mtdram_size__;
 extern const struct file_operations mtdchar_fops;
 extern const struct inode_operations tmpfs_iops;
 
-/* struct inode *create_dev_inode(const char *name, */
-/* 			const struct file_operations *fops); */
-
 extern struct inode tmpfs_inodes[];
-extern struct dentry tmpfs_dentries[];
 
 static struct inode mtd0_inode = {
-	.i_ino     = 1200,
+	.i_ino     = 1300,
 	.i_op      = &tmpfs_iops,
 	.i_fop     = &mtdchar_fops,
 	.i_private = &mtdram,
 };
 
-static struct dentry mtd0_dentry = {
-	.d_inode  = &mtd0_inode,
- 	.d_parent = &tmpfs_dentries[1],
-	.d_name   = "mtd0",
-};
+static struct dentry mtd0_dentry = { .d_inode = &mtd0_inode,
+				     .d_name  = "mtd0" };
 
 void mtdram_init(void)
 {
