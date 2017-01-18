@@ -17,7 +17,13 @@
 
 //FIXME: the file table is part of the task structure
 #define FILE_MAX 8
-/* static */ struct file filetable[FILE_MAX];
+
+struct file *fd_to_file(int fd)
+{
+	static struct file filetable[FILE_MAX];
+
+	return &filetable[fd];
+}
 
 unsigned long filemap;
 
@@ -43,11 +49,13 @@ int sys_open(const char *pathname, int flags)
 	(void)flags;
 
 	struct inode *inode = root_inode();
-	struct dentry *dentry;
 	struct dentry *parent = root_dentry();
+	struct dentry *dentry;
 
 	for (size_t i = 0; i < strlen(pathname);) {
 		dentry = malloc(sizeof(struct dentry));
+		if (dentry == NULL)
+			return -1;
 		dentry->d_parent = parent;
 		i += path_head(dentry->d_name, &pathname[i]);
 		dentry = vfs_lookup(inode, dentry);
@@ -63,7 +71,7 @@ int sys_open(const char *pathname, int flags)
 	}
 
 	int fd = getfd();
-	struct file *file = &filetable[fd];
+	struct file *file = fd_to_file(fd);
 	file->f_dentry = dentry;
 	file->f_op = dentry->d_inode->i_fop;
 	file->f_pos = 0;
@@ -75,8 +83,7 @@ int sys_open(const char *pathname, int flags)
 
 ssize_t sys_read(int fd, void *buf, size_t count)
 {
-	//FIXME: revalidate the filedesc
-	struct file *file = &filetable[fd];
+	struct file *file = fd_to_file(fd);
 
 	count = file->f_op->read(file, buf, count, file->f_pos);
 	file->f_pos += count;
@@ -86,7 +93,7 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 
 ssize_t sys_write(int fd, void *buf, size_t count)
 {
-	struct file *file = &filetable[fd];
+	struct file *file = fd_to_file(fd);
 	off_t offset = file->f_pos;
 
 	count = file->f_op->write(file, buf, count, &offset);
@@ -97,7 +104,7 @@ ssize_t sys_write(int fd, void *buf, size_t count)
 
 off_t sys_seek(int fd, off_t offset, int whence)
 {
-	struct file *file = &filetable[fd];
+	struct file *file = fd_to_file(fd);
 	off_t size = file->f_dentry->d_inode->i_size;
 
 	if (file->f_op->seek)
