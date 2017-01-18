@@ -14,8 +14,6 @@ NAME = vega
 # Build and run on Qemu when the target is unspecified
 TARGET ?= qemu
 
-DIRS = . kernel libc api include include/libc include/libc/sys
-
 # The platform Makefile contains hw details and flags
 include target/$(TARGET)/Makefile
 
@@ -39,14 +37,16 @@ ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	SSRC += arch/v7m-head.S arch/v7m-entry.S arch/v7m-svcall.S \
-		libc/v7m-pthread.S
+	SSRC += arch/v7m-head.S arch/v7m-entry.S arch/v7m-svcall.S
 	CSRC += arch/v7m-faults.c
 endif
 
-SSRC += $(wildcard libc/vega/*.S)
-CSRC += $(wildcard libc/*.c)		\
-	$(wildcard kernel/*.c)		\
+LIBVEGA_CSRC = $(wildcard libc/*.c)
+LIBVEGA_SSRC = $(wildcard libc/*.S) $(wildcard libc/vega/*.S)
+
+LIBVEGA_OBJS = $(LIBVEGA_SSRC:.S=.o) $(LIBVEGA_CSRC:.c=.o)
+
+CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
@@ -59,9 +59,13 @@ OBJS := $(sort $(OBJS))
 
 all: include/version.h $(NAME).lds $(NAME).hex
 
-$(NAME).elf: $(OBJS)
+$(NAME).elf: $(OBJS) libvega.a
 	$(VECHO) "LD\t$@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
+
+libvega.a: $(LIBVEGA_OBJS)
+	$(VECHO) "AR\t$@"
+	$(Q)$(AR) rcs $@ $^
 
 %.o: %.c
 	$(VECHO) "CC\t$@"
@@ -73,7 +77,7 @@ $(NAME).elf: $(OBJS)
 
 %.lds: %.lds.S
 	$(VECHO) "HOSTCC\t$@"
-	$(Q)$(HOSTCC) -E -P -Iinclude -D__LINKER__ -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
+	$(Q)$(HOSTCC) -E -P -Iinclude -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
 
 include/version.h: include/version.template.h
 	$(VECHO) "GEN\t$@"
@@ -84,13 +88,13 @@ include/version.h: include/version.template.h
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OCPY) -O ihex $< $@
 
-EMACS_TRASH = $(foreach dir,$(DIRS),$(wildcard $(dir)/*~))
-
 clean::
-	rm -f $(OBJS) $(NAME).map $(NAME).lds include/version.h $(EMACS_TRASH)
+	find . -name "*.o" -type f -delete
+	rm -f $(NAME).map $(NAME).lds include/version.h
 
 distclean: clean
-	rm -f $(NAME).elf $(NAME).hex
+	rm -f $(NAME).elf $(NAME).hex libvega.a
+	find . -name "*~" -type f -delete
 
 # platform Makefile.rules contains flashing and running rules
 include target/$(TARGET)/Makefile.rules
