@@ -12,8 +12,6 @@
 
 #include "linux/list.h"
 
-/* static int tmpfs_ino = 0xbabe; */
-
 struct tmpfs_dirent {
 	struct inode     *inode;
 	char             name[NAME_MAX];
@@ -43,13 +41,17 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 {
 	(void)old_dentry;
 
-	dir->i_size++;
+	struct list_head *dirlist;
+	struct tmpfs_dirent *new;
 
-	struct list_head *dirlist = (struct list_head *)dir->i_private;
-	struct tmpfs_dirent *new = malloc(sizeof(struct tmpfs_dirent));
+	new = malloc(sizeof(struct tmpfs_dirent));
+	if (new == NULL)
+		return -1;
 	new->inode = dentry->d_inode;
 	strncpy(new->name, dentry->d_name, NAME_MAX);
+	dirlist = (struct list_head *)dir->i_private;
 	list_add_tail(&new->list, dirlist);
+	dir->i_size++;
 
 	return 0;
 }
