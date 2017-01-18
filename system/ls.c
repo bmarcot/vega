@@ -12,12 +12,15 @@
 
 int ls(int argc, char *argv[])
 {
-	(void)argc;
-
+	DIR *dir;
 	struct dirent dirent;
 	struct dirent *result;
 
-	DIR *dir = opendir(argv[1]);
+	if (argc == 1)
+		dir = opendir("/"); //FIXME: get current directory
+	else
+		dir = opendir(argv[1]);
+
 	do {
 		readdir_r(dir, &dirent, &result);
 		if (result != NULL)
