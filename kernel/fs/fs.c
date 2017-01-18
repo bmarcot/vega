@@ -49,8 +49,11 @@ int sys_open(const char *pathname, int flags)
 	(void)flags;
 
 	struct inode *inode = root_inode();
-	struct dentry *parent = root_dentry();
-	struct dentry *dentry;
+	struct dentry *dentry = root_dentry();
+	struct dentry *parent = dentry;
+
+	/* remove the trailing slash, no support for relative path */
+	pathname++;
 
 	for (size_t i = 0; i < strlen(pathname);) {
 		dentry = malloc(sizeof(struct dentry));
