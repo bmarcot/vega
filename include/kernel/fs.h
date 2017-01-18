@@ -159,4 +159,10 @@ ssize_t sys_write(int fd, void *buf, size_t count);
 off_t   sys_seek(int fd, off_t offset, int whence);
 int     sys_close(int fd);
 
+/* misc functions */
+
+struct inode *root_inode(void);
+struct inode *dev_inode(void);
+struct dentry *root_dentry(void);
+
 #endif /* !_KERNEL_FS_H */

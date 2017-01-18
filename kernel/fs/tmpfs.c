@@ -16,7 +16,7 @@
 
 struct tmpfs_dirent {
 	struct inode     *inode;
-	const char       *name;
+	char             name[NAME_MAX];
 	struct list_head list;
 };
 
@@ -48,7 +48,7 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 	struct list_head *dirlist = (struct list_head *)dir->i_private;
 	struct tmpfs_dirent *new = malloc(sizeof(struct tmpfs_dirent));
 	new->inode = dentry->d_inode;
-	new->name = dentry->d_name;
+	strncpy(new->name, dentry->d_name, NAME_MAX);
 	list_add_tail(&new->list, dirlist);
 
 	return 0;
@@ -109,7 +109,7 @@ const struct file_operations tmpfs_fops = {
 	.iterate = tmpfs_iterate,
 };
 
-struct inode tmpfs_inodes[] = {
+static struct inode tmpfs_inodes[] = {
 	{	/* /      - the root directory */
 		.i_ino     = 1,
 		.i_op      = &tmpfs_iops,
@@ -134,16 +134,33 @@ struct inode tmpfs_inodes[] = {
 	},
 };
 
-static struct tmpfs_dirent dirents[] = {
-	{ .inode = &tmpfs_inodes[1], .name = "dev",  },
-	{ .inode = &tmpfs_inodes[2], .name = "proc", },
-};
+struct inode *root_inode(void)
+{
+	return &tmpfs_inodes[0];
+}
 
-struct dentry root_dent = { .d_inode  = &tmpfs_inodes[0],
-			    .d_parent = &root_dent };
+struct inode *dev_inode(void)
+{
+	return &tmpfs_inodes[1];
+}
+
+struct dentry *root_dentry(void)
+{
+	static struct dentry dentry = {
+		.d_inode  = &tmpfs_inodes[0],
+		.d_parent = &dentry,
+	};
+
+	return &dentry;
+}
 
 void tmpfs_init(void)
 {
+	static struct tmpfs_dirent dirents[] = {
+		{ .inode = &tmpfs_inodes[1], .name = "dev",  },
+		{ .inode = &tmpfs_inodes[2], .name = "proc", },
+	};
+
 	struct list_head *rootdir = (struct list_head *)tmpfs_inodes[0].i_private;
 	INIT_LIST_HEAD(rootdir);
 	list_add_tail(&dirents[0].list, rootdir);

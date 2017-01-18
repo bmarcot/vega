@@ -5,6 +5,7 @@
  */
 
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -13,9 +14,6 @@
 #include <kernel/errno-base.h>
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
-
-extern struct inode tmpfs_inodes[];
-extern struct dentry tmpfs_dentries[];
 
 //FIXME: the file table is part of the task structure
 #define FILE_MAX 8
@@ -40,16 +38,13 @@ static void releasefd(int fd)
 	bitmap_clear_bit(&filemap, fd);
 }
 
-#include <stdlib.h>
-extern struct dentry root_dent;
-
 int sys_open(const char *pathname, int flags)
 {
 	(void)flags;
 
-	struct inode *inode = &tmpfs_inodes[0]; // fsroot_inode();
+	struct inode *inode = root_inode();
 	struct dentry *dentry;
-	struct dentry *parent = &root_dent;
+	struct dentry *parent = root_dentry();
 
 	for (size_t i = 0; i < strlen(pathname);) {
 		dentry = malloc(sizeof(struct dentry));
