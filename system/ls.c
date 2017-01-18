@@ -1,7 +1,7 @@
 /*
  * system/ls.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <stdio.h>
@@ -12,6 +12,8 @@
 
 int ls(int argc, char *argv[])
 {
+	(void)argc;
+
 	struct dirent dirent;
 	struct dirent *result;
 
