@@ -32,3 +32,11 @@ struct dentry *vfs_lookup(struct inode *dir, struct dentry *target)
 
 	return dentry;
 }
+
+int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry)
+{
+	if (dir->i_op->link == NULL)
+		return -1;
+
+	return dir->i_op->link(old_dentry, dir, dentry);
+}

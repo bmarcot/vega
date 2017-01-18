@@ -1,7 +1,7 @@
 /*
  * include/kernel/fs.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #ifndef _KERNEL_FS_H
@@ -55,6 +55,8 @@ struct dentry;
 
 struct inode_operations {
 	struct dentry * (*lookup) (struct inode *inode, struct dentry *dentry);
+	int             (*link) (struct dentry *old_dentry, struct inode *dir,
+				struct dentry *dentry);
 };
 
 /*
@@ -142,6 +144,8 @@ static inline int dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 
 int vfs_iterate(struct file *file, struct dir_context *ctx);
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target);
+int vfs_link(struct dentry *old_dentry, struct inode *dir,
+	struct dentry *dentry);
 
 typedef void DIR;
 
