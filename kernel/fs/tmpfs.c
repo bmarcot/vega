@@ -102,6 +102,7 @@ struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 
 const struct inode_operations tmpfs_iops = {
 	.lookup = tmpfs_lookup,
+	.link   = tmpfs_link,
 };
 
 const struct file_operations tmpfs_fops = {
@@ -115,21 +116,21 @@ struct inode tmpfs_inodes[] = {
 		.i_fop     = &tmpfs_fops,
 		.i_mode    = S_IFDIR,
 		.i_size    = 2,
-		.i_private = &((struct list_head){}),
+		.i_private = &((struct list_head){ .next = 0, .prev = 0 }),
 	},
 	{	/* /dev   - essential device files */
 		.i_ino     = 2,
 		.i_op      = &tmpfs_iops,
 		.i_fop     = &tmpfs_fops,
 		.i_mode    = S_IFDIR,
-		.i_private = &((struct list_head){}),
+		.i_private = &((struct list_head){ .next = 0, .prev = 0 }),
 	},
 	{	/* /proc  - process and kernel information as files */
 		.i_ino     = 3,
 		.i_op      = &tmpfs_iops,
 		.i_fop     = &tmpfs_fops,
 		.i_mode    = S_IFDIR,
-		.i_private = &((struct list_head){}),
+		.i_private = &((struct list_head){ .next = 0, .prev = 0 }),
 	},
 };
 

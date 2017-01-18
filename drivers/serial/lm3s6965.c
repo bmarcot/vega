@@ -1,7 +1,7 @@
 /*
  * drivers/serial/lm3s6965.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <sys/types.h>
@@ -99,7 +99,7 @@ static struct dentry lm3s6965_dentry = { .d_inode = &lm3s6965_inode,
 
 int lm3s6965_init(void)
 {
-	tmpfs_link(0, &tmpfs_inodes[1], &lm3s6965_dentry);
+	vfs_link(0, &tmpfs_inodes[1], &lm3s6965_dentry);
 
 	/* configure link */
 	UART0->CTL |= 1;

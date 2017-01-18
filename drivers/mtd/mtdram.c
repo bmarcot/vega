@@ -99,5 +99,5 @@ void mtdram_init(void)
 	printk("Creating MTD device %s\n", mtd0_dentry.d_name);
 	mtdram_init_device(&mtdram, &__mtdram_start__,
 			(unsigned long)&__mtdram_size__, mtd0_dentry.d_name);
-	tmpfs_link(NULL, &tmpfs_inodes[1], &mtd0_dentry);
+	vfs_link(NULL, &tmpfs_inodes[1], &mtd0_dentry);
 }

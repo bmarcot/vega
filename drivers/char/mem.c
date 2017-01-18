@@ -125,6 +125,6 @@ void memdev_init(void)
 		printk("Creating /dev/%s\n", memdev_dentries[i].d_name);
 		//tmpfs_mkdir(&memdev_inodes[i], &memdev_dentries[i], 0);
 		//tmpfs_link(NULL, &tmpfs_inodes[1], devnames[i]);
-		tmpfs_link(0, &tmpfs_inodes[1], &memdev_dentries[i]);
+		vfs_link(0, &tmpfs_inodes[1], &memdev_dentries[i]);
 	}
 }
