@@ -51,17 +51,16 @@ int sys_open(const char *pathname, int flags)
 	struct inode *inode = root_inode();
 	struct dentry *dentry = root_dentry();
 	struct dentry *parent = dentry;
+	struct dentry target;
 
 	/* remove the trailing slash, no support for relative path */
 	pathname++;
 
 	for (size_t i = 0; i < strlen(pathname);) {
-		dentry = malloc(sizeof(struct dentry));
-		if (dentry == NULL)
-			return -1;
-		dentry->d_parent = parent;
-		i += path_head(dentry->d_name, &pathname[i]);
-		dentry = vfs_lookup(inode, dentry);
+		target.d_parent = parent;
+		i += path_head(target.d_name, &pathname[i]);
+
+		dentry = vfs_lookup(inode, &target);
 		if (dentry == NULL)
 			return -1;
 		inode = dentry->d_inode;
@@ -133,6 +132,18 @@ off_t sys_seek(int fd, off_t offset, int whence)
 
 int sys_close(int fd)
 {
+	struct file *file = fd_to_file(fd);
+	struct dentry *dentry = file->f_dentry;
+	struct dentry *parent;
+
+	for (; dentry != root_dentry(); dentry = parent) {
+		if (--dentry->d_count)
+			break;
+		parent = dentry->d_parent;
+		vfs_release(dentry);
+		if (!dentry->d_count)
+			vfs_delete(dentry);
+	}
 	releasefd(fd);
 
 	return 0;
