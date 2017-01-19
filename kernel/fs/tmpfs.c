@@ -87,19 +87,40 @@ int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 	return res;
 }
 
+const struct dentry_operations tmpfs_dops;
+
 struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 {
 	struct list_head *dirlist = (struct list_head *)dir->i_private;
 	struct tmpfs_dirent *dirent;
+	struct dentry *dentry = NULL;
 
 	list_for_each_entry(dirent, dirlist, list) {
 		if (!strcmp(target->d_name, dirent->name)) {
 			target->d_inode = dirent->inode;
-			return target;
+			dentry = malloc(sizeof(struct dentry));
+			if (dentry) {
+				memcpy(dentry, target, sizeof(struct dentry));
+				dentry->d_count = 0;
+				dentry->d_op = &tmpfs_dops;
+			}
+			break;
 		}
 	}
 
-	return NULL;
+	return dentry;
+}
+
+int tmpfs_delete(struct dentry *dentry)
+{
+	free(dentry);
+
+	return 0;
+}
+
+void tmpfs_release(struct dentry *dentry)
+{
+	(void)dentry;
 }
 
 const struct inode_operations tmpfs_iops = {
@@ -109,6 +130,11 @@ const struct inode_operations tmpfs_iops = {
 
 const struct file_operations tmpfs_fops = {
 	.iterate = tmpfs_iterate,
+};
+
+const struct dentry_operations tmpfs_dops = {
+	.delete  = tmpfs_delete,
+	.release = tmpfs_release,
 };
 
 static struct inode tmpfs_inodes[] = {
@@ -149,8 +175,10 @@ struct inode *dev_inode(void)
 struct dentry *root_dentry(void)
 {
 	static struct dentry dentry = {
+		.d_name   = "/",
 		.d_inode  = &tmpfs_inodes[0],
 		.d_parent = &dentry,
+		.d_op     = &tmpfs_dops,
 	};
 
 	return &dentry;

@@ -40,3 +40,17 @@ int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry
 
 	return dir->i_op->link(old_dentry, dir, dentry);
 }
+
+int vfs_delete(struct dentry *dentry)
+{
+	if (dentry->d_op->delete)
+		return dentry->d_op->delete(dentry);
+
+	return -1;
+}
+
+void vfs_release(struct dentry *dentry)
+{
+	if (dentry->d_op->release)
+		return dentry->d_op->release(dentry);
+}

@@ -87,12 +87,17 @@ struct file_operations {
 struct dentry {
 	_Atomic int                 d_count;            /* usage count */
 	struct inode             *d_inode;           /* associated inode */
-	//struct dentry_operations *d_op;        /* dentry operations table */
+	const struct dentry_operations *d_op;        /* dentry operations table */
 	struct dentry            *d_parent;          /* dentry object of parent */
 	/* unsigned */ char            d_name[NAME_MAX];   /* short name */
 
 	struct list_head d_child;       /* child of parent list */
 	struct list_head d_subdirs;     /* our children */
+};
+
+struct dentry_operations {
+	int  (*delete) (struct dentry *dentry);
+	void (*release) (struct dentry *dentry);
 };
 
 /* readdir */
@@ -146,10 +151,12 @@ int vfs_iterate(struct file *file, struct dir_context *ctx);
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target);
 int vfs_link(struct dentry *old_dentry, struct inode *dir,
 	struct dentry *dentry);
-
-typedef void DIR;
+int vfs_delete(struct dentry *dentry);
+void vfs_release(struct dentry *dentry);
 
 /* syscall entries */
+
+typedef void DIR;
 
 int     sys_opendir(const char *name);
 int     sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
