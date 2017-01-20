@@ -85,14 +85,14 @@ struct file_operations {
 */
 
 struct dentry {
-	_Atomic int                 d_count;            /* usage count */
-	struct inode             *d_inode;           /* associated inode */
-	const struct dentry_operations *d_op;        /* dentry operations table */
-	struct dentry            *d_parent;          /* dentry object of parent */
-	/* unsigned */ char            d_name[NAME_MAX];   /* short name */
+	_Atomic int                    d_count;           /* usage count */
+	struct inode                   *d_inode;          /* associated inode */
+	const struct dentry_operations *d_op;             /* dentry operations table */
+	struct dentry                  *d_parent;         /* dentry object of parent */
+	char                           d_name[NAME_MAX];  /* short name */
 
-	struct list_head d_child;       /* child of parent list */
-	struct list_head d_subdirs;     /* our children */
+	//struct list_head d_child;       /* child of parent list */
+	//struct list_head d_subdirs;     /* our children */
 };
 
 struct dentry_operations {
@@ -172,5 +172,6 @@ struct inode *root_inode(void);
 struct inode *dev_inode(void);
 struct dentry *root_dentry(void);
 struct file *fd_to_file(int fd);
+void tmpfs_init(void);
 
 #endif /* !_KERNEL_FS_H */
