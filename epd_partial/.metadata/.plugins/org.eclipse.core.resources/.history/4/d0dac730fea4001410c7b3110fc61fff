@@ -1,0 +1,311 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+CG_TOOL_ROOT := E:/ti/ccsv6/tools/compiler/msp430_4.3.4
+
+ORDERED_OBJS += \
+$(GEN_CMDS__FLAG) \
+"./src/main_for_demo_2.6inch_Toppan.obj" \
+"./src/Pervasive_Displays_small_EPD/EPD_hardware_driver.obj" \
+"./src/Pervasive_Displays_small_EPD/EPD_interface.obj" \
+"./src/Pervasive_Displays_small_EPD/EPD_partial_interface.obj" \
+"./src/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb/EPD_G2_Aurora_Mb.obj" \
+"./src/Pervasive_Displays_small_EPD/COG_FPL/G1_Aurora_Mb/EPD_G1_Aurora_Mb.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/Black.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP01.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP02.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP03.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP04.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP05.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP06.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP07.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP08.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/LP09.obj" \
+"./src/Images/demo_2.7inch_TI_LaunchPad/White.obj" \
+"./src/Images/demo_2.6inch_Toppan/Black_1.obj" \
+"./src/Images/demo_2.6inch_Toppan/White_1.obj" \
+"./src/Images/demo_2.6inch_Toppan/White_B.obj" \
+"./src/Images/demo_2.6inch_Toppan/White_W.obj" \
+"./src/Images/demo_2.6inch_ECG/Black.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG01.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG02.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG03.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG04.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG05.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG06.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG07.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG08.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG09.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG10.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG11.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG12.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG13.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG14.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG15.obj" \
+"./src/Images/demo_2.6inch_ECG/ECG16.obj" \
+"./src/Images/demo_2.6inch_ECG/White.obj" \
+"./src/Images/demo_2.0inch_HVAC/Black.obj" \
+"./src/Images/demo_2.0inch_HVAC/H01.obj" \
+"./src/Images/demo_2.0inch_HVAC/H02.obj" \
+"./src/Images/demo_2.0inch_HVAC/H03.obj" \
+"./src/Images/demo_2.0inch_HVAC/H04.obj" \
+"./src/Images/demo_2.0inch_HVAC/H05.obj" \
+"./src/Images/demo_2.0inch_HVAC/H06.obj" \
+"./src/Images/demo_2.0inch_HVAC/H07.obj" \
+"./src/Images/demo_2.0inch_HVAC/H08.obj" \
+"./src/Images/demo_2.0inch_HVAC/H09.obj" \
+"./src/Images/demo_2.0inch_HVAC/H10.obj" \
+"./src/Images/demo_2.0inch_HVAC/H11.obj" \
+"./src/Images/demo_2.0inch_HVAC/H12.obj" \
+"./src/Images/demo_2.0inch_HVAC/H13.obj" \
+"./src/Images/demo_2.0inch_HVAC/H14.obj" \
+"./src/Images/demo_2.0inch_HVAC/H15.obj" \
+"./src/Images/demo_2.0inch_HVAC/White.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple01.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple02.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple03.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple04.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple05.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple06.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple07.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple08.obj" \
+"./src/Images/demo_1.9inch_AppleSales/Apple09.obj" \
+"./src/Images/demo_1.9inch_AppleSales/black.obj" \
+"./src/Images/demo_1.9inch_AppleSales/white.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/00.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/01.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/02.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/03.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/04.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/05.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/06.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/07.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/08.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/09.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/10.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/11.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/12.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/13.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/14.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/15.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/16.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/17.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/18.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/19.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/20.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/21.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/22.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/23.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/24.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/25.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/26.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/27.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/28.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/29.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/30.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/31.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/32.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/33.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/34.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/35.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/36.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/37.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/38.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/39.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/40.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/41.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/42.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/43.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/44.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/45.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/46.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/47.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/48.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/49.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/50.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/51.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/52.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/53.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/54.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/55.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/56.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/57.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/58.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/59.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/Black.obj" \
+"./src/Images/demo_1.44inch_Stopwatch/White.obj" \
+"../lnk_msp430f5529.cmd" \
+-l"libc.a" \
+-l"libmath.a" \
+
+-include ../makefile.init
+
+RM := DEL /F
+RMDIR := RMDIR /S/Q
+
+# All of the sources participating in the build are defined here
+-include sources.mk
+-include subdir_vars.mk
+-include src/subdir_vars.mk
+-include src/Pervasive_Displays_small_EPD/subdir_vars.mk
+-include src/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb/subdir_vars.mk
+-include src/Pervasive_Displays_small_EPD/COG_FPL/G1_Aurora_Mb/subdir_vars.mk
+-include src/Images/demo_2.7inch_TI_LaunchPad/subdir_vars.mk
+-include src/Images/demo_2.6inch_Toppan/subdir_vars.mk
+-include src/Images/demo_2.6inch_ECG/subdir_vars.mk
+-include src/Images/demo_2.0inch_HVAC/subdir_vars.mk
+-include src/Images/demo_1.9inch_AppleSales/subdir_vars.mk
+-include src/Images/demo_1.44inch_Stopwatch/subdir_vars.mk
+-include subdir_rules.mk
+-include src/subdir_rules.mk
+-include src/Pervasive_Displays_small_EPD/subdir_rules.mk
+-include src/Pervasive_Displays_small_EPD/COG_FPL/G2_Aurora_Mb/subdir_rules.mk
+-include src/Pervasive_Displays_small_EPD/COG_FPL/G1_Aurora_Mb/subdir_rules.mk
+-include src/Images/demo_2.7inch_TI_LaunchPad/subdir_rules.mk
+-include src/Images/demo_2.6inch_Toppan/subdir_rules.mk
+-include src/Images/demo_2.6inch_ECG/subdir_rules.mk
+-include src/Images/demo_2.0inch_HVAC/subdir_rules.mk
+-include src/Images/demo_1.9inch_AppleSales/subdir_rules.mk
+-include src/Images/demo_1.44inch_Stopwatch/subdir_rules.mk
+-include objects.mk
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(S_DEPS)),)
+-include $(S_DEPS)
+endif
+ifneq ($(strip $(S_UPPER_DEPS)),)
+-include $(S_UPPER_DEPS)
+endif
+ifneq ($(strip $(S62_DEPS)),)
+-include $(S62_DEPS)
+endif
+ifneq ($(strip $(C64_DEPS)),)
+-include $(C64_DEPS)
+endif
+ifneq ($(strip $(ASM_DEPS)),)
+-include $(ASM_DEPS)
+endif
+ifneq ($(strip $(CC_DEPS)),)
+-include $(CC_DEPS)
+endif
+ifneq ($(strip $(S55_DEPS)),)
+-include $(S55_DEPS)
+endif
+ifneq ($(strip $(C67_DEPS)),)
+-include $(C67_DEPS)
+endif
+ifneq ($(strip $(C??_DEPS)),)
+-include $(C??_DEPS)
+endif
+ifneq ($(strip $(CLA_DEPS)),)
+-include $(CLA_DEPS)
+endif
+ifneq ($(strip $(CPP_DEPS)),)
+-include $(CPP_DEPS)
+endif
+ifneq ($(strip $(S??_DEPS)),)
+-include $(S??_DEPS)
+endif
+ifneq ($(strip $(C_DEPS)),)
+-include $(C_DEPS)
+endif
+ifneq ($(strip $(C62_DEPS)),)
+-include $(C62_DEPS)
+endif
+ifneq ($(strip $(CXX_DEPS)),)
+-include $(CXX_DEPS)
+endif
+ifneq ($(strip $(C++_DEPS)),)
+-include $(C++_DEPS)
+endif
+ifneq ($(strip $(ASM_UPPER_DEPS)),)
+-include $(ASM_UPPER_DEPS)
+endif
+ifneq ($(strip $(K_DEPS)),)
+-include $(K_DEPS)
+endif
+ifneq ($(strip $(C43_DEPS)),)
+-include $(C43_DEPS)
+endif
+ifneq ($(strip $(S67_DEPS)),)
+-include $(S67_DEPS)
+endif
+ifneq ($(strip $(SA_DEPS)),)
+-include $(SA_DEPS)
+endif
+ifneq ($(strip $(S43_DEPS)),)
+-include $(S43_DEPS)
+endif
+ifneq ($(strip $(OPT_DEPS)),)
+-include $(OPT_DEPS)
+endif
+ifneq ($(strip $(S64_DEPS)),)
+-include $(S64_DEPS)
+endif
+ifneq ($(strip $(C_UPPER_DEPS)),)
+-include $(C_UPPER_DEPS)
+endif
+ifneq ($(strip $(C55_DEPS)),)
+-include $(C55_DEPS)
+endif
+endif
+
+-include ../makefile.defs
+
+# Add inputs and outputs from these tool invocations to the build variables 
+EXE_OUTPUTS += \
+EPD_Extension_Board.out \
+
+EXE_OUTPUTS__QUOTED += \
+"EPD_Extension_Board.out" \
+
+BIN_OUTPUTS += \
+EPD_Extension_Board.hex \
+
+BIN_OUTPUTS__QUOTED += \
+"EPD_Extension_Board.hex" \
+
+
+# All Target
+all: EPD_Extension_Board.out
+
+# Tool invocations
+EPD_Extension_Board.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+	@echo 'Building target: $@'
+	@echo 'Invoking: MSP430 Linker'
+	"E:/ti/ccsv6/tools/compiler/msp430_4.3.4/bin/cl430" -vmspx --abi=eabi --data_model=restricted --opt_for_speed=1 -g --define=__MSP430F5529__ --diag_warning=225 --display_error_number --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU23 --silicon_errata=CPU40 --printf_support=minimal -z -m"EPD_Extension_Board.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"E:/ti/ccsv6/ccs_base/msp430/include" -i"E:/ti/ccsv6/tools/compiler/msp430_4.3.4/lib" -i"E:/ti/ccsv6/tools/compiler/msp430_4.3.4/include" -i"E:/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --diag_suppress=10374 --xml_link_info="EPD_Extension_Board_linkInfo.xml" --rom_model -o "EPD_Extension_Board.out" $(ORDERED_OBJS)
+	@echo 'Finished building target: $@'
+	@echo ' '
+
+EPD_Extension_Board.hex: $(EXE_OUTPUTS)
+	@echo 'Invoking: MSP430 Hex Utility'
+	"E:/ti/ccsv6/tools/compiler/msp430_4.3.4/bin/hex430" --memwidth=8 --romwidth=8 -o "EPD_Extension_Board.hex" $(EXE_OUTPUTS__QUOTED)
+	@echo 'Finished building: $@'
+	@echo ' '
+
+# Other Targets
+clean:
+	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
+	-$(RM) "src\main_for_demo_2.6inch_Toppan.pp" "src\Pervasive_Displays_small_EPD\EPD_hardware_driver.pp" "src\Pervasive_Displays_small_EPD\EPD_interface.pp" "src\Pervasive_Displays_small_EPD\EPD_partial_interface.pp" "src\Pervasive_Displays_small_EPD\COG_FPL\G2_Aurora_Mb\EPD_G2_Aurora_Mb.pp" "src\Pervasive_Displays_small_EPD\COG_FPL\G1_Aurora_Mb\EPD_G1_Aurora_Mb.pp" "src\Images\demo_2.7inch_TI_LaunchPad\Black.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP01.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP02.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP03.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP04.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP05.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP06.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP07.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP08.pp" "src\Images\demo_2.7inch_TI_LaunchPad\LP09.pp" "src\Images\demo_2.7inch_TI_LaunchPad\White.pp" "src\Images\demo_2.6inch_Toppan\Black_1.pp" "src\Images\demo_2.6inch_Toppan\White_1.pp" "src\Images\demo_2.6inch_Toppan\White_B.pp" 
+	-$(RM) "src\Images\demo_2.6inch_Toppan\White_W.pp" "src\Images\demo_2.6inch_ECG\Black.pp" "src\Images\demo_2.6inch_ECG\ECG01.pp" "src\Images\demo_2.6inch_ECG\ECG02.pp" "src\Images\demo_2.6inch_ECG\ECG03.pp" "src\Images\demo_2.6inch_ECG\ECG04.pp" "src\Images\demo_2.6inch_ECG\ECG05.pp" "src\Images\demo_2.6inch_ECG\ECG06.pp" "src\Images\demo_2.6inch_ECG\ECG07.pp" "src\Images\demo_2.6inch_ECG\ECG08.pp" "src\Images\demo_2.6inch_ECG\ECG09.pp" "src\Images\demo_2.6inch_ECG\ECG10.pp" "src\Images\demo_2.6inch_ECG\ECG11.pp" "src\Images\demo_2.6inch_ECG\ECG12.pp" "src\Images\demo_2.6inch_ECG\ECG13.pp" "src\Images\demo_2.6inch_ECG\ECG14.pp" "src\Images\demo_2.6inch_ECG\ECG15.pp" "src\Images\demo_2.6inch_ECG\ECG16.pp" "src\Images\demo_2.6inch_ECG\White.pp" "src\Images\demo_2.0inch_HVAC\Black.pp" "src\Images\demo_2.0inch_HVAC\H01.pp" "src\Images\demo_2.0inch_HVAC\H02.pp" "src\Images\demo_2.0inch_HVAC\H03.pp" "src\Images\demo_2.0inch_HVAC\H04.pp" "src\Images\demo_2.0inch_HVAC\H05.pp" "src\Images\demo_2.0inch_HVAC\H06.pp" 
+	-$(RM) "src\Images\demo_2.0inch_HVAC\H07.pp" "src\Images\demo_2.0inch_HVAC\H08.pp" "src\Images\demo_2.0inch_HVAC\H09.pp" "src\Images\demo_2.0inch_HVAC\H10.pp" "src\Images\demo_2.0inch_HVAC\H11.pp" "src\Images\demo_2.0inch_HVAC\H12.pp" "src\Images\demo_2.0inch_HVAC\H13.pp" "src\Images\demo_2.0inch_HVAC\H14.pp" "src\Images\demo_2.0inch_HVAC\H15.pp" "src\Images\demo_2.0inch_HVAC\White.pp" "src\Images\demo_1.9inch_AppleSales\Apple01.pp" "src\Images\demo_1.9inch_AppleSales\Apple02.pp" "src\Images\demo_1.9inch_AppleSales\Apple03.pp" "src\Images\demo_1.9inch_AppleSales\Apple04.pp" "src\Images\demo_1.9inch_AppleSales\Apple05.pp" "src\Images\demo_1.9inch_AppleSales\Apple06.pp" "src\Images\demo_1.9inch_AppleSales\Apple07.pp" "src\Images\demo_1.9inch_AppleSales\Apple08.pp" "src\Images\demo_1.9inch_AppleSales\Apple09.pp" "src\Images\demo_1.9inch_AppleSales\black.pp" "src\Images\demo_1.9inch_AppleSales\white.pp" "src\Images\demo_1.44inch_Stopwatch\00.pp" "src\Images\demo_1.44inch_Stopwatch\01.pp" "src\Images\demo_1.44inch_Stopwatch\02.pp" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\03.pp" "src\Images\demo_1.44inch_Stopwatch\04.pp" "src\Images\demo_1.44inch_Stopwatch\05.pp" "src\Images\demo_1.44inch_Stopwatch\06.pp" "src\Images\demo_1.44inch_Stopwatch\07.pp" "src\Images\demo_1.44inch_Stopwatch\08.pp" "src\Images\demo_1.44inch_Stopwatch\09.pp" "src\Images\demo_1.44inch_Stopwatch\10.pp" "src\Images\demo_1.44inch_Stopwatch\11.pp" "src\Images\demo_1.44inch_Stopwatch\12.pp" "src\Images\demo_1.44inch_Stopwatch\13.pp" "src\Images\demo_1.44inch_Stopwatch\14.pp" "src\Images\demo_1.44inch_Stopwatch\15.pp" "src\Images\demo_1.44inch_Stopwatch\16.pp" "src\Images\demo_1.44inch_Stopwatch\17.pp" "src\Images\demo_1.44inch_Stopwatch\18.pp" "src\Images\demo_1.44inch_Stopwatch\19.pp" "src\Images\demo_1.44inch_Stopwatch\20.pp" "src\Images\demo_1.44inch_Stopwatch\21.pp" "src\Images\demo_1.44inch_Stopwatch\22.pp" "src\Images\demo_1.44inch_Stopwatch\23.pp" "src\Images\demo_1.44inch_Stopwatch\24.pp" "src\Images\demo_1.44inch_Stopwatch\25.pp" "src\Images\demo_1.44inch_Stopwatch\26.pp" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\27.pp" "src\Images\demo_1.44inch_Stopwatch\28.pp" "src\Images\demo_1.44inch_Stopwatch\29.pp" "src\Images\demo_1.44inch_Stopwatch\30.pp" "src\Images\demo_1.44inch_Stopwatch\31.pp" "src\Images\demo_1.44inch_Stopwatch\32.pp" "src\Images\demo_1.44inch_Stopwatch\33.pp" "src\Images\demo_1.44inch_Stopwatch\34.pp" "src\Images\demo_1.44inch_Stopwatch\35.pp" "src\Images\demo_1.44inch_Stopwatch\36.pp" "src\Images\demo_1.44inch_Stopwatch\37.pp" "src\Images\demo_1.44inch_Stopwatch\38.pp" "src\Images\demo_1.44inch_Stopwatch\39.pp" "src\Images\demo_1.44inch_Stopwatch\40.pp" "src\Images\demo_1.44inch_Stopwatch\41.pp" "src\Images\demo_1.44inch_Stopwatch\42.pp" "src\Images\demo_1.44inch_Stopwatch\43.pp" "src\Images\demo_1.44inch_Stopwatch\44.pp" "src\Images\demo_1.44inch_Stopwatch\45.pp" "src\Images\demo_1.44inch_Stopwatch\46.pp" "src\Images\demo_1.44inch_Stopwatch\47.pp" "src\Images\demo_1.44inch_Stopwatch\48.pp" "src\Images\demo_1.44inch_Stopwatch\49.pp" "src\Images\demo_1.44inch_Stopwatch\50.pp" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\51.pp" "src\Images\demo_1.44inch_Stopwatch\52.pp" "src\Images\demo_1.44inch_Stopwatch\53.pp" "src\Images\demo_1.44inch_Stopwatch\54.pp" "src\Images\demo_1.44inch_Stopwatch\55.pp" "src\Images\demo_1.44inch_Stopwatch\56.pp" "src\Images\demo_1.44inch_Stopwatch\57.pp" "src\Images\demo_1.44inch_Stopwatch\58.pp" "src\Images\demo_1.44inch_Stopwatch\59.pp" "src\Images\demo_1.44inch_Stopwatch\Black.pp" "src\Images\demo_1.44inch_Stopwatch\White.pp" 
+	-$(RM) "src\main_for_demo_2.6inch_Toppan.obj" "src\Pervasive_Displays_small_EPD\EPD_hardware_driver.obj" "src\Pervasive_Displays_small_EPD\EPD_interface.obj" "src\Pervasive_Displays_small_EPD\EPD_partial_interface.obj" "src\Pervasive_Displays_small_EPD\COG_FPL\G2_Aurora_Mb\EPD_G2_Aurora_Mb.obj" "src\Pervasive_Displays_small_EPD\COG_FPL\G1_Aurora_Mb\EPD_G1_Aurora_Mb.obj" "src\Images\demo_2.7inch_TI_LaunchPad\Black.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP01.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP02.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP03.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP04.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP05.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP06.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP07.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP08.obj" "src\Images\demo_2.7inch_TI_LaunchPad\LP09.obj" "src\Images\demo_2.7inch_TI_LaunchPad\White.obj" "src\Images\demo_2.6inch_Toppan\Black_1.obj" "src\Images\demo_2.6inch_Toppan\White_1.obj" "src\Images\demo_2.6inch_Toppan\White_B.obj" 
+	-$(RM) "src\Images\demo_2.6inch_Toppan\White_W.obj" "src\Images\demo_2.6inch_ECG\Black.obj" "src\Images\demo_2.6inch_ECG\ECG01.obj" "src\Images\demo_2.6inch_ECG\ECG02.obj" "src\Images\demo_2.6inch_ECG\ECG03.obj" "src\Images\demo_2.6inch_ECG\ECG04.obj" "src\Images\demo_2.6inch_ECG\ECG05.obj" "src\Images\demo_2.6inch_ECG\ECG06.obj" "src\Images\demo_2.6inch_ECG\ECG07.obj" "src\Images\demo_2.6inch_ECG\ECG08.obj" "src\Images\demo_2.6inch_ECG\ECG09.obj" "src\Images\demo_2.6inch_ECG\ECG10.obj" "src\Images\demo_2.6inch_ECG\ECG11.obj" "src\Images\demo_2.6inch_ECG\ECG12.obj" "src\Images\demo_2.6inch_ECG\ECG13.obj" "src\Images\demo_2.6inch_ECG\ECG14.obj" "src\Images\demo_2.6inch_ECG\ECG15.obj" "src\Images\demo_2.6inch_ECG\ECG16.obj" "src\Images\demo_2.6inch_ECG\White.obj" "src\Images\demo_2.0inch_HVAC\Black.obj" "src\Images\demo_2.0inch_HVAC\H01.obj" "src\Images\demo_2.0inch_HVAC\H02.obj" "src\Images\demo_2.0inch_HVAC\H03.obj" "src\Images\demo_2.0inch_HVAC\H04.obj" "src\Images\demo_2.0inch_HVAC\H05.obj" 
+	-$(RM) "src\Images\demo_2.0inch_HVAC\H06.obj" "src\Images\demo_2.0inch_HVAC\H07.obj" "src\Images\demo_2.0inch_HVAC\H08.obj" "src\Images\demo_2.0inch_HVAC\H09.obj" "src\Images\demo_2.0inch_HVAC\H10.obj" "src\Images\demo_2.0inch_HVAC\H11.obj" "src\Images\demo_2.0inch_HVAC\H12.obj" "src\Images\demo_2.0inch_HVAC\H13.obj" "src\Images\demo_2.0inch_HVAC\H14.obj" "src\Images\demo_2.0inch_HVAC\H15.obj" "src\Images\demo_2.0inch_HVAC\White.obj" "src\Images\demo_1.9inch_AppleSales\Apple01.obj" "src\Images\demo_1.9inch_AppleSales\Apple02.obj" "src\Images\demo_1.9inch_AppleSales\Apple03.obj" "src\Images\demo_1.9inch_AppleSales\Apple04.obj" "src\Images\demo_1.9inch_AppleSales\Apple05.obj" "src\Images\demo_1.9inch_AppleSales\Apple06.obj" "src\Images\demo_1.9inch_AppleSales\Apple07.obj" "src\Images\demo_1.9inch_AppleSales\Apple08.obj" "src\Images\demo_1.9inch_AppleSales\Apple09.obj" "src\Images\demo_1.9inch_AppleSales\black.obj" "src\Images\demo_1.9inch_AppleSales\white.obj" "src\Images\demo_1.44inch_Stopwatch\00.obj" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\01.obj" "src\Images\demo_1.44inch_Stopwatch\02.obj" "src\Images\demo_1.44inch_Stopwatch\03.obj" "src\Images\demo_1.44inch_Stopwatch\04.obj" "src\Images\demo_1.44inch_Stopwatch\05.obj" "src\Images\demo_1.44inch_Stopwatch\06.obj" "src\Images\demo_1.44inch_Stopwatch\07.obj" "src\Images\demo_1.44inch_Stopwatch\08.obj" "src\Images\demo_1.44inch_Stopwatch\09.obj" "src\Images\demo_1.44inch_Stopwatch\10.obj" "src\Images\demo_1.44inch_Stopwatch\11.obj" "src\Images\demo_1.44inch_Stopwatch\12.obj" "src\Images\demo_1.44inch_Stopwatch\13.obj" "src\Images\demo_1.44inch_Stopwatch\14.obj" "src\Images\demo_1.44inch_Stopwatch\15.obj" "src\Images\demo_1.44inch_Stopwatch\16.obj" "src\Images\demo_1.44inch_Stopwatch\17.obj" "src\Images\demo_1.44inch_Stopwatch\18.obj" "src\Images\demo_1.44inch_Stopwatch\19.obj" "src\Images\demo_1.44inch_Stopwatch\20.obj" "src\Images\demo_1.44inch_Stopwatch\21.obj" "src\Images\demo_1.44inch_Stopwatch\22.obj" "src\Images\demo_1.44inch_Stopwatch\23.obj" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\24.obj" "src\Images\demo_1.44inch_Stopwatch\25.obj" "src\Images\demo_1.44inch_Stopwatch\26.obj" "src\Images\demo_1.44inch_Stopwatch\27.obj" "src\Images\demo_1.44inch_Stopwatch\28.obj" "src\Images\demo_1.44inch_Stopwatch\29.obj" "src\Images\demo_1.44inch_Stopwatch\30.obj" "src\Images\demo_1.44inch_Stopwatch\31.obj" "src\Images\demo_1.44inch_Stopwatch\32.obj" "src\Images\demo_1.44inch_Stopwatch\33.obj" "src\Images\demo_1.44inch_Stopwatch\34.obj" "src\Images\demo_1.44inch_Stopwatch\35.obj" "src\Images\demo_1.44inch_Stopwatch\36.obj" "src\Images\demo_1.44inch_Stopwatch\37.obj" "src\Images\demo_1.44inch_Stopwatch\38.obj" "src\Images\demo_1.44inch_Stopwatch\39.obj" "src\Images\demo_1.44inch_Stopwatch\40.obj" "src\Images\demo_1.44inch_Stopwatch\41.obj" "src\Images\demo_1.44inch_Stopwatch\42.obj" "src\Images\demo_1.44inch_Stopwatch\43.obj" "src\Images\demo_1.44inch_Stopwatch\44.obj" "src\Images\demo_1.44inch_Stopwatch\45.obj" "src\Images\demo_1.44inch_Stopwatch\46.obj" 
+	-$(RM) "src\Images\demo_1.44inch_Stopwatch\47.obj" "src\Images\demo_1.44inch_Stopwatch\48.obj" "src\Images\demo_1.44inch_Stopwatch\49.obj" "src\Images\demo_1.44inch_Stopwatch\50.obj" "src\Images\demo_1.44inch_Stopwatch\51.obj" "src\Images\demo_1.44inch_Stopwatch\52.obj" "src\Images\demo_1.44inch_Stopwatch\53.obj" "src\Images\demo_1.44inch_Stopwatch\54.obj" "src\Images\demo_1.44inch_Stopwatch\55.obj" "src\Images\demo_1.44inch_Stopwatch\56.obj" "src\Images\demo_1.44inch_Stopwatch\57.obj" "src\Images\demo_1.44inch_Stopwatch\58.obj" "src\Images\demo_1.44inch_Stopwatch\59.obj" "src\Images\demo_1.44inch_Stopwatch\Black.obj" "src\Images\demo_1.44inch_Stopwatch\White.obj" 
+	-@echo 'Finished clean'
+	-@echo ' '
+
+.PHONY: all clean dependents
+.SECONDARY:
+
+-include ../makefile.targets
+

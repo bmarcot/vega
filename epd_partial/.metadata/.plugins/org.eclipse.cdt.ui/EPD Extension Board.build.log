@@ -1,0 +1,87 @@
+
+**** Build of configuration Debug for project EPD Extension Board ****
+
+"C:\\ti\\ccsv5\\utils\\bin\\gmake" all 
+'Building file: ../src/image_data.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/image_data.pp" --obj_directory="src"  "../src/image_data.c"
+'Finished building: ../src/image_data.c'
+' '
+'Building file: ../src/main.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/main.pp" --obj_directory="src"  "../src/main.c"
+'Finished building: ../src/main.c'
+' '
+'Building file: ../src/Pervasive_Displays_small_EPD/EPD_COG.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/Pervasive_Displays_small_EPD/EPD_COG.pp" --obj_directory="src/Pervasive_Displays_small_EPD"  "../src/Pervasive_Displays_small_EPD/EPD_COG.c"
+'Finished building: ../src/Pervasive_Displays_small_EPD/EPD_COG.c'
+' '
+'Building file: ../src/Pervasive_Displays_small_EPD/EPD_controller.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/Pervasive_Displays_small_EPD/EPD_controller.pp" --obj_directory="src/Pervasive_Displays_small_EPD"  "../src/Pervasive_Displays_small_EPD/EPD_controller.c"
+'Finished building: ../src/Pervasive_Displays_small_EPD/EPD_controller.c'
+' '
+'Building file: ../src/Pervasive_Displays_small_EPD/EPD_hardware_driver.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/Pervasive_Displays_small_EPD/EPD_hardware_driver.pp" --obj_directory="src/Pervasive_Displays_small_EPD"  "../src/Pervasive_Displays_small_EPD/EPD_hardware_driver.c"
+'Finished building: ../src/Pervasive_Displays_small_EPD/EPD_hardware_driver.c'
+' '
+'Building file: ../src/Pervasive_Displays_small_EPD/EPD_hardware_gpio.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/Pervasive_Displays_small_EPD/EPD_hardware_gpio.pp" --obj_directory="src/Pervasive_Displays_small_EPD"  "../src/Pervasive_Displays_small_EPD/EPD_hardware_gpio.c"
+'Finished building: ../src/Pervasive_Displays_small_EPD/EPD_hardware_gpio.c'
+' '
+'Building file: ../src/Pervasive_Displays_small_EPD/COG/V230/EPD_COG_process_v230_G2_2.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/Pervasive_Displays_small_EPD/COG/V230/EPD_COG_process_v230_G2_2.pp" --obj_directory="src/Pervasive_Displays_small_EPD/COG/V230"  "../src/Pervasive_Displays_small_EPD/COG/V230/EPD_COG_process_v230_G2_2.c"
+'Finished building: ../src/Pervasive_Displays_small_EPD/COG/V230/EPD_COG_process_v230_G2_2.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/Char.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/Char.pp" --obj_directory="src/EPD_Kit_Tool"  "../src/EPD_Kit_Tool/Char.c"
+'Finished building: ../src/EPD_Kit_Tool/Char.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/EPD_Kit_Tool_Process.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/EPD_Kit_Tool_Process.pp" --obj_directory="src/EPD_Kit_Tool"  "../src/EPD_Kit_Tool/EPD_Kit_Tool_Process.c"
+'Finished building: ../src/EPD_Kit_Tool/EPD_Kit_Tool_Process.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/Mem_Flash.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/Mem_Flash.pp" --obj_directory="src/EPD_Kit_Tool"  "../src/EPD_Kit_Tool/Mem_Flash.c"
+"../src/EPD_Kit_Tool/Mem_Flash.c", line 127: warning: function "epd_epd_spi_attach" declared implicitly
+'Finished building: ../src/EPD_Kit_Tool/Mem_Flash.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/Uart_Controller.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/Uart_Controller.pp" --obj_directory="src/EPD_Kit_Tool"  "../src/EPD_Kit_Tool/Uart_Controller.c"
+'Finished building: ../src/EPD_Kit_Tool/Uart_Controller.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/Drivers/EPD_LED.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/Drivers/EPD_LED.pp" --obj_directory="src/EPD_Kit_Tool/Drivers"  "../src/EPD_Kit_Tool/Drivers/EPD_LED.c"
+'Finished building: ../src/EPD_Kit_Tool/Drivers/EPD_LED.c'
+' '
+'Building file: ../src/EPD_Kit_Tool/Drivers/Uart_Driver.c'
+'Invoking: MSP430 Compiler'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --include_path="C:/ti/ccsv5/ccs_base/msp430/include" --include_path="C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool/Drivers" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/EPD_Kit_Tool" --include_path="D:/epaper/TI LaunchPad/firmware/EPD Extension Board v1.01/EPD Extension Board v1.01/EPD Extension Board/src/Pervasive_Displays_small_EPD" --define=__MSP430G2553__ --printf_support=minimal --preproc_with_compile --preproc_dependency="src/EPD_Kit_Tool/Drivers/Uart_Driver.pp" --obj_directory="src/EPD_Kit_Tool/Drivers"  "../src/EPD_Kit_Tool/Drivers/Uart_Driver.c"
+'Finished building: ../src/EPD_Kit_Tool/Drivers/Uart_Driver.c'
+' '
+'Building target: EPD Extension Board.out'
+'Invoking: MSP430 Linker'
+"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/bin/cl430" -vmsp --abi=eabi --opt_for_speed=0 --define=__MSP430G2553__ --printf_support=minimal -z --heap_size=80 --stack_size=80 -i"C:/ti/ccsv5/ccs_base/msp430/include" -i"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/lib" -i"C:/ti/ccsv5/tools/compiler/msp430_4.2.2/include" --reread_libs --warn_sections --xml_link_info="EPD Extension Board_linkInfo.xml" --rom_model -o "EPD Extension Board.out"  "./src/EPD_Kit_Tool/Drivers/Uart_Driver.obj" "./src/EPD_Kit_Tool/Drivers/EPD_LED.obj" "./src/EPD_Kit_Tool/Uart_Controller.obj" "./src/EPD_Kit_Tool/Mem_Flash.obj" "./src/EPD_Kit_Tool/EPD_Kit_Tool_Process.obj" "./src/EPD_Kit_Tool/Char.obj" "./src/Pervasive_Displays_small_EPD/COG/V230/EPD_COG_process_v230_G2_2.obj" "./src/Pervasive_Displays_small_EPD/EPD_hardware_gpio.obj" "./src/Pervasive_Displays_small_EPD/EPD_hardware_driver.obj" "./src/Pervasive_Displays_small_EPD/EPD_controller.obj" "./src/Pervasive_Displays_small_EPD/EPD_COG.obj" "./src/main.obj" "./src/image_data.obj" "../lnk_msp430g2553.cmd" -l"libc.a" 
+<Linking>
+
+ undefined          first referenced                
+  symbol                in file                     
+ ---------          ----------------                
+ epd_epd_spi_attach ./src/EPD_Kit_Tool/Mem_Flash.obj
+
+error: unresolved symbols remain
+error: errors encountered during linking; "EPD Extension Board.out" not built
+
+>> Compilation failure
+gmake: *** [EPD Extension Board.out] Error 1
+
+**** Build Finished ****

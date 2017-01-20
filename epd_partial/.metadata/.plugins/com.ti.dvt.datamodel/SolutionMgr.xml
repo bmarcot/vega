@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_13" class="java.beans.XMLDecoder"> 
+ <object class="com.ti.dvt.datamodel.solution.SolutionManager$PersistState"> 
+  <void property="defaultSolution"> 
+   <string>C:\ti\ccsv6\ccs_base\dvt_4.0.0.201407021231\CodeGen\solutions\CodeGenCoverage</string> 
+  </void> 
+  <void property="openedSolutions"> 
+   <void method="add"> 
+    <string>C:\ti\ccsv6\ccs_base\dvt_4.0.0.201407021231\CodeGen\solutions\CodeGenCoverage</string> 
+   </void> 
+   <void method="add"> 
+    <string>D:\kit project\Partial Update_for MSP430F5529 LP\EPD extension board for partial update v1.0beta\dvt\AnalysisSolutionsTemp\AnalysisSolution1428996256556\null</string> 
+   </void> 
+  </void> 
+ </object> 
+</java> 
