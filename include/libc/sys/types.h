@@ -56,14 +56,11 @@ typedef struct {
 	/* unsigned	      __guardsize; */
 } pthread_attr_t;
 
-//XXX: used by pthread_mutex_t, where should we put this?
-#include "linux/types.h"
 typedef _Atomic int atomic_s32;
 
 /* Used for mutexes. */
 typedef struct mutex {
 	atomic_s32 val;
-	struct list_head waitq;    /* list of threads contending for the mutex */
 } pthread_mutex_t;
 
 /* Used to identify a mutex attribute object. */
@@ -73,6 +70,7 @@ typedef int pthread_mutexattr_t;
 typedef unsigned int pthread_t;
 
 /* Used for condition variables. */
+#include "linux/types.h"
 typedef struct {
 	struct list_head waitq;
 } pthread_cond_t;

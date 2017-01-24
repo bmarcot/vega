@@ -41,7 +41,6 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 	(void)attr;
 
 	mutex->val = -1;
-	INIT_LIST_HEAD(&mutex->waitq);
 
 	return 0;
 }
