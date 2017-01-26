@@ -16,7 +16,7 @@ CSRC	+= drivers/timer/nrf52.c
 SSRC	+= drivers/timer/nrf52-entry.S
 
 # Serial driver files
-#CSRC	+= drivers/serial/nrf52.c
+CSRC	+= drivers/serial/nrf52.c
 
 # Gpio driver files
 CSRC	+= platform/nrf52/gpio.c

@@ -11,12 +11,14 @@
 struct timer_operations;
 
 void config_timer_operations(struct timer_operations *tops);
+int nrf52_serial_init(void);
 
 extern struct timer_operations nrf52_tops;
 
 __weak void __platform_init(void)
 {
 	config_timer_operations(&nrf52_tops);
+	nrf52_serial_init();
 }
 
 __weak void __platform_halt(void)
