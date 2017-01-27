@@ -34,6 +34,7 @@ void *cpu_idle(void *);
 void mtdram_init(void);
 void __printk_init(void);
 int minishell(void *options);
+void memdev_init(void);
 
 struct task_info top_task;
 
