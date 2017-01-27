@@ -18,7 +18,7 @@ ssize_t read(int fd, void *buf, size_t count);
 ssize_t write(int fd, const void *buf, size_t count);
 int ls(int argc, char *argv[]);
 
-static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
+//static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
 
 static const char TERM_PROMPT[]        = "$ ";
