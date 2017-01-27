@@ -6,6 +6,7 @@
 
 #include <sys/types.h>
 
+#include <kernel/cbuf.h>
 #include <kernel/fs.h>
 #include <kernel/irq.h>
 #include <kernel/serial.h>
@@ -16,28 +17,13 @@
 #define LM3S_UARTIM_RXIM_Pos  4
 #define LM3S_UARTICR_RXIC_Pos 4
 
-static char rx_cbuf[16];
-static int pos_begin;
-static int pos_end;
-
-static char cbuf_getc(void)
-{
-	char c = rx_cbuf[pos_begin++];
-	pos_begin %= 16;
-
-	return c;
-}
-
-static void cbuf_putc(char c)
-{
-	rx_cbuf[pos_end++] = c;
-	pos_end %= 16;
-}
+static struct cbuf_info cbuf;
+static char buf[16];
 
 int lm3s6965_getc(struct serial_info *serial, char *c)
 {
 	serial->rx_count--;
-	*c = cbuf_getc();
+	cbuf_getc(&cbuf, c);
 
 	return 0;
 }
@@ -77,7 +63,7 @@ struct serial_info lm3s6965_uart0 = {
 static void lm3s6965_uart0_isr(void)
 {
 	char c = (char)UART0->DR;
-	cbuf_putc(c);
+	cbuf_putc(&cbuf, c);
 	lm3s6965_uart0.rx_count++;
 	UART0->ICR = 1 << LM3S_UARTICR_RXIC_Pos; /* ack */
 	serial_activity_callback(&lm3s6965_uart0);
@@ -95,8 +81,10 @@ static struct inode lm3s6965_inode = {
 
 int lm3s6965_init(void)
 {
-	struct dentry dentry = { .d_inode = &lm3s6965_inode, .d_name  = "ttyS0" };
+	struct dentry dentry = { .d_inode = &lm3s6965_inode,
+				 .d_name  = "ttyS0" };
 
+	cbuf_init(&cbuf, buf, 16);
 	vfs_link(0, dev_inode(), &dentry);
 
 	/* configure link */
