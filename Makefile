@@ -88,12 +88,26 @@ include/version.h: include/version.template.h
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OCPY) -O ihex $< $@
 
+DIRS =	arch		\
+	drivers		\
+	kernel		\
+	platform	\
+	system		\
+	target
+
 clean::
-	find . -name "*.o" -type f -delete
+	find $(DIRS) -name "*.o" -type f -delete
 	rm -f $(NAME).map $(NAME).lds include/version.h
 
-distclean: clean
-	rm -f $(NAME).elf $(NAME).hex libvega.a
+clean_cmsis:
+	find libc -name "*.o" -type f -delete
+
+clean_libvega:
+	find libc -name "*.o" -type f -delete
+	rm -f libvega.a
+
+distclean: clean clean_libvega clean_cmsis
+	rm -f $(NAME).elf $(NAME).hex
 	find . -name "*~" -type f -delete
 
 # platform Makefile.rules contains flashing and running rules
