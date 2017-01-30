@@ -1,7 +1,7 @@
 /*
  * drivers/timer/nrf52.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <errno.h>
@@ -65,9 +65,15 @@ int nrf52_timer_configure(struct timer_info *timer,
 int nrf52_timer_set(struct timer_info *timer, const struct itimerspec *new_value)
 {
 	struct nrf52_timer *nrf52_timer = timer->dev;
+	unsigned long usecs;
 
-	unsigned long usecs = new_value->it_value.tv_sec * 1000000
-		+ new_value->it_value.tv_nsec / 1000;
+	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_sec) {
+		usecs = new_value->it_interval.tv_sec * 1000000
+			+ new_value->it_interval.tv_nsec / 1000;
+	} else {
+		usecs = new_value->it_value.tv_sec * 1000000
+			+ new_value->it_value.tv_nsec / 1000;
+	}
 
 	/* lookup tables */
 	const u8 prescalers[] = {9, 4, 5, 4, 6, 4, 5, 4,
@@ -91,11 +97,18 @@ int nrf52_timer_set(struct timer_info *timer, const struct itimerspec *new_value
 	nrf52_timer_consts[i].nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
 	nrf52_timer_consts[i].nrf_timer->PRESCALER =
 		prescaler << TIMER_PRESCALER_PRESCALER_Pos;
+	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_sec) {
+		nrf52_timer_consts[i].nrf_timer->SHORTS =
+			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+	} else {
+		nrf52_timer_consts[i].nrf_timer->SHORTS =
+			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos)
+			| (TIMER_SHORTS_COMPARE0_STOP_Enabled << TIMER_SHORTS_COMPARE0_STOP_Pos);
+	}
 	nrf52_timer_consts[i].nrf_timer->TASKS_START = 1;
 
 	return 0;
 }
-
 
 int nrf52_timer_cancel(struct timer_info *timer)
 {
@@ -126,9 +139,6 @@ void nrf52_timer_init(void)
 		irq_attach(nrf52_timer_consts[i].irq_no, nrf52_timer_consts[i].isr_entry);
 		nrf52_timer_consts[i].nrf_timer->MODE =
 			TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos;
-		nrf52_timer_consts[i].nrf_timer->SHORTS =
-			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos)
-			| (TIMER_SHORTS_COMPARE0_STOP_Enabled << TIMER_SHORTS_COMPARE0_STOP_Pos);
 	}
 }
 
