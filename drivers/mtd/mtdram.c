@@ -80,11 +80,8 @@ extern char __mtdram_start__;
 extern char __mtdram_size__;
 
 extern const struct file_operations mtdchar_fops;
-extern const struct inode_operations tmpfs_iops;
 
 static struct inode mtd0_inode = {
-	.i_ino     = 1300,
-	.i_op      = &tmpfs_iops,
 	.i_fop     = &mtdchar_fops,
 	.i_private = &mtdram,
 };
@@ -96,5 +93,7 @@ void mtdram_init(void)
 	printk("Creating MTD device %s\n", dentry.d_name);
 	mtdram_init_device(&mtdram, &__mtdram_start__,
 			(unsigned long)&__mtdram_size__, dentry.d_name);
+
+	init_tmpfs_inode(&mtd0_inode);
 	vfs_link(NULL, dev_inode(), &dentry);
 }

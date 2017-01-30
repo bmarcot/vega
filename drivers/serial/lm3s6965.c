@@ -70,11 +70,8 @@ static void lm3s6965_uart0_isr(void)
 }
 
 extern const struct file_operations serialchar_fops;
-extern const struct inode_operations tmpfs_iops;
 
 static struct inode lm3s6965_inode = {
-	.i_ino     = 1200,
-	.i_op      = &tmpfs_iops,
 	.i_fop     = &serialchar_fops,
 	.i_private = &lm3s6965_uart0,
 };
@@ -85,6 +82,8 @@ int lm3s6965_init(void)
 				 .d_name  = "ttyS0" };
 
 	cbuf_init(&cbuf, buf, 16);
+
+	init_tmpfs_inode(&lm3s6965_inode);
 	vfs_link(0, dev_inode(), &dentry);
 
 	/* configure link */

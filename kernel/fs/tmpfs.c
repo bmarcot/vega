@@ -182,6 +182,16 @@ struct dentry *root_dentry(void)
 	return &dentry;
 }
 
+struct inode *init_tmpfs_inode(struct inode *inode)
+{
+	static ino_t ino = 9000;
+
+	inode->i_ino = ino++;
+	inode->i_op = &tmpfs_iops;
+
+	return inode;
+}
+
 void tmpfs_init(void)
 {
 	static struct dirlist entries[] = {
