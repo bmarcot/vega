@@ -134,6 +134,7 @@ int sys_timer_settime(timer_t timerid, int flags,
 		printk("timer_settime: No timer found with id=%d\n", timerid);
 		return EINVAL;
 	}
+	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 	timer_configure(timer, timer_callback);
 	timer_set(timer, new_value);
 

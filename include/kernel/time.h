@@ -31,6 +31,7 @@ struct timer_info {
 	//struct thread_info *owner;
 	struct list_head list;
 	timer_t id;
+	struct itimerspec value;
 
 	//XXX: what goes in there?
 	//struct device *dev;
