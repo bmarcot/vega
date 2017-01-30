@@ -1,14 +1,15 @@
 /*
  * drivers/timer/systick.c
  *
- * Copyright (C) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  *
  * Low-resolution (1kHz) SysTick-based timers to support the common
- * timer interface.
+ * driver's timer interface.
  */
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include <kernel/errno-base.h>
@@ -55,11 +56,16 @@ int systick_timer_set(struct timer_info *timer,
 {
 	struct systick_timer *systick_timer =
 		(struct systick_timer *)timer->dev;
+	const struct timespec *tv;
+
+	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_sec)
+		tv = &new_value->it_interval;
+	else
+		tv = &new_value->it_value;
 
 	systick_timer->start_clocktime = clocktime_in_msec;
 	systick_timer->expire_clocktime = clocktime_in_msec
-		+ new_value->it_value.tv_sec * 1000
-		+ new_value->it_value.tv_nsec / 1000000;
+		+ tv->tv_sec * 1000 + tv->tv_nsec / 1000000;
 	list_add(&systick_timer->list, &systick_timers);
 
 	return 0;
@@ -102,8 +108,10 @@ void systick(void)
 	struct systick_timer *pos, *pos1;
 	list_for_each_entry_safe(pos, pos1, &systick_timers, list) {
 		if (pos->expire_clocktime < clocktime_in_msec) {
-			//printk("timer expired!\n");
 			list_del(&pos->list);
+			if (pos->timer->value.it_interval.tv_sec
+				|| pos->timer->value.it_interval.tv_nsec)
+				systick_timer_set(pos->timer, &pos->timer->value);
 			timer_expire_callback(pos->timer);
 		}
 	}
