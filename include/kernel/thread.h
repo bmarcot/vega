@@ -37,6 +37,11 @@ struct thread_info {
 	bool ti_joinable;
 	struct thread_info *ti_joining;
 
+	/* We store here misc kernel info, like the mutex the thread is
+	 * currently blocking on, the return value for when the thread has
+	 * exited, etc. */
+	void *ti_private;
+
 	/* /\* local-storage *\/ */
 	/* struct list_head *ti_lsq; // local-storage queue */
 
