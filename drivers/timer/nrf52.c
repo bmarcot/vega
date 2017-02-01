@@ -47,7 +47,8 @@ int nrf52_timer_alloc(struct timer_info *timer)
 int nrf52_timer_configure(struct timer_info *timer,
 			void (*callback)(struct timer_info *self))
 {
-	unsigned int i = ARRAY_INDEX(timer->dev, nrf52_timers);
+	struct nrf52_timer *nrf52_timer = timer->dev;
+	unsigned int i = ARRAY_INDEX(nrf52_timer, nrf52_timers);
 
 	if (callback) {
 		nrf52_timer_consts[i].nrf_timer->INTENSET =
