@@ -110,12 +110,12 @@ int nrf52_serial_init(void)
 	NRF_UARTE0->EVENTS_RXSTARTED = 0;
 	NRF_UARTE0->EVENTS_ENDRX = 0;
 
+	/* enable data tx and rx */
+	NRF_UARTE0->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
+
 	/* enable rx interrupt */
 	irq_attach(UARTE0_UART0_IRQn, nrf52_uarte0_isr);
 	NVIC_EnableIRQ(UARTE0_UART0_IRQn);
-
-	/* enable data tx and rx */
-	NRF_UARTE0->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
 
 	NRF_UARTE0->TASKS_STARTRX = 1;
 	while (!NRF_UARTE0->EVENTS_RXSTARTED)
