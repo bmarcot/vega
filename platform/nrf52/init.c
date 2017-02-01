@@ -1,7 +1,7 @@
 /*
  * platform/nrf52/init.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <sys/cdefs.h>
@@ -12,6 +12,8 @@ struct timer_operations;
 
 void config_timer_operations(struct timer_operations *tops);
 int nrf52_serial_init(void);
+int nrf52_hwrng_init(void);
+int nrf52_timer_init(void);
 
 extern struct timer_operations nrf52_tops;
 
@@ -19,6 +21,8 @@ __weak void __platform_init(void)
 {
 	config_timer_operations(&nrf52_tops);
 	nrf52_serial_init();
+	nrf52_hwrng_init();
+	nrf52_timer_init();
 }
 
 __weak void __platform_halt(void)

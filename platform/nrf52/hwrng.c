@@ -26,12 +26,12 @@ static ssize_t hwrng_read(struct file *file, char *buf, size_t count, off_t offs
 	(void)file, (void)offset;
 
 	for (int i = 0; i < (int)count; i++) {
-		NRF_RNG->EVENTS_VALRDY = 0;
 		NRF_RNG->TASKS_START = 1;
 		if (!NRF_RNG->EVENTS_VALRDY) {
 			CURRENT_THREAD_INFO(curr_thread);
 			owner = curr_thread;
 			sched_elect(SCHED_OPT_NONE);
+			NRF_RNG->EVENTS_VALRDY = 0;
 		}
 		buf[i] = NRF_RNG->VALUE;
 	}
