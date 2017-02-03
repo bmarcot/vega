@@ -1,11 +1,11 @@
 /*
  * include/kernel/time.h
  *
- * Copyright (C) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#ifndef KERNEL_TIME_H
-#define KERNEL_TIME_H
+#ifndef _KERNEL_TIME_H
+#define _KERNEL_TIME_H
 
 #include <sys/types.h>
 #include "linux/list.h"
@@ -24,14 +24,14 @@ struct timer_operations {
 };
 
 struct timer_info {
-	u32 flags;
-	int running;
+	timer_t                 id;
+	u32                     flags;
+	int                     running;
+	void                    (*callback)(struct timer_info *self);
 	struct timer_operations *tops;
-	void (*callback)(struct timer_info *self);
-	//struct thread_info *owner;
-	struct list_head list;
-	timer_t id;
-	struct itimerspec value;
+	struct thread_info      *owner;
+	struct itimerspec       value;
+	struct list_head        list;
 
 	//XXX: what goes in there?
 	//struct device *dev;
@@ -49,4 +49,4 @@ int timer_free(struct timer_info *timer);
 
 void timer_expire_callback(struct timer_info *timer);
 
-#endif /* !KERNEL_TIME_H */
+#endif /* !_KERNEL_TIME_H */

@@ -1,7 +1,7 @@
 /*
  * kernel/time.c
  *
- * Copyright (C) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <signal.h>
@@ -12,6 +12,7 @@
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/scheduler.h>
+#include <kernel/signal.h>
 #include <kernel/thread.h>
 #include <kernel/time.h>
 
@@ -110,15 +111,9 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	return 0;
 }
 
-void do_sigevent(const struct sigevent *sigevent);
-
 static void timer_callback(struct timer_info *timer)
 {
-	/* printk(">> timer_callback()\n"); */
-	/* FIXME: Sigevent handler is staged in current thread
-	   at the moment. It should be staged in timer's owner
-	   thread instead. */
-	do_sigevent(timer->priv);
+	do_sigevent(timer->priv, timer->owner);
 }
 
 int sys_timer_settime(timer_t timerid, int flags,
@@ -134,6 +129,8 @@ int sys_timer_settime(timer_t timerid, int flags,
 		printk("timer_settime: No timer found with id=%d\n", timerid);
 		return EINVAL;
 	}
+	CURRENT_THREAD_INFO(curr_thread);
+	timer->owner = curr_thread;
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 	timer_configure(timer, timer_callback);
 	timer_set(timer, new_value);
