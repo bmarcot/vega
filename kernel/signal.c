@@ -1,9 +1,8 @@
 /*
  * kernel/signal.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
-
 
 #include <errno.h>
 #include <signal.h>
@@ -114,36 +113,35 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 /* static stage_sigevent(); ... */
 
-void do_sigevent(const struct sigevent *sigevent)
+void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 {
-	CURRENT_THREAD_INFO(threadp);
-	struct thread_context_regs *tcr;
-
-	//printk("signal(%d): Staging sigaction %p\n", sig, sigaction->sa_sigaction);
+	CURRENT_THREAD_INFO(curr_thread);
+	struct thread_context_regs *ctx;
 
 	//if (sigevent->sigev_notify == SIGEV_THREAD) {
 
-	/* SP_process for the Current thread control block has not been updated,
-	   need to update it because we are pushing data to the process stack.  */
-	threadp->ti_mach.mi_psp = __get_PSP();
+	/* update current thread Process_SP */
+	if (thread == curr_thread)
+		thread->ti_mach.mi_psp = __get_PSP();
 
-	/* the sigaction context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
+	/* the sigevent context will be poped by cpu on exception return */
+	v7m_alloca_thread_context(thread, sizeof(struct thread_context_regs));
 
-	/* build the sigaction trampoline */ /* build_context() */
-	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = sigevent->sigev_value.sival_int;
-	tcr->r0_r3__r12[1] = 0;
-	tcr->r0_r3__r12[2] = 0;
-	tcr->r0_r3__r12[3] = 0;
-	tcr->r0_r3__r12[4] = 0;
-	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
-	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
-	tcr->xpsr = xPSR_T_Msk;
+	/* build a sigevent trampoline */
+	ctx = (struct thread_context_regs *)thread->ti_mach.mi_psp;
+	ctx->r0_r3__r12[0] = sigevent->sigev_value.sival_int;
+	ctx->r0_r3__r12[1] = 0;
+	ctx->r0_r3__r12[2] = 0;
+	ctx->r0_r3__r12[3] = 0;
+	ctx->r0_r3__r12[4] = 0;
+	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
+	ctx->ret_addr =
+		(u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
+	ctx->xpsr = xPSR_T_Msk;
 
-	/* We staged the sigaction on the current thread context, so update the
-	   SP_process before returning to thread.  */
-	__set_PSP(threadp->ti_mach.mi_psp);
+	/* update current thread Process_SP */
+	if (thread == curr_thread)
+		__set_PSP(thread->ti_mach.mi_psp);
 }
 
 extern struct task_info top_task;
