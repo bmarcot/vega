@@ -46,27 +46,33 @@ static void releasefd(int fd)
 
 int sys_open(const char *pathname, int flags)
 {
-	(void)flags;
-
 	struct inode *inode = root_inode();
 	struct dentry *dentry = root_dentry();
 	struct dentry *parent = dentry;
-	struct dentry target;
+	struct dentry *target;
 
-	/* remove the trailing slash, no support for relative path */
+	/* remove the trailing slash, relative path is not supported */
 	pathname++;
 
 	for (size_t i = 0; i < strlen(pathname);) {
-		target.d_parent = parent;
-		i += path_head(target.d_name, &pathname[i]);
-
-		dentry = vfs_lookup(inode, &target);
-		if (dentry == NULL)
+		target = malloc(sizeof(struct dentry));
+		if (target == NULL)
 			return -1;
+		target->d_count = 0;
+		target->d_parent = parent;
+		i += path_head(target->d_name, &pathname[i]);
+
+		dentry = vfs_lookup(inode, target);
+		if (dentry == NULL) {
+			//FIXME: free also the allocated parent dentries
+			free(target);
+			return -1;
+		}
 		inode = dentry->d_inode;
 		parent = dentry;
 	}
 
+	/* opendir() redirects to sys_open() */
 	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {
 		errno = ENOTDIR;
 		return -1;

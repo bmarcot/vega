@@ -91,22 +91,17 @@ struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 {
 	struct list_head *head = (struct list_head *)dir->i_private;
 	struct dirlist *dirlist;
-	struct dentry *dentry = NULL;
 
 	list_for_each_entry(dirlist, head, list) {
 		if (!strcmp(target->d_name, dirlist->name)) {
 			target->d_inode = dirlist->inode;
-			dentry = malloc(sizeof(struct dentry));
-			if (dentry) {
-				memcpy(dentry, target, sizeof(struct dentry));
-				dentry->d_count = 0;
-				dentry->d_op = &tmpfs_dops;
-			}
-			break;
+			target->d_op = &tmpfs_dops;
+
+			return target;
 		}
 	}
 
-	return dentry;
+	return NULL;
 }
 
 int tmpfs_delete(struct dentry *dentry)
