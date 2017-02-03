@@ -40,78 +40,78 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 
 static void stage_sighandler(struct sigaction *sigaction)
 {
-	CURRENT_THREAD_INFO(threadp);
-	struct thread_context_regs *tcr;
+	CURRENT_THREAD_INFO(curr_thread);
+	struct thread_context_regs *ctx;
 
-	/* SP_process for the Current thread control block has not been updated,
-	   need to update it because we are pushing data to the process stack.  */
-	threadp->ti_mach.mi_psp = __get_PSP();
+	/* update current thread SP_process */
+	curr_thread->ti_mach.mi_psp = __get_PSP();
 
 	/* this is the exception stacked-context */
-	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = 0; /* return value of syscall, cannot fail after this point */
+	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+
+	/* return value of syscall, cannot fail after this point */
+	ctx->r0_r3__r12[0] = 0;
 
 	/* the sigaction context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
+	v7m_alloca_thread_context(curr_thread,
+				sizeof(struct thread_context_regs));
 
 	/* build the sigaction trampoline */
-	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
+	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
 /* #ifdef SECURE_KERNEL */
-	tcr->r0_r3__r12[1] = 0;
-	tcr->r0_r3__r12[2] = 0;
-	tcr->r0_r3__r12[3] = 0;
-	tcr->r0_r3__r12[4] = 0;
+	ctx->r0_r3__r12[1] = 0;
+	ctx->r0_r3__r12[2] = 0;
+	ctx->r0_r3__r12[3] = 0;
+	ctx->r0_r3__r12[4] = 0;
 /* #endif */
-	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
-	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_handler);
-	tcr->xpsr = xPSR_T_Msk;
+	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
+	ctx->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_handler);
+	ctx->xpsr = xPSR_T_Msk;
 
-	/* We staged the sigaction on the current thread context, so update the
-	   SP_process before returning to thread.  */
-	__set_PSP(threadp->ti_mach.mi_psp);
+	/* update current thread SP_process */
+	__set_PSP(curr_thread->ti_mach.mi_psp);
 }
 
 static void stage_sigaction(const struct sigaction *sigaction, int sig,
 			union sigval value)
 {
-	CURRENT_THREAD_INFO(threadp);
-	struct thread_context_regs *tcr;
+	CURRENT_THREAD_INFO(curr_thread);
+	struct thread_context_regs *ctx;
 
-	/* SP_process for the Current thread control block has not been updated,
-	   need to update it because we are pushing data to the process stack.  */
-	threadp->ti_mach.mi_psp = __get_PSP();
+	/* update current thread SP_process */
+	curr_thread->ti_mach.mi_psp = __get_PSP();
 
 	/* this is the exception stacked-context */
-	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[0] = 0; /* return value of syscall, cannot fail after this point */
+	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
 
-	/* allocate the siginfo_t struct on thread's stack (SP_process); that
-	   memory will be reclaimed during return_from_sigaction */
-	siginfo_t *siginfo_ptr = v7m_alloca_thread_context(threadp, sizeof(siginfo_t));
+	/* return value of syscall, cannot fail after this point */
+	ctx->r0_r3__r12[0] = 0;
+
+	/* The siginfo_t struct is allocated on thread's stack; that memory
+	 * will be reclaimed during return_from_sigaction. */
+	siginfo_t *siginfo_ptr =
+		v7m_alloca_thread_context(curr_thread, sizeof(siginfo_t));
 	siginfo_ptr->si_signo = sig;
 	siginfo_ptr->si_value = value;
-	siginfo_ptr->si_pid = threadp->ti_id;
+	siginfo_ptr->si_pid = curr_thread->ti_id;
 
 	/* the sigaction context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(threadp, sizeof(struct thread_context_regs));
+	v7m_alloca_thread_context(curr_thread,
+				sizeof(struct thread_context_regs));
 
-	/* build the sigaction trampoline */ /* build_context() */
-	tcr = (struct thread_context_regs *)threadp->ti_mach.mi_psp;
-	tcr->r0_r3__r12[1] = (u32)siginfo_ptr; /* XXX: allocate on the process stack?
-						  and cleanup on return_from_sigaction? */
-	tcr->r0_r3__r12[2] = 0;  /* POSIX says it's a ucontext_t *, but commonly unused */
-	tcr->r0_r3__r12[3] = 0;
-	tcr->r0_r3__r12[4] = 0;
-	tcr->lr = (u32)v7m_set_thumb_bit(return_from_sigaction);
-	tcr->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_sigaction);
-	tcr->xpsr = xPSR_T_Msk;
+	/* build a sigaction trampoline */
+	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+	ctx->r0_r3__r12[1] = (u32)siginfo_ptr;
+	ctx->r0_r3__r12[2] = 0; /* ucontext_t *, but commonly unused */
+	ctx->r0_r3__r12[3] = 0;
+	ctx->r0_r3__r12[4] = 0;
+	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sigaction);
+	ctx->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_sigaction);
+	ctx->xpsr = xPSR_T_Msk;
 
-	/* We staged the sigaction on the current thread context, so update the
-	   SP_process before returning to thread.  */
-	__set_PSP(threadp->ti_mach.mi_psp);
+	/* update current thread SP_process */
+	__set_PSP(curr_thread->ti_mach.mi_psp);
 }
-
-/* static stage_sigevent(); ... */
 
 void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 {
@@ -120,7 +120,7 @@ void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 
 	//if (sigevent->sigev_notify == SIGEV_THREAD) {
 
-	/* update current thread Process_SP */
+	/* update current thread SP_process */
 	if (thread == curr_thread)
 		thread->ti_mach.mi_psp = __get_PSP();
 
@@ -139,7 +139,7 @@ void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 		(u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
 	ctx->xpsr = xPSR_T_Msk;
 
-	/* update current thread Process_SP */
+	/* update current thread SP_process */
 	if (thread == curr_thread)
 		__set_PSP(thread->ti_mach.mi_psp);
 }
