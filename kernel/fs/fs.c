@@ -44,6 +44,24 @@ static void releasefd(int fd)
 	bitmap_clear_bit(&filemap, fd);
 }
 
+int release_dentries(struct dentry *dentry)
+{
+	struct dentry *parent;
+
+	for (; dentry != root_dentry(); dentry = parent) {
+		if (!dentry->d_count)
+			return -1;
+		if (--dentry->d_count)
+			break;
+		parent = dentry->d_parent;
+		vfs_release(dentry);
+		if (!dentry->d_count)
+			vfs_delete(dentry);
+	}
+
+	return 0;
+}
+
 int sys_open(const char *pathname, int flags)
 {
 	struct inode *inode = root_inode();
@@ -58,14 +76,13 @@ int sys_open(const char *pathname, int flags)
 		target = malloc(sizeof(struct dentry));
 		if (target == NULL)
 			return -1;
-		target->d_count = 0;
+		target->d_count = 1;
 		target->d_parent = parent;
 		i += path_head(target->d_name, &pathname[i]);
 
 		dentry = vfs_lookup(inode, target);
 		if (dentry == NULL) {
-			//FIXME: free also the allocated parent dentries
-			free(target);
+			release_dentries(target);
 			return -1;
 		}
 		inode = dentry->d_inode;
@@ -139,17 +156,8 @@ off_t sys_seek(int fd, off_t offset, int whence)
 int sys_close(int fd)
 {
 	struct file *file = fd_to_file(fd);
-	struct dentry *dentry = file->f_dentry;
-	struct dentry *parent;
 
-	for (; dentry != root_dentry(); dentry = parent) {
-		if (--dentry->d_count)
-			break;
-		parent = dentry->d_parent;
-		vfs_release(dentry);
-		if (!dentry->d_count)
-			vfs_delete(dentry);
-	}
+	release_dentries(file->f_dentry);
 	releasefd(fd);
 
 	return 0;

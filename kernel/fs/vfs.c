@@ -27,8 +27,6 @@ struct dentry *vfs_lookup(struct inode *dir, struct dentry *target)
 	if (!S_ISDIR(dir->i_mode))
 		return NULL;
 	dentry = dir->i_op->lookup(dir, target);
-	if (dentry)
-		dentry->d_count++;
 
 	return dentry;
 }
