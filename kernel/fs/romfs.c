@@ -70,9 +70,11 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 {
 	static int ino = 0xbeef;
 	struct romfs_superblock *super = ((struct mtd_info *)dir->i_private)->priv;
+
+	/* volume name is a 0-terminated string */
 	struct romfs_inode *rinode =
 		(struct romfs_inode *)((char *)super + sizeof(struct romfs_superblock)
-				+ align_next(strlen(super->volume_name), 16));
+				+ align_next(strlen(super->volume_name) + 1, 16));
 
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
 		if (!strcmp(rinode->file_name, target->d_name)) {
@@ -81,10 +83,11 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 			inode->i_ino = ino++;
 			inode->i_mode = S_IFREG;
 			inode->i_fop = &romfs_fops;
+			/* file_name is a 0-terminated string */
 			inode->i_private = // offset from beginning of device
 				(void *)(((char *)rinode - (char *)super)
 					+ offsetof(struct romfs_inode, file_name)
-					+ align_next(strlen(rinode->file_name), 16));
+					+ align_next(strlen(rinode->file_name) + 1, 16));
 
 			target->d_inode = inode;
 			target->d_count = 0;
@@ -109,7 +112,7 @@ void dump_romfs_info(struct romfs_superblock *super)
 
 	struct romfs_inode *rinode =
 		(struct romfs_inode *)((char *)super + sizeof(struct romfs_superblock)
-				+ align_next(strlen(super->volume_name), 16));
+				+ align_next(strlen(super->volume_name) + 1, 16));
 
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
 		printk("Inode:\n");
