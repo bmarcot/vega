@@ -14,6 +14,7 @@
 #include <kernel/errno-base.h>
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
+#include <kernel/fs/romfs.h>
 
 //FIXME: the file table is part of the task structure
 #define FILE_MAX 8
@@ -190,10 +191,13 @@ int sys_stat(const char *pathname, struct stat *buf)
 	return 0;
 }
 
-int sys_mount(const char *source, const char *target, const char *filesystemtype,
+int sys_mount(const char *source, const char *target,
+	const char *filesystemtype,
 	unsigned long mountflags, const void *data)
 {
-	(void)source, (void)target, (void)filesystemtype, (void)mountflags, (void)data;
+	if (!strcmp("romfs", filesystemtype))
+		return romfs_mount(source, target, filesystemtype, mountflags,
+				data);
 
-	return 0;
+	return -1;
 }

@@ -22,4 +22,8 @@ struct romfs_inode {
 	char file_name[0];
 };
 
+int romfs_mount(const char *source, const char *target,
+		const char *filesystemtype,
+		unsigned long mountflags, const void *data);
+
 #endif /* !_KERNEL_FS_ROMFS_H */

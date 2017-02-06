@@ -36,7 +36,8 @@ static const char *basename(const char *name)
 }
 
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
-int romfs_mount(const char *source, const char *target, const char *filesystemtype,
+int romfs_mount(const char *source, const char *target,
+		const char *filesystemtype,
 		unsigned long mountflags, const void *data)
 {
 	(void)filesystemtype, (void)mountflags, (void)data;
