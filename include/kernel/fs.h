@@ -173,6 +173,7 @@ struct inode *dev_inode(void);
 struct dentry *root_dentry(void);
 struct file *fd_to_file(int fd);
 struct inode *init_tmpfs_inode(struct inode *inode);
+struct inode *inode_from_pathname(const char *pathname);
 
 void tmpfs_init(void);
 
