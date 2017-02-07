@@ -80,8 +80,11 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 		if (!strcmp(rinode->file_name, target->d_name)) {
 			//FIXME: Flat filesystem
 			struct inode *inode = malloc(sizeof(struct inode));
+			if (inode == NULL)
+				return NULL;
 			inode->i_ino = ino++;
 			inode->i_mode = S_IFREG;
+			inode->i_size = rinode->size;
 			inode->i_fop = &romfs_fops;
 			/* file_name is a 0-terminated string */
 			inode->i_private = // offset from beginning of device
@@ -136,10 +139,13 @@ int romfs_open(struct inode *inode, struct file *file)
 ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 {
 	size_t retlen;
+	size_t filesize = file->f_dentry->d_inode->i_size;
 
 	//FIXME: Use file->sb, file->dev
 	struct mtd_info *mtd = file->f_dentry->d_parent->d_inode->i_private;
 
+	if (file->f_pos + count > filesize)
+		count = filesize - offset;
 	mtd_read(mtd, (off_t)file->f_private + offset, count, &retlen,
 		(unsigned char *)buf);
 

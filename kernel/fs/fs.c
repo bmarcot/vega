@@ -131,7 +131,8 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 {
 	struct file *file = fd_to_file(fd);
 
-	count = file->f_op->read(file, buf, count, file->f_pos);
+	if (count)
+		count = file->f_op->read(file, buf, count, file->f_pos);
 	file->f_pos += count;
 
 	return count;
