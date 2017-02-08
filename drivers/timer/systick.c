@@ -50,11 +50,15 @@ int systick_timer_set(struct timer_info *timer, const struct timespec *value,
 	struct systick_timer *systick_timer =
 		(struct systick_timer *)timer->dev;
 
-	systick_timer->type = type;
-	systick_timer->start_clocktime = clocktime_in_msec;
-	systick_timer->expire_clocktime = clocktime_in_msec
-		+ value->tv_sec * 1000 + value->tv_nsec / 1000000;
-	list_add(&systick_timer->list, &systick_timers);
+	if (systick_timer->timer->running)
+		list_del(&systick_timer->list);
+	if (value->tv_sec || value->tv_nsec) {
+		systick_timer->type = type;
+		systick_timer->start_clocktime = clocktime_in_msec;
+		systick_timer->expire_clocktime = clocktime_in_msec
+			+ value->tv_sec * 1000 + value->tv_nsec / 1000000;
+		list_add(&systick_timer->list, &systick_timers);
+	}
 
 	return 0;
 }
