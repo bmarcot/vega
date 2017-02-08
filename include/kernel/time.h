@@ -42,7 +42,6 @@ struct timer_info {
 	//XXX: what goes in there?
 	//struct device *dev;
 	void *dev;
-	void *priv;
 };
 
 struct timer_info *timer_alloc(void);

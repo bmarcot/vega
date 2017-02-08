@@ -24,10 +24,10 @@ extern struct thread_info *thread_idle;
 
 static void msleep_callback(struct timer_info *timer)
 {
-	sched_enqueue(timer->priv); /* enqueue owner */
-	CURRENT_THREAD_INFO(cur_thread);
-	if (cur_thread != thread_idle)
-		sched_enqueue(cur_thread);
+	sched_enqueue(timer->owner);
+	CURRENT_THREAD_INFO(curr_thread);
+	if (curr_thread != thread_idle)
+		sched_enqueue(curr_thread);
 	sched_elect(SCHED_OPT_NONE);
 }
 
@@ -38,14 +38,13 @@ int sys_msleep(unsigned int msec)
 
 	if (timer == NULL)
 		return -1;
-	CURRENT_THREAD_INFO(cur_thread);
-	timer->priv = cur_thread;
+	CURRENT_THREAD_INFO(curr_thread);
+	timer->owner = curr_thread;
 	timer_configure(timer, msleep_callback);
-	struct itimerspec value = {
-		.it_value = { .tv_sec = msec / 1000,
-			      .tv_nsec = (msec % 1000) * 1000000 } };
-	timer_set(timer, &value.it_value, ONESHOT_TIMER);
-	sched_dequeue(cur_thread);
+	struct timespec value = { .tv_sec  = msec / 1000,
+				  .tv_nsec = (msec % 1000) * 1000000 };
+	timer_set(timer, &value, ONESHOT_TIMER);
+	sched_dequeue(curr_thread);
 	sched_elect(SCHED_OPT_NONE);
 	timer_free(timer);
 
