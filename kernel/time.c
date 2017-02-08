@@ -45,7 +45,7 @@ int sys_msleep(unsigned int msec)
 	struct itimerspec value = {
 		.it_value = { .tv_sec = msec / 1000,
 			      .tv_nsec = (msec % 1000) * 1000000 } };
-	timer_set(timer, &value);
+	timer_set(timer, &value.it_value, ONESHOT_TIMER);
 	sched_dequeue(cur_thread);
 	sched_elect(SCHED_OPT_NONE);
 	timer_free(timer);
@@ -113,6 +113,10 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 
 static void timer_callback(struct timer_info *timer)
 {
+	if (timer->it_link) {
+		timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
+		timer->it_link = 0;
+	}
 	do_sigevent(timer->priv, timer->owner);
 }
 
@@ -129,11 +133,25 @@ int sys_timer_settime(timer_t timerid, int flags,
 		printk("timer_settime: No timer found with id=%d\n", timerid);
 		return EINVAL;
 	}
-	CURRENT_THREAD_INFO(curr_thread);
-	timer->owner = curr_thread;
+
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 	timer_configure(timer, timer_callback);
-	timer_set(timer, new_value);
+
+	CURRENT_THREAD_INFO(curr_thread);
+	timer->owner = curr_thread;
+	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_nsec) {
+		if ((new_value->it_value.tv_sec == new_value->it_interval.tv_sec)
+			&& (new_value->it_value.tv_nsec == new_value->it_interval.tv_nsec)) {
+			timer_set(timer, &new_value->it_interval, INTERVAL_TIMER);
+			timer->it_link = 0;
+		} else {
+			timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
+			timer->it_link = 1;
+		}
+	} else {
+		timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
+		timer->it_link = 0;
+	}
 
 	return 0;
 

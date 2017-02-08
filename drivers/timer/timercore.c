@@ -48,10 +48,11 @@ int timer_configure(struct timer_info *timer,
 	return timer->tops->timer_configure(timer, callback);
 }
 
-int timer_set(struct timer_info *timer, const struct itimerspec *value)
+int timer_set(struct timer_info *timer, const struct timespec *value,
+	enum timer_type type)
 {
 	timer->running = 1;
-	return timer->tops->timer_set(timer, value);
+	return timer->tops->timer_set(timer, value, type);
 }
 
 int timer_get(struct timer_info *timer, struct itimerspec *value)

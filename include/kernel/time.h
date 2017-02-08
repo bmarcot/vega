@@ -13,25 +13,29 @@
 struct timer_info;
 struct itimerspec;
 
+enum timer_type { ONESHOT_TIMER, INTERVAL_TIMER };
+
 struct timer_operations {
 	int (*timer_alloc)(struct timer_info *timer/* , int flags */);
 	int (*timer_configure)(struct timer_info *timer,
 			void (*callback)(struct timer_info *self));
-	int (*timer_set)(struct timer_info *timer, const struct itimerspec *value);
+	int (*timer_set)(struct timer_info *timer,
+			const struct timespec *value, enum timer_type type);
 	int (*timer_get)(struct timer_info *timer, struct itimerspec *value);
 	int (*timer_cancel)(struct timer_info *timer);
 	int (*timer_free)(struct timer_info *timer);
 };
 
 struct timer_info {
-	timer_t                 id;
-	u32                     flags;
-	int                     running;
-	void                    (*callback)(struct timer_info *self);
-	struct timer_operations *tops;
-	struct thread_info      *owner;
-	struct itimerspec       value;
-	struct list_head        list;
+	timer_t            id;
+	u32                flags;
+	int                running;
+	int                it_link; /* link to an interval timer */
+	void               (*callback)(struct timer_info *self);
+	struct thread_info *owner;
+	struct itimerspec  value;
+	struct list_head   list;
+	const struct timer_operations *tops;
 
 	//XXX: what goes in there?
 	//struct device *dev;
@@ -42,7 +46,8 @@ struct timer_info {
 struct timer_info *timer_alloc(void);
 int timer_configure(struct timer_info *timer,
 		void (*callback)(struct timer_info *self));
-int timer_set(struct timer_info *timer, const struct itimerspec *value);
+int timer_set(struct timer_info *timer, const struct timespec *value,
+	enum timer_type type);
 int timer_get(struct timer_info *timer, struct itimerspec *value);
 int timer_cancel(struct timer_info *timer);
 int timer_free(struct timer_info *timer);
