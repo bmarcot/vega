@@ -123,12 +123,13 @@ int sys_timer_settime(timer_t timerid, int flags,
 		const struct itimerspec *new_value,
 		struct itimerspec *old_value)
 {
-	(void)flags, (void)old_value;
+	(void)flags;
 
 	struct timer_info *timer = find_timer_by_id(timerid, &timer_head);
 	if (timer == NULL)
 		return EINVAL;
-
+	if (old_value != NULL)
+		memcpy(old_value, &timer->value, sizeof(struct itimerspec));
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 	timer_configure(timer, timer_callback);
 
