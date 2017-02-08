@@ -18,8 +18,6 @@ enum timer_type { ONESHOT_TIMER, INTERVAL_TIMER };
 
 struct timer_operations {
 	int (*timer_alloc)(struct timer_info *timer/* , int flags */);
-	int (*timer_configure)(struct timer_info *timer,
-			void (*callback)(struct timer_info *self));
 	int (*timer_set)(struct timer_info *timer,
 			const struct timespec *value, enum timer_type type);
 	int (*timer_get)(struct timer_info *timer, struct itimerspec *value);
@@ -45,8 +43,6 @@ struct timer_info {
 };
 
 struct timer_info *timer_alloc(void);
-int timer_configure(struct timer_info *timer,
-		void (*callback)(struct timer_info *self));
 int timer_set(struct timer_info *timer, const struct timespec *value,
 	enum timer_type type);
 int timer_get(struct timer_info *timer, struct itimerspec *value);

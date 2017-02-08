@@ -40,7 +40,7 @@ int sys_msleep(unsigned int msec)
 		return -1;
 	CURRENT_THREAD_INFO(curr_thread);
 	timer->owner = curr_thread;
-	timer_configure(timer, msleep_callback);
+	timer->callback = msleep_callback;
 	struct timespec value = { .tv_sec  = msec / 1000,
 				  .tv_nsec = (msec % 1000) * 1000000 };
 	timer_set(timer, &value, ONESHOT_TIMER);
@@ -80,6 +80,15 @@ static int reserve_timer_id(timer_t *timerid)
 	return 0;
 }
 
+static void timer_callback(struct timer_info *timer)
+{
+	if (timer->it_link) {
+		timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
+		timer->it_link = 0;
+	}
+	do_sigevent(&timer->sigev, timer->owner);
+}
+
 int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 		timer_t *timerid)
 {
@@ -95,19 +104,11 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	}
 
 	*timerid = timer->id;
+	timer->callback = timer_callback;
 	memcpy(&timer->sigev, sevp, sizeof(struct sigevent));
 	list_add(&timer->list, &timer_head);
 
 	return 0;
-}
-
-static void timer_callback(struct timer_info *timer)
-{
-	if (timer->it_link) {
-		timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
-		timer->it_link = 0;
-	}
-	do_sigevent(&timer->sigev, timer->owner);
 }
 
 int sys_timer_settime(timer_t timerid, int flags,
@@ -122,7 +123,6 @@ int sys_timer_settime(timer_t timerid, int flags,
 	if (old_value != NULL)
 		memcpy(old_value, &timer->value, sizeof(struct itimerspec));
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
-	timer_configure(timer, timer_callback);
 
 	CURRENT_THREAD_INFO(curr_thread);
 	timer->owner = curr_thread;

@@ -44,14 +44,6 @@ int systick_timer_alloc(struct timer_info *timer)
 	return 0;
 }
 
-int systick_timer_configure(struct timer_info *timer,
-			void (*callback)(struct timer_info *self))
-{
-	(void)timer, (void)callback;
-
-	return 0;
-}
-
 int systick_timer_set(struct timer_info *timer, const struct timespec *value,
 		enum timer_type type)
 {
@@ -117,7 +109,6 @@ void systick(void)
 
 const struct timer_operations systick_tops = {
 	.timer_alloc = systick_timer_alloc,
-	.timer_configure = systick_timer_configure,
 	.timer_set = systick_timer_set,
 	.timer_get = systick_timer_get,
 	.timer_cancel = systick_timer_cancel,

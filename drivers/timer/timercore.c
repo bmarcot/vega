@@ -40,14 +40,6 @@ struct timer_info *timer_alloc(void)
 	return timer;
 }
 
-int timer_configure(struct timer_info *timer,
-		void (*callback)(struct timer_info *self))
-{
-	timer->callback = callback;
-
-	return timer->tops->timer_configure(timer, callback);
-}
-
 int timer_set(struct timer_info *timer, const struct timespec *value,
 	enum timer_type type)
 {
