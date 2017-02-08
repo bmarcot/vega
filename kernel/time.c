@@ -90,21 +90,13 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	if (timer == NULL)
 		return -1;
 
-	struct sigevent *sigev = malloc(sizeof(struct sigevent));
-	if (sigev == NULL) {
-		timer_free(timer);
-		return ENOMEM;
-	}
-
 	if (reserve_timer_id(&timer->id)) {
 		timer_free(timer);
-		free(sigev);
 		return EAGAIN;
 	}
 
 	*timerid = timer->id;
-	timer->priv = sigev;
-	memcpy(sigev, sevp, sizeof(struct sigevent));
+	memcpy(&timer->sigev, sevp, sizeof(struct sigevent));
 	list_add(&timer->list, &timer_head);
 
 	return 0;
@@ -116,7 +108,7 @@ static void timer_callback(struct timer_info *timer)
 		timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
 		timer->it_link = 0;
 	}
-	do_sigevent(timer->priv, timer->owner);
+	do_sigevent(&timer->sigev, timer->owner);
 }
 
 int sys_timer_settime(timer_t timerid, int flags,

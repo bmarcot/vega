@@ -7,6 +7,7 @@
 #ifndef _KERNEL_TIME_H
 #define _KERNEL_TIME_H
 
+#include <signal.h>
 #include <sys/types.h>
 #include "linux/list.h"
 
@@ -34,6 +35,7 @@ struct timer_info {
 	void               (*callback)(struct timer_info *self);
 	struct thread_info *owner;
 	struct itimerspec  value;
+	struct sigevent    sigev;
 	struct list_head   list;
 	const struct timer_operations *tops;
 
