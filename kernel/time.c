@@ -38,7 +38,6 @@ int sys_msleep(unsigned int msec)
 
 	if (timer == NULL)
 		return -1;
-	/* printk("timer: create a timer t=%dms at %p\n", msec, &timer); */
 	CURRENT_THREAD_INFO(cur_thread);
 	timer->priv = cur_thread;
 	timer_configure(timer, msleep_callback);
@@ -55,13 +54,12 @@ int sys_msleep(unsigned int msec)
 
 /* POSIX timers */
 
-static LIST_HEAD(kernel_timers);
+static LIST_HEAD(timer_head);
 
 static struct timer_info *find_timer_by_id(timer_t timerid,
 					struct list_head *timer_list)
 {
 	struct timer_info *pos;
-
 	list_for_each_entry(pos, timer_list, list) {
 		if (pos->id == timerid)
 			return pos;
@@ -88,25 +86,26 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 {
 	(void)clockid;
 
-	/* printk(">> sys_ timer_create()\n"); */
-
 	struct timer_info *timer = timer_alloc();
 	if (timer == NULL)
 		return -1;
+
 	struct sigevent *sigev = malloc(sizeof(struct sigevent));
 	if (sigev == NULL) {
 		timer_free(timer);
 		return ENOMEM;
 	}
+
 	if (reserve_timer_id(&timer->id)) {
 		timer_free(timer);
 		free(sigev);
 		return EAGAIN;
 	}
+
 	*timerid = timer->id;
 	timer->priv = sigev;
 	memcpy(sigev, sevp, sizeof(struct sigevent));
-	list_add(&timer->list, &kernel_timers);
+	list_add(&timer->list, &timer_head);
 
 	return 0;
 }
@@ -126,13 +125,9 @@ int sys_timer_settime(timer_t timerid, int flags,
 {
 	(void)flags, (void)old_value;
 
-	/* printk(">> sys_ timer_settime()\n"); */
-
-	struct timer_info *timer = find_timer_by_id(timerid, &kernel_timers);
-	if (timer == NULL) {
-		printk("timer_settime: No timer found with id=%d\n", timerid);
+	struct timer_info *timer = find_timer_by_id(timerid, &timer_head);
+	if (timer == NULL)
 		return EINVAL;
-	}
 
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 	timer_configure(timer, timer_callback);
@@ -159,12 +154,10 @@ int sys_timer_settime(timer_t timerid, int flags,
 
 int sys_timer_gettime(timer_t timerid, struct itimerspec *curr_value)
 {
-	struct timer_info *timer = find_timer_by_id(timerid, &kernel_timers);
+	struct timer_info *timer = find_timer_by_id(timerid, &timer_head);
 
-	if (timer == NULL) {
-		printk("timer_gettime: No timer found with id=%d\n", timerid);
+	if (timer == NULL)
 		return EINVAL;
-	}
 	timer_get(timer, curr_value);
 
 	return 0;
