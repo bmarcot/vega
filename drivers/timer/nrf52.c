@@ -44,37 +44,11 @@ int nrf52_timer_alloc(struct timer_info *timer)
 	return 0;
 }
 
-int nrf52_timer_configure(struct timer_info *timer,
-			void (*callback)(struct timer_info *self))
+int nrf52_timer_set(struct timer_info *timer, const struct timespec *value,
+		enum timer_type type)
 {
 	struct nrf52_timer *nrf52_timer = timer->dev;
-	unsigned int i = ARRAY_INDEX(nrf52_timer, nrf52_timers);
-
-	if (callback) {
-		nrf52_timer_consts[i].nrf_timer->INTENSET =
-			TIMER_INTENSET_COMPARE0_Set << TIMER_INTENSET_COMPARE0_Pos;
-		NVIC_EnableIRQ(nrf52_timer_consts[i].irq_no);
-	} else {
-		nrf52_timer_consts[i].nrf_timer->INTENCLR =
-			TIMER_INTENCLR_COMPARE0_Clear << TIMER_INTENCLR_COMPARE0_Pos;
-		NVIC_DisableIRQ(nrf52_timer_consts[i].irq_no);
-	}
-
-	return 0;
-}
-
-int nrf52_timer_set(struct timer_info *timer, const struct itimerspec *new_value)
-{
-	struct nrf52_timer *nrf52_timer = timer->dev;
-	unsigned long usecs;
-
-	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_sec) {
-		usecs = new_value->it_interval.tv_sec * 1000000
-			+ new_value->it_interval.tv_nsec / 1000;
-	} else {
-		usecs = new_value->it_value.tv_sec * 1000000
-			+ new_value->it_value.tv_nsec / 1000;
-	}
+	unsigned long usecs = value->tv_sec * 1000000 + value->tv_nsec / 1000;
 
 	/* lookup tables */
 	const u8 prescalers[] = {9, 4, 5, 4, 6, 4, 5, 4,
@@ -98,13 +72,20 @@ int nrf52_timer_set(struct timer_info *timer, const struct itimerspec *new_value
 	nrf52_timer_consts[i].nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
 	nrf52_timer_consts[i].nrf_timer->PRESCALER =
 		prescaler << TIMER_PRESCALER_PRESCALER_Pos;
-	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_sec) {
+
+	if (type == INTERVAL_TIMER) {
+		nrf52_timer_consts[i].nrf_timer->INTENSET =
+			TIMER_INTENSET_COMPARE0_Set << TIMER_INTENSET_COMPARE0_Pos;
 		nrf52_timer_consts[i].nrf_timer->SHORTS =
 			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+		NVIC_EnableIRQ(nrf52_timer_consts[i].irq_no);
 	} else {
 		nrf52_timer_consts[i].nrf_timer->SHORTS =
 			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos)
 			| (TIMER_SHORTS_COMPARE0_STOP_Enabled << TIMER_SHORTS_COMPARE0_STOP_Pos);
+		nrf52_timer_consts[i].nrf_timer->INTENCLR =
+			TIMER_INTENCLR_COMPARE0_Clear << TIMER_INTENCLR_COMPARE0_Pos;
+		NVIC_DisableIRQ(nrf52_timer_consts[i].irq_no);
 	}
 	nrf52_timer_consts[i].nrf_timer->TASKS_START = 1;
 
@@ -143,10 +124,9 @@ void nrf52_timer_init(void)
 	}
 }
 
-struct timer_operations nrf52_tops = {
-	.timer_alloc = nrf52_timer_alloc,
-	.timer_configure = nrf52_timer_configure,
-	.timer_set = nrf52_timer_set,
+const struct timer_operations nrf52_tops = {
+	.timer_alloc  = nrf52_timer_alloc,
+	.timer_set    = nrf52_timer_set,
 	.timer_cancel = nrf52_timer_cancel,
-	.timer_free = nrf52_timer_free,
+	.timer_free   = nrf52_timer_free,
 };
