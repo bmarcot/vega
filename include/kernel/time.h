@@ -29,7 +29,6 @@ struct timer_info {
 	timer_t            id;
 	u32                flags;
 	int                running;
-	int                it_link; /* link to an interval timer */
 	void               (*callback)(struct timer_info *self);
 	struct thread_info *owner;
 	struct itimerspec  value;

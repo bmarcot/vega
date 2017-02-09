@@ -82,10 +82,13 @@ static int reserve_timer_id(timer_t *timerid)
 
 static void timer_callback(struct timer_info *timer)
 {
-	if (timer->it_link) {
-		timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
-		timer->it_link = 0;
-	}
+	do_sigevent(&timer->sigev, timer->owner);
+}
+
+static void timer_callback_and_link(struct timer_info *timer)
+{
+	timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
+	timer->callback = timer_callback;
 	do_sigevent(&timer->sigev, timer->owner);
 }
 
@@ -104,7 +107,6 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	}
 
 	*timerid = timer->id;
-	timer->callback = timer_callback;
 	memcpy(&timer->sigev, sevp, sizeof(struct sigevent));
 	list_add(&timer->list, &timer_head);
 
@@ -130,14 +132,14 @@ int sys_timer_settime(timer_t timerid, int flags,
 		if ((new_value->it_value.tv_sec == new_value->it_interval.tv_sec)
 			&& (new_value->it_value.tv_nsec == new_value->it_interval.tv_nsec)) {
 			timer_set(timer, &new_value->it_interval, INTERVAL_TIMER);
-			timer->it_link = 0;
+			timer->callback = timer_callback;
 		} else {
 			timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
-			timer->it_link = 1;
+			timer->callback = timer_callback_and_link;
 		}
 	} else {
 		timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
-		timer->it_link = 0;
+		timer->callback = timer_callback;
 	}
 
 	return 0;
