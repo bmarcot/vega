@@ -66,15 +66,30 @@ int romfs_mount(const char *source, const char *target,
 	return 0;
 }
 
+static struct romfs_inode *first_filehdr(struct romfs_superblock *super)
+{
+	/* volume_name is a 0-terminated string */
+	int volname_len = align_next(strlen(super->volume_name) + 1, 16);
+
+	return (struct romfs_inode *)(super->volume_name + volname_len);
+}
+
+static void *offset_in_dev(struct romfs_superblock *super,
+			struct romfs_inode *rinode)
+{
+	/* file_name is a 0-terminated string */
+	int filename_len = align_next(strlen(rinode->file_name) + 1, 16);
+
+	return (void *)((char *)rinode->file_name - (char *)super
+			+ filename_len);
+}
+
 struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 {
 	static int ino = 0xbeef;
-	struct romfs_superblock *super = ((struct mtd_info *)dir->i_private)->priv;
-
-	/* volume name is a 0-terminated string */
-	struct romfs_inode *rinode =
-		(struct romfs_inode *)((char *)super + sizeof(struct romfs_superblock)
-				+ align_next(strlen(super->volume_name) + 1, 16));
+	struct mtd_info *mtd = dir->i_private;
+	struct romfs_superblock *super = mtd->priv;
+	struct romfs_inode *rinode = first_filehdr(super);
 
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
 		if (!strcmp(rinode->file_name, target->d_name)) {
@@ -84,13 +99,9 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 				return NULL;
 			inode->i_ino = ino++;
 			inode->i_mode = S_IFREG;
-			inode->i_size = rinode->size;
+			inode->i_size = ntohl(rinode->size);
 			inode->i_fop = &romfs_fops;
-			/* file_name is a 0-terminated string */
-			inode->i_private = // offset from beginning of device
-				(void *)(((char *)rinode - (char *)super)
-					+ offsetof(struct romfs_inode, file_name)
-					+ align_next(strlen(rinode->file_name) + 1, 16));
+			inode->i_private = offset_in_dev(super, rinode);
 
 			target->d_inode = inode;
 			target->d_count = 0;
@@ -113,10 +124,7 @@ void dump_romfs_info(struct romfs_superblock *super)
 	printk("    Volume name  %s\n", super->volume_name);
 	printk("    Full size    %d bytes\n", ntohl(super->full_size));
 
-	struct romfs_inode *rinode =
-		(struct romfs_inode *)((char *)super + sizeof(struct romfs_superblock)
-				+ align_next(strlen(super->volume_name) + 1, 16));
-
+	struct romfs_inode *rinode = first_filehdr(super);
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
 		printk("Inode:\n");
 		printk("    File name    %s\n", rinode->file_name);
