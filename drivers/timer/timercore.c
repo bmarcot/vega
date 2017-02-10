@@ -40,11 +40,9 @@ struct timer_info *timer_alloc(void)
 	return timer;
 }
 
-int timer_set(struct timer_info *timer, const struct timespec *value,
-	enum timer_type type)
+int timer_set(struct timer_info *timer, const struct timespec *value)
 {
-	timer->running = 1;
-	return timer->tops->timer_set(timer, value, type);
+	return timer->tops->timer_set(timer, value);
 }
 
 int timer_get(struct timer_info *timer, struct itimerspec *value)
@@ -59,7 +57,7 @@ int timer_cancel(struct timer_info *timer)
 
 int timer_free(struct timer_info *timer)
 {
-	if (timer->running)
+	if (!timer->disarmed)
 		timer->tops->timer_cancel(timer);
 	timer->tops->timer_free(timer);
 	free(timer);

@@ -20,7 +20,6 @@
 struct systick_timer {
 	unsigned long     start_clocktime;
 	unsigned long     expire_clocktime;
-	enum timer_type   type;
 	struct list_head  list;
 	struct timer_info *timer; /* backlink */
 };
@@ -44,16 +43,14 @@ int systick_timer_alloc(struct timer_info *timer)
 	return 0;
 }
 
-int systick_timer_set(struct timer_info *timer, const struct timespec *value,
-		enum timer_type type)
+int systick_timer_set(struct timer_info *timer, const struct timespec *value)
 {
 	struct systick_timer *systick_timer =
 		(struct systick_timer *)timer->dev;
 
-	if (systick_timer->timer->running)
+	if (!value->tv_sec && !value->tv_nsec)
 		list_del(&systick_timer->list);
 	if (value->tv_sec || value->tv_nsec) {
-		systick_timer->type = type;
 		systick_timer->start_clocktime = clocktime_in_msec;
 		systick_timer->expire_clocktime = clocktime_in_msec
 			+ value->tv_sec * 1000 + value->tv_nsec / 1000000;
@@ -102,10 +99,9 @@ void systick(void)
 		if (pos->expire_clocktime < clocktime_in_msec) {
 			list_del(&pos->list);
 			struct timer_info *timer = pos->timer;
-			if (pos->type == INTERVAL_TIMER)
+			if (timer->type == INTERVAL_TIMER)
 				systick_timer_set(timer,
-						&timer->value.it_interval,
-						INTERVAL_TIMER);
+						&timer->value.it_interval);
 			timer_expire_callback(timer);
 		}
 	}

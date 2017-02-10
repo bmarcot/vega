@@ -29,6 +29,7 @@ static void msleep_callback(struct timer_info *timer)
 	if (curr_thread != thread_idle)
 		sched_enqueue(curr_thread);
 	sched_elect(SCHED_OPT_NONE);
+	timer->disarmed = 1;
 }
 
 //FIXME: POSIX standard is sys_nanosleep()
@@ -40,10 +41,12 @@ int sys_msleep(unsigned int msec)
 		return -1;
 	CURRENT_THREAD_INFO(curr_thread);
 	timer->owner = curr_thread;
+	timer->disarmed = 0;
+	timer->type = ONESHOT_TIMER;
 	timer->callback = msleep_callback;
 	struct timespec value = { .tv_sec  = msec / 1000,
 				  .tv_nsec = (msec % 1000) * 1000000 };
-	timer_set(timer, &value, ONESHOT_TIMER);
+	timer_set(timer, &value);
 	sched_dequeue(curr_thread);
 	sched_elect(SCHED_OPT_NONE);
 	timer_free(timer);
@@ -82,13 +85,16 @@ static int reserve_timer_id(timer_t *timerid)
 
 static void timer_callback(struct timer_info *timer)
 {
+	if (timer->type == ONESHOT_TIMER)
+		timer->disarmed = 1;
 	do_sigevent(&timer->sigev, timer->owner);
 }
 
 static void timer_callback_and_link(struct timer_info *timer)
 {
-	timer_set(timer, &timer->value.it_interval, INTERVAL_TIMER);
+	timer->type = INTERVAL_TIMER;
 	timer->callback = timer_callback;
+	timer_set(timer, &timer->value.it_interval);
 	do_sigevent(&timer->sigev, timer->owner);
 }
 
@@ -107,6 +113,7 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	}
 
 	*timerid = timer->id;
+	timer->disarmed = 1;
 	memcpy(&timer->sigev, sevp, sizeof(struct sigevent));
 	list_add(&timer->list, &timer_head);
 
@@ -120,26 +127,41 @@ int sys_timer_settime(timer_t timerid, int flags,
 	(void)flags;
 
 	struct timer_info *timer = find_timer_by_id(timerid, &timer_head);
+
 	if (timer == NULL)
 		return EINVAL;
 	if (old_value != NULL)
 		memcpy(old_value, &timer->value, sizeof(struct itimerspec));
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 
+	/* disarm timer */
+	if (!new_value->it_value.tv_sec && !new_value->it_value.tv_nsec)
+	{
+		if (!timer->disarmed) {
+			timer->disarmed = 1;
+			timer_set(timer, &new_value->it_value);
+		}
+		return 0;
+	}
+
 	CURRENT_THREAD_INFO(curr_thread);
 	timer->owner = curr_thread;
+	timer->disarmed = 0;
 	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_nsec) {
 		if ((new_value->it_value.tv_sec == new_value->it_interval.tv_sec)
 			&& (new_value->it_value.tv_nsec == new_value->it_interval.tv_nsec)) {
-			timer_set(timer, &new_value->it_interval, INTERVAL_TIMER);
+			timer->type = INTERVAL_TIMER;
 			timer->callback = timer_callback;
+			timer_set(timer, &new_value->it_interval);
 		} else {
-			timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
+			timer->type = ONESHOT_TIMER;
 			timer->callback = timer_callback_and_link;
+			timer_set(timer, &new_value->it_value);
 		}
 	} else {
-		timer_set(timer, &new_value->it_value, ONESHOT_TIMER);
+		timer->type = ONESHOT_TIMER;
 		timer->callback = timer_callback;
+		timer_set(timer, &new_value->it_value);
 	}
 
 	return 0;

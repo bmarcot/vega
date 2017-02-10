@@ -19,7 +19,7 @@ enum timer_type { ONESHOT_TIMER, INTERVAL_TIMER };
 struct timer_operations {
 	int (*timer_alloc)(struct timer_info *timer/* , int flags */);
 	int (*timer_set)(struct timer_info *timer,
-			const struct timespec *value, enum timer_type type);
+			const struct timespec *value);
 	int (*timer_get)(struct timer_info *timer, struct itimerspec *value);
 	int (*timer_cancel)(struct timer_info *timer);
 	int (*timer_free)(struct timer_info *timer);
@@ -28,7 +28,8 @@ struct timer_operations {
 struct timer_info {
 	timer_t            id;
 	u32                flags;
-	int                running;
+	int                disarmed;
+	enum timer_type    type;
 	void               (*callback)(struct timer_info *self);
 	struct thread_info *owner;
 	struct itimerspec  value;
@@ -42,8 +43,7 @@ struct timer_info {
 };
 
 struct timer_info *timer_alloc(void);
-int timer_set(struct timer_info *timer, const struct timespec *value,
-	enum timer_type type);
+int timer_set(struct timer_info *timer, const struct timespec *value);
 int timer_get(struct timer_info *timer, struct itimerspec *value);
 int timer_cancel(struct timer_info *timer);
 int timer_free(struct timer_info *timer);
