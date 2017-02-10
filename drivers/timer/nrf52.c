@@ -44,11 +44,20 @@ int nrf52_timer_alloc(struct timer_info *timer)
 	return 0;
 }
 
-int nrf52_timer_set(struct timer_info *timer, const struct timespec *value,
-		enum timer_type type)
+int nrf52_timer_set(struct timer_info *timer, const struct timespec *value)
 {
 	struct nrf52_timer *nrf52_timer = timer->dev;
 	unsigned long usecs = value->tv_sec * 1000000 + value->tv_nsec / 1000;
+	unsigned int i = ARRAY_INDEX(nrf52_timer, nrf52_timers);
+	NRF_TIMER_Type *nrf_timer = nrf52_timer_consts[i].nrf_timer;
+
+	/* reset/stop an armed timer */
+	if (!timer->disarmed) {
+		nrf_timer->TASKS_STOP = 1;
+		nrf_timer->EVENTS_COMPARE[0] = 0;
+		if (!usecs)
+			return 0;
+	}
 
 	/* lookup tables */
 	const u8 prescalers[] = {9, 4, 5, 4, 6, 4, 5, 4,
@@ -67,19 +76,17 @@ int nrf52_timer_set(struct timer_info *timer, const struct timespec *value,
 	u8 bitmode = bitmodes[__builtin_clz(cc) / 8];
 
 	/* setup the peripheral */
-	unsigned int i = ARRAY_INDEX(nrf52_timer, nrf52_timers);
-	nrf52_timer_consts[i].nrf_timer->CC[0] = cc;
-	nrf52_timer_consts[i].nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
-	nrf52_timer_consts[i].nrf_timer->PRESCALER =
-		prescaler << TIMER_PRESCALER_PRESCALER_Pos;
-	if (type == INTERVAL_TIMER)
-		nrf52_timer_consts[i].nrf_timer->SHORTS =
-			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+	nrf_timer->CC[0] = cc;
+	nrf_timer->BITMODE = bitmode << TIMER_BITMODE_BITMODE_Pos;
+	nrf_timer->PRESCALER = prescaler << TIMER_PRESCALER_PRESCALER_Pos;
+	if (timer->type == INTERVAL_TIMER)
+		nrf_timer->SHORTS =
+			TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos;
 	else
-		nrf52_timer_consts[i].nrf_timer->SHORTS =
+		nrf_timer->SHORTS =
 			(TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos)
 			| (TIMER_SHORTS_COMPARE0_STOP_Enabled << TIMER_SHORTS_COMPARE0_STOP_Pos);
-	nrf52_timer_consts[i].nrf_timer->TASKS_START = 1;
+	nrf_timer->TASKS_START = 1;
 
 	return 0;
 }
