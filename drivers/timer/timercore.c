@@ -50,15 +50,12 @@ int timer_get(struct timer_info *timer, struct itimerspec *value)
 	return timer->tops->timer_get(timer, value);
 }
 
-int timer_cancel(struct timer_info *timer)
-{
-	return timer->tops->timer_cancel(timer);
-}
-
 int timer_free(struct timer_info *timer)
 {
-	if (!timer->disarmed)
-		timer->tops->timer_cancel(timer);
+	if (!timer->disarmed) {
+		const struct timespec zero_val = { 0, 0 };
+		timer_set(timer, &zero_val);
+	}
 	timer->tops->timer_free(timer);
 	free(timer);
 

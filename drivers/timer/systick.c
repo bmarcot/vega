@@ -72,13 +72,6 @@ int systick_timer_get(struct timer_info *timer, struct itimerspec *curr_value)
 	return 0;
 }
 
-int systick_timer_cancel(struct timer_info *timer)
-{
-	(void)timer;
-
-	return 0;
-}
-
 int systick_timer_free(struct timer_info *timer)
 {
 	free(timer->dev);
@@ -111,6 +104,5 @@ const struct timer_operations systick_tops = {
 	.timer_alloc = systick_timer_alloc,
 	.timer_set = systick_timer_set,
 	.timer_get = systick_timer_get,
-	.timer_cancel = systick_timer_cancel,
 	.timer_free = systick_timer_free,
 };
