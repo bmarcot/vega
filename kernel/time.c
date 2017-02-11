@@ -138,9 +138,8 @@ int sys_timer_settime(timer_t timerid, int flags,
 	if (!new_value->it_value.tv_sec && !new_value->it_value.tv_nsec)
 	{
 		if (!timer->disarmed) {
-			timer->disarmed = 1;
 			timer_set(timer, &new_value->it_value);
-		}
+			timer->disarmed = 1;		}
 		return 0;
 	}
 
