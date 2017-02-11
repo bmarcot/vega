@@ -91,13 +91,6 @@ int nrf52_timer_set(struct timer_info *timer, const struct timespec *value)
 	return 0;
 }
 
-int nrf52_timer_cancel(struct timer_info *timer)
-{
-	(void)timer;
-
-	return 0;
-}
-
 int nrf52_timer_free(struct timer_info *timer)
 {
 	struct nrf52_timer *nrf52_timer = timer->dev;
@@ -129,6 +122,5 @@ void nrf52_timer_init(void)
 const struct timer_operations nrf52_tops = {
 	.timer_alloc  = nrf52_timer_alloc,
 	.timer_set    = nrf52_timer_set,
-	.timer_cancel = nrf52_timer_cancel,
 	.timer_free   = nrf52_timer_free,
 };
