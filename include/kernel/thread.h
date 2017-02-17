@@ -1,10 +1,18 @@
-#ifndef THREAD_H
-#define THREAD_H
+/*
+ * include/kernel/thread.h
+ *
+ * Copyright (c) 2016-2017 Benoit Marcot
+ */
+
+#ifndef _KERNEL_THREAD_H
+#define _KERNEL_THREAD_H
+
+#include <sys/types.h>
+
+#include <kernel/kernel.h>
 
 #include "linux/types.h"
 #include "linux/list.h"
-#include "pthread.h"
-#include "kernel.h"
 
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
 #define INTR_STACK_SIZE   (1 << INTR_STACK_ORDER)
@@ -149,6 +157,10 @@ static inline struct thread_info *current_thread_info(void)
 #define CURRENT_THREAD_INFO(var) \
 	struct thread_info *var = current_thread_info();
 
+#define THREAD_INFO(addr)					\
+	({ (struct thread_info *)align((unsigned long)addr,	\
+					INTR_STACK_SIZE); })
+
 #define THREAD_CANARY0 0xee48a608
 #define THREAD_CANARY1 0x840dc3bc
 
@@ -167,4 +179,4 @@ static inline struct thread_info *current_thread_info(void)
 #  define KERNEL_STACK_CHECKING
 #endif
 
-#endif /* !THREAD_H */
+#endif /* !_KERNEL_THREAD_H */

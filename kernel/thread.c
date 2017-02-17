@@ -1,10 +1,9 @@
 /*
  * kernel/thread.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <pthread.h>  /* include pthread.h because lr loaded with pthread_exit() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,19 +26,16 @@
 
 extern struct task_info top_task;
 
-static struct kernel_context_regs *build_intr_stack(void)
+static struct kernel_context_regs *alloc_interrupt_stack(void)
 {
-	void *memp;
+	char *memp;
 	struct kernel_context_regs *kcr;
 
-	/* We don't need a huge stack for interrupt handling, however we need the page
-	   to be aligned on a known value to retrieve the Thread Control Block that
-	   is stored at the bottom of the physical page.    */
 	memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
 	if (memp == NULL)
 		return NULL;
 	kcr = (struct kernel_context_regs *)
-		((unsigned long)memp + INTR_STACK_SIZE - sizeof(struct kernel_context_regs));
+		(memp + INTR_STACK_SIZE - sizeof(struct kernel_context_regs));
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
 	memset(kcr->r4_r7, 0, 4 * sizeof(u32));
 	memset(kcr->r8_r11, 0, 4 * sizeof(u32));
@@ -51,25 +47,24 @@ static struct kernel_context_regs *build_intr_stack(void)
 	return kcr;
 }
 
-// pass user-supplied stack size - configure task stack size
-// note: detect stack overflow -> #memf && (SP_Process == MMFAR)
-static struct thread_context_regs *build_thrd_stack(void *(*start_routine)(void *),
-						void *arg, size_t stacksize)
+/* new thread's LR loaded with pthread_exit address */
+void pthread_exit(void *retval);
+
+//XXX: Detecting a stack-overflow on v7M: #memf && (SP_Process == MMFAR)
+static struct thread_context_regs *alloc_thread_stack(
+	void *(*start_routine)(void *),	void *arg, size_t stacksize)
 {
-	void *memp;
+	char *memp;
 	struct thread_context_regs *tcr;
 
 	memp = alloc_pages(size_to_page_order(stacksize));
 	if (!memp)
 		return NULL;
 	tcr = (struct thread_context_regs*)
-		((unsigned long)memp + stacksize - sizeof(struct thread_context_regs));
+		(memp + stacksize - sizeof(struct thread_context_regs));
 	tcr->r0_r3__r12[0] = (u32)arg;
 	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof(u32));
-
-	/* Calls pthread_exit() on return keyword. This might need to be fixed at
-	   runtime in the future.    */
-	tcr->lr = (u32)pthread_exit;
+	tcr->lr = (u32)pthread_exit; //FIXME: Should libc be dynamically loaded?
 	tcr->ret_addr = (u32)v7m_clear_thumb_bit(start_routine);
 	tcr->xpsr = xPSR_T_Msk;
 
@@ -81,17 +76,19 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 {
 	struct thread_info *thread;
 	struct kernel_context_regs *kcr;
+	struct thread_context_regs *tcr;
 	static int thread_count = 0;
 
-	kcr = build_intr_stack();
-	if (!kcr)
+	kcr = alloc_interrupt_stack();
+	if (kcr == NULL)
 		return NULL;
-	thread = (struct thread_info *)align((unsigned long)kcr, INTR_STACK_SIZE);
-	thread->ti_mach.mi_psp = (u32)build_thrd_stack(start_routine, arg, stacksize);
-	if (!thread->ti_mach.mi_psp) {
-		//FIXME: free(kcr);
+	tcr = alloc_thread_stack(start_routine,	arg, stacksize);
+	thread = THREAD_INFO(kcr);
+	if (tcr == NULL) {
+		free(thread);
 		return NULL;
 	}
+	thread->ti_mach.mi_psp = (u32)tcr;
 	thread->ti_mach.mi_msp = (u32)kcr;
 	thread->ti_mach.mi_priv = priv;
 	thread->ti_stacksize = stacksize;
@@ -99,7 +96,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_joinable = false;
 	thread->ti_joining = NULL;
 	thread->ti_detached = false;
-	thread->ti_priority = PRI_MIN;  /* new threads are assigned the lowest priority */
+	thread->ti_priority = PRI_MIN;
 	thread->ti_state = THREAD_STATE_NEW;
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	thread->ti_canary[0] = THREAD_CANARY0;
@@ -118,41 +115,41 @@ int thread_yield(void)
 #endif /* DEBUG */
 
 	//FIXME: elect iff there is a higher-priority thread ready to run
-	CURRENT_THREAD_INFO(current);
-	sched_enqueue(current);
+	CURRENT_THREAD_INFO(curr_thread);
+	sched_enqueue(curr_thread);
 
 	return sched_elect(SCHED_OPT_NONE);
 }
 
 int thread_self(void)
 {
-	CURRENT_THREAD_INFO(thread);
+	CURRENT_THREAD_INFO(curr_thread);
 
-	return thread->ti_id;
+	return curr_thread->ti_id;
 }
 
 void thread_exit(void *retval)
 {
-	CURRENT_THREAD_INFO(current);
+	CURRENT_THREAD_INFO(curr_thread);
 
 #ifdef DEBUG
 	printk("thread: id=%d is exiting with retval=%d\n", current->ti_id, (int) retval);
 #endif
 
 	/* free thread stack memory */
-	free_pages(align(current->ti_mach.mi_psp, current->ti_stacksize),
-		size_to_page_order(current->ti_stacksize));
+	free_pages(align(curr_thread->ti_mach.mi_psp, curr_thread->ti_stacksize),
+		size_to_page_order(curr_thread->ti_stacksize));
 
-	if (current->ti_detached == false) {
-		current->ti_retval = retval;
-		if (current->ti_joining)
-			sched_enqueue(current->ti_joining);
+	if (curr_thread->ti_detached == false) {
+		curr_thread->ti_retval = retval;
+		if (curr_thread->ti_joining)
+			sched_enqueue(curr_thread->ti_joining);
 		else
-			current->ti_joinable = true;
+			curr_thread->ti_joinable = true;
 	} else {
 		/* We are freeing the stack we are running on, no kernel preemption
 		 * is allowed until we call sched_elect().  */
-		free_pages((unsigned long)current,
+		free_pages((unsigned long)curr_thread,
 			size_to_page_order(INTR_STACK_SIZE));
 	}
 
@@ -161,9 +158,7 @@ void thread_exit(void *retval)
 
 int thread_set_priority(struct thread_info *thread, int priority)
 {
-	//FIXME: Must be called before the sched_enqueue!
-	//if (thread->state != THREAD_STATE_NEW)
-	// return -1;
+	/* priority change is effective on next scheduling */
 	thread->ti_priority = priority;
 
 	return 0;
@@ -193,11 +188,11 @@ int thread_join(pthread_t thread, void **retval)
 
 	/* the other thread is not yet joinable, the current thread blocks */
 	if (other->ti_joinable == false) {
-		CURRENT_THREAD_INFO(current);
+		CURRENT_THREAD_INFO(curr_thread);
 		if (other->ti_joining)
 			return -EINVAL;  /* Another thread is already waiting to
 					    join with this thread. */
-		other->ti_joining = current;
+		other->ti_joining = curr_thread;
 		sched_elect(SCHED_OPT_NONE);
 	}
 	*retval = other->ti_retval;
@@ -209,10 +204,10 @@ int thread_join(pthread_t thread, void **retval)
 
 int thread_detach(pthread_t thread)
 {
-	struct thread_info *tip;
+	struct thread_info *thread_info;
 
-	tip = find_thread_by_id(thread);
-	tip->ti_detached = true;
+	thread_info = find_thread_by_id(thread);
+	thread_info->ti_detached = true;
 
 	return 0;
 }
@@ -252,8 +247,7 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	else
 		stacksize = stacklimit.rlim_cur;
 
-	/* FIXME: We must check all addresses of user-supplied pointers, they must belong
-	   to this process user-space.    */
+	//FIXME: Check start_routine's address belongs to process' address-space
 	struct thread_info *thread_info =
 		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
 	if (thread_info == NULL)
