@@ -1,0 +1,14 @@
+#
+# Makefile.opt
+#
+# Copyright (c) 2017 Benoit Marcot
+#
+
+# Control the build verbosity
+ifeq ("$(VERBOSE)","1")
+  Q :=
+  VECHO = @true
+else
+  Q := @
+  VECHO = @echo
+endif

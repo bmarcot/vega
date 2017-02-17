@@ -1,12 +1,11 @@
+#
+# Makefile
+#
+# Copyright (c) 2017 Benoit Marcot
+#
 
-# Control the build verbosity
-ifeq ("$(VERBOSE)","1")
-Q :=
-VECHO = @true
-else
-Q := @
-VECHO = @echo
-endif
+include Makefile.opt
+include Makefile.inc
 
 # vegaz, compressed kernel
 NAME = vega
@@ -17,20 +16,12 @@ TARGET ?= qemu
 # The platform Makefile contains hw details and flags
 include target/$(TARGET)/Makefile
 
-CROSS = arm-none-eabi-
-CC = $(CROSS)gcc
-AS = $(CROSS)as
-OCPY = $(CROSS)objcopy
-HOSTCC=gcc
-
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += \
-	-mcpu=$(CPU) -mthumb -Iinclude -Iinclude/libc -I. -Icmsis/arm \
+CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	-Iinclude/kernel \
 	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
 
-# ld must know the architecture because we use the stdlib (printf, memcpy..)
-LDFLAGS = -mthumb -march=$(ARCH) -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds
+LDFLAGS += -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds
 
 #FIXME: revisit the arch-specific imports
 ifeq ($(ARCH),armv6-m)
