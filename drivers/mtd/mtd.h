@@ -10,6 +10,7 @@
 #include <sys/types.h>
 
 #include <kernel/errno-base.h>
+#include <kernel/types.h>
 
 #define MTD_ERASE_PENDING       (1 << 0)
 #define MTD_ERASING             (1 << 1)
