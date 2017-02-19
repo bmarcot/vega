@@ -1,5 +1,11 @@
-#ifndef KERNEL_TYPES_H
-#define KERNEL_TYPES_H
+/*
+ * include/kernel/kernel.h
+ *
+ * Copyright (c) 2016-2017 Benoit Marcot
+ */
+
+#ifndef _KERNEL_TYPES_H
+#define _KERNEL_TYPES_H
 
 #ifndef _U32
 #define _U32
@@ -31,14 +37,12 @@ typedef unsigned char u8;
 typedef char s8;
 #endif
 
-#ifndef _INO_T
-#define _INO_T
-typedef unsigned int ino_t;
-#endif
-
 #ifndef _UMODE_T
 #define _UMODE_T
 typedef unsigned short umode_t;
 #endif
 
-#endif /* !KERNEL_TYPES_H */
+/* import struct list_head */
+#include "linux/types.h"
+
+#endif /* !_KERNEL_TYPES_H */
