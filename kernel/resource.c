@@ -1,4 +1,4 @@
-#include <sys/resource.h>
+#include <vega/sys/resource.h>
 
 static struct rlimit rlimits[] = {
 	{ .rlim_cur = 1024, .rlim_max = 1024 }  /* RLIMIT_STACK */
