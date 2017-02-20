@@ -1,6 +1,7 @@
-/* kernel/condition.c
+/*
+ * kernel/cond.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <sys/types.h>
@@ -11,22 +12,27 @@
 
 #include "linux/list.h"
 
-/* The cond variable storage is provided by the user, and the kernel must check
- * the addresses provided in the struct. See issue #8 (LDRT/STRT).  */
+static LIST_HEAD(cond_head);
+
+static struct thread_info *find_other_thread(pthread_cond_t *cond)
+{
+	struct thread_info *other;
+
+	list_for_each_entry(other, &cond_head, ti_q) {
+		if (other->ti_private == cond)
+			return other;
+	}
+
+	return NULL;
+}
+
 int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
-	CURRENT_THREAD_INFO(cur_thread);
-
-	/* if (cond->owner != cur_thread) { */
-	/* 	errno = EINVAL; */
-	/* 	return -1; */
-	/* } */
-	list_add_tail(&cur_thread->ti_q, &cond->waitq);
-	cur_thread->ti_state = THREAD_STATE_BLOCKED;
+	CURRENT_THREAD_INFO(curr_thread);
+	curr_thread->ti_private = cond;
+	curr_thread->ti_state = THREAD_STATE_BLOCKED;
+	list_add_tail(&curr_thread->ti_q, &cond_head);
 	sys_pthread_mutex_unlock(mutex);
-
-	//XXX: yield IS NOT mandatory; previous unlock may have rescheduled!
-	//__pthread_yield();
 
 	/* contend for the lock */
 	sys_pthread_mutex_lock(mutex);
@@ -36,16 +42,16 @@ int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 
 int sys_pthread_cond_signal(pthread_cond_t *cond)
 {
-	struct thread_info *waiter;
-	CURRENT_THREAD_INFO(cur_thread);
+	struct thread_info *other;
 
-	waiter = list_first_entry_or_null(&cond->waitq, struct thread_info, ti_q);
-	if (waiter == NULL)
+	other = find_other_thread(cond);
+	if (other == NULL)
 		return 0;
-	list_del(&waiter->ti_q);
-	sched_enqueue(waiter);
-	if (waiter->ti_priority >= cur_thread->ti_priority) {
-		sched_enqueue(cur_thread);
+	list_del(&other->ti_q);
+	sched_enqueue(other);
+	CURRENT_THREAD_INFO(curr_thread);
+	if (other->ti_priority >= curr_thread->ti_priority) {
+		sched_enqueue(curr_thread);
 		sched_elect(SCHED_OPT_NONE);
 	}
 
