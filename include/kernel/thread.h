@@ -56,6 +56,8 @@ struct thread_info {
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	u32 ti_canary[2];
 #endif
+
+	char ti_storage[0];
 };
 
 enum thread_privilege {
