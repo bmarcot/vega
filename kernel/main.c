@@ -35,6 +35,7 @@ void mtdram_init(void);
 void __printk_init(void);
 int minishell(void *options);
 void memdev_init(void);
+void kernel_heap_init(void *heap_start, size_t heap_size);
 
 struct task_info top_task;
 
