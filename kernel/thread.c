@@ -7,9 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/resource.h>
 #include <sys/types.h>
 #include <ucontext.h>
+
+#include <vega/sys/resource.h>
 
 #include <arch/v7m-helper.h>
 
