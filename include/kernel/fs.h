@@ -7,29 +7,19 @@
 #ifndef _KERNEL_FS_H
 #define _KERNEL_FS_H
 
+#include <sys/types.h>
+
+#include <vega/dirent.h>
+
 #include <kernel/types.h>
 
-#include <sys/types.h> // for off_t
-
-#define NAME_MAX 32 // <limits.h>
+#define NAME_MAX 32 //FIXME: Include <limits.h>
 
 #define O_DIRECTORY 1
 
 #define SEEK_SET  0  /* seek relative to beginning of file */
 #define SEEK_CUR  1  /* seek relative to current file position */
 #define SEEK_END  2  /* seek relative to end of file */
-
-/* #define S_IFMT   0170000   /\* bit mask for the file type bit field *\/ */
-
-/* #define S_IFLNK  0120000 */
-/* #define S_IFREG  0100000 */
-/* #define S_IFDIR  0040000 */
-/* #define S_IFCHR  0020000 */
-
-/* #define S_ISLNK(m)  (((m) & S_IFMT) == S_IFLNK) */
-/* #define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG) */
-/* #define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR) */
-/* #define S_ISCHR(m)  (((m) & S_IFMT) == S_IFCHR) */
 
 /*
  * inode struct
@@ -119,10 +109,6 @@ struct readdir_callback {
 };
 
 struct vega_dirent {
-	ino_t d_ino;            /* inode number */
-	char  d_name[NAME_MAX]; /* filename */
-};
-struct dirent {
 	ino_t d_ino;            /* inode number */
 	char  d_name[NAME_MAX]; /* filename */
 };

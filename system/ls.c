@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <vega/dirent.h>
+
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 
