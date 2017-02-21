@@ -1,5 +1,9 @@
 #include <unistd.h>
 
+enum sc_varname {
+	PAGESIZE,
+};
+
 struct sys_param {
 	const char *name;
 	long value;
