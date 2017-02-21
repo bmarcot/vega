@@ -15,16 +15,6 @@
 #define align_next(x, a)          align_next_mask(x, (__typeof__(x))((a) - 1))
 #define align_next_mask(x, mask)  (((x) + (mask)) & ~(mask))
 
-#define max(a, b)			\
-	({ __typeof__(a) _a = (a);	\
-	   __typeof__(b) _b = (b);	\
-	   _a > _b ? _a : _b; })
-
-#define min(a, b)			\
-	({ __typeof__(a) _a = (a);	\
-	   __typeof__(b) _b = (b);	\
-	   _a < _b ? _a : _b; })
-
 #define ARRAY_SIZE(arr) \
 	((size_t)(sizeof(arr) / sizeof(*(arr))))
 

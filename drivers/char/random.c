@@ -6,9 +6,9 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include <kernel/fs.h>
-#include <kernel/kernel.h>
 
 typedef unsigned long long u64;
 
@@ -53,8 +53,8 @@ ssize_t read_random(struct file *file, char *buf, size_t count, off_t offset)
 	} else {
 		for (int i = count; i > 0; i -= 8, buf = (char *)buf + 8) {
 			m = next();
-			memcpy(buf, &m, min(i, 8));
-			remaining_bytes = 8 - min(i, 8);
+			memcpy(buf, &m, MIN(i, 8));
+			remaining_bytes = 8 - MIN(i, 8);
 		}
 	}
 

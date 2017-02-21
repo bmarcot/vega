@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <ucontext.h>
 
@@ -244,7 +245,7 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	/* get the thread default stack size */
 	sys_getrlimit(RLIMIT_STACK, &stacklimit);
 	if (attr)
-		stacksize = min(attr->stacksize, stacklimit.rlim_max);
+		stacksize = MIN(attr->stacksize, stacklimit.rlim_max);
 	else
 		stacksize = stacklimit.rlim_cur;
 
