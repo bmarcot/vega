@@ -5,6 +5,7 @@
 *.lds
 *.hex
 include/version.h
+libvega.a
 
 # CMSIS is managed as an external dependency
 include/cmsis

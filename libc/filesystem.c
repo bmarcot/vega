@@ -7,17 +7,22 @@
 #include <kernel/syscalls.h>
 #include "vega/syscalls.h"
 
-int open(const char *pathname, int flags)
+int _open(const char *pathname, int flags)
 {
 	return do_syscall2((void *)pathname, (void *)flags, SYS_OPEN);
 }
 
-ssize_t read(int fd, void *buf, size_t count)
+int _close(int fd)
+{
+	return do_syscall1((void *)fd, SYS_CLOSE);
+}
+
+ssize_t _read(int fd, void *buf, size_t count)
 {
 	return (ssize_t)do_syscall3((void *)fd, buf, (void *)count, SYS_READ);
 }
 
-ssize_t write(int fd, void *buf, size_t count)
+ssize_t _write(int fd, void *buf, size_t count)
 {
 	return (ssize_t)do_syscall3((void *)fd, buf, (void *)count, SYS_WRITE);
 }

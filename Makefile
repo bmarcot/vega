@@ -44,15 +44,16 @@ CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard drivers/timer/timercore.c) \
 	$(wildcard drivers/serial/serial*.c) \
 	$(wildcard system/*.c)		\
+	libc/vega/stubs.c		\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
-all: include/version.h $(NAME).lds $(NAME).hex
+all: include/version.h $(NAME).lds libvega.a $(NAME).hex
 
-$(NAME).elf: $(OBJS) libvega.a
+$(NAME).elf: $(OBJS)
 	$(VECHO) "LD\t$@"
-	$(Q)$(CC) $(LDFLAGS) -o $@ $^
+	$(Q)$(CC) $(LDFLAGS) -o $@ $^ -L. -lvega
 
 libvega.a: $(LIBVEGA_OBJS)
 	$(VECHO) "AR\t$@"
