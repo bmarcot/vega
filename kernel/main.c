@@ -38,7 +38,7 @@ void memdev_init(void);
 
 struct task_info top_task;
 
-void __weak *main(__unused void *arg)
+void __weak_symbol *main(__unused void *arg)
 {
 	minishell(NULL);
 
