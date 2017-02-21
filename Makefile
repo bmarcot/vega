@@ -18,7 +18,7 @@ include target/$(TARGET)/Makefile
 
 # warning: return type of 'main' is not 'int' [-Wmain]
 CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
-	-Iinclude/kernel -D_POSIX_THREADS=1 -D_POSIX_TIMERS=1 \
+	-Iinclude/kernel -D_POSIX_THREADS=1 -D_POSIX_TIMERS=1 -D_POSIX_REALTIME_SIGNALS=1 \
 	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color
 
 LDFLAGS += -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds

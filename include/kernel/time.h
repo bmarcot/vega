@@ -12,6 +12,8 @@
 #include <sys/timespec.h> //FIXME: Why including this header explicitly?
 #include <time.h>
 
+#include <vega/signal.h>
+
 #include <kernel/types.h>
 
 #include "linux/list.h"

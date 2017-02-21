@@ -9,6 +9,8 @@
 
 #include <signal.h>
 
+#include <vega/signal.h>
+
 #include <kernel/thread.h>
 
 #include "linux/types.h"
