@@ -6,12 +6,13 @@
 
 /* https://www.kernel.org/doc/Documentation/filesystems/romfs.txt */
 
-#include <inet.h> /* words are big endian in romfs */
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#include <vega/arpa/inet.h> /* words are big endian in romfs */
 
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
