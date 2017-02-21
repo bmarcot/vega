@@ -23,7 +23,6 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize)
 }
 
 const pthread_attr_t pthread_attr_default = {
-	.flags = 0,
 	.stacksize = 1024
 };
 
@@ -40,16 +39,14 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 {
 	(void)attr;
 
-	mutex->val = -1;
+	*mutex = -1;
 
 	return 0;
 }
 
 int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-	(void)attr;
-
-	INIT_LIST_HEAD(&cond->waitq);
+	(void)attr, (void)attr;
 
 	return 0;
 }
