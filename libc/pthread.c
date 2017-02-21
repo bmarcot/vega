@@ -46,7 +46,7 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 
 int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-	(void)attr, (void)attr;
+	(void)cond, (void)attr;
 
 	return 0;
 }
@@ -54,6 +54,7 @@ int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 /* syscall wrappers */
 
 #include <kernel/syscalls.h>
+
 #include "vega/syscalls.h"
 
 int pthread_yield(void)
@@ -69,6 +70,10 @@ pthread_t pthread_self(void)
 void pthread_exit(void *retval)
 {
 	do_syscall1((void *)retval, SYS_PTHREAD_EXIT);
+
+	/* compiler complains about 'noreturn' function does return */
+	for (;;)
+		;
 }
 
 int pthread_detach(pthread_t thread)
