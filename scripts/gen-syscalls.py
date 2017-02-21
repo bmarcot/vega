@@ -32,7 +32,7 @@ xs = [
     'close',
     'read',
     'write',
-    'seek',
+    'lseek',
     'stat',
     'mount',
     'readdir_r',

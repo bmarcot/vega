@@ -149,13 +149,13 @@ ssize_t sys_write(int fd, void *buf, size_t count)
 	return count;
 }
 
-off_t sys_seek(int fd, off_t offset, int whence)
+off_t sys_lseek(int fd, off_t offset, int whence)
 {
 	struct file *file = fd_to_file(fd);
 	off_t size = file->f_dentry->d_inode->i_size;
 
-	if (file->f_op->seek)
-		file->f_op->seek(file, offset, whence);
+	if (file->f_op->lseek)
+		file->f_op->lseek(file, offset, whence);
 	switch (whence) {
 	case SEEK_SET:
 		if (offset)

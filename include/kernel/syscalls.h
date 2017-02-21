@@ -31,7 +31,7 @@
 #define SYS_CLOSE 19
 #define SYS_READ 20
 #define SYS_WRITE 21
-#define SYS_SEEK 22
+#define SYS_LSEEK 22
 #define SYS_STAT 23
 #define SYS_MOUNT 24
 #define SYS_READDIR_R 25

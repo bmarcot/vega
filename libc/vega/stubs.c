@@ -21,13 +21,6 @@ int _fstat()
 	return -1;
 }
 
-int _lseek(__unused int file, __unused int ptr, __unused int dir)
-{
-	HANGS_ON();
-
-	return -1;
-}
-
 void *_sbrk(__unused int incr)
 {
 	HANGS_ON();

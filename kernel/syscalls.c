@@ -32,7 +32,7 @@ int sys_open();
 int sys_close();
 int sys_read();
 int sys_write();
-int sys_seek();
+int sys_lseek();
 int sys_stat();
 int sys_mount();
 int sys_readdir_r();
@@ -62,7 +62,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_CLOSE] = sys_close,
 	[SYS_READ] = sys_read,
 	[SYS_WRITE] = sys_write,
-	[SYS_SEEK] = sys_seek,
+	[SYS_LSEEK] = sys_lseek,
 	[SYS_STAT] = sys_stat,
 	[SYS_MOUNT] = sys_mount,
 	[SYS_READDIR_R] = sys_readdir_r,

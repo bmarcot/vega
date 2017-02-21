@@ -27,10 +27,10 @@ ssize_t _write(int fd, void *buf, size_t count)
 	return (ssize_t)do_syscall3((void *)fd, buf, (void *)count, SYS_WRITE);
 }
 
-off_t seek(int fd, off_t offset, int whence)
+off_t _lseek(int fd, off_t offset, int whence)
 {
 	return (off_t)do_syscall3((void *)fd, (void *)offset, (void *)whence,
-				SYS_SEEK);
+				SYS_LSEEK);
 }
 
 int stat(const char *pathname, struct stat *buf)

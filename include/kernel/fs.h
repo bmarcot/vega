@@ -8,6 +8,7 @@
 #define _KERNEL_FS_H
 
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <vega/dirent.h>
 
@@ -16,10 +17,6 @@
 #define NAME_MAX 32 //FIXME: Include <limits.h>
 
 #define O_DIRECTORY 1
-
-#define SEEK_SET  0  /* seek relative to beginning of file */
-#define SEEK_CUR  1  /* seek relative to current file position */
-#define SEEK_END  2  /* seek relative to end of file */
 
 /*
  * inode struct
@@ -63,7 +60,7 @@ struct file {
 struct dir_context;
 
 struct file_operations {
-	off_t   (*seek) (struct file *file, off_t offset, int origin);
+	off_t   (*lseek) (struct file *file, off_t offset, int origin);
 	ssize_t (*read) (struct file *file, char *buf, size_t count, off_t offset);
 	ssize_t (*write) (struct file *file, const char *buf, size_t count, off_t *offset);
 	int     (*iterate) (struct file *file, struct dir_context *ctx);
