@@ -4,10 +4,8 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <stdlib.h>
-#include <sys/types.h>
-
 #include <kernel/kernel.h>
+#include <kernel/mutex.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
@@ -15,9 +13,9 @@
 
 static LIST_HEAD(mutex_head);
 
-/* The thread owns the mutex on return.  We also check the case when the lock
+/* The thread owns the mutex on return. We also check the case when the lock
  * has been released between the test of the mutex and this syscall. */
-int sys_pthread_mutex_lock(pthread_mutex_t *mutex)
+int sys_pthread_mutex_lock(kernel_mutex_t *mutex)
 {
 	mutex->val++;
 	if (!mutex->val)
@@ -31,7 +29,7 @@ int sys_pthread_mutex_lock(pthread_mutex_t *mutex)
 	return 0;
 }
 
-static struct thread_info *find_first_blocking_thread(pthread_mutex_t *mutex)
+static struct thread_info *find_first_blocking_thread(kernel_mutex_t *mutex)
 {
 	struct thread_info *thread;
 
@@ -43,7 +41,7 @@ static struct thread_info *find_first_blocking_thread(pthread_mutex_t *mutex)
 	return NULL;
 }
 
-int sys_pthread_mutex_unlock(pthread_mutex_t *mutex)
+int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 {
 	struct thread_info *waiter = NULL;
 

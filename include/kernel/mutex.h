@@ -1,14 +1,19 @@
-/* include/kernel/mutex.h
+/*
+ * include/kernel/mutex.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#ifndef KERNEL_MUTEX_H
-#define KERNEL_MUTEX_H
+#ifndef _KERNEL_MUTEX_H
+#define _KERNEL_MUTEX_H
 
-#include <sys/types.h>
+typedef _Atomic int atomic_s32;
 
-int sys_pthread_mutex_lock(pthread_mutex_t *mutex);
-int sys_pthread_mutex_unlock(pthread_mutex_t *mutex);
+typedef struct {
+	atomic_s32 val;
+} kernel_mutex_t;
 
-#endif /* !KERNEL_MUTEX_H */
+int sys_pthread_mutex_lock(kernel_mutex_t *mutex);
+int sys_pthread_mutex_unlock(kernel_mutex_t *mutex);
+
+#endif /* !_KERNEL_MUTEX_H */
