@@ -26,7 +26,7 @@ static struct thread_info *find_other_thread(pthread_cond_t *cond)
 	return NULL;
 }
 
-int sys_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+int sys_pthread_cond_wait(pthread_cond_t *cond, kernel_mutex_t *mutex)
 {
 	CURRENT_THREAD_INFO(curr_thread);
 	curr_thread->ti_private = cond;
