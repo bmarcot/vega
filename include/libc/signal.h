@@ -3,6 +3,8 @@
 
 #include <sys/types.h>
 
+#include "linux/list.h"
+
 typedef struct {
 	void *ss_sp;     /* Base address of stack */
 	int ss_flags;    /* Flags */
