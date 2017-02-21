@@ -9,10 +9,14 @@
 
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/timespec.h> //FIXME: Why including this header explicitly?
+#include <time.h>
+
+#include <kernel/types.h>
+
 #include "linux/list.h"
 
 struct timer_info;
-struct itimerspec;
 
 enum timer_type { ONESHOT_TIMER, INTERVAL_TIMER };
 
