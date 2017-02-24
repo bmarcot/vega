@@ -19,7 +19,7 @@ SECTIONS
 {
     .vector 0 : {
 	PROVIDE(__vector_start__ = .);
-    	*(.vector)
+	KEEP(*(.vector))
     } > rom
 
     .text BLOCK(8) : {
