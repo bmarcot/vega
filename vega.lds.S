@@ -86,4 +86,10 @@ SECTIONS
 	} > ram
 
 	PROVIDE(__mtdram_size__ = SIZEOF(.mtdram));
+
+    /DISCARD/ :
+    {
+	*(.ARM.exidx)
+	*(.ARM.attributes)
+    }
 }
