@@ -79,7 +79,7 @@ include/version.h: include/version.template.h
 
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"
-	$(Q)$(OCPY) -O ihex $< $@
+	$(Q)$(OBJCOPY) -O ihex $< $@
 
 DIRS =	arch		\
 	drivers		\
