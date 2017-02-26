@@ -187,7 +187,15 @@ int sys_close(int fd)
 
 int sys_stat(const char *pathname, struct stat *buf)
 {
-	(void)pathname, (void)buf;
+	struct inode *inode = inode_from_pathname(pathname);
+
+	if (inode == NULL) {
+		errno = ENOENT;
+		return -1;
+	}
+	buf->st_ino = inode->i_ino;
+	buf->st_mode = inode->i_mode;
+	buf->st_size = inode->i_size;
 
 	return 0;
 }
