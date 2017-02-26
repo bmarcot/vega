@@ -90,6 +90,7 @@ struct thread_info *start_kernel(void)
 
 	__printk_init();
 
+	INIT_LIST_HEAD(&top_task.thread_head);
 	INIT_LIST_HEAD(&top_task.signal_head);
 
 	/* initialize the kernel's malloc */
