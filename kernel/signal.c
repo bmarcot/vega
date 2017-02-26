@@ -212,8 +212,10 @@ static int is_signal_supported(int sig)
  *   handle the update of the error code in the cpu-pushed stackframe.
  */
 
-int sys_raise(int sig)
+int sys_kill(pid_t pid, int sig)
 {
+	(void)pid;
+
 	if (!is_signal_supported(sig))
 		return -EINVAL;
 

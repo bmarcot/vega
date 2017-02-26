@@ -44,3 +44,11 @@ void _fini(void)
 {
 	HANGS_ON();
 }
+
+#include <kernel/syscalls.h>
+#include "syscalls.h"
+
+int _getpid(void)
+{
+	return do_syscall0(SYS_GETPID);
+}

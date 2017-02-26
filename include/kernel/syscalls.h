@@ -25,7 +25,7 @@
 #define SYS_MSLEEP 13
 #define SYS_SYSCONF 14
 #define SYS_SIGACTION 15
-#define SYS_RAISE 16
+#define SYS_KILL 16
 #define SYS_SIGQUEUE 17
 #define SYS_OPEN 18
 #define SYS_CLOSE 19
@@ -35,5 +35,6 @@
 #define SYS_STAT 23
 #define SYS_MOUNT 24
 #define SYS_READDIR_R 25
+#define SYS_GETPID 26
 
 #endif /* !KERNEL_SYSCALLS_H */

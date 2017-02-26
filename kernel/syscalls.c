@@ -26,7 +26,7 @@ int sys_timer_gettime();
 int sys_msleep();
 int sys_sysconf();
 int sys_sigaction();
-int sys_raise();
+int sys_kill();
 int sys_sigqueue();
 int sys_open();
 int sys_close();
@@ -36,6 +36,7 @@ int sys_lseek();
 int sys_stat();
 int sys_mount();
 int sys_readdir_r();
+int sys_getpid();
 
 #define SYS_MAX 48
 
@@ -56,7 +57,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_MSLEEP] = sys_msleep,
 	[SYS_SYSCONF] = sys_sysconf,
 	[SYS_SIGACTION] = sys_sigaction,
-	[SYS_RAISE] = sys_raise,
+	[SYS_KILL] = sys_kill,
 	[SYS_SIGQUEUE] = sys_sigqueue,
 	[SYS_OPEN] = sys_open,
 	[SYS_CLOSE] = sys_close,
@@ -66,6 +67,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_STAT] = sys_stat,
 	[SYS_MOUNT] = sys_mount,
 	[SYS_READDIR_R] = sys_readdir_r,
+	[SYS_GETPID] = sys_getpid,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())
