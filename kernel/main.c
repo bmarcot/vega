@@ -37,7 +37,7 @@ int minishell(void *options);
 void memdev_init(void);
 void kernel_heap_init(void *heap_start, size_t heap_size);
 
-struct task_info top_task;
+struct task_info top_task = { .pid = 1, };
 
 void __weak_symbol *main(__unused void *arg)
 {
