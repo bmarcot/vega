@@ -1,11 +1,16 @@
+/* Newlib stubs */
+
 #include <stdint.h>
 #include <sys/cdefs.h>
 #include <unistd.h>
 
 #include <kernel/kernel.h>
+#include <kernel/syscalls.h>
+
+#include "syscalls.h"
 
 #define HANGS_ON() \
-	({ printk("Newlib: need %s", __func__); for (;;); })
+	({ printk("error: Newlib needs %s", __func__); for (;;); })
 
 int _isatty(__unused int file)
 {
@@ -44,9 +49,6 @@ void _fini(void)
 {
 	HANGS_ON();
 }
-
-#include <kernel/syscalls.h>
-#include "syscalls.h"
 
 int _getpid(void)
 {
