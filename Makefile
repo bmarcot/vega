@@ -22,7 +22,8 @@ CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color \
 	-ffunction-sections -fdata-sections -Os
 
-LDFLAGS += -nostartfiles -Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections
+LDFLAGS += -nostartfiles -specs=nano.specs \
+	-Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections
 
 #FIXME: revisit the arch-specific imports
 ifeq ($(ARCH),armv6-m)
