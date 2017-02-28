@@ -4,10 +4,11 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#ifndef _SH_H
-#define _SH_H
+#ifndef _SYSTEM_SH_H
+#define _SYSTEM_SH_H
 
-#define BUF_LINE_LEN 128
+#define ARG_COUNT_MAX 8
+#define BUF_LINE_LEN  128
 
 enum ascii_control_char {
 	ASCII_NULL            =  000,
@@ -17,4 +18,4 @@ enum ascii_control_char {
 	ASCII_DELETE          = 0177,
 };
 
-#endif /* !_SH_H */
+#endif /* !_SYSTEM_SH_H */

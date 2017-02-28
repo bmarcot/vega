@@ -1,22 +1,21 @@
 /*
  * system/sh.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
 
-#include <kernel/kernel.h> //XXX: printk()
+#include <kernel/kernel.h>
 
 #include "sh.h"
 #include "platform.h"
 
-int open(const char *pathname, int flags);
-ssize_t read(int fd, void *buf, size_t count);
-ssize_t write(int fd, const void *buf, size_t count);
 int ls(int argc, char *argv[]);
+int echo(int argc, char *argv[]);
 
 //static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
@@ -29,8 +28,9 @@ static const char BUILTIN_HALT[]   = "halt";
 static const char BUILTIN_REBOOT[] = "reboot";
 static const char BUILTIN_EXIT[]   = "exit";
 static const char BUILTIN_LS[]     = "ls";
+static const char BUILTIN_ECHO[]   = "echo";
 
-static int parse_command_line(const char *buf, char *argv[])
+static int parse_command_line(char *buf, char *argv[])
 {
 	int buflen = strlen(buf);
 
@@ -38,6 +38,7 @@ static int parse_command_line(const char *buf, char *argv[])
 	argv[0] = (char *)buf;
 	for (int i = 0; i < buflen; i++) {
 		if (buf[i] == ' ') {
+			buf[i++] = '\0';
 			while (buf[i] == ' ')
 				i++;
 			argv[argc++] = (char *)&buf[i];
@@ -47,12 +48,17 @@ static int parse_command_line(const char *buf, char *argv[])
 	return argc;
 }
 
-static void exec_command(const char *buf, int fd)
+static void exec_command(char *buf, int fd)
 {
+	int argc;
+	char *argv[ARG_COUNT_MAX];
+
 	if (!strncmp(BUILTIN_LS, buf, sizeof(BUILTIN_LS) - 1)) {
-		char *argv[8];
-		int argc = parse_command_line(buf, argv);
+		argc = parse_command_line(buf, argv);
 		ls(argc, argv);
+	} else if (!strncmp(BUILTIN_ECHO, buf, sizeof(BUILTIN_ECHO) - 1)) {
+		argc = parse_command_line(buf, argv);
+		echo(argc, argv);
 	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
 		printk("Requesting system reboot\n");
 		NVIC_SystemReset();
