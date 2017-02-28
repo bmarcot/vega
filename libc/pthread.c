@@ -57,10 +57,12 @@ int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 
 #include "vega/syscalls.h"
 
-int pthread_yield(void)
+int sched_yield(void)
 {
 	return do_syscall0(SYS_PTHREAD_YIELD);
 }
+
+int pthread_yield(void) __attribute__ ((alias ("sched_yield")));
 
 pthread_t pthread_self(void)
 {
