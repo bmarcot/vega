@@ -112,11 +112,6 @@ int tmpfs_delete(struct dentry *dentry)
 	return 0;
 }
 
-void tmpfs_release(struct dentry *dentry)
-{
-	(void)dentry;
-}
-
 const struct inode_operations tmpfs_iops = {
 	.lookup = tmpfs_lookup,
 	.link   = tmpfs_link,
@@ -127,8 +122,7 @@ const struct file_operations tmpfs_fops = {
 };
 
 const struct dentry_operations tmpfs_dops = {
-	.delete  = tmpfs_delete,
-	.release = tmpfs_release,
+	.delete = tmpfs_delete,
 };
 
 static struct inode tmpfs_inodes[] = {
