@@ -26,16 +26,11 @@ const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;
 
-static const char *basename(const char *name)
+static char *basename(const char *filename)
 {
-	const char *p = name;
+	char *p = strrchr(filename, '/');
 
-	while (*p != '\0')
-		p++;
-	while (p > name && *(p - 1) != '/')
-		p--;
-
-	return p;
+	return p ? p + 1 : (char *)filename;
 }
 
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
