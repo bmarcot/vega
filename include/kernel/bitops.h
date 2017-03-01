@@ -15,16 +15,6 @@ static inline unsigned long flsl(unsigned long word)
 	return word ? sizeof(long) * BITS_PER_CHAR - __builtin_clz(word) : 0;
 }
 
-static inline unsigned long ffsl(unsigned long word)
-{
-	return __builtin_ffsl(word);
-}
-
-static inline unsigned long ffzl(unsigned long word)
-{
-	return __builtin_ffsl(~word);
-}
-
 static inline void clear_bit(unsigned long bit, unsigned long *word)
 {
 	*word &= ~(1 << bit);
