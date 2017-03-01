@@ -23,7 +23,8 @@
 #include "linux/list.h"
 
 const struct inode_operations romfs_iops;
-const struct file_operations  romfs_fops;
+const struct file_operations romfs_fops;
+const struct dentry_operations romfs_dops;
 
 static const char *basename(const char *name)
 {
@@ -106,6 +107,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 			inode->i_private = offset_in_dev(super, rinode);
 
 			target->d_inode = inode;
+			target->d_op = &romfs_dops;
 			target->d_count = 0;
 
 			return target;
@@ -162,6 +164,14 @@ ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 	return retlen;
 }
 
+int romfs_delete(struct dentry *dentry)
+{
+	free(dentry->d_inode);
+	free(dentry);
+
+	return 0;
+}
+
 const struct inode_operations romfs_iops = {
 	.lookup = romfs_lookup,
 };
@@ -169,4 +179,8 @@ const struct inode_operations romfs_iops = {
 const struct file_operations romfs_fops = {
 	.open = romfs_open,
 	.read = romfs_read,
+};
+
+const struct dentry_operations romfs_dops = {
+	.delete = romfs_delete,
 };
