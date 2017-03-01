@@ -22,7 +22,7 @@ struct mthread_info {
 	u32 mi_msp;     /* +0 */
 	u32 mi_psp;     /* +4 */
 	u32 mi_priv;    /* +8 */
-};
+} __attribute__ ((packed));
 
 struct sigaction;
 
@@ -41,13 +41,12 @@ struct thread_info {
 
 	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
 	void *ti_retval;
-	bool ti_detached;
-	bool ti_joinable;
+	int ti_detached;
+	int ti_joinable;
 	struct thread_info *ti_joining;
 
-	/* We store here misc kernel info, like the mutex the thread is
-	 * currently blocking on, the return value for when the thread has
-	 * exited, etc. */
+	/* Pointer to mutually exclusive data: the mutex the thread is blocking
+	 * on, the exit value when thread is not yet joined, etc. */
 	void *ti_private;
 
 	/* /\* local-storage *\/ */
