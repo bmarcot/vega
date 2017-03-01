@@ -1,9 +1,16 @@
+/*
+ * kernel/main.c
+ *
+ * Copyright (c) 2015-2017 Baruch Marcot
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/mm/slab.h>
 #include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/task.h>
@@ -105,6 +112,7 @@ struct thread_info *start_kernel(void)
 
 	/* initialize the physical memory allocator */
 	show_page_bitmap(); // init_pages();
+	kmem_cache_init();
 
 	/* select a scheduling policy */
 	sched_select(SCHED_CLASS_O1);

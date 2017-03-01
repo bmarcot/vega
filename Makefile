@@ -41,6 +41,7 @@ LIBVEGA_OBJS = $(LIBVEGA_SSRC:.S=.o) $(LIBVEGA_CSRC:.c=.o)
 
 CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
+	$(wildcard kernel/mm/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
 	$(wildcard drivers/timer/timercore.c) \
