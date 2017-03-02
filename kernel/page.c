@@ -1,15 +1,16 @@
 /*
  * kernel/page.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <stddef.h>
 
 #include <kernel/bitops.h>
+#include <kernel/hash.h>
+#include <kernel/kernel.h>
 #include <kernel/log2.h>
 #include <kernel/page.h>
-#include "kernel.h"
 
 /* .pgmem section is 32KiB:
  *      - 128 pages of 256B is a 16 bytes map
@@ -126,4 +127,16 @@ void show_page_bitmap(void)
 			printk("%08x  ", *(page_bitmap[i] + j / BITS_PER_LONG));
 		printk("\n");
 	}
+}
+
+/* Useful function to get a signature of memory fragmentation before and
+ * after allocating/freeing memory. */
+unsigned long page_alloc_signature(void)
+{
+	unsigned long hash = hash_djb2((unsigned char *)page_bitmap[0], 4 * 4)
+		+ hash_djb2((unsigned char *)page_bitmap[1], 2 * 4)
+		+ hash_djb2((unsigned char *)page_bitmap[2], 1 * 4)
+		+ hash_djb2((unsigned char *)page_bitmap[3], 1 * 4);
+
+	return hash;
 }
