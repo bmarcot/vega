@@ -37,7 +37,7 @@ endif
 LIBVEGA_CSRC = $(wildcard libc/*.c)
 LIBVEGA_SSRC = $(wildcard libc/*.S) $(wildcard libc/vega/*.S)
 
-LIBVEGA_OBJS = $(LIBVEGA_SSRC:.S=.o) $(LIBVEGA_CSRC:.c=.o)
+SSRC += $(LIBVEGA_SSRC)
 
 CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
@@ -48,19 +48,16 @@ CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard drivers/serial/serial*.c) \
 	$(wildcard system/*.c)		\
 	libc/vega/stubs.c		\
+	$(LIBVEGA_CSRC)			\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
-all: include/version.h $(NAME).lds libvega.a $(NAME).hex
+all: include/version.h $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS)
 	$(VECHO) "LD\t$@"
-	$(Q)$(CC) $(LDFLAGS) -o $@ $^ -L. -lvega
-
-libvega.a: $(LIBVEGA_OBJS)
-	$(VECHO) "AR\t$@"
-	$(Q)$(AR) rcs $@ $^
+	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(VECHO) "CC\t$@"
@@ -83,25 +80,11 @@ include/version.h: include/version.template.h
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OBJCOPY) -O ihex $< $@
 
-DIRS =	arch		\
-	drivers		\
-	kernel		\
-	platform	\
-	system		\
-	target
-
 clean::
-	find $(DIRS) -name "*.o" -type f -delete
+	find . -name "*.o" -type f -delete
 	rm -f $(NAME).map $(NAME).lds include/version.h
 
-clean_cmsis:
-	find libc -name "*.o" -type f -delete
-
-clean_libvega:
-	find libc -name "*.o" -type f -delete
-	rm -f libvega.a
-
-distclean: clean clean_libvega clean_cmsis
+distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
 	find . -name "*~" -type f -delete
 
