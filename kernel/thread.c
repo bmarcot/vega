@@ -17,7 +17,7 @@
 
 #include <kernel/errno-base.h>
 #include <kernel/kernel.h>
-#include <kernel/page.h>
+#include <kernel/mm/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 #include <kernel/task.h>

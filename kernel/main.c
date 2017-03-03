@@ -10,8 +10,8 @@
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
-#include <kernel/page.h>
 #include <kernel/scheduler.h>
 #include <kernel/task.h>
 #include <kernel/thread.h>

@@ -10,7 +10,7 @@
 #include <kernel/hash.h>
 #include <kernel/kernel.h>
 #include <kernel/log2.h>
-#include <kernel/page.h>
+#include <kernel/mm/page.h>
 
 /* .pgmem section is 32KiB:
  *      - 128 pages of 256B is a 16 bytes map
