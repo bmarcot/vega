@@ -27,6 +27,8 @@ static struct kmem_cache cache_caches = {
 	.slabs_free    = LIST_HEAD_INIT(cache_caches.slabs_free),
 	.slabs_partial = LIST_HEAD_INIT(cache_caches.slabs_partial),
 	.slabs_full    = LIST_HEAD_INIT(cache_caches.slabs_full),
+	.alloc_succeed = 0,
+	.alloc_fail    = 0,
 	.opts          = CACHE_OPT_NONE,
 };
 
@@ -96,15 +98,18 @@ void *kmem_cache_alloc(struct kmem_cache *cache, __unused unsigned long flags)
 
 	if (list_empty(&cache->slabs_partial)) {
 		if (list_empty(&cache->slabs_free)) {
+			cache->alloc_fail++;
 			slab = kmem_cache_grow(cache);
 			if (slab == NULL)
 				return NULL;
 		} else {
+			cache->alloc_succeed++;
 			slab = list_first_entry(&cache->slabs_free,
 						struct slab, list);
 		}
 		list_move(&slab->list, &cache->slabs_partial);
 	} else {
+		cache->alloc_succeed++;
 		slab = list_first_entry(&cache->slabs_partial, struct slab,
 					list);
 	}

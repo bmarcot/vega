@@ -30,6 +30,8 @@ struct kmem_cache {
 	unsigned short   objsize; /* size of one object within a slab */
 	unsigned short   objnum;  /* number of objects per slab */
 	int              opts;
+	int              alloc_succeed;
+	int              alloc_fail;
 	char             name[CACHE_NAMELEN];
 };
 
