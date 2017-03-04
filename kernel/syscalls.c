@@ -37,6 +37,7 @@ int sys_stat();
 int sys_mount();
 int sys_readdir_r();
 int sys_getpid();
+int sys_mmap();
 
 #define SYS_MAX 48
 
@@ -68,6 +69,7 @@ void *syscall_vect[SYS_MAX] = {
 	[SYS_MOUNT] = sys_mount,
 	[SYS_READDIR_R] = sys_readdir_r,
 	[SYS_GETPID] = sys_getpid,
+	[SYS_MMAP] = sys_mmap,
 };
 
 int syscall_register(unsigned ix, void *(*fn)())

@@ -36,6 +36,9 @@ xs = [
     'stat',
     'mount',
     'readdir_r',
+
+    # <sys/mman.h>
+    'mmap',
 ]
 
 import datetime

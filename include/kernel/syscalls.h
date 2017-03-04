@@ -36,5 +36,6 @@
 #define SYS_MOUNT 24
 #define SYS_READDIR_R 25
 #define SYS_GETPID 26
+#define SYS_MMAP 27
 
 #endif /* !KERNEL_SYSCALLS_H */
