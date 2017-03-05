@@ -41,3 +41,10 @@ ENTRY(do_syscall5)
 	svc	#5
 	bx	lr
 ENDPROC(do_syscall5)
+
+	@ int do_syscall6(void *a0, void *a1, void *a2, void *a3,
+	@                 void *a4, void *a5, int no)
+ENTRY(do_syscall6)
+	svc	#6
+	bx	lr
+ENDPROC(do_syscall6)
