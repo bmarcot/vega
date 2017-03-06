@@ -24,7 +24,8 @@ struct mthread_info {
 	u32 mi_priv;    /* +8 */
 } __attribute__ ((packed));
 
-struct sigaction;
+
+struct task_info;
 
 struct thread_info {
 	/* machine-specific thread info */
@@ -35,6 +36,7 @@ struct thread_info {
 	int ti_id;
 	int ti_state;
 	size_t ti_stacksize; /* user thread stacksize */
+	struct task_info *ti_task;
 
 	struct list_head ti_list;  /* global list of threads */
 	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
@@ -131,7 +133,9 @@ struct thread_context_regs {
 void switch_to(struct thread_info *, struct thread_info *);
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
-struct thread_info *thread_create(void *(*)(void *), void *, enum thread_privilege, size_t);
+struct thread_info *thread_create(void *(*)(void *), void *,
+				enum thread_privilege, size_t,
+				struct task_info *);
 int thread_yield(void);
 int thread_self(void);
 void thread_exit(void *);

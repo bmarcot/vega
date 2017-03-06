@@ -26,8 +26,6 @@
 #include "utils.h"
 #include "platform.h"
 
-extern struct task_info top_task;
-
 static struct kernel_context_regs *alloc_interrupt_stack(void)
 {
 	char *memp;
@@ -74,7 +72,8 @@ static struct thread_context_regs *alloc_thread_stack(
 }
 
 struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
-				enum thread_privilege priv, size_t stacksize)
+				enum thread_privilege priv, size_t stacksize,
+				struct task_info *task)
 {
 	struct thread_info *thread;
 	struct kernel_context_regs *kcr;
@@ -95,6 +94,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_mach.mi_priv = priv;
 	thread->ti_stacksize = stacksize;
 	thread->ti_id = thread_count++;
+	thread->ti_task = task;
 	thread->ti_joinable = false;
 	thread->ti_joining = NULL;
 	thread->ti_detached = false;
@@ -104,7 +104,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;
 #endif
-	list_add(&thread->ti_list, &top_task.thread_head);
+	list_add(&thread->ti_list, &task->thread_head);
 
 	return thread;
 }
@@ -169,8 +169,9 @@ int thread_set_priority(struct thread_info *thread, int priority)
 static struct thread_info *find_thread_by_id(int id)
 {
 	struct thread_info *tp;
+	CURRENT_TASK_INFO(curr_task);
 
-	list_for_each_entry(tp, &top_task.thread_head, ti_list) {
+	list_for_each_entry(tp, &curr_task->thread_head, ti_list) {
 		if (tp->ti_id == id)
 			return tp;
 	}
@@ -251,7 +252,8 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 	//FIXME: Check start_routine's address belongs to process' address-space
 	struct thread_info *thread_info =
-		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
+		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize,
+			current_task_info());
 	if (thread_info == NULL)
 		return EAGAIN; /* insufficient resources to create another thread */
 	*thread = (pthread_t)thread_info->ti_id;
