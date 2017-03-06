@@ -9,16 +9,6 @@
 	.syntax unified
 	.thumb
 
-	@ get task control block
-	@ this works as long as the TCB is effectively at the
-	@ base of the stack __and__ this is only one stack
-	@ size, aligned on that size.
-	//FIXME: how to handle different stack size?
-	// store somewhere the current stack size info
-	// but it is the kernel stack so we will never use a lot
-	// of space !!!! :) user stack size must be configurable
-	// though
-
 	@ do the thread-context switch
 	@
 	@ r0: struct thread_info *next
@@ -138,12 +128,12 @@ ENTRY(usgf)
 	fault_handler usagefault
 ENDPROC(usgf)
 
-ENTRY(cpu_do_idle)
+ENTRY(__do_idle)
 	wfi
 	bx	lr
-ENDPROC(cpu_do_idle)
+ENDPROC(__do_idle)
 
-	/* void v7m_semih_exit(int status) */
+	/* void v7m_semih_exit(int status); */
 ENTRY(v7m_semih_exit)
 	tst	r0, r0
 	ite	eq

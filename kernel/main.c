@@ -36,8 +36,8 @@ extern char __heap_start__;
 extern char __heap_end__;
 extern char __heap_size__;
 
-void cpu_do_idle(void);
-void *cpu_idle(void *);
+void __do_idle(void);
+void *do_idle(void *);
 void mtdram_init(void);
 void __printk_init(void);
 int minishell(void *options);
@@ -118,7 +118,7 @@ struct thread_info *start_kernel(void)
 	sched_select(SCHED_CLASS_O1);
 
 	/* idle_thread is not added to the runqueue */
-	thread_idle = thread_create(cpu_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
+	thread_idle = thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
 	if (thread_idle == NULL) {
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
@@ -156,15 +156,8 @@ struct thread_info *start_kernel(void)
 	return thread_main;
 }
 
-void *cpu_idle(void *arg)
+void *do_idle(__unused void *arg)
 {
-	(void)arg;
-
 	for (;;)
-		cpu_do_idle();
-}
-
-void system_reset(__unused int reason)
-{
-	NVIC_SystemReset();
+		__do_idle();
 }
