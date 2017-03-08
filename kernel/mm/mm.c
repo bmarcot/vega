@@ -4,16 +4,40 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
+#include <errno.h>
+#include <string.h>
+#include <sys/cdefs.h>
 #include <sys/types.h>
+
+#include <vega/sys/mman.h>
 
 #include <kernel/mm/page.h>
 
-void *sys_mmap(void *addr, size_t length, int prot, int flags,
-	int fd, off_t offset)
+#define M_ISANON(f)     (((f) & MAP_ANONYMOUS) == MAP_ANONYMOUS)
+#define M_ISUNINIT(f)   (((f) & MAP_UNINITIALIZED) == MAP_UNINITIALIZED)
+
+void *sys_mmap(void *addr, size_t length, __unused int prot,
+	int flags, __unused int fd, __unused off_t offset)
 {
-	(void)addr, (void)prot, (void)flags, (void)fd, (void)offset;
+	int order;
 
-	int order = size_to_page_order(length);
+	if (!length) {
+		errno = EINVAL;
+		return MAP_FAILED;
+	}
+	if (M_ISANON(flags)) {
+		order = size_to_page_order(length);
+		addr = alloc_pages(order);
+	} else {
+		//FIXME: Support file mapping --baruch
+		return MAP_FAILED;
+	}
+	if (addr == NULL) {
+		errno = ENOMEM;
+		return MAP_FAILED;
+	}
+	if (M_ISANON(flags) & !M_ISUNINIT(flags))
+		memset(addr, 0, length);
 
-	return alloc_pages(order);
+	return addr;
 }
