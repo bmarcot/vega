@@ -160,6 +160,11 @@ struct inode *dev_inode(void)
 	return &tmpfs_inodes[1];
 }
 
+struct inode *proc_inode(void)
+{
+	return &tmpfs_inodes[2];
+}
+
 struct dentry *root_dentry(void)
 {
 	static struct dentry dentry = {
@@ -196,4 +201,7 @@ void tmpfs_init(void)
 
 	struct list_head *devdir = (struct list_head *)tmpfs_inodes[1].i_private;
 	INIT_LIST_HEAD(devdir);
+
+	struct list_head *procdir = (struct list_head *)tmpfs_inodes[2].i_private;
+	INIT_LIST_HEAD(procdir);
 }

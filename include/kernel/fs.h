@@ -153,11 +153,13 @@ int     sys_close(int fd);
 
 struct inode *root_inode(void);
 struct inode *dev_inode(void);
+struct inode *proc_inode(void);
 struct dentry *root_dentry(void);
 struct file *fd_to_file(int fd);
 struct inode *init_tmpfs_inode(struct inode *inode);
 struct inode *inode_from_pathname(const char *pathname);
 
 void tmpfs_init(void);
+void proc_init(void);
 
 #endif /* !_KERNEL_FS_H */
