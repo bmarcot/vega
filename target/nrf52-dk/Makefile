@@ -22,5 +22,6 @@ CSRC	+= drivers/serial/nrf52.c
 # Gpio driver files
 CSRC	+= platform/nrf52/gpio.c
 
-# Master SPIM
+# Platform drivers
 CSRC	+= platform/nrf52/spim.c
+CSRC	+= platform/nrf52/twim.c
