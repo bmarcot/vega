@@ -10,13 +10,6 @@
 
 #include "platform.h"
 
-struct spim_config {
-	unsigned int pin_sck;
-	unsigned int pin_mosi;
-	unsigned int pin_miso;
-	unsigned int freq;
-};
-
 struct spim_config config = {
 	.pin_sck = 10,
 	.pin_mosi = 11,
@@ -24,8 +17,12 @@ struct spim_config config = {
 	.freq = SPIM_FREQUENCY_FREQUENCY_M8,
 };
 
+struct spim_config curr_config;
+
 void nrf52_spim_init(struct spim_config *config)
 {
+	memcpy(&curr_config, config, sizeof(struct spim_config));
+
 	/* disable the peripheral */
 	NRF_SPIM0->ENABLE = SPIM_ENABLE_ENABLE_Disabled << SPIM_ENABLE_ENABLE_Pos;
 
