@@ -72,3 +72,13 @@ void spi_transfer(const void *tx_buf, size_t tx_len, void *rx_buf,
 	while (!NRF_SPIM0->EVENTS_END)
 		;
 }
+
+void nrf52_spim_cs_low(void)
+{
+	nrf52_gpio_direction_output(curr_config.pin_cs, 0);
+}
+
+void nrf52_spim_cs_up(void)
+{
+	nrf52_gpio_direction_output(curr_config.pin_cs, 1);
+}
