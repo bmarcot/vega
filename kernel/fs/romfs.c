@@ -103,7 +103,6 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 
 			target->d_inode = inode;
 			target->d_op = &romfs_dops;
-			target->d_count = 0;
 
 			return target;
 		}
