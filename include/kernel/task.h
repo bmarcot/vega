@@ -9,6 +9,8 @@
 
 #include <sys/types.h>
 
+#include <kernel/fs.h>
+
 #include "linux/list.h"
 
 #define PID_BASE 7000
@@ -16,6 +18,8 @@
 
 struct task_info {
 	pid_t            pid;
+	unsigned long    filemap;
+	struct file      filetable[FILE_MAX];
 	struct list_head list;
 	struct list_head thread_head;
 	struct list_head signal_head; /* list of installed handlers */
