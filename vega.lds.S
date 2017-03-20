@@ -37,10 +37,14 @@ SECTIONS
        but need to be copied to a volatile storage for they are not
        read-only.    */
 
+	.framebuffer RAMORG : {
+		. += 12k;
+	} > ram
+	
     .data : AT (__rodata_end__) {
     	PROVIDE(__data_start__ = .);
-        *(.data)
-        *(.data.*)
+        *(.data*)
+	*(.data.*)
 	PROVIDE(__data_end__ = .);
     } > ram
 
@@ -49,6 +53,7 @@ SECTIONS
     .bss : {
     	PROVIDE(__bss_start__ = .);
         *(.bss)
+        *(.bss.*)
         *(COMMON)
 	PROVIDE(__bss_end__ = .);
     } > ram

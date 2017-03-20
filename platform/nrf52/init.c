@@ -17,12 +17,22 @@ int nrf52_timer_init(void);
 
 extern struct timer_operations nrf52_tops;
 
+static struct twim_config twim_config = {
+	.pin_scl = 27,
+	.pin_sda = 26,
+	.freq    = TWIM_FREQUENCY_FREQUENCY_K400,
+	.address = 0x3e,
+};
+
 __weak_symbol void __platform_init(void)
 {
 	config_timer_operations(&nrf52_tops);
 	nrf52_serial_init();
 	nrf52_hwrng_init();
 	nrf52_timer_init();
+
+	nrf52_gpio_direction_output(13, 0);
+	nrf52_twim_init(&twim_config);
 }
 
 __weak_symbol void __platform_halt(void)

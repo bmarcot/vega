@@ -98,6 +98,19 @@ struct thread_info *start_kernel(void)
 
 	__printk_init();
 
+	/* printk("Check bss....\n"); */
+	/* for (int i = &__bss_start__; i < &__bss_end__; i+=4) { */
+	/* 	if (*(unsigned int *)i != 0) { */
+	/* 		printk("%x != 0\n", *(unsigned int *)i); */
+	/* 		for (;;) */
+	/* 			; */
+	/* 	} else { */
+	/* 		printk("%08x [%08x]\n", i, *(unsigned int *)i); */
+	/* 	} */
+	/* } */
+
+	show_page_bitmap(); // init_pages();
+	
 	/* initialize the kernel's malloc */
 	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
 
@@ -130,7 +143,7 @@ struct thread_info *start_kernel(void)
 	 * start_kernel() returns.    */
 	task_init(&main_task);
 	struct thread_info *thread_main = thread_create(main, NULL,
-							THREAD_PRIV_USER, 1024,
+							THREAD_PRIV_SUPERVISOR, 1024,
 							&main_task);
 	if (thread_main == NULL) {
 		printk("[!] Could not create user main thread.\n");
@@ -153,6 +166,16 @@ struct thread_info *start_kernel(void)
 	/* do the platform-specific inits */
 	__platform_init();
 
+	/* printk("Check bss....\n"); */
+	/* for (int i = &__bss_start__; i < &__bss_end__; i+=4) { */
+	/* 	if (*(unsigned int *)i != 0) { */
+	/* 		printk("%x != 0\n", *(unsigned int *)i); */
+	/* 		for (;;) */
+	/* 			; */
+	/* 	} else { */
+	/* 		printk("%08x [%08x]\n", 1, *(unsigned int *)i); */
+	/* 	} */
+	/* } */
 	printk("Kernel bootstrap done.\n--\n");
 
 	return thread_main;
