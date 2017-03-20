@@ -15,6 +15,7 @@
 #include <kernel/types.h>
 
 #define NAME_MAX 32 //FIXME: Include <limits.h>
+#define FILE_MAX 8
 
 #define O_DIRECTORY 1
 

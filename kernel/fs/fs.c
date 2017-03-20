@@ -15,34 +15,33 @@
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
-
-//FIXME: the file table is part of the task structure
-#define FILE_MAX 8
+#include <kernel/task.h>
 
 struct file *fd_to_file(int fd)
 {
-	static struct file filetable[FILE_MAX];
+	CURRENT_TASK_INFO(curr_task);
 
-	return &filetable[fd];
+	return &curr_task->filetable[fd];
 }
-
-unsigned long filemap;
 
 static int getfd(void)
 {
 	int fd;
+	CURRENT_TASK_INFO(curr_task);
 
-	fd = find_first_zero_bit(&filemap, BITS_PER_LONG); // MAX_FILE_PER_PROCESS
-	if (fd == BITS_PER_LONG)
+	fd = find_first_zero_bit(&curr_task->filemap, FILE_MAX);
+	if (fd == FILE_MAX)
 		return -1;
-	bitmap_set_bit(&filemap, fd);
+	bitmap_set_bit(&curr_task->filemap, fd);
 
 	return fd;
 }
 
 static void releasefd(int fd)
 {
-	bitmap_clear_bit(&filemap, fd);
+	CURRENT_TASK_INFO(curr_task);
+
+	bitmap_clear_bit(&curr_task->filemap, fd);
 }
 
 int release_dentries(struct dentry *dentry)
