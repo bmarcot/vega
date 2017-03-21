@@ -13,6 +13,9 @@
 // https://linux.die.net/lkmpg/x861.html
 // https://lwn.net/Articles/22355/
 
+extern const char _version_ptr;
+extern const int  _version_len;
+
 static int open_version(__unused struct inode *inode,
 			__unused struct file *file)
 {
@@ -22,10 +25,9 @@ static int open_version(__unused struct inode *inode,
 static ssize_t read_version(__unused struct file *file, char *buf,
 			size_t count, off_t offset)
 {
-	const char ver[] = "OpenAstra-1.0.1-67sd01kl";
-	size_t n = MIN(count, strlen(ver) - offset);
+	size_t n = MIN(count, (int)&_version_len - offset);
 
-	strncpy(buf, ver + offset, n);
+	strncpy(buf, &_version_ptr + offset, n);
 
 	return n;
 }
