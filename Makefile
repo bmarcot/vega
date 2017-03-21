@@ -54,7 +54,7 @@ CSRC += $(wildcard kernel/*.c)		\
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
-all: include/version.h $(NAME).lds $(NAME).hex
+all: $(NAME).lds $(NAME).hex
 
 $(NAME).elf: $(OBJS) kernel/fs/version.o
 	$(VECHO) "LD\t$@"
@@ -71,11 +71,6 @@ $(NAME).elf: $(OBJS) kernel/fs/version.o
 %.lds: %.lds.S
 	$(VECHO) "HOSTCC\t$@"
 	$(Q)$(HOSTCC) -E -P -Iinclude -DROMSZ=$(ROMSZ) -DRAMSZ=$(RAMSZ) -o $@ $<
-
-include/version.h: include/version.template.h
-	$(VECHO) "GEN\t$@"
-	$(Q)cat $< | sed -e "s/GIT_COMMIT/`git log --pretty=format:'%h' -n 1`/g" \
-	-e "s/GIT_BRANCH/`git symbolic-ref --short HEAD`/g" > $@
 
 kernel/fs/version:
 	$(VECHO) "GEN\t$@"
@@ -97,8 +92,8 @@ kernel/fs/version.o: kernel/fs/version
 
 clean::
 	find . -name "*.o" -type f -delete
-	rm -f $(NAME).map $(NAME).lds include/version.h
-	rm -f kernel/proc/version
+	rm -f $(NAME).map $(NAME).lds
+	rm -f kernel/fs/version
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex

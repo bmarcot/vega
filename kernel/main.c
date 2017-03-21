@@ -16,7 +16,6 @@
 #include <kernel/task.h>
 #include <kernel/thread.h>
 
-#include "version.h"
 #include "platform.h"
 
 extern char __early_stack_start__;
@@ -47,8 +46,20 @@ void kernel_heap_init(void *heap_start, size_t heap_size);
 struct task_info idle_task;
 struct task_info main_task;
 
+void print_version(void)
+{
+	char buf[] = {0, 0};
+	int fd = open("/proc/version", 0);
+
+	while (read(fd, &buf, 1))
+		printk("%s", buf);
+	close(fd);
+	printk("\n");
+}
+
 void __weak_symbol *main(__unused void *arg)
 {
+	print_version();
 	minishell(NULL);
 
 	return 0;
@@ -101,11 +112,6 @@ struct thread_info *start_kernel(void)
 	/* initialize the kernel's malloc */
 	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
 
-	printk("Vega Kernel Release 1.0rc1 (%s) Build %s armv7e-m\n"
-		"Copyright (c) 2015-2016 Benoit Marcot\n\n", VER_MILESTONE,
-		VER_COMMIT);
-	printk("Version slug: %s\n", VER_SLUG);
-	printk("Created: %s  %s UTC\n", __DATE__, __TIME__);
 	print_linker_sections();
 
 	/* initialize the physical memory allocator */

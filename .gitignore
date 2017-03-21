@@ -4,8 +4,7 @@
 *.map
 *.lds
 *.hex
-include/version.h
-libvega.a
+kernel/fs/version
 
 # CMSIS is managed as an external dependency
 include/cmsis
