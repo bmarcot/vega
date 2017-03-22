@@ -16,6 +16,7 @@
 
 int ls(int argc, char *argv[]);
 int echo(int argc, char *argv[]);
+int cat(int argc, char *argv[]);
 
 //static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
@@ -29,6 +30,7 @@ static const char BUILTIN_REBOOT[] = "reboot";
 static const char BUILTIN_EXIT[]   = "exit";
 static const char BUILTIN_LS[]     = "ls";
 static const char BUILTIN_ECHO[]   = "echo";
+static const char BUILTIN_CAT[]    = "cat";
 
 static int parse_command_line(char *buf, char *argv[])
 {
@@ -59,6 +61,9 @@ static void exec_command(char *buf, int fd)
 	} else if (!strncmp(BUILTIN_ECHO, buf, sizeof(BUILTIN_ECHO) - 1)) {
 		argc = parse_command_line(buf, argv);
 		echo(argc, argv);
+	} else if (!strncmp(BUILTIN_CAT, buf, sizeof(BUILTIN_CAT) - 1)) {
+		argc = parse_command_line(buf, argv);
+		cat(argc, argv);
 	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
 		printk("Requesting system reboot\n");
 		NVIC_SystemReset();
