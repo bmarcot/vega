@@ -102,7 +102,7 @@ int sys_open(const char *pathname, int flags)
 
 		dentry = vfs_lookup(inode, target);
 		if (dentry == NULL) {
-			release_dentries(target);
+			release_dentries(target->d_parent);
 			return -1;
 		}
 		inode = dentry->d_inode;
