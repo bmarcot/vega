@@ -89,7 +89,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 	struct romfs_superblock *super = mtd->priv;
 	struct romfs_inode *rinode = first_filehdr(super);
 
-	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
+	for (int i = 0; i < /* MAX_FILES_PER_DEV */100; i++) {
 		if (!strcmp(rinode->file_name, target->d_name)) {
 			//FIXME: Flat filesystem
 			struct inode *inode = malloc(sizeof(struct inode));
