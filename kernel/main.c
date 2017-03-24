@@ -47,6 +47,41 @@ void kernel_heap_init(void *heap_start, size_t heap_size);
 struct task_info idle_task;
 struct task_info main_task;
 
+
+struct arm_semih_open_arg {
+	char   *filename;
+	int    mode;
+	size_t length;
+};
+
+struct arm_semih_write_arg {
+	int           fd;
+	unsigned char *data;
+	size_t        length;
+};
+
+int v7m_semih_open(int, struct arm_semih_open_arg *);
+int v7m_semih_write(int, struct arm_semih_write_arg *);
+
+int save_pbm(void)
+{
+	struct arm_semih_open_arg oarg = { "screen.pbm", 4, 10 };
+	printk("filename=%s %d\n", oarg.filename, oarg.length);
+	int fd = v7m_semih_open(0x01, &oarg);
+	printk("fd=%d\n", fd);
+
+	/* struct arm_semih_write_arg warg = {fd, "P4\n", 3}; */
+	/* printk("write %d\n", v7m_semih_write(0x5, &warg)); */
+
+	/* warg.data = "400 240\n"; */
+	/* warg.length = strlen(warg.data); */
+	/* printk("write %d\n", v7m_semih_write(0x5, &warg)); */
+
+	/* warg.data = framebuffer; */
+	/* warg.length = 400 * 240 / 8; */
+	/* printk("write %d\n", v7m_semih_write(0x5, &warg)); */
+}
+
 void __weak_symbol *main(__unused void *arg)
 {
 	minishell(NULL);
