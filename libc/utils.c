@@ -1,4 +1,5 @@
-#include <string.h> //XXX: for strcpy
+#include <stdlib.h>
+#include <string.h>
 
 char *strrev(char *s)
 {
@@ -29,26 +30,29 @@ void strpad(char *buf, char pad_val, int count)
 		buf[count] = pad_val;
 }
 
-//XXX: [Newlib's itoa] error: conflicting types for 'itoa'
-char *_itoa(unsigned int u, char *buf, const char *base)
+char *itoa_base(int value, char *buf, int base)
 {
-	size_t base_len = strlen(base);
-	unsigned int i = 0;
+	const char base36[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	int i = 0;
+	int isneg = 0;
+	unsigned int val = value;
 
-	if ((buf == NULL) || (base == NULL) || !base_len)
+	if (!buf || (base > 36))
 		return NULL;
 
-	if (!u) {
-		strcpy(buf, "0");
-		return buf;
+	if ((value < 0) && (base == 10)) {
+		val = abs(value);
+		isneg = 1;
 	}
 
-	for (; u > 0; i++) {
-		buf[i] = base[u % base_len];
-		u /= base_len;
-	}
+	do {
+		buf[i++] = base36[val % base];
+		val /= base;
+	} while (val);
+
+	if (isneg)
+		buf[i++] = '-';
 	buf[i] = '\0';
-	strrev(buf);
 
-	return buf;
+	return strrev(buf);
 }

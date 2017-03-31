@@ -11,7 +11,7 @@ static inline void infinite_loop(void)
 
 char *strrev(char *s);
 void strpad(char *buf, char pad_val, int count);
-char *_itoa(unsigned int u, char *buf, const char *base);
+char *itoa_base(int value, char *buf, int base);
 
 #endif /* !__LINKER__ */
 

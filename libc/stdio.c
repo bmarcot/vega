@@ -9,8 +9,6 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap)
 	char itoa_buf[16];  /* contains a 32bit integer in decimal, plus null char */
 	char pad_char;
 	int pad_count = 0;
-	const char *BASE_DEC = "0123456789";
-	const char *BASE_HEX = "0123456789abcdef";
 
 	for (unsigned int i = 0; (i < strlen(format)) && (str_pos < size); i++) {
 		if (format[i] == '%') {
@@ -46,11 +44,11 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap)
 				goto print_hex;
 			case 'd':
 			print_dec:
-				_itoa(va_arg(ap, unsigned int), itoa_buf, BASE_DEC);
+				itoa_base(va_arg(ap, unsigned int), itoa_buf, 10);
 				goto print_num;
 			case 'x':
 			print_hex:
-				_itoa(va_arg(ap, unsigned int), itoa_buf, BASE_HEX);
+				itoa_base(va_arg(ap, unsigned int), itoa_buf, 16);
 			print_num:;
 				int itoa_buf_len = strlen(itoa_buf);
 				if (pad_count) {
