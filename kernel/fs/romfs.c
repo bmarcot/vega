@@ -158,6 +158,18 @@ ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 	return retlen;
 }
 
+int romfs_mmap(struct file *file, off_t offset, void **addr)
+{
+	//FIXME: Use file->sb, file->dev
+	struct mtd_info *mtd = file->f_dentry->d_parent->d_inode->i_private;
+	size_t retlen;
+	size_t filesize = file->f_dentry->d_inode->i_size;
+
+	return mtd_point(mtd, (off_t)file->f_private + offset, filesize,
+			&retlen, addr);
+}
+
+
 int romfs_delete(struct dentry *dentry)
 {
 	free(dentry->d_inode);
@@ -173,6 +185,7 @@ const struct inode_operations romfs_iops = {
 const struct file_operations romfs_fops = {
 	.open = romfs_open,
 	.read = romfs_read,
+	.mmap = romfs_mmap,
 };
 
 const struct dentry_operations romfs_dops = {
