@@ -65,6 +65,7 @@ struct file_operations {
 	ssize_t (*read) (struct file *file, char *buf, size_t count, off_t offset);
 	ssize_t (*write) (struct file *file, const char *buf, size_t count, off_t *offset);
 	int     (*iterate) (struct file *file, struct dir_context *ctx);
+	int     (*mmap) (struct file *file, off_t offset, void **addr); /* struct vm_area_struct *area */
 	int     (*open) (struct inode *inode, struct file *file);
 };
 
@@ -131,12 +132,13 @@ static inline int dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 
 /* forward declarations */
 
-int vfs_iterate(struct file *file, struct dir_context *ctx);
+int           vfs_iterate(struct file *file, struct dir_context *ctx);
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target);
-int vfs_link(struct dentry *old_dentry, struct inode *dir,
-	struct dentry *dentry);
-int vfs_delete(struct dentry *dentry);
-void vfs_release(struct dentry *dentry);
+int           vfs_link(struct dentry *old_dentry, struct inode *dir,
+		struct dentry *dentry);
+int           vfs_delete(struct dentry *dentry);
+void          vfs_release(struct dentry *dentry);
+int           vfs_mmap(struct file *file, off_t offset, void **addr);
 
 /* syscall entries */
 

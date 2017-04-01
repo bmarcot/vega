@@ -53,3 +53,11 @@ void vfs_release(struct dentry *dentry)
 	if (dentry->d_op->release)
 		return dentry->d_op->release(dentry);
 }
+
+int vfs_mmap(struct file *file, off_t offset, void **addr)
+{
+	if (file->f_op->mmap)
+		return file->f_op->mmap(file, offset, addr);
+
+	return -1;
+}

@@ -17,7 +17,7 @@
 #define M_ISUNINIT(f)   (((f) & MAP_UNINITIALIZED) == MAP_UNINITIALIZED)
 
 void *sys_mmap(void *addr, size_t length, __unused int prot,
-	int flags, __unused int fd, __unused off_t offset)
+	int flags, int fd, off_t offset)
 {
 	int order;
 
@@ -28,16 +28,22 @@ void *sys_mmap(void *addr, size_t length, __unused int prot,
 	if (M_ISANON(flags)) {
 		order = size_to_page_order(length);
 		addr = alloc_pages(order);
+		if (addr == NULL) {
+			errno = ENOMEM;
+			return MAP_FAILED;
+		}
+		if (!M_ISUNINIT(flags))
+			memset(addr, 0, length);
+
 	} else {
-		//FIXME: Support file mapping --baruch
-		return MAP_FAILED;
+		struct file *file = fd_to_file(fd);
+		if (!file) {
+			errno = EBADF;
+			return MAP_FAILED;
+		}
+		if (vfs_mmap(file, offset, &addr))
+			return MAP_FAILED;
 	}
-	if (addr == NULL) {
-		errno = ENOMEM;
-		return MAP_FAILED;
-	}
-	if (M_ISANON(flags) & !M_ISUNINIT(flags))
-		memset(addr, 0, length);
 
 	return addr;
 }
