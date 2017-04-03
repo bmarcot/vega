@@ -33,6 +33,36 @@ static char *basename(const char *filename)
 	return p ? p + 1 : (char *)filename;
 }
 
+static off_t offsetof_device_inode(struct romfs_inode *rinode,
+				struct romfs_superblock *super)
+{
+	return (off_t)rinode - (off_t)super;
+}
+
+static off_t offsetof_first_device_inode(struct romfs_superblock *super)
+{
+	/* volume_name is a null-terminated string */
+	int len = align_next(strlen(super->volume_name) + 1, 16);
+
+	return offsetof(struct romfs_superblock, volume_name) + len;
+}
+
+static struct romfs_inode *get_romfs_inode(struct inode *inode)
+{
+	void *romfs_inode;
+	size_t retlen;
+	int err;
+	struct mtd_info *mtd;
+
+	mtd = inode->i_sb->s_private;
+	err = mtd_point(mtd, (off_t)inode->i_private,
+			sizeof(struct romfs_inode), &retlen, &romfs_inode);
+	if (err || (retlen != sizeof(struct romfs_inode)))
+		return NULL;
+
+	return romfs_inode;
+}
+
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
 int romfs_mount(const char *source, const char *target,
 		const char *filesystemtype,
@@ -52,7 +82,6 @@ int romfs_mount(const char *source, const char *target,
 	inode->i_op = &romfs_iops;
 	inode->i_mode = S_IFDIR;
 	inode->i_size = 0;
-	inode->i_private = s_inode->i_private; //FIXME: Use i_dev
 
 	// link mounted-over inode to parent directory
 	struct dentry dentry;
@@ -61,78 +90,72 @@ int romfs_mount(const char *source, const char *target,
 	strcpy(dentry.d_name, basename(target));
 	vfs_link(0, dev_inode(), &dentry);
 
+	/* Allocate a super_block struct that will be released on filesystem
+	 * unmount. */
+	struct super_block *super_block = malloc(sizeof(struct super_block));
+	if (super_block == NULL)
+		return -1;
+	/* super_block is found at the begining of memory area on MTD dev */
+	struct mtd_info *mtd = s_inode->i_private;
+	super_block->s_private = mtd;
+	super_block->s_iroot = inode; //FIXME: super_block must point to dentry instead of inode
+	inode->i_sb = super_block;
+	struct romfs_superblock *super = mtd->priv;
+	inode->i_private = (void *)offsetof_first_device_inode(super);
+
 	return 0;
-}
-
-static struct romfs_inode *first_filehdr(struct romfs_superblock *super)
-{
-	/* volume_name is a 0-terminated string */
-	int volname_len = align_next(strlen(super->volume_name) + 1, 16);
-
-	return (struct romfs_inode *)(super->volume_name + volname_len);
-}
-
-static void *offset_in_dev(struct romfs_superblock *super,
-			struct romfs_inode *rinode)
-{
-	/* file_name is a 0-terminated string */
-	int filename_len = align_next(strlen(rinode->file_name) + 1, 16);
-
-	return (void *)((char *)rinode->file_name - (char *)super
-			+ filename_len);
 }
 
 struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 {
 	static int ino = 0xbeef;
-	struct mtd_info *mtd = dir->i_private;
+	u32 next_filehdr;
+	struct mtd_info *mtd = dir->i_sb->s_private;
 	struct romfs_superblock *super = mtd->priv;
-	struct romfs_inode *rinode = first_filehdr(super);
+	struct romfs_inode *rinode = get_romfs_inode(dir);
+
+	/* enter and walk the directory */
+	next_filehdr = align(ntohl(rinode->spec_info), 16);
+	rinode = (struct romfs_inode *)((char *)super + next_filehdr);
 
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
 		if (!strcmp(rinode->file_name, target->d_name)) {
-			//FIXME: Flat filesystem
+			/* populate a new inode */
 			struct inode *inode = malloc(sizeof(struct inode));
 			if (inode == NULL)
 				return NULL;
+			if ((ntohl(rinode->next_filehdr) & 0x7) == 1)
+				inode->i_mode = S_IFDIR;
+			else
+				inode->i_mode = S_IFREG;
 			inode->i_ino = ino++;
-			inode->i_mode = S_IFREG;
 			inode->i_size = ntohl(rinode->size);
+			inode->i_op = &romfs_iops;
 			inode->i_fop = &romfs_fops;
-			inode->i_private = offset_in_dev(super, rinode);
+			/* We store the offset to on-device inode rather than
+			 * the logical address of the on-device inode, because
+			 * that does not work if fs is stored on a SPI flash
+			 * for instamce, and is not directly mapped onto logical
+			 *  address space. */
+			inode->i_private =
+				(void *)offsetof_device_inode(rinode, super);
+			inode->i_sb = dir->i_sb;
 
+			/* update the dentry */
 			target->d_inode = inode;
 			target->d_op = &romfs_dops;
 
 			return target;
 		}
 
-		u32 next_filehdr = align(ntohl(rinode->next_filehdr), 16);
+		/* inspect next file in current directory */
+		next_filehdr = align(ntohl(rinode->next_filehdr), 16);
 		if (!next_filehdr)
 			break;
 		rinode = (struct romfs_inode *)((char *)super + next_filehdr);
 	}
 
 	return NULL;
-}
-
-void dump_romfs_info(struct romfs_superblock *super)
-{
-	printk("Superblock:\n");
-	printk("    Volume name  %s\n", super->volume_name);
-	printk("    Full size    %d bytes\n", ntohl(super->full_size));
-
-	struct romfs_inode *rinode = first_filehdr(super);
-	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
-		printk("Inode:\n");
-		printk("    File name    %s\n", rinode->file_name);
-		printk("    File size    %d bytes\n", ntohl(rinode->size));
-
-		u32 next_filehdr = align(ntohl(rinode->next_filehdr), 16);
-		if (!next_filehdr)
-			break;
-		rinode = (struct romfs_inode *)((char *)super + next_filehdr);
-	}
 }
 
 int romfs_open(struct inode *inode, struct file *file)
@@ -146,14 +169,16 @@ ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 {
 	size_t retlen;
 	size_t filesize = file->f_dentry->d_inode->i_size;
-
-	//FIXME: Use file->sb, file->dev
-	struct mtd_info *mtd = file->f_dentry->d_parent->d_inode->i_private;
+	struct mtd_info *mtd = file->f_dentry->d_inode->i_sb->s_private;
+	struct romfs_inode *rinode =
+		get_romfs_inode(file->f_dentry->d_inode);
+	int len = sizeof(struct romfs_inode)
+		+ align_next(strlen(rinode->file_name) + 1, 16);
 
 	if (file->f_pos + count > filesize)
 		count = filesize - offset;
-	mtd_read(mtd, (off_t)file->f_private + offset, count, &retlen,
-		(unsigned char *)buf);
+	mtd_read(mtd, (off_t)file->f_dentry->d_inode->i_private + len + offset,
+		count, &retlen, (unsigned char *)buf);
 
 	return retlen;
 }
@@ -172,7 +197,11 @@ int romfs_mmap(struct file *file, off_t offset, void **addr)
 
 int romfs_delete(struct dentry *dentry)
 {
-	free(dentry->d_inode);
+	/* release in-memory inode */
+	/* the root inode is deleted on unmount(), operation is pointed
+	 * by i_sb->s_op->unmount() */
+	if (dentry->d_inode != dentry->d_inode->i_sb->s_iroot)
+		free(dentry->d_inode);
 	free(dentry);
 
 	return 0;

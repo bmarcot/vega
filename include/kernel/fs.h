@@ -20,8 +20,20 @@
 #define O_DIRECTORY 1
 
 /*
+ * super_block struct
+ */
+
+struct dentry;
+struct inode; //FIXME: delete me from here
+
+struct super_block {
+	void *s_private;       // for dev, pointing to MTD
+	struct inode *s_iroot; //FIXME: just use s_root and dentry
+};
+
+/*
  * inode struct
-*/
+ */
 
 struct inode_operations;
 struct file_operations;
@@ -35,11 +47,10 @@ struct inode {
 	off_t                         i_size;        /* file size in bytes */
 	const struct inode_operations *i_op;         /* inode ops table */
 	const struct file_operations  *i_fop;        /* default inode ops */
+	struct super_block            *i_sb;         /* associated superblock */
 	void                          *i_private;
 	char                          i_data[0];
 };
-
-struct dentry;
 
 struct inode_operations {
 	struct dentry * (*lookup) (struct inode *inode, struct dentry *dentry);
