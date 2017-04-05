@@ -26,6 +26,18 @@ const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;
 
+#define ROMFS_SUPER_BLOCK(sb) ({			\
+	struct mtd_info *__mtd = (sb)->s_private;	\
+	struct romfs_superblock *__rs = __mtd->priv;	\
+	__rs;						\
+})
+
+#define ROMFS_INODE(rs, offset) ({				  \
+	int __addr = (unsigned int)(rs) + (unsigned int)(offset); \
+	struct romfs_inode *__ri = (struct romfs_inode *)__addr;  \
+	__ri;							  \
+})
+
 static char *basename(const char *filename)
 {
 	char *p = strrchr(filename, '/');
@@ -45,22 +57,6 @@ static off_t offsetof_first_device_inode(struct romfs_superblock *super)
 	int len = align_next(strlen(super->volume_name) + 1, 16);
 
 	return offsetof(struct romfs_superblock, volume_name) + len;
-}
-
-static struct romfs_inode *get_romfs_inode(struct inode *inode)
-{
-	void *romfs_inode;
-	size_t retlen;
-	int err;
-	struct mtd_info *mtd;
-
-	mtd = inode->i_sb->s_private;
-	err = mtd_point(mtd, (off_t)inode->i_private,
-			sizeof(struct romfs_inode), &retlen, &romfs_inode);
-	if (err || (retlen != sizeof(struct romfs_inode)))
-		return NULL;
-
-	return romfs_inode;
 }
 
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
@@ -106,42 +102,50 @@ int romfs_mount(const char *source, const char *target,
 	return 0;
 }
 
+static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
+{
+	struct inode *inode;
+	static int ino = 0xbeef;
+
+	inode = malloc(sizeof(struct inode));
+	if (inode == NULL)
+		return NULL;
+
+	if ((ntohl(ri->next_filehdr) & 0x7) == 1)
+		inode->i_mode = S_IFDIR;
+	else
+		inode->i_mode = S_IFREG;
+	inode->i_ino = ino++;
+	inode->i_size = ntohl(ri->size);
+	inode->i_op = &romfs_iops;
+	inode->i_fop = &romfs_fops;
+	inode->i_sb = sb;
+
+	/* We store the offset to on-device inode rather than the logical
+	 * address of the on-device inode, because that does not work if
+	 * fs is stored on a SPI flash for instance, and is not directly
+	 * mapped onto logical address space. */
+	inode->i_private =
+		(void *)offsetof_device_inode(ri, ROMFS_SUPER_BLOCK(sb));
+
+	return inode;
+}
+
 struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 {
-	static int ino = 0xbeef;
 	u32 next_filehdr;
-	struct mtd_info *mtd = dir->i_sb->s_private;
-	struct romfs_superblock *super = mtd->priv;
-	struct romfs_inode *rinode = get_romfs_inode(dir);
+	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(dir->i_sb);
+	struct romfs_inode *ri = ROMFS_INODE(rs, dir->i_private);
 
 	/* enter and walk the directory */
-	next_filehdr = align(ntohl(rinode->spec_info), 16);
-	rinode = (struct romfs_inode *)((char *)super + next_filehdr);
+	next_filehdr = align(ntohl(ri->spec_info), 16);
+	ri = ROMFS_INODE(rs, next_filehdr);
 
 	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
-		if (!strcmp(rinode->file_name, target->d_name)) {
-			/* populate a new inode */
-			struct inode *inode = malloc(sizeof(struct inode));
+		if (!strcmp(ri->file_name, target->d_name)) {
+			struct inode *inode = alloc_inode(ri, dir->i_sb);
 			if (inode == NULL)
 				return NULL;
-			if ((ntohl(rinode->next_filehdr) & 0x7) == 1)
-				inode->i_mode = S_IFDIR;
-			else
-				inode->i_mode = S_IFREG;
-			inode->i_ino = ino++;
-			inode->i_size = ntohl(rinode->size);
-			inode->i_op = &romfs_iops;
-			inode->i_fop = &romfs_fops;
-			/* We store the offset to on-device inode rather than
-			 * the logical address of the on-device inode, because
-			 * that does not work if fs is stored on a SPI flash
-			 * for instamce, and is not directly mapped onto logical
-			 *  address space. */
-			inode->i_private =
-				(void *)offsetof_device_inode(rinode, super);
-			inode->i_sb = dir->i_sb;
-
-			/* update the dentry */
 			target->d_inode = inode;
 			target->d_op = &romfs_dops;
 
@@ -149,10 +153,10 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 		}
 
 		/* inspect next file in current directory */
-		next_filehdr = align(ntohl(rinode->next_filehdr), 16);
+		next_filehdr = align(ntohl(ri->next_filehdr), 16);
 		if (!next_filehdr)
 			break;
-		rinode = (struct romfs_inode *)((char *)super + next_filehdr);
+		ri = ROMFS_INODE(rs, next_filehdr);
 	}
 
 	return NULL;
@@ -169,16 +173,18 @@ ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 {
 	size_t retlen;
 	size_t filesize = file->f_dentry->d_inode->i_size;
-	struct mtd_info *mtd = file->f_dentry->d_inode->i_sb->s_private;
-	struct romfs_inode *rinode =
-		get_romfs_inode(file->f_dentry->d_inode);
+	struct inode *inode = file->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	struct mtd_info *mtd = sb->s_private;
+	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(sb);
+	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
-		+ align_next(strlen(rinode->file_name) + 1, 16);
+		+ align_next(strlen(ri->file_name) + 1, 16);
 
 	if (file->f_pos + count > filesize)
 		count = filesize - offset;
-	mtd_read(mtd, (off_t)file->f_dentry->d_inode->i_private + len + offset,
-		count, &retlen, (unsigned char *)buf);
+	mtd_read(mtd, (off_t)inode->i_private + len + offset, count, &retlen,
+		(unsigned char *)buf);
 
 	return retlen;
 }
@@ -187,15 +193,17 @@ int romfs_mmap(struct file *file, off_t offset, void **addr)
 {
 	size_t retlen;
 	size_t filesize = file->f_dentry->d_inode->i_size;
-	struct mtd_info *mtd = file->f_dentry->d_inode->i_sb->s_private;
-	struct romfs_inode *rinode =
-		get_romfs_inode(file->f_dentry->d_inode);
+	struct inode *inode = file->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	struct mtd_info *mtd = sb->s_private;
+	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(sb);
+	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
-		+ align_next(strlen(rinode->file_name) + 1, 16);
+		+ align_next(strlen(ri->file_name) + 1, 16);
 
 	return mtd_point(mtd,
-			(off_t)file->f_dentry->d_inode->i_private + len + offset,
-			filesize, &retlen, addr);
+			(off_t)inode->i_private + len + offset,	filesize,
+			&retlen, addr);
 }
 
 int romfs_delete(struct dentry *dentry)
