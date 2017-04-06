@@ -37,5 +37,6 @@
 #define SYS_READDIR_R 25
 #define SYS_GETPID 26
 #define SYS_MMAP 27
+#define SYS_MUNMAP 28
 
 #endif /* !KERNEL_SYSCALLS_H */

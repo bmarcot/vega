@@ -39,6 +39,7 @@ xs = [
 
     # <sys/mman.h>
     'mmap',
+    'munmap',
 ]
 
 import datetime
