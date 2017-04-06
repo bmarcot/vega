@@ -11,3 +11,8 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 				(void *)prot, (void *)flags,
 				(void *)fd, (void *)offset, SYS_MMAP);
 }
+
+int munmap(__unused void *addr, __unused size_t length)
+{
+	return do_syscall2((void *)addr, (void *)length, SYS_MUNMAP);
+}
