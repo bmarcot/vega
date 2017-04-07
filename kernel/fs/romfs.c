@@ -26,18 +26,6 @@ const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;
 
-#define ROMFS_SUPER_BLOCK(sb) ({			\
-	struct mtd_info *__mtd = (sb)->s_private;	\
-	struct romfs_superblock *__rs = __mtd->priv;	\
-	__rs;						\
-})
-
-#define ROMFS_INODE(rs, offset) ({				  \
-	int __addr = (unsigned int)(rs) + (unsigned int)(offset); \
-	struct romfs_inode *__ri = (struct romfs_inode *)__addr;  \
-	__ri;							  \
-})
-
 static char *basename(const char *filename)
 {
 	char *p = strrchr(filename, '/');
@@ -133,19 +121,24 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 
 struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 {
-	u32 next_filehdr;
-	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(dir->i_sb);
-	struct romfs_inode *ri = ROMFS_INODE(rs, dir->i_private);
+	__u32 next_filehdr = 0;
+	struct romfs_superblock *rs;
+	struct romfs_inode *ri;
+
+	/* get current on-device inode */
+	rs = ROMFS_SUPER_BLOCK(dir->i_sb);
+	ri = ROMFS_INODE(rs, dir->i_private);
 
 	/* enter and walk the directory */
 	next_filehdr = align(ntohl(ri->spec_info), 16);
 	ri = ROMFS_INODE(rs, next_filehdr);
 
-	for (int i = 0; i < /* MAX_FILES_PER_DEV */10; i++) {
+	for (int i = 0; next_filehdr < rs->full_size; i++) {
 		if (!strcmp(ri->file_name, target->d_name)) {
 			struct inode *inode = alloc_inode(ri, dir->i_sb);
 			if (inode == NULL)
 				return NULL;
+
 			target->d_inode = inode;
 			target->d_op = &romfs_dops;
 
