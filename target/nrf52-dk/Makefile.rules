@@ -5,7 +5,7 @@
 include target/nrf52-dk/Makefile.config
 
 run:  $(NAME).hex
-	$(NRFJPROG) --family NRF52 --program $^ --chiperase -s $(DEBUGGER_SERIAL)
+	$(NRFJPROG) --family NRF52 --program $^ --chiperase -s $(DEBUGGER_SERIAL) --reset
 
 reset:
 	$(NRFJPROG) --family NRF52 --reset -s $(DEBUGGER_SERIAL)
