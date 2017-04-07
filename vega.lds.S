@@ -1,7 +1,7 @@
 /*
  * vega.lds.S
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 OUTPUT_FORMAT("elf32-littlearm")
@@ -18,19 +18,17 @@ MEMORY
 SECTIONS
 {
     .vector 0 : {
-	PROVIDE(__vector_start__ = .);
-	KEEP(*(.vector))
+        PROVIDE(__vector_start__ = .);
+        KEEP(*(.vector))
     } > rom
 
     .text BLOCK(8) : {
-	PROVIDE(__text_start__ = .);
-        *(.text)
-	*(.text.*)
-	PROVIDE(__text_end__ = .);
-	PROVIDE(__rodata_start__ = .);
-	*(.rodata)
-	*(.rodata.*)
-	PROVIDE(__rodata_end__ = .);
+        PROVIDE(__text_start__ = .);
+        *(.text*)
+        PROVIDE(__text_end__ = .);
+        PROVIDE(__rodata_start__ = .);
+        *(.rodata*)
+        PROVIDE(__rodata_end__ = .);
     } > rom
 
     /* Initialized data (.data* sections) are initially stored in Flash,
@@ -38,20 +36,18 @@ SECTIONS
        read-only.    */
 
     .data : AT (__rodata_end__) {
-    	PROVIDE(__data_start__ = .);
-        *(.data)
-        *(.data.*)
-	PROVIDE(__data_end__ = .);
+        PROVIDE(__data_start__ = .);
+        *(.data*)
+        PROVIDE(__data_end__ = .);
     } > ram
 
     PROVIDE(__data_size__ = SIZEOF(.data));
 
     .bss : {
-    	PROVIDE(__bss_start__ = .);
-        *(.bss)
-        *(.bss.*)
+        PROVIDE(__bss_start__ = .);
+        *(.bss*)
         *(COMMON)
-	PROVIDE(__bss_end__ = .);
+        PROVIDE(__bss_end__ = .);
     } > ram
 
     PROVIDE(__bss_size__ = SIZEOF(.bss));
@@ -66,31 +62,31 @@ SECTIONS
     PROVIDE(__heap_size__ = SIZEOF(.heap));
 
     .pgmem RAMORG + RAMSZ - 32k : {
-	PROVIDE(__pgmem_start__ = .);
-	. += 26k;
+        PROVIDE(__pgmem_start__ = .);
+        . += 26k;
 
-	/* Reserve the last page for the early stack. Must be of the biggest size
-	 * such that there will be no coalescing when freeing the page, for lower
-	 * booting time.    */
-	PROVIDE(__early_stack_end__ = .);
-	. += 2k;
-	PROVIDE(__early_stack_start__ = .);
+        /* Reserve the last page for the early stack. Must be of the biggest size
+         * such that there will be no coalescing when freeing the page, for lower
+         * booting time.    */
+        PROVIDE(__early_stack_end__ = .);
+        . += 2k;
+        PROVIDE(__early_stack_start__ = .);
 
-	PROVIDE(__pgmem_end__ = .);
+        PROVIDE(__pgmem_end__ = .);
     } > ram
 
     PROVIDE(__pgmem_size__ = SIZEOF(.pgmem));
 
-	.mtdram : {
-		PROVIDE(__mtdram_start__ = .);
-		. += 4k;
-	} > ram
+    .mtdram : {
+        PROVIDE(__mtdram_start__ = .);
+        . += 4k;
+    } > ram
 
-	PROVIDE(__mtdram_size__ = SIZEOF(.mtdram));
+    PROVIDE(__mtdram_size__ = SIZEOF(.mtdram));
 
     /DISCARD/ :
     {
-	*(.ARM.exidx)
-	*(.ARM.attributes)
+        *(.ARM.exidx)
+        *(.ARM.attributes)
     }
 }
