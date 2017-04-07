@@ -42,6 +42,13 @@ typedef char s8;
 typedef unsigned short umode_t;
 #endif
 
+typedef u32 __u32;
+typedef s32 __s32;
+typedef u16 __u16;
+typedef s16 __s16;
+typedef  u8 __u8;
+typedef  s8 __s8;
+
 /* import struct list_head */
 #include "linux/types.h"
 
