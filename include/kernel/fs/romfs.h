@@ -38,15 +38,15 @@ struct romfs_inode {
 };
 
 #define ROMFS_SUPER_BLOCK(sb) ({			\
-	struct mtd_info *__mtd = (sb)->s_private;	\
-	struct romfs_superblock *__rs = __mtd->priv;	\
-	__rs;						\
+	struct mtd_info *mtd = (sb)->s_private;		\
+	struct romfs_superblock *rs = mtd->priv;	\
+	rs;						\
 })
 
 #define ROMFS_INODE(rs, offset) ({			\
-	__u32 __addr = (__u32)(rs) + (__u32)(offset);	\
-	struct romfs_inode *__ri = (struct romfs_inode *)__addr; \
-	__ri;						\
+	__u32 addr = (__u32)(rs) + (__u32)(offset);	\
+	struct romfs_inode *ri = (struct romfs_inode *)addr; \
+	ri;						\
 })
 
 int romfs_mount(const char *source, const char *target,
