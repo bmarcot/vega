@@ -99,10 +99,28 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 	if (inode == NULL)
 		return NULL;
 
-	if ((ntohl(ri->next_filehdr) & 0x7) == 1)
+	switch (ntohl(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
+	case ROMFS_FILETYPE_DIR:
 		inode->i_mode = S_IFDIR;
-	else
+		break;
+	case ROMFS_FILETYPE_REG:
 		inode->i_mode = S_IFREG;
+		break;
+	case ROMFS_FILETYPE_LNK:
+		inode->i_mode = S_IFLNK;
+		break;
+	case ROMFS_FILETYPE_BLK:
+		inode->i_mode = S_IFBLK;
+		break;
+	case ROMFS_FILETYPE_CHR:
+		inode->i_mode = S_IFCHR;
+		break;
+	case ROMFS_FILETYPE_FIFO:
+		inode->i_mode = S_IFIFO;
+		break;
+	default:
+		inode->i_mode = 0;
+	}
 	inode->i_ino = ino++;
 	inode->i_size = ntohl(ri->size);
 	inode->i_op = &romfs_iops;

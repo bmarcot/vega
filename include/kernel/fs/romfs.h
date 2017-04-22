@@ -11,6 +11,17 @@
 
 #include <drivers/mtd/mtd.h>
 
+#define ROMFS_FILETYPE_MASK   0x7
+
+#define ROMFS_FILETYPE_HARD   0
+#define ROMFS_FILETYPE_DIR    1
+#define ROMFS_FILETYPE_REG    2
+#define ROMFS_FILETYPE_LNK    3
+#define ROMFS_FILETYPE_BLK    4
+#define ROMFS_FILETYPE_CHR    5
+#define ROMFS_FILETYPE_SOCKET 6
+#define ROMFS_FILETYPE_FIFO   7
+
 struct romfs_superblock {
 	__u8  magic_number[8];
 	__u32 full_size;
