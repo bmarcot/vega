@@ -23,13 +23,12 @@ int vfs_iterate(struct file *file, struct dir_context *ctx)
 
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target)
 {
-	struct dentry *dentry;
-
+	if (dir->i_op->lookup == NULL)
+		return NULL;
 	if (!S_ISDIR(dir->i_mode))
 		return NULL;
-	dentry = dir->i_op->lookup(dir, target);
 
-	return dentry;
+	return dir->i_op->lookup(dir, target);
 }
 
 int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry)
@@ -42,10 +41,10 @@ int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry
 
 int vfs_delete(struct dentry *dentry)
 {
-	if (dentry->d_op->delete)
-		return dentry->d_op->delete(dentry);
+	if (dentry->d_op->delete == NULL)
+		return -1;
 
-	return -1;
+	return dentry->d_op->delete(dentry);
 }
 
 void vfs_release(struct dentry *dentry)
@@ -56,8 +55,8 @@ void vfs_release(struct dentry *dentry)
 
 int vfs_mmap(struct file *file, off_t offset, void **addr)
 {
-	if (file->f_op->mmap)
-		return file->f_op->mmap(file, offset, addr);
+	if (file->f_op->mmap == NULL)
+		return -1;
 
-	return -1;
+	return file->f_op->mmap(file, offset, addr);
 }
