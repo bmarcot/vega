@@ -129,7 +129,7 @@ struct thread_info *start_kernel(void)
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
 	}
-	printk("Created idle_thread at <%p>\n", thread_idle);
+	pr_info("Created idle_thread at <%p>", thread_idle);
 
 	/* The main_thread is the user's entry-point to the system.  It is not
 	 * added to the runqueue because it has been implicitly "elected" when
@@ -142,12 +142,12 @@ struct thread_info *start_kernel(void)
 		printk("[!] Could not create user main thread.\n");
 		return NULL;
 	}
-	printk("Created main_thread at <%p> with priority=%d\n", thread_main,
+	pr_info("Created main_thread at <%p> with priority=%d", thread_main,
 		thread_main->ti_priority);
 
 	/* Reclaim the early-stack physical memory.  In the current context, no
 	 * page allocation after this point are allowed.    */
-	printk("Reclaim early stack's physical memory (%d Bytes, order=%d).\n",
+	pr_info("Reclaim early stack's physical memory (%d Bytes, order=%d).",
 		&__early_stack_start__ - &__early_stack_end__,
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
