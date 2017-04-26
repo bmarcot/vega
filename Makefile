@@ -50,6 +50,7 @@ CSRC += $(wildcard kernel/*.c)		\
 	libc/vega/stubs.c		\
 	libc/vega/mman.c		\
 	$(LIBVEGA_CSRC)			\
+	lib/rbtree.c			\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
