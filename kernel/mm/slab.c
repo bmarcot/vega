@@ -18,7 +18,7 @@
 #define OBJECTS_PER_SLAB(objsize) \
 	((CACHE_PAGE_SIZE - sizeof(struct slab)) / (objsize))
 
-static LIST_HEAD(caches);
+/* static */ LIST_HEAD(caches);
 
 static struct kmem_cache cache_caches = {
 	.objsize       = sizeof(struct kmem_cache),
