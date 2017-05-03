@@ -11,34 +11,57 @@
 
 #include <kernel/kernel.h>
 
-#include "sh.h"
+#include <system/cat.h>
+#include <system/echo.h>
+#include <system/kmastat.h>
+#include <system/ls.h>
+#include <system/sh.h>
+
 #include "platform.h"
 
-int ls(int argc, char *argv[]);
-int echo(int argc, char *argv[]);
-int cat(int argc, char *argv[]);
-int kmastat(int argc, char *argv[]);
+/* forward declarations of buitins */
+static int builtin_reboot(void);
+static int builtin_halt(void);
 
 //static const char ESC_SEQ_CURSOR_BACKWARD[] = "\033[D";
 static const char ESC_SEQ_ERASE_LINE[]      = "\033[K";
 
 static const char TERM_PROMPT[]        = "$ ";
-static const char TERM_CMD_NOT_FOUND[] = "command not found: ";
 static const char TERM_CRLF[]          = "\r\n";
 
-static const char BUILTIN_HALT[]   = "halt";
-static const char BUILTIN_REBOOT[] = "reboot";
-static const char BUILTIN_EXIT[]   = "exit";
-static const char BUILTIN_LS[]     = "ls";
-static const char BUILTIN_ECHO[]   = "echo";
-static const char BUILTIN_CAT[]    = "cat";
-static const char BUILTIN_KMASTAT[] = "kmastat";
+struct cmd_info cmd_info[] = {
+	DECL_CMD(cat,     cat),
+	DECL_CMD(echo,    echo),
+	DECL_CMD(exit,    builtin_halt),
+	DECL_CMD(halt,    builtin_halt),
+	DECL_CMD(kmastat, kmastat),
+	DECL_CMD(ls,      ls),
+	DECL_CMD(quit,    builtin_halt),
+	DECL_CMD(reboot,  builtin_reboot),
+};
+
+static int builtin_reboot(void)
+{
+	printk("Requesting system reboot\n");
+	NVIC_SystemReset();
+
+	return -1; /* should not get there */
+}
+
+static int builtin_halt(void)
+{
+	__platform_halt();
+
+	return -1; /* should not get there */
+}
 
 static int parse_command_line(char *buf, char *argv[])
 {
 	int buflen = strlen(buf);
-
 	int argc = 1;
+
+	if (!buflen)
+		return 0;
 	argv[0] = (char *)buf;
 	for (int i = 0; i < buflen; i++) {
 		if (buf[i] == ' ') {
@@ -57,30 +80,18 @@ static void exec_command(char *buf, int fd)
 	int argc;
 	char *argv[ARG_COUNT_MAX];
 
-	if (!strncmp(BUILTIN_LS, buf, sizeof(BUILTIN_LS) - 1)) {
-		argc = parse_command_line(buf, argv);
-		ls(argc, argv);
-	} else if (!strncmp(BUILTIN_ECHO, buf, sizeof(BUILTIN_ECHO) - 1)) {
-		argc = parse_command_line(buf, argv);
-		echo(argc, argv);
-	} else if (!strncmp(BUILTIN_CAT, buf, sizeof(BUILTIN_CAT) - 1)) {
-		argc = parse_command_line(buf, argv);
-		cat(argc, argv);
-	} else if (!strncmp(BUILTIN_KMASTAT, buf, sizeof(BUILTIN_KMASTAT) - 1)) {
-		argc = parse_command_line(buf, argv);
-		kmastat(argc, argv);
-	} else if (!strncmp(BUILTIN_REBOOT, buf, sizeof(BUILTIN_REBOOT))) {
-		printk("Requesting system reboot\n");
-		NVIC_SystemReset();
-	} else if (!strncmp(BUILTIN_HALT, buf, sizeof(BUILTIN_HALT))) {
-		__platform_halt();
-	} else if (!strncmp(BUILTIN_EXIT, buf, sizeof(BUILTIN_EXIT))) {
-		__platform_halt();
-	} else {
-		write(fd, TERM_CMD_NOT_FOUND, sizeof(TERM_CMD_NOT_FOUND) - 1);
-		write(fd, buf, strlen(buf));
-		write(fd, TERM_CRLF, sizeof(TERM_CRLF) - 1);
+	argc = parse_command_line(buf, argv);
+	for (unsigned i = 0; i < ARRAY_SIZE(cmd_info); i++) {
+		if (!strncmp(cmd_info[i].cmd_name, argv[0], cmd_info[i].cmd_len)) {
+			cmd_info[i].cmd_fun(argc, argv);
+			return;
+		}
 	}
+
+	/* command not found */
+	write(fd, "command not found: ", STATIC_STRLEN("command not found: "));
+	write(fd, buf, strlen(buf));
+	write(fd, TERM_CRLF, sizeof(TERM_CRLF) - 1);
 }
 
 static void cursor_backward(int n, int fd)
@@ -170,8 +181,10 @@ int minishell(void *options)
 	(void)options;
 
 	int fd = open("/dev/ttyS0", 0);
-	if (fd < 0)
-		printk("cannot open /dev/ttyS0\n");
+	if (fd < 0) {
+		pr_err("Cannot open /dev/ttyS0");
+		return -1;
+	}
 
 	write(fd, TERM_PROMPT, sizeof(TERM_PROMPT) - 1);
 	for (;;) {
