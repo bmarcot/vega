@@ -10,7 +10,7 @@
 #include <kernel/fs.h>
 #include <kernel/types.h>
 
-#define MINORBITS      20
+#define MINORBITS      10
 #define MINORMASK      ((1U << MINORBITS) - 1)
 
 #define MAJOR(dev)     ((unsigned int) ((dev) >> MINORBITS))
