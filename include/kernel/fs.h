@@ -174,6 +174,8 @@ struct dentry *root_dentry(void);
 struct file *fd_to_file(int fd);
 struct inode *init_tmpfs_inode(struct inode *inode);
 struct inode *inode_from_pathname(const char *pathname);
+struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry,
+			int mode);
 
 void tmpfs_init(void);
 void proc_init(void);

@@ -1,5 +1,5 @@
 /*
- * kernel/fs/dev.c
+ * kernel/fs/tmpfs.c
  *
  * Copyright (c) 2016-2017 Benoit Marcot
  */
@@ -51,6 +51,49 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 	struct list_head *dirlist = (struct list_head *)dir->i_private;
 	list_add_tail(&new->list, dirlist);
 	dir->i_size++;
+
+	return 0;
+}
+
+const struct inode_operations tmpfs_iops;
+
+#define TMPFS_DIRLIST(dir) \
+	((struct list_head *)(dir)->i_private)
+
+struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
+{
+	struct inode *inode;
+	struct dirlist *dirent;
+	static ino_t ino = 300;
+
+	inode = malloc(sizeof(struct inode)); //FIXME: alloc_inode(), or get from cache
+	if (inode == NULL)
+		return NULL;
+	inode->i_ino = ino++;
+	inode->i_size = 0;
+	inode->i_op = &tmpfs_iops;
+	inode->i_mode |= mode;
+
+	dirent = malloc(sizeof(struct dirlist));
+	if (dirent == NULL) {
+		free(inode); //FIXME: delete(inode);
+		return NULL;
+	}
+	dirent->inode = inode;
+	strncpy(dirent->name, dentry->d_name, NAME_MAX);
+	list_add_tail(&dirent->list, TMPFS_DIRLIST(dir));
+	dir->i_size++;
+
+	return inode;
+}
+
+int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
+{
+	struct inode *inode;
+
+	inode = __tmpfs_create(dir, dentry, mode);
+	if (inode == NULL)
+		return -1;
 
 	return 0;
 }
