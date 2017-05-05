@@ -49,6 +49,9 @@ typedef s16 __s16;
 typedef  u8 __u8;
 typedef  s8 __s8;
 
+typedef __u32          kdev_t;
+typedef unsigned short fmode_t;
+
 /* import struct list_head */
 #include "linux/types.h"
 
