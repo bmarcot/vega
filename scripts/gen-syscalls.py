@@ -24,7 +24,7 @@ xs = [
 
     # <signal.h>
     'sigaction',
-    'raise',
+    'kill',
     'sigqueue',
 
     # <fcntl.h>, <unistd.h>, <sys/mount.h>...
@@ -36,6 +36,7 @@ xs = [
     'stat',
     'mount',
     'readdir_r',
+    'getpid',
 
     # <sys/mman.h>
     'mmap',
@@ -51,17 +52,10 @@ print('//XXX: Created on ' +
 print('')
 
 for x in list(enumerate(xs)):
-    name = 'sys_' + x[1]
-    print('[{}] = {},'.format(name.upper(), name))
+    print('__SYSCALL_ARM({}, {})'.format(x[0], x[1]))
 
 print('')
 
 for x in list(enumerate(xs)):
     name = 'sys_' + x[1]
     print('#define {} {}'.format(name.upper(), x[0]))
-
-print('')
-
-for x in list(enumerate(xs)):
-    name = 'sys_' + x[1]
-    print('int {}();'.format(name))
