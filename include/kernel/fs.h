@@ -44,6 +44,7 @@ struct inode {
 	// kernel_ino_t
 	unsigned long                 i_ino;         /* inode number */
 	atomic_t                      i_count;       /* reference counter */
+	kdev_t                        i_rdev;        /* real device node */
 	off_t                         i_size;        /* file size in bytes */
 	const struct inode_operations *i_op;         /* inode ops table */
 	const struct file_operations  *i_fop;        /* default inode ops */
@@ -65,6 +66,7 @@ struct inode_operations {
 struct file {
 	struct dentry                *f_dentry;    /* associated dentry object */
 	const struct file_operations *f_op;        /* file operations table */
+	fmode_t                      f_mode;       /* file access mode */
 	off_t                        f_pos;        /* file offset (file pointer) */
 	void                         *f_private;
 };
