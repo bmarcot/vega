@@ -16,7 +16,7 @@
 #define align_next_mask(x, mask)  (((x) + (mask)) & ~(mask))
 
 #define ARRAY_SIZE(arr) \
-	((size_t)(sizeof(arr) / sizeof(*(arr))))
+	((int)(sizeof(arr) / sizeof(*(arr))))
 
 #define ARRAY_INDEX(elt, arr)				\
 	({ unsigned int _elt = (unsigned int)(elt);	\
