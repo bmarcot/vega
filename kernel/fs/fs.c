@@ -195,6 +195,10 @@ int sys_stat(const char *pathname, struct stat *buf)
 	buf->st_ino = inode->i_ino;
 	buf->st_mode = inode->i_mode;
 	buf->st_size = inode->i_size;
+	if (S_ISCHR(inode->i_mode))
+		buf->st_rdev = inode->i_rdev;
+	else
+		buf->st_rdev = 0;
 
 	return 0;
 }
