@@ -32,7 +32,7 @@ int ls(int argc, char *argv[])
 		readdir_r(dir, &dirent, &result);
 		if (result != NULL) {
 			if (!strcmp(dirent.d_name, ".") || !strcmp(dirent.d_name, "..")) {
-				printk("  % 6d         %s\n", st.st_ino, dirent.d_name);
+				printk("  % 6d         %s\n", dirent.d_ino, dirent.d_name);
 				continue;
 			}
 
