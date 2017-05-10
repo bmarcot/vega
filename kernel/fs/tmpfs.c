@@ -13,11 +13,34 @@
 
 #include "linux/list.h"
 
-struct dirlist {
+struct __dirent {
 	struct inode     *inode;
 	char             name[NAME_MAX];
 	struct list_head list;
 };
+
+#define TMPFS_DIRLIST(dir) \
+	((struct list_head *)(dir)->i_private)
+
+static struct __dirent *alloc_dirent(void)
+{
+	struct __dirent *dirent;
+
+	dirent = malloc(sizeof(struct __dirent));
+
+	return dirent;
+}
+
+static int init_dirent(struct __dirent *dirent, struct inode *dir,
+		struct dentry *dentry)
+{
+	dirent->inode = dentry->d_inode;
+	strncpy(dirent->name, dentry->d_name, NAME_MAX);
+	list_add_tail(&dirent->list, TMPFS_DIRLIST(dir));
+	dir->i_size++;
+
+	return 0;
+}
 
 int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
@@ -42,28 +65,20 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dent
 {
 	(void)old_dentry;
 
-	struct dirlist *new = malloc(sizeof(struct dirlist));
+	struct __dirent *new = alloc_dirent();
 	if (new == NULL)
 		return -1;
-	new->inode = dentry->d_inode;
-	strncpy(new->name, dentry->d_name, NAME_MAX);
-
-	struct list_head *dirlist = (struct list_head *)dir->i_private;
-	list_add_tail(&new->list, dirlist);
-	dir->i_size++;
+	init_dirent(new, dir, dentry);
 
 	return 0;
 }
 
 const struct inode_operations tmpfs_iops;
 
-#define TMPFS_DIRLIST(dir) \
-	((struct list_head *)(dir)->i_private)
-
 struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
-	struct dirlist *dirent;
+	struct __dirent *dirent;
 	static ino_t ino = 300;
 
 	inode = malloc(sizeof(struct inode)); //FIXME: alloc_inode(), or get from cache
@@ -74,15 +89,13 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	inode->i_op = &tmpfs_iops;
 	inode->i_mode |= mode;
 
-	dirent = malloc(sizeof(struct dirlist));
+	dirent = alloc_dirent();
 	if (dirent == NULL) {
 		free(inode); //FIXME: delete(inode);
 		return NULL;
 	}
-	dirent->inode = inode;
-	strncpy(dirent->name, dentry->d_name, NAME_MAX);
-	list_add_tail(&dirent->list, TMPFS_DIRLIST(dir));
-	dir->i_size++;
+	dentry->d_inode = inode;
+	init_dirent(dirent, dir, dentry);
 
 	return inode;
 }
@@ -113,7 +126,7 @@ int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 		res = dir_emit_dotdot(file, ctx);
 		break;
 	default:;
-		struct dirlist *dirlist;
+		struct __dirent *dirlist;
 		struct list_head *head = (struct list_head *)inode->i_private;
 		int i = 2;
 		list_for_each_entry(dirlist, head, list) {
@@ -134,7 +147,7 @@ const struct dentry_operations tmpfs_dops;
 struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 {
 	struct list_head *head = (struct list_head *)dir->i_private;
-	struct dirlist *dirlist;
+	struct __dirent *dirlist;
 
 	list_for_each_entry(dirlist, head, list) {
 		if (!strcmp(target->d_name, dirlist->name)) {
@@ -232,7 +245,7 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 
 void tmpfs_init(void)
 {
-	static struct dirlist entries[] = {
+	static struct __dirent entries[] = {
 		{ .inode = &tmpfs_inodes[1], .name = "dev",  },
 		{ .inode = &tmpfs_inodes[2], .name = "proc", },
 	};
