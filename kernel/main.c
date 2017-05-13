@@ -37,6 +37,7 @@ extern char __heap_size__;
 
 void __do_idle(void);
 void *do_idle(void *);
+int mtdchar_init(void);
 void mtdram_init(void);
 void __printk_init(void);
 int minishell(void *options);
@@ -155,6 +156,7 @@ struct thread_info *start_kernel(void)
 	tmpfs_init();
 	proc_init();
 	memdev_init();
+	mtdchar_init();
 	mtdram_init(); /* create a test mtdram device */
 
 	/* do the platform-specific inits */
