@@ -39,7 +39,7 @@ static int mtdram_unpoint(struct mtd_info *mtd, off_t from, size_t len)
 	return 0;
 }
 
-int mtdram_write(struct mtd_info *mtd, off_t to, size_t len,
+static int mtdram_write(struct mtd_info *mtd, off_t to, size_t len,
 			size_t *retlen, const void *buf)
 {
 	memcpy((char *)mtd->priv + to, buf, len);
@@ -48,7 +48,7 @@ int mtdram_write(struct mtd_info *mtd, off_t to, size_t len,
 	return 0;
 }
 
-int mtdram_read(struct mtd_info *mtd, off_t from, size_t len,
+static int mtdram_read(struct mtd_info *mtd, off_t from, size_t len,
 		size_t *retlen, void *buf)
 {
 	memcpy(buf, mtd->priv + from, len);
