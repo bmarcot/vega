@@ -10,6 +10,7 @@
 #include <kernel/kernel.h>
 
 #include <drivers/mtd/mtd.h>
+#include <drivers/mtd/mtdram.h>
 
 #define SIZE_1KB 1024
 
@@ -57,7 +58,7 @@ int mtdram_read(struct mtd_info *mtd, off_t from, size_t len,
 }
 
 int mtdram_init_device(struct mtd_info *mtd, void *mapped_address,
-			unsigned long size, const char *name)
+		unsigned long size, const char *name)
 {
 	if (size % SIZE_1KB)
 		return -1;
@@ -72,19 +73,4 @@ int mtdram_init_device(struct mtd_info *mtd, void *mapped_address,
 	mtd->mtd_write = mtdram_write;
 
 	return 0;
-}
-
-struct mtd_info mtdram;
-
-extern char __mtdram_start__;
-extern char __mtdram_size__;
-
-void mtdram_init(void)
-{
-	struct dentry dentry = { .d_name  = "mtd0" };
-
-	printk("Creating MTD device %s\n", dentry.d_name);
-	mtdram_init_device(&mtdram, &__mtdram_start__,
-			(unsigned long)&__mtdram_size__, dentry.d_name);
-	add_mtd_device(&mtdram, dentry.d_name);
 }

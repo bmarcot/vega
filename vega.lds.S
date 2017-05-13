@@ -63,7 +63,7 @@ SECTIONS
 
     .pgmem RAMORG + RAMSZ - 32k : {
         PROVIDE(__pgmem_start__ = .);
-        . += 26k;
+        . += 30k;
 
         /* Reserve the last page for the early stack. Must be of the biggest size
          * such that there will be no coalescing when freeing the page, for lower
@@ -76,13 +76,6 @@ SECTIONS
     } > ram
 
     PROVIDE(__pgmem_size__ = SIZEOF(.pgmem));
-
-    .mtdram : {
-        PROVIDE(__mtdram_start__ = .);
-        . += 4k;
-    } > ram
-
-    PROVIDE(__mtdram_size__ = SIZEOF(.mtdram));
 
     /DISCARD/ :
     {
