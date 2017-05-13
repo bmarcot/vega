@@ -29,8 +29,6 @@ struct inode; //FIXME: delete me from here, using s_root dentry
 struct super_block {
 	dev_t        s_dev;      /* identifier */
 	struct inode *s_iroot;   //FIXME: just use s_root and dentry
-
-	void         *s_private; //FIXME: Will die eventually..
 };
 
 /*
