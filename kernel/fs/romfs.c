@@ -147,11 +147,11 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 	/* get current on-device inode */
 	struct mtd_info *mtd = get_mtd_device(dir->i_sb->s_dev);
 	rs = ROMFS_SB(mtd);
-	ri = ROMFS_INODE(rs, dir->i_private);
+	ri = ROMFS_I(rs, dir->i_private);
 
 	/* enter and walk the directory */
 	next_filehdr = align(ntohl(ri->spec_info), 16);
-	ri = ROMFS_INODE(rs, next_filehdr);
+	ri = ROMFS_I(rs, next_filehdr);
 
 	for (int i = 0; next_filehdr < rs->full_size; i++) {
 		if (!strcmp(ri->file_name, target->d_name)) {
@@ -169,7 +169,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 		next_filehdr = align(ntohl(ri->next_filehdr), 16);
 		if (!next_filehdr)
 			break;
-		ri = ROMFS_INODE(rs, next_filehdr);
+		ri = ROMFS_I(rs, next_filehdr);
 	}
 
 	return NULL;
@@ -182,7 +182,7 @@ ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 	struct inode *inode = file->f_dentry->d_inode;
 	struct mtd_info *mtd = get_mtd_device(inode->i_sb->s_dev);
 	struct romfs_superblock *rs = ROMFS_SB(mtd);
-	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
+	struct romfs_inode *ri = ROMFS_I(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
 		+ align_next(strlen(ri->file_name) + 1, 16);
 
@@ -201,7 +201,7 @@ int romfs_mmap(struct file *file, off_t offset, void **addr)
 	struct inode *inode = file->f_dentry->d_inode;
 	struct mtd_info *mtd = get_mtd_device(inode->i_sb->s_dev);
 	struct romfs_superblock *rs = ROMFS_SB(mtd);
-	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
+	struct romfs_inode *ri = ROMFS_I(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
 		+ align_next(strlen(ri->file_name) + 1, 16);
 

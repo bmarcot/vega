@@ -9,8 +9,6 @@
 
 #include <kernel/types.h>
 
-#include <drivers/mtd/mtd.h>
-
 #define ROMFS_FILETYPE_MASK   0x7
 
 #define ROMFS_FILETYPE_HARD   0
@@ -37,18 +35,12 @@ struct romfs_inode {
 	char  file_name[0];
 };
 
-#define ROMFS_SUPER_BLOCK(sb) ({			\
-	struct mtd_info *mtd = (sb)->s_private;		\
-	struct romfs_superblock *rs = mtd->priv;	\
-	rs;						\
-})
-
 #define ROMFS_SB(mtd) ({				\
 	struct romfs_superblock *rs = mtd->priv;	\
 	rs;						\
 })
 
-#define ROMFS_INODE(rs, offset) ({			\
+#define ROMFS_I(rs, offset) ({				\
 	__u32 addr = (__u32)(rs) + (__u32)(offset);	\
 	struct romfs_inode *ri = (struct romfs_inode *)addr; \
 	ri;						\
