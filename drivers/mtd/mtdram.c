@@ -79,21 +79,12 @@ struct mtd_info mtdram;
 extern char __mtdram_start__;
 extern char __mtdram_size__;
 
-extern const struct file_operations mtdchar_fops;
-
-static struct inode mtd0_inode = {
-	.i_fop     = &mtdchar_fops,
-	.i_private = &mtdram,
-};
-
 void mtdram_init(void)
 {
-	struct dentry dentry = { .d_inode = &mtd0_inode, .d_name  = "mtd0" };
+	struct dentry dentry = { .d_name  = "mtd0" };
 
 	printk("Creating MTD device %s\n", dentry.d_name);
 	mtdram_init_device(&mtdram, &__mtdram_start__,
 			(unsigned long)&__mtdram_size__, dentry.d_name);
-
-	init_tmpfs_inode(&mtd0_inode);
-	vfs_link(NULL, dev_inode(), &dentry);
+	add_mtd_device(&mtdram, dentry.d_name);
 }
