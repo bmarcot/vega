@@ -43,6 +43,11 @@ struct romfs_inode {
 	rs;						\
 })
 
+#define ROMFS_SB(mtd) ({				\
+	struct romfs_superblock *rs = mtd->priv;	\
+	rs;						\
+})
+
 #define ROMFS_INODE(rs, offset) ({			\
 	__u32 addr = (__u32)(rs) + (__u32)(offset);	\
 	struct romfs_inode *ri = (struct romfs_inode *)addr; \

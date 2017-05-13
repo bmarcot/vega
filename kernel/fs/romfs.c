@@ -80,12 +80,12 @@ int romfs_mount(const char *source, const char *target,
 	if (super_block == NULL)
 		return -1;
 	/* super_block is found at the begining of memory area on MTD dev */
-	struct mtd_info *mtd = s_inode->i_private;
-	super_block->s_private = mtd;
+	super_block->s_dev = s_inode->i_rdev;
 	super_block->s_iroot = inode; //FIXME: super_block must point to dentry instead of inode
 	inode->i_sb = super_block;
-	struct romfs_superblock *super = mtd->priv;
-	inode->i_private = (void *)offsetof_first_device_inode(super);
+
+	struct mtd_info *mtd = get_mtd_device(super_block->s_dev);
+	inode->i_private = (void *)offsetof_first_device_inode(ROMFS_SB(mtd));
 
 	return 0;
 }
@@ -93,7 +93,7 @@ int romfs_mount(const char *source, const char *target,
 static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 {
 	struct inode *inode;
-	static int ino = 0xbeef;
+	static int ino = 600;
 
 	inode = malloc(sizeof(struct inode));
 	if (inode == NULL)
@@ -131,8 +131,9 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 	 * address of the on-device inode, because that does not work if
 	 * fs is stored on a SPI flash for instance, and is not directly
 	 * mapped onto logical address space. */
+	struct mtd_info *mtd = get_mtd_device(sb->s_dev);
 	inode->i_private =
-		(void *)offsetof_device_inode(ri, ROMFS_SUPER_BLOCK(sb));
+		(void *)offsetof_device_inode(ri, ROMFS_SB(mtd));
 
 	return inode;
 }
@@ -144,7 +145,8 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 	struct romfs_inode *ri;
 
 	/* get current on-device inode */
-	rs = ROMFS_SUPER_BLOCK(dir->i_sb);
+	struct mtd_info *mtd = get_mtd_device(dir->i_sb->s_dev);
+	rs = ROMFS_SB(mtd);
 	ri = ROMFS_INODE(rs, dir->i_private);
 
 	/* enter and walk the directory */
@@ -173,21 +175,13 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 	return NULL;
 }
 
-int romfs_open(struct inode *inode, struct file *file)
-{
-	file->f_private = inode->i_private;
-
-	return 0;
-}
-
 ssize_t romfs_read(struct file *file, char *buf, size_t count, off_t offset)
 {
 	size_t retlen;
 	size_t filesize = file->f_dentry->d_inode->i_size;
 	struct inode *inode = file->f_dentry->d_inode;
-	struct super_block *sb = inode->i_sb;
-	struct mtd_info *mtd = sb->s_private;
-	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(sb);
+	struct mtd_info *mtd = get_mtd_device(inode->i_sb->s_dev);
+	struct romfs_superblock *rs = ROMFS_SB(mtd);
 	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
 		+ align_next(strlen(ri->file_name) + 1, 16);
@@ -205,9 +199,8 @@ int romfs_mmap(struct file *file, off_t offset, void **addr)
 	size_t retlen;
 	size_t filesize = file->f_dentry->d_inode->i_size;
 	struct inode *inode = file->f_dentry->d_inode;
-	struct super_block *sb = inode->i_sb;
-	struct mtd_info *mtd = sb->s_private;
-	struct romfs_superblock *rs = ROMFS_SUPER_BLOCK(sb);
+	struct mtd_info *mtd = get_mtd_device(inode->i_sb->s_dev);
+	struct romfs_superblock *rs = ROMFS_SB(mtd);
 	struct romfs_inode *ri = ROMFS_INODE(rs, inode->i_private);
 	int len = sizeof(struct romfs_inode)
 		+ align_next(strlen(ri->file_name) + 1, 16);
@@ -234,7 +227,6 @@ const struct inode_operations romfs_iops = {
 };
 
 const struct file_operations romfs_fops = {
-	.open = romfs_open,
 	.read = romfs_read,
 	.mmap = romfs_mmap,
 };
