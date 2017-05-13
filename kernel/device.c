@@ -4,6 +4,7 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -14,7 +15,7 @@
 
 static struct char_dev {
 	const struct file_operations *fops;
-	unsigned int count;
+	unsigned int                 count;
 } char_devs[8];
 
 static inline struct char_dev *chrdev_lookup(unsigned int major)
@@ -79,4 +80,33 @@ int chrdev_add(kdev_t dev, const char *name)
 	init_special_inode(inode, 0666 | S_IFCHR, dev);
 
 	return 0;
+}
+
+static LIST_HEAD(device_head);
+
+int device_add(struct device *dev)
+{
+	list_add(&dev->list, &device_head);
+
+	return 0;
+}
+
+struct device *device_get(dev_t devt)
+{
+	struct device *dev;
+
+	list_for_each_entry(dev, &device_head, list) {
+		if (dev->devt == devt)
+			return dev;
+	}
+
+	return NULL;
+}
+
+struct device *device_alloc(void)
+{
+	//FIXME: Get memory from dev-cache
+	struct device *dev = malloc(sizeof(struct device));
+
+	return dev;
 }
