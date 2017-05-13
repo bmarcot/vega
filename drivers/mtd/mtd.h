@@ -69,4 +69,7 @@ int mtd_write(struct mtd_info *mtd, off_t to, size_t len, size_t *retlen,
 
 void mtd_erase_callback(struct erase_info *instr);
 
+int add_mtd_device(struct mtd_info *mtd, const char *name);
+struct mtd_info *get_mtd_device(dev_t devt);
+
 #endif /* !_DRIVERS_MTD_MTD_H */

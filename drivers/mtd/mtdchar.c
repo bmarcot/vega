@@ -1,48 +1,54 @@
 /*
  * drivers/mtd/mtdchar.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <sys/types.h>
 
+#include <kernel/device.h>
 #include <kernel/fs.h>
+#include <kernel/kernel.h>
 
 #include <drivers/mtd/mtd.h>
+#include <drivers/mtd/mtdchar.h>
 
-//note: romfs will use these functions
-
-int mtdchar_open(struct inode *inode, struct file *file)
+static ssize_t mtdchar_read(struct file *file, char *buf, size_t count,
+			off_t offset)
 {
-	file->f_private = inode->i_private;
-
-	return 0;
-}
-
-ssize_t mtdchar_read(struct file *file, char *buf, size_t count, off_t offset)
-{
+	struct mtd_info *mtd;
 	size_t retlen;
-	struct mtd_info *mtd = file->f_private;
 
+	mtd = get_mtd_device(file->f_dentry->d_inode->i_rdev);
+	if (mtd == NULL)
+		return -ENXIO;
 	if (mtd_read(mtd, offset, count, &retlen, (unsigned char *)buf) < 0)
 		return -1;
 
 	return retlen;
 }
 
-ssize_t mtdchar_write(struct file *file, const char *buf, size_t count, off_t *offset)
+static ssize_t mtdchar_write(struct file *file, const char *buf, size_t count,
+			off_t *offset)
 {
+	struct mtd_info *mtd;
 	size_t retlen;
-	struct mtd_info *mtd = file->f_private;
 
+	mtd = get_mtd_device(file->f_dentry->d_inode->i_rdev);
+	if (mtd == NULL)
+		return -ENXIO;
 	if (mtd_write(mtd, *offset, count, &retlen, (const unsigned char *)buf) < 0)
 		return -1;
 
 	return retlen;
 }
 
-const struct file_operations mtdchar_fops = {
-	.open  = mtdchar_open,
+static const struct file_operations mtdchar_fops = {
 	.read  = mtdchar_read,
 	.write = mtdchar_write,
 };
+
+int mtdchar_init(void)
+{
+	return chrdev_register(MTDCHAR_MAJOR, &mtdchar_fops);
+}
