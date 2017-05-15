@@ -158,7 +158,7 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 	switch (whence) {
 	case SEEK_SET:
 		if (offset)
-			offset = size % offset;
+			offset = offset % size;
 		break;
 	case SEEK_CUR:
 		offset = (file->f_pos + offset) % size;
