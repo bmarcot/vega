@@ -9,6 +9,8 @@
 
 //XXX: GENERATED, DO NOT EDIT!
 
+//FIXME: This belongs to include/uapi/
+
 #define SYS_PTHREAD_EXIT 0
 #define SYS_PTHREAD_SELF 1
 #define SYS_PTHREAD_YIELD 2
@@ -24,19 +26,20 @@
 #define SYS_TIMER_GETTIME 12
 #define SYS_MSLEEP 13
 #define SYS_SYSCONF 14
-#define SYS_SIGACTION 15
-#define SYS_KILL 16
-#define SYS_SIGQUEUE 17
-#define SYS_OPEN 18
-#define SYS_CLOSE 19
-#define SYS_READ 20
-#define SYS_WRITE 21
-#define SYS_LSEEK 22
-#define SYS_STAT 23
-#define SYS_MOUNT 24
-#define SYS_READDIR_R 25
-#define SYS_GETPID 26
-#define SYS_MMAP 27
-#define SYS_MUNMAP 28
+#define SYS_EXECVE 15
+#define SYS_SIGACTION 16
+#define SYS_KILL 17
+#define SYS_SIGQUEUE 18
+#define SYS_OPEN 19
+#define SYS_CLOSE 20
+#define SYS_READ 21
+#define SYS_WRITE 22
+#define SYS_LSEEK 23
+#define SYS_STAT 24
+#define SYS_MOUNT 25
+#define SYS_READDIR_R 26
+#define SYS_GETPID 27
+#define SYS_MMAP 28
+#define SYS_MUNMAP 29
 
 #endif /* !KERNEL_SYSCALLS_H */

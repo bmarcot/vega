@@ -21,6 +21,7 @@ xs = [
     # <unistd.h>
     'msleep',
     'sysconf',
+    'execve',
 
     # <signal.h>
     'sigaction',
