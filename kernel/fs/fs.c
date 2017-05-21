@@ -82,7 +82,7 @@ struct inode *inode_from_pathname(const char *pathname/* , struct dentry *from *
 	return inode;
 }
 
-int sys_open(const char *pathname, int flags)
+int do_open(const char *pathname, int flags)
 {
 	struct inode *inode = root_inode();
 	struct dentry *dentry = root_dentry();
@@ -109,7 +109,7 @@ int sys_open(const char *pathname, int flags)
 		parent = dentry;
 	}
 
-	/* opendir() redirects to sys_open() */
+	/* opendir() redirects to open() */
 	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {
 		errno = ENOTDIR;
 		return -1;
@@ -126,7 +126,12 @@ int sys_open(const char *pathname, int flags)
 	return fd;
 }
 
-ssize_t sys_read(int fd, void *buf, size_t count)
+int sys_open(const char *pathname, int flags)
+{
+	return do_open(pathname, flags);
+}
+
+ssize_t do_read(int fd, void *buf, size_t count)
 {
 	struct file *file = fd_to_file(fd);
 
@@ -137,7 +142,12 @@ ssize_t sys_read(int fd, void *buf, size_t count)
 	return count;
 }
 
-ssize_t sys_write(int fd, void *buf, size_t count)
+ssize_t sys_read(int fd, void *buf, size_t count)
+{
+	return do_read(fd, buf, count);
+}
+
+ssize_t do_write(int fd, void *buf, size_t count)
 {
 	struct file *file = fd_to_file(fd);
 	off_t offset = file->f_pos;
@@ -148,7 +158,12 @@ ssize_t sys_write(int fd, void *buf, size_t count)
 	return count;
 }
 
-off_t sys_lseek(int fd, off_t offset, int whence)
+ssize_t sys_write(int fd, void *buf, size_t count)
+{
+	return do_write(fd, buf, count);
+}
+
+off_t do_lseek(int fd, off_t offset, int whence)
 {
 	struct file *file = fd_to_file(fd);
 	off_t size = file->f_dentry->d_inode->i_size;
@@ -174,7 +189,12 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 	return 0;
 }
 
-int sys_close(int fd)
+off_t sys_lseek(int fd, off_t offset, int whence)
+{
+	return do_lseek(fd, offset, whence);
+}
+
+int do_close(int fd)
 {
 	struct file *file = fd_to_file(fd);
 
@@ -182,6 +202,11 @@ int sys_close(int fd)
 	releasefd(fd);
 
 	return 0;
+}
+
+int sys_close(int fd)
+{
+	return do_close(fd);
 }
 
 int sys_stat(const char *pathname, struct stat *buf)

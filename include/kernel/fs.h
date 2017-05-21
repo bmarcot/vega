@@ -143,7 +143,9 @@ static inline int dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 			file->f_dentry->d_parent->d_inode->i_ino, 0);
 }
 
-/* forward declarations */
+/*
+ * VFS-layer forward declarations
+ */
 
 int           vfs_iterate(struct file *file, struct dir_context *ctx);
 struct dentry *vfs_lookup(struct inode *dir, struct dentry *target);
@@ -153,7 +155,9 @@ int           vfs_delete(struct dentry *dentry);
 void          vfs_release(struct dentry *dentry);
 int           vfs_mmap(struct file *file, off_t offset, void **addr);
 
-/* syscall entries */
+/*
+ * Syscall entries
+ */
 
 typedef void DIR;
 
@@ -165,7 +169,9 @@ ssize_t sys_write(int fd, void *buf, size_t count);
 off_t   sys_seek(int fd, off_t offset, int whence);
 int     sys_close(int fd);
 
-/* misc functions */
+/*
+ * Misc functions (most will die)
+ */
 
 struct inode *root_inode(void);
 struct inode *dev_inode(void);
@@ -179,5 +185,15 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry,
 
 void tmpfs_init(void);
 void proc_init(void);
+
+/*
+ * Kernel common file-manipulation functions
+*/
+
+int     do_open(const char *pathname, int flags);
+ssize_t do_read(int fd, void *buf, size_t count);
+ssize_t do_write(int fd, void *buf, size_t count);
+off_t   do_lseek(int fd, off_t offset, int whence);
+int     do_close(int fd);
 
 #endif /* !_KERNEL_FS_H */
