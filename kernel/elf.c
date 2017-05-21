@@ -31,6 +31,11 @@ static int elf_check_mode(Elf32_Ehdr *ehdr)
 	return ehdr->e_type == ET_EXEC;
 }
 
+static int elf_check_phentsize(Elf32_Ehdr *ehdr)
+{
+	return ehdr->e_phentsize == sizeof(Elf32_Phdr);
+}
+
 static int check_elf_header(Elf32_Ehdr *ehdr)
 {
 	if (!elf_check_magic(ehdr)) {
@@ -55,6 +60,9 @@ static int check_elf_header(Elf32_Ehdr *ehdr)
 
 static int copy_load_segments(int fd, Elf32_Ehdr *ehdr)
 {
+	if (!elf_check_phentsize(ehdr))
+		return -1;
+
 	/* Find the PHDR segment, and copy it to memory. */
 	Elf32_Phdr phdr;
 	for (int i = 0; i < ehdr->e_phnum; i++) {
