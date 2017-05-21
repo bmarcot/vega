@@ -114,6 +114,7 @@ int elf_load_binary(const char *pathname)
 {
 	Elf32_Ehdr ehdr;
 	int fd;
+	int err;
 
 	//FIXME: struct file* do_file_open(const char *pathname, int flags);
 	//FIXME: struct file* do_file_read(struct file *file, void *buf, size_t count);
@@ -127,10 +128,15 @@ int elf_load_binary(const char *pathname)
 
 	/* ELF header is at the beginning of the file. */
 	do_read(fd, &ehdr, sizeof(Elf32_Ehdr));
-	if (check_elf_header(&ehdr))
-		return -1;
-	copy_load_segments(fd, &ehdr);
+	err = check_elf_header(&ehdr);
+	if (err)
+		goto out;
+	err = copy_load_segments(fd, &ehdr);
+
+out:
 	do_close(fd);
+	if (err)
+		return err;
 
 	/* Create a new task. */
 	struct task_info *bin_task = malloc(sizeof(struct task_info));
