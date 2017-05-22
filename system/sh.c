@@ -62,6 +62,8 @@ static int parse_command_line(char *buf, char *argv[])
 
 	if (!buflen)
 		return 0;
+	while (*buf == ' ')
+		buf++;
 	argv[0] = (char *)buf;
 	for (int i = 0; i < buflen; i++) {
 		if (buf[i] == ' ') {
