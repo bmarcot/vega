@@ -1,7 +1,7 @@
 /*
  * include/kernel/kernel.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #ifndef _KERNEL_KERNEL_H
@@ -26,6 +26,22 @@
 #define container_of(ptr, type, member) ({				\
 	    const __typeof__( ((type *)0)->member ) *__mptr = (ptr);	\
 	    (type *)( (char *)__mptr - offsetof(type,member) );})
+
+/*
+ * Endianess conversion
+ */
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ /* GNU C extension */
+#  include "platform.h"
+#  define le16_to_cpu(val)  (val)
+#  define le32_to_cpu(val)  (val)
+#  define be16_to_cpu(val)  __REV16((val))
+#  define be32_to_cpu(val)  __REV((val))
+#endif
+
+/*
+ * Formatting and printing
+ */
 
 int printk(const char *fmt, ...);
 

@@ -12,8 +12,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <vega/arpa/inet.h> /* words are big endian in romfs */
-
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/kernel.h>
@@ -99,7 +97,7 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 	if (inode == NULL)
 		return NULL;
 
-	switch (ntohl(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
+	switch (be32_to_cpu(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
 	case ROMFS_FILETYPE_DIR:
 		inode->i_mode = S_IFDIR;
 		break;
@@ -122,7 +120,7 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 		inode->i_mode = 0;
 	}
 	inode->i_ino = ino++;
-	inode->i_size = ntohl(ri->size);
+	inode->i_size = be32_to_cpu(ri->size);
 	inode->i_op = &romfs_iops;
 	inode->i_fop = &romfs_fops;
 	inode->i_sb = sb;
@@ -150,7 +148,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 	ri = ROMFS_I(rs, dir->i_private);
 
 	/* enter and walk the directory */
-	next_filehdr = align(ntohl(ri->spec_info), 16);
+	next_filehdr = align(be32_to_cpu(ri->spec_info), 16);
 	ri = ROMFS_I(rs, next_filehdr);
 
 	for (int i = 0; next_filehdr < rs->full_size; i++) {
@@ -166,7 +164,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 		}
 
 		/* inspect next file in current directory */
-		next_filehdr = align(ntohl(ri->next_filehdr), 16);
+		next_filehdr = align(be32_to_cpu(ri->next_filehdr), 16);
 		if (!next_filehdr)
 			break;
 		ri = ROMFS_I(rs, next_filehdr);
