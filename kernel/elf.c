@@ -14,6 +14,8 @@
 #include <kernel/task.h>
 #include <kernel/thread.h>
 
+#include <lib/array.h>
+
 #include <uapi/elf32.h>
 
 static int elf_check_magic(Elf32_Ehdr *ehdr)
@@ -73,45 +75,45 @@ static int copy_load_segments(struct file *file, Elf32_Ehdr *ehdr)
 	}
 	if (phdr.p_type != PT_PHDR)
 		return -1;
-	Elf32_Phdr *phdrs = malloc(phdr.p_memsz);
-	if (phdrs == NULL) {
+	Elf32_Phdr *phdr_seg = malloc(phdr.p_memsz);
+	if (phdr_seg == NULL) {
 		pr_warn("Cannot allocate %d bytes", phdr.p_memsz);
 		return -1;
 	}
 	do_file_lseek(file, phdr.p_offset, SEEK_SET);
-	do_file_read(file, phdrs, phdr.p_memsz);
+	do_file_read(file, phdr_seg, phdr.p_memsz);
 
 	/* For each LOAD segment, allocate memory and copy bytes. */
-	for (int i = 0; i < ehdr->e_phnum; i++) {
-		if (phdrs[i].p_type == PT_LOAD) {
-			void *mem = malloc(phdrs[i].p_memsz);
+	Elf32_Phdr *ph;
+	array_for_each_element(ph, phdr_seg, ehdr->e_phnum, ehdr->e_phentsize) {
+		if (ph->p_type == PT_LOAD) {
+			void *mem = malloc(ph->p_memsz);
 			if (mem == NULL) {
-				pr_warn("Cannot allocate %d bytes", phdrs[i].p_memsz);
+				pr_warn("Cannot allocate %d bytes", ph->p_memsz);
 				return -1;
 			}
-			do_file_lseek(file, phdrs[i].p_offset, SEEK_SET);
-			int rb = do_file_read(file, mem, phdrs[i].p_filesz);
-			if (rb != (int)phdrs[i].p_filesz) {
-				pr_err("Copied %d bytes, wanted %d", rb, phdrs[i].p_filesz);
+			do_file_lseek(file, ph->p_offset, SEEK_SET);
+			int rb = do_file_read(file, mem, ph->p_filesz);
+			if (rb != (int)ph->p_filesz) {
+				pr_err("Copied %d bytes, wanted %d", rb, ph->p_filesz);
 				return -1;
 			}
-			phdrs[i].p_paddr = (Elf32_Addr)mem;
+			ph->p_paddr = (Elf32_Addr)mem;
 		}
 	}
 
 	/* Relocate the start address. */
-	for (int i = 0; i < ehdr->e_phnum; i++) {
-		if ((phdrs[i].p_type == PT_LOAD)
-			&& (ehdr->e_entry >= phdrs[i].p_vaddr)
-			&& (ehdr->e_entry < phdrs[i].p_vaddr + phdrs[i].p_memsz)) {
-			ehdr->e_entry -= phdrs[i].p_vaddr;
-			ehdr->e_entry += phdrs[i].p_paddr;
+	array_for_each_element(ph, phdr_seg, ehdr->e_phnum, ehdr->e_phentsize) {
+		if ((ph->p_type == PT_LOAD)
+			&& (ehdr->e_entry >= ph->p_vaddr)
+			&& (ehdr->e_entry < ph->p_vaddr + ph->p_memsz)) {
+			ehdr->e_entry = ehdr->e_entry - ph->p_vaddr + ph->p_paddr;
 			break;
 		}
 	}
 
 	/* We don't need to keep the PHDR segment. */
-	free(phdrs);
+	free(phdr_seg);
 
 	return 0;
 }
