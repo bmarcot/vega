@@ -177,7 +177,7 @@ struct inode *root_inode(void);
 struct inode *dev_inode(void);
 struct inode *proc_inode(void);
 struct dentry *root_dentry(void);
-struct file *fd_to_file(int fd);
+struct file *fget(unsigned int fd);
 struct inode *init_tmpfs_inode(struct inode *inode);
 struct inode *inode_from_pathname(const char *pathname);
 struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry,
@@ -190,10 +190,10 @@ void proc_init(void);
  * Kernel common file-manipulation functions
 */
 
-int     do_open(const char *pathname, int flags);
-ssize_t do_read(int fd, void *buf, size_t count);
-ssize_t do_write(int fd, void *buf, size_t count);
-off_t   do_lseek(int fd, off_t offset, int whence);
-int     do_close(int fd);
+struct file *do_file_open(const char *pathname, int flags);
+ssize_t     do_file_read(struct file *file, void *buf, size_t count);
+ssize_t     do_file_write(struct file *file, void *buf, size_t count);
+off_t       do_file_lseek(struct file *file, off_t offset, int whence);
+int         do_file_close(struct file *file);
 
 #endif /* !_KERNEL_FS_H */

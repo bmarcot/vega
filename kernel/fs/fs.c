@@ -17,14 +17,25 @@
 #include <kernel/fs/romfs.h>
 #include <kernel/task.h>
 
-struct file *fd_to_file(int fd)
+struct file *fget(unsigned int fd)
 {
 	CURRENT_TASK_INFO(curr_task);
 
-	return &curr_task->filetable[fd];
+	return curr_task->filetable[fd];
 }
 
-static int getfd(void)
+static struct file *fput(unsigned int fd, struct file *file)
+{
+	struct file *old_file;
+	CURRENT_TASK_INFO(curr_task);
+
+	old_file = curr_task->filetable[fd];
+	curr_task->filetable[fd] = file;
+
+	return old_file;
+}
+
+static int alloc_fd(void)
 {
 	int fd;
 	CURRENT_TASK_INFO(curr_task);
@@ -37,11 +48,19 @@ static int getfd(void)
 	return fd;
 }
 
-static void releasefd(int fd)
+static void release_fd(int fd)
 {
 	CURRENT_TASK_INFO(curr_task);
 
 	bitmap_clear_bit(&curr_task->filemap, fd);
+}
+
+int validate_fd(unsigned int fd)
+{
+	if (fd >= FILE_MAX)
+		return -1;
+
+	return 0;
 }
 
 int release_dentries(struct dentry *dentry)
@@ -82,7 +101,7 @@ struct inode *inode_from_pathname(const char *pathname/* , struct dentry *from *
 	return inode;
 }
 
-int do_open(const char *pathname, int flags)
+struct file *do_file_open(const char *pathname, int flags)
 {
 	struct inode *inode = root_inode();
 	struct dentry *dentry = root_dentry();
@@ -95,7 +114,7 @@ int do_open(const char *pathname, int flags)
 	for (size_t i = 0; i < strlen(pathname);) {
 		target = malloc(sizeof(struct dentry));
 		if (target == NULL)
-			return -1;
+			return NULL;
 		target->d_count = 1;
 		target->d_parent = parent;
 		i += path_head(target->d_name, &pathname[i]);
@@ -103,7 +122,7 @@ int do_open(const char *pathname, int flags)
 		dentry = vfs_lookup(inode, target);
 		if (dentry == NULL) {
 			release_dentries(target->d_parent);
-			return -1;
+			return NULL;
 		}
 		inode = dentry->d_inode;
 		parent = dentry;
@@ -112,29 +131,42 @@ int do_open(const char *pathname, int flags)
 	/* opendir() redirects to open() */
 	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {
 		errno = ENOTDIR;
-		return -1;
+		return NULL;
 	}
 
-	int fd = getfd();
-	struct file *file = fd_to_file(fd);
+	struct file *file = malloc(sizeof(struct file));
+	if (file == NULL) {
+		errno = ENOMEM;
+		return NULL;
+	}
 	file->f_dentry = dentry;
 	file->f_op = dentry->d_inode->i_fop;
 	file->f_pos = 0;
+
 	if (file->f_op->open)
 		file->f_op->open(inode, file);
 
-	return fd;
+	return file;
 }
 
 int sys_open(const char *pathname, int flags)
 {
-	return do_open(pathname, flags);
+	int fd = alloc_fd();
+	if (fd < 0)
+		return fd;
+
+	struct file *file = do_file_open(pathname, flags);
+	if (file == NULL) {
+		release_fd(fd);
+		return -1;
+	}
+	fput(fd, file);
+
+	return fd;
 }
 
-ssize_t do_read(int fd, void *buf, size_t count)
+ssize_t do_file_read(struct file *file, void *buf, size_t count)
 {
-	struct file *file = fd_to_file(fd);
-
 	if (count)
 		count = file->f_op->read(file, buf, count, file->f_pos);
 	file->f_pos += count;
@@ -144,12 +176,13 @@ ssize_t do_read(int fd, void *buf, size_t count)
 
 ssize_t sys_read(int fd, void *buf, size_t count)
 {
-	return do_read(fd, buf, count);
+	struct file *file = fget(fd);
+
+	return do_file_read(file, buf, count);
 }
 
-ssize_t do_write(int fd, void *buf, size_t count)
+ssize_t do_file_write(struct file *file, void *buf, size_t count)
 {
-	struct file *file = fd_to_file(fd);
 	off_t offset = file->f_pos;
 
 	count = file->f_op->write(file, buf, count, &offset);
@@ -160,12 +193,13 @@ ssize_t do_write(int fd, void *buf, size_t count)
 
 ssize_t sys_write(int fd, void *buf, size_t count)
 {
-	return do_write(fd, buf, count);
+	struct file *file = fget(fd);
+
+	return do_file_write(file, buf, count);
 }
 
-off_t do_lseek(int fd, off_t offset, int whence)
+off_t do_file_lseek(struct file *file, off_t offset, int whence)
 {
-	struct file *file = fd_to_file(fd);
 	off_t size = file->f_dentry->d_inode->i_size;
 
 	if (file->f_op->lseek)
@@ -191,22 +225,27 @@ off_t do_lseek(int fd, off_t offset, int whence)
 
 off_t sys_lseek(int fd, off_t offset, int whence)
 {
-	return do_lseek(fd, offset, whence);
+	struct file *file = fget(fd);
+
+	return do_file_lseek(file, offset, whence);
 }
 
-int do_close(int fd)
+int do_file_close(struct file *file)
 {
-	struct file *file = fd_to_file(fd);
-
 	release_dentries(file->f_dentry);
-	releasefd(fd);
+	free(file);
 
 	return 0;
 }
 
 int sys_close(int fd)
 {
-	return do_close(fd);
+	struct file *file = fget(fd);
+
+	fput(fd, NULL);
+	release_fd(fd);
+
+	return do_file_close(file);
 }
 
 int sys_stat(const char *pathname, struct stat *buf)
