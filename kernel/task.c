@@ -28,6 +28,8 @@ struct task_info *task_init(struct task_info *task)
 {
 	task->pid = alloc_pid();
 	task->filemap = 0;
+	for (int i = 0; i < FILE_MAX; i++)
+		task->filetable[i] = NULL;
 	INIT_LIST_HEAD(&task->thread_head);
 	INIT_LIST_HEAD(&task->signal_head);
 	list_add(&task->list, &task_head);
