@@ -41,7 +41,7 @@ static void *map_file(__unused size_t length, __unused int prot,
 	void *addr;
 	struct file *file;
 
-	file = fd_to_file(fd);
+	file = fget(fd);
 	if (!file) {
 		printk("mmap: BADF\n");
 		errno = EBADF;

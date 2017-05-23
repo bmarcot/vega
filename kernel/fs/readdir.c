@@ -30,7 +30,7 @@ static int fillonedir(struct dir_context *ctx, const char *name, int namlen,
 
 int sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 {
-	struct file *file = fd_to_file((int)dirp);
+	struct file *file = fget((int)dirp);
 	struct readdir_callback buf = {
 		.ctx    = {.actor = fillonedir, .pos = 0},
 		.dirent = (struct vega_dirent *)entry,
