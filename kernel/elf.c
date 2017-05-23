@@ -28,7 +28,7 @@ static int elf_check_arch(Elf32_Ehdr *ehdr)
 
 static int elf_check_mode(Elf32_Ehdr *ehdr)
 {
-	return ehdr->e_type == ET_EXEC;
+	return (ehdr->e_type == ET_EXEC) || (ehdr->e_type == ET_DYN);
 }
 
 static int elf_check_phentsize(Elf32_Ehdr *ehdr)
@@ -51,14 +51,14 @@ static int check_elf_header(Elf32_Ehdr *ehdr)
 		return -1;
 	}
 	if (!elf_check_mode(ehdr)) {
-		pr_err("ELF is not an executable binary");
+		pr_err("ELF is not an exec binary or a dynamic object");
 		return -1;
 	}
 
 	return 0;
 }
 
-static int copy_load_segments(int fd, Elf32_Ehdr *ehdr)
+static int copy_load_segments(struct file *file, Elf32_Ehdr *ehdr)
 {
 	if (!elf_check_phentsize(ehdr))
 		return -1;
@@ -66,8 +66,8 @@ static int copy_load_segments(int fd, Elf32_Ehdr *ehdr)
 	/* Find the PHDR segment, and copy it to memory. */
 	Elf32_Phdr phdr;
 	for (int i = 0; i < ehdr->e_phnum; i++) {
-		do_lseek(fd, ehdr->e_phoff + i * ehdr->e_phentsize, SEEK_SET);
-		do_read(fd, &phdr, sizeof(Elf32_Phdr));
+		do_file_lseek(file, ehdr->e_phoff + i * ehdr->e_phentsize, SEEK_SET);
+		do_file_read(file, &phdr, sizeof(Elf32_Phdr));
 		if (phdr.p_type == PT_PHDR)
 			break;
 	}
@@ -78,8 +78,8 @@ static int copy_load_segments(int fd, Elf32_Ehdr *ehdr)
 		pr_warn("Cannot allocate %d bytes", phdr.p_memsz);
 		return -1;
 	}
-	do_lseek(fd, phdr.p_offset, SEEK_SET);
-	do_read(fd, phdrs, phdr.p_memsz);
+	do_file_lseek(file, phdr.p_offset, SEEK_SET);
+	do_file_read(file, phdrs, phdr.p_memsz);
 
 	/* For each LOAD segment, allocate memory and copy bytes. */
 	for (int i = 0; i < ehdr->e_phnum; i++) {
@@ -89,8 +89,8 @@ static int copy_load_segments(int fd, Elf32_Ehdr *ehdr)
 				pr_warn("Cannot allocate %d bytes", phdrs[i].p_memsz);
 				return -1;
 			}
-			do_lseek(fd, phdrs[i].p_offset, SEEK_SET);
-			int rb = do_read(fd, mem, phdrs[i].p_filesz);
+			do_file_lseek(file, phdrs[i].p_offset, SEEK_SET);
+			int rb = do_file_read(file, mem, phdrs[i].p_filesz);
 			if (rb != (int)phdrs[i].p_filesz) {
 				pr_err("Copied %d bytes, wanted %d", rb, phdrs[i].p_filesz);
 				return -1;
@@ -121,28 +121,24 @@ typedef void *(*start_routine)(void *);
 int elf_load_binary(const char *pathname)
 {
 	Elf32_Ehdr ehdr;
-	int fd;
+	struct file *file;
 	int err;
 
-	//FIXME: struct file* do_file_open(const char *pathname, int flags);
-	//FIXME: struct file* do_file_read(struct file *file, void *buf, size_t count);
-	//FIXME: int          do_file_close(struct file *file);
-
-	fd = do_open(pathname, 0);
-	if (fd < 0) {
+	file = do_file_open(pathname, 0);
+	if (file == NULL) {
 		pr_err("error: Failed to open %s", pathname);
 		return -1;
 	}
 
 	/* ELF header is at the beginning of the file. */
-	do_read(fd, &ehdr, sizeof(Elf32_Ehdr));
+	do_file_read(file, &ehdr, sizeof(Elf32_Ehdr));
 	err = check_elf_header(&ehdr);
 	if (err)
 		goto out;
-	err = copy_load_segments(fd, &ehdr);
+	err = copy_load_segments(file, &ehdr);
 
 out:
-	do_close(fd);
+	do_file_close(file);
 	if (err)
 		return err;
 
