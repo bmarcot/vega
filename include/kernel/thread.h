@@ -24,7 +24,6 @@ struct mthread_info {
 	u32 mi_priv;    /* +8 */
 } __attribute__ ((packed));
 
-
 struct task_info;
 
 struct thread_info {
@@ -133,6 +132,8 @@ struct thread_context_regs {
 void switch_to(struct thread_info *, struct thread_info *);
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
+typedef void *(*start_routine)(void *);
+
 struct thread_info *thread_create(void *(*)(void *), void *,
 				enum thread_privilege, size_t,
 				struct task_info *);
@@ -141,6 +142,8 @@ int thread_self(void);
 void thread_exit(void *);
 int thread_set_priority(struct thread_info *thread, int priority);
 int thread_detach(pthread_t thread);
+struct thread_info *thread_clone(struct thread_info *other, void *arg,
+				struct task_info *task);
 
 //FIXME: this proc should be in an asm/machine source file
 #if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */

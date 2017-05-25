@@ -109,6 +109,60 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	return thread;
 }
 
+static inline struct thread_info *init_thread_info(struct thread_info *thread)
+{
+	static int next_tid = 3000;
+
+	thread->ti_stacksize = 0;
+	thread->ti_id = next_tid++;
+	thread->ti_task = NULL;
+	thread->ti_joinable = false;
+	thread->ti_joining = NULL;
+	thread->ti_detached = false;
+	thread->ti_priority = PRI_MIN;
+	thread->ti_state = THREAD_STATE_NEW;
+#ifdef CONFIG_KERNEL_STACK_CHECKING
+	thread->ti_canary[0] = THREAD_CANARY0;
+	thread->ti_canary[1] = THREAD_CANARY1;
+#endif
+
+	return thread;
+}
+
+struct thread_info *thread_clone(struct thread_info *other, void *arg,
+				struct task_info *task /* will die.. */)
+{
+	struct thread_info *new;
+	struct kernel_context_regs *kcr;
+	struct thread_context_regs *tcr;
+
+	kcr = alloc_interrupt_stack();
+	if (kcr == NULL)
+		return NULL;
+
+	struct thread_context_regs *other_tcr =
+		(struct thread_context_regs *)other->ti_mach.mi_psp;
+	tcr = alloc_thread_stack((start_routine)other_tcr->ret_addr, arg,
+				other->ti_stacksize);
+	memcpy(tcr, other_tcr, sizeof(struct thread_context_regs));
+	tcr->r0_r3__r12[0] = (__u32)arg;
+
+	new = THREAD_INFO(kcr);
+	init_thread_info(new);
+	if (tcr == NULL) {
+		free(new);
+		return NULL;
+	}
+	new->ti_mach.mi_psp = (__u32)tcr;
+	new->ti_mach.mi_msp = (__u32)kcr;
+	new->ti_mach.mi_priv = other->ti_mach.mi_priv;
+	new->ti_stacksize = other->ti_stacksize;
+	new->ti_task = task;
+	list_add(&new->ti_list, &task->thread_head);
+
+	return new;
+}
+
 int thread_yield(void)
 {
 #ifdef DEBUG
@@ -135,7 +189,8 @@ void thread_exit(void *retval)
 	CURRENT_THREAD_INFO(curr_thread);
 
 #ifdef DEBUG
-	printk("thread: id=%d is exiting with retval=%d\n", current->ti_id, (int) retval);
+	printk("thread: id=%d is exiting with retval=%d\n", curr_thread->ti_id,
+		(int) retval);
 #endif
 
 	/* free thread stack memory */
