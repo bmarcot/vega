@@ -271,4 +271,57 @@ typedef struct {
 
 #define	PN_XNUM		0xffff		/* extended program header index */
 
+/*
+ *	Section header
+ */
+
+typedef struct {
+	Elf32_Word sh_name;
+	Elf32_Word sh_type;
+	Elf32_Word sh_flags;
+	Elf32_Addr sh_addr;
+	Elf32_Off  sh_offset;
+	Elf32_Word sh_size;
+	Elf32_Word sh_link;
+	Elf32_Word sh_info;
+	Elf32_Word sh_addralign;
+	Elf32_Word sh_entsize;
+} Elf32_Shdr;
+
+/* sh_type */
+#define SHT_NULL	0
+#define SHT_PROGBITS	1
+#define SHT_SYMTAB	2
+#define SHT_STRTAB	3
+#define SHT_RELA	4
+#define SHT_HASH	5
+#define SHT_DYNAMIC	6
+#define SHT_NOTE	7
+#define SHT_NOBITS	8
+#define SHT_REL		9
+#define SHT_SHLIB	10
+#define SHT_DYNSYM	11
+#define SHT_NUM		12
+#define SHT_LOPROC	0x70000000
+#define SHT_HIPROC	0x7fffffff
+#define SHT_LOUSER	0x80000000
+#define SHT_HIUSER	0xffffffff
+
+/*
+ *	Relocation entry
+ */
+
+typedef struct {
+	Elf32_Addr r_offset;
+	Elf32_Word r_info;
+} Elf32_Rel;
+
+/* The following are used with relocations */
+#define ELF32_R_SYM(x)  ((x) >> 8)
+#define ELF32_R_TYPE(x) ((x) & 0xff)
+
+/* ARM relocation codes */
+#define R_ARM_NONE	0
+#define R_ARM_RELATIVE	23
+
 #endif /* !_UAPI_ELF32_H */
