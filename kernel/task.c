@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 
+#include <kernel/scheduler.h>
 #include <kernel/task.h>
 #include <kernel/thread.h>
 
@@ -57,4 +58,29 @@ int sys_getpid(void)
 	CURRENT_TASK_INFO(curr_task);
 
 	return curr_task->pid;
+}
+
+pid_t do_fork(void)
+{
+	/* create a new child process */
+	struct task_info *child = malloc(sizeof(struct task_info));
+	if (child == NULL)
+		return -1;
+	task_init(child);
+
+	/* sync thread info, update current thread SP_process */
+	CURRENT_THREAD_INFO(parent_thread);
+	parent_thread->ti_mach.mi_psp = __get_PSP();
+
+	/* add a thread to child process */
+	struct thread_info *child_thread =
+		thread_clone(parent_thread, 0, child);
+	sched_enqueue(child_thread);
+
+	return child->pid;
+}
+
+pid_t sys_fork(void)
+{
+	return do_fork();
 }
