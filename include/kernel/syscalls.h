@@ -27,19 +27,20 @@
 #define SYS_MSLEEP 13
 #define SYS_SYSCONF 14
 #define SYS_EXECVE 15
-#define SYS_SIGACTION 16
-#define SYS_KILL 17
-#define SYS_SIGQUEUE 18
-#define SYS_OPEN 19
-#define SYS_CLOSE 20
-#define SYS_READ 21
-#define SYS_WRITE 22
-#define SYS_LSEEK 23
-#define SYS_STAT 24
-#define SYS_MOUNT 25
-#define SYS_READDIR_R 26
-#define SYS_GETPID 27
-#define SYS_MMAP 28
-#define SYS_MUNMAP 29
+#define SYS_FORK 16
+#define SYS_SIGACTION 17
+#define SYS_KILL 18
+#define SYS_SIGQUEUE 19
+#define SYS_OPEN 20
+#define SYS_CLOSE 21
+#define SYS_READ 22
+#define SYS_WRITE 23
+#define SYS_LSEEK 24
+#define SYS_STAT 25
+#define SYS_MOUNT 26
+#define SYS_READDIR_R 27
+#define SYS_GETPID 28
+#define SYS_MMAP 29
+#define SYS_MUNMAP 30
 
 #endif /* !KERNEL_SYSCALLS_H */
