@@ -22,6 +22,7 @@ xs = [
     'msleep',
     'sysconf',
     'execve',
+    'fork',
 
     # <signal.h>
     'sigaction',
