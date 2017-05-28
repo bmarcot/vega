@@ -17,13 +17,6 @@
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
 #define INTR_STACK_SIZE   (1 << INTR_STACK_ORDER)
 
-/* machine-specific thread info on ARM */
-struct mthread_info {
-	u32 mi_msp;     /* +0 */
-	u32 mi_psp;     /* +4 */
-	u32 mi_priv;    /* +8 */
-} __attribute__ ((packed));
-
 enum thread_privilege {
 	THREAD_PRIV_SUPERVISOR = 0,
 	THREAD_PRIV_USER       = 1
@@ -68,28 +61,6 @@ enum thread_state {
  *   well as triggering a switch from Handler_Mode to Thread_Mode in the
  *   CPU. We initialize the task non-scratch registers to 0.
  */
-
-struct kernel_context_regs {
-#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-	u32 r8_r11[4];
-	//FIXME: restore r12 also? yes because kernel might use it! This is the
-	//       kernel context (non-scratch), not the non-scratch for the user
-	//       thread: they are implicitly restored by the epilogues for those
-	//       used by kernel, or filled with 0 from there.
-	//       u32 r8__r12[5];
-	u32 r4_r7[4];
-#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	u32 r4_r12[9];  /* r4 to r12, zero-filled */
-#endif
-	u32 lr;         /* initially loaded with EXC_RETURN value */
-};
-
-struct thread_context_regs {
-	u32 r0_r3__r12[5];  /* r0 to r3, r12; args or zero-filled */
-	u32 lr;	            /* initially loaded with pthread_exit() */
-	u32 ret_addr;       /* thread entry-point function */
-	u32 xpsr;           /* forced to Thumb_Mode */
-};
 
 /* Restored in thread's context when switching to a new thread. */
 struct v7m_kernel_ctx_regs {
