@@ -10,8 +10,8 @@
 #include <sys/types.h>
 
 #include <kernel/kernel.h>
+#include <kernel/types.h>
 
-#include "linux/types.h"
 #include "linux/list.h"
 
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
@@ -23,42 +23,6 @@ struct mthread_info {
 	u32 mi_psp;     /* +4 */
 	u32 mi_priv;    /* +8 */
 } __attribute__ ((packed));
-
-struct task_info;
-
-struct thread_info {
-	/* machine-specific thread info */
-	struct mthread_info ti_mach;
-
-	/* thread description data */
-	int ti_priority;
-	int ti_id;
-	int ti_state;
-	size_t ti_stacksize; /* user thread stacksize */
-	struct task_info *ti_task;
-
-	struct list_head ti_list;  /* global list of threads */
-	struct list_head ti_q;     /* shared by sched runq, mutex waitq, thread joinq */
-
-	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
-	void *ti_retval;
-	int ti_detached;
-	int ti_joinable;
-	struct thread_info *ti_joining;
-
-	/* Pointer to mutually exclusive data: the mutex the thread is blocking
-	 * on, the exit value when thread is not yet joined, etc. */
-	void *ti_private;
-
-	/* /\* local-storage *\/ */
-	/* struct list_head *ti_lsq; // local-storage queue */
-
-#ifdef CONFIG_KERNEL_STACK_CHECKING
-	u32 ti_canary[2];
-#endif
-
-	char ti_storage[0];
-};
 
 enum thread_privilege {
 	THREAD_PRIV_SUPERVISOR = 0,
@@ -125,6 +89,69 @@ struct thread_context_regs {
 	u32 lr;	            /* initially loaded with pthread_exit() */
 	u32 ret_addr;       /* thread entry-point function */
 	u32 xpsr;           /* forced to Thumb_Mode */
+};
+
+/* Restored in thread's context when switching to a new thread. */
+struct v7m_kernel_ctx_regs {
+	__u32 r4_r12[9]; /* zero-filled */
+	__u32 lr;        /* loaded with EXC_RETURN value */
+};
+
+struct v7m_thread_ctx_regs {
+	__u32 r0_r3__r12[5]; /* r0 to r3, r12; args or zero-filled */
+	__u32 lr;            /* initially loaded with pthread_exit() */
+	__u32 ret_addr;      /* thread entry-point function */
+	__u32 xpsr;          /* forced to Thumb_Mode */
+};
+
+struct v7m_thread_info {
+	union {
+		__u32 sp;                         /* msp special register */
+		struct v7m_kernel_ctx_regs *regs; /* non-scratch registers */
+	} kernel_ctx;
+	union {
+		__u32 sp;                         /* psp special register */
+		struct v7m_thread_ctx_regs *regs; /* auto-saved registers */
+	} thread_ctx;
+	__u32 priv;
+};
+
+struct task_info;
+
+struct thread_info {
+	struct v7m_thread_info ti_mach;
+
+	int                    ti_priority;
+	int                    ti_id;
+	int                    ti_state;
+	int                    ti_stacksize; /* thread stack's size */
+	struct task_info       *ti_task;
+
+	struct list_head       ti_list; /* global list of threads */
+	struct list_head       ti_q;    /* sched runq, mutex waitq, thread joinq */
+
+	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
+	void                   *ti_retval;
+	int                    ti_detached;
+	int                    ti_joinable;
+	struct thread_info     *ti_joining;
+
+	/* Pointer to mutually exclusive data: the mutex the thread is blocking
+	 * on, the exit value when thread is not yet joined, etc. */
+	void                   *ti_private;
+
+#ifdef CONFIG_KERNEL_STACK_CHECKING
+	__u32                  ti_canary[2];
+#endif
+
+	char                   ti_stacktop[0]; /* top of kernel stack */
+};
+
+#define THREAD_SIZE 512
+
+union thread_union {
+	struct thread_info thread_info;
+	unsigned int       stack[THREAD_SIZE / sizeof(int)];
 };
 
 /* forward declarations */

@@ -26,22 +26,15 @@
 #include "utils.h"
 #include "platform.h"
 
-static struct kernel_context_regs *alloc_interrupt_stack(void)
+static struct v7m_kernel_ctx_regs *alloc_interrupt_stack(void)
 {
-	char *memp;
-	struct kernel_context_regs *kcr;
-
-	memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
+	char *memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
 	if (memp == NULL)
 		return NULL;
-	kcr = (struct kernel_context_regs *)
-		(memp + INTR_STACK_SIZE - sizeof(struct kernel_context_regs));
-#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-	memset(kcr->r4_r7, 0, 4 * sizeof(u32));
-	memset(kcr->r8_r11, 0, 4 * sizeof(u32));
-#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	memset(kcr->r4_r12, 0, 9 * sizeof(u32));
-#endif
+
+	struct v7m_kernel_ctx_regs *kcr = (struct v7m_kernel_ctx_regs *)
+		(memp + INTR_STACK_SIZE - sizeof(struct v7m_kernel_ctx_regs));
+	memset(kcr->r4_r12, 0, 9 * sizeof(__u32));
 	kcr->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
 	return kcr;
@@ -51,21 +44,19 @@ static struct kernel_context_regs *alloc_interrupt_stack(void)
 void pthread_exit(void *retval);
 
 //XXX: Detecting a stack-overflow on v7M: #memf && (SP_Process == MMFAR)
-static struct thread_context_regs *alloc_thread_stack(
+static struct v7m_thread_ctx_regs *alloc_thread_stack(
 	void *(*start_routine)(void *),	void *arg, size_t stacksize)
 {
-	char *memp;
-	struct thread_context_regs *tcr;
-
-	memp = alloc_pages(size_to_page_order(stacksize));
+	char *memp = alloc_pages(size_to_page_order(stacksize));
 	if (!memp)
 		return NULL;
-	tcr = (struct thread_context_regs*)
-		(memp + stacksize - sizeof(struct thread_context_regs));
-	tcr->r0_r3__r12[0] = (u32)arg;
-	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof(u32));
-	tcr->lr = (u32)pthread_exit; //FIXME: Should libc be dynamically loaded?
-	tcr->ret_addr = (u32)v7m_clear_thumb_bit(start_routine);
+
+	struct v7m_thread_ctx_regs *tcr = (struct v7m_thread_ctx_regs*)
+		(memp + stacksize - sizeof(struct v7m_thread_ctx_regs));
+	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof(__u32));
+	tcr->r0_r3__r12[0] = (__u32)arg;
+	tcr->lr = (__u32)pthread_exit; //FIXME: Should libc be dynamically loaded?
+	tcr->ret_addr = (__u32)v7m_clear_thumb_bit(start_routine);
 	tcr->xpsr = xPSR_T_Msk;
 
 	return tcr;
@@ -76,8 +67,8 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 				struct task_info *task)
 {
 	struct thread_info *thread;
-	struct kernel_context_regs *kcr;
-	struct thread_context_regs *tcr;
+	struct v7m_kernel_ctx_regs *kcr;
+	struct v7m_thread_ctx_regs *tcr;
 	static int thread_count = 0;
 
 	kcr = alloc_interrupt_stack();
@@ -89,9 +80,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 		free(thread);
 		return NULL;
 	}
-	thread->ti_mach.mi_psp = (u32)tcr;
-	thread->ti_mach.mi_msp = (u32)kcr;
-	thread->ti_mach.mi_priv = priv;
+	thread->ti_mach.thread_ctx.regs = tcr;
+	thread->ti_mach.kernel_ctx.regs = kcr;
+	thread->ti_mach.priv = priv;
 	thread->ti_stacksize = stacksize;
 	thread->ti_id = thread_count++;
 	thread->ti_task = task;
@@ -133,18 +124,17 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 				struct task_info *task /* will die.. */)
 {
 	struct thread_info *new;
-	struct kernel_context_regs *kcr;
-	struct thread_context_regs *tcr;
+	struct v7m_kernel_ctx_regs *kcr;
+	struct v7m_thread_ctx_regs *tcr;
 
 	kcr = alloc_interrupt_stack();
 	if (kcr == NULL)
 		return NULL;
 
-	struct thread_context_regs *other_tcr =
-		(struct thread_context_regs *)other->ti_mach.mi_psp;
+	struct v7m_thread_ctx_regs *other_tcr = other->ti_mach.thread_ctx.regs;
 	tcr = alloc_thread_stack((start_routine)other_tcr->ret_addr, arg,
 				other->ti_stacksize);
-	memcpy(tcr, other_tcr, sizeof(struct thread_context_regs));
+	memcpy(tcr, other_tcr, sizeof(struct v7m_thread_ctx_regs));
 	tcr->r0_r3__r12[0] = (__u32)arg;
 
 	new = THREAD_INFO(kcr);
@@ -153,9 +143,9 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 		free(new);
 		return NULL;
 	}
-	new->ti_mach.mi_psp = (__u32)tcr;
-	new->ti_mach.mi_msp = (__u32)kcr;
-	new->ti_mach.mi_priv = other->ti_mach.mi_priv;
+	new->ti_mach.thread_ctx.regs = tcr;
+	new->ti_mach.kernel_ctx.regs = kcr;
+	new->ti_mach.priv = other->ti_mach.priv;
 	new->ti_stacksize = other->ti_stacksize;
 	new->ti_task = task;
 	list_add(&new->ti_list, &task->thread_head);
@@ -194,7 +184,7 @@ void thread_exit(void *retval)
 #endif
 
 	/* free thread stack memory */
-	free_pages(align(curr_thread->ti_mach.mi_psp, curr_thread->ti_stacksize),
+	free_pages(align(curr_thread->ti_mach.thread_ctx.sp, curr_thread->ti_stacksize),
 		size_to_page_order(curr_thread->ti_stacksize));
 
 	if (curr_thread->ti_detached == false) {

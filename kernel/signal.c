@@ -26,9 +26,9 @@ extern void return_from_sigaction(void);
 
 void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
 {
-	tip->ti_mach.mi_psp -= len;
+	tip->ti_mach.thread_ctx.sp -= len;
 
-	return (void *)tip->ti_mach.mi_psp;
+	return (void *)tip->ti_mach.thread_ctx.sp;
 }
 
 void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
@@ -41,48 +41,48 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 static void stage_sighandler(struct sigaction *sigaction)
 {
 	CURRENT_THREAD_INFO(curr_thread);
-	struct thread_context_regs *ctx;
+	struct v7m_thread_ctx_regs *ctx;
 
 	/* update current thread SP_process */
-	curr_thread->ti_mach.mi_psp = __get_PSP();
+	curr_thread->ti_mach.thread_ctx.sp = __get_PSP();
 
 	/* this is the exception stacked-context */
-	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+	ctx = curr_thread->ti_mach.thread_ctx.regs;
 
 	/* return value of syscall, cannot fail after this point */
 	ctx->r0_r3__r12[0] = 0;
 
 	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(curr_thread,
-				sizeof(struct thread_context_regs));
+				sizeof(struct v7m_thread_ctx_regs));
 
 	/* build the sigaction trampoline */
-	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+	ctx = curr_thread->ti_mach.thread_ctx.regs;
 /* #ifdef SECURE_KERNEL */
 	ctx->r0_r3__r12[1] = 0;
 	ctx->r0_r3__r12[2] = 0;
 	ctx->r0_r3__r12[3] = 0;
 	ctx->r0_r3__r12[4] = 0;
 /* #endif */
-	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
-	ctx->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_handler);
+	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
+	ctx->ret_addr = (__u32)v7m_clear_thumb_bit(sigaction->sa_handler);
 	ctx->xpsr = xPSR_T_Msk;
 
 	/* update current thread SP_process */
-	__set_PSP(curr_thread->ti_mach.mi_psp);
+	__set_PSP(curr_thread->ti_mach.thread_ctx.sp);
 }
 
 static void stage_sigaction(const struct sigaction *sigaction, int sig,
 			union sigval value)
 {
 	CURRENT_THREAD_INFO(curr_thread);
-	struct thread_context_regs *ctx;
+	struct v7m_thread_ctx_regs *ctx;
 
 	/* update current thread SP_process */
-	curr_thread->ti_mach.mi_psp = __get_PSP();
+	curr_thread->ti_mach.thread_ctx.sp = __get_PSP();
 
 	/* this is the exception stacked-context */
-	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+	ctx = curr_thread->ti_mach.thread_ctx.regs;
 
 	/* return value of syscall, cannot fail after this point */
 	ctx->r0_r3__r12[0] = 0;
@@ -97,10 +97,10 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(curr_thread,
-				sizeof(struct thread_context_regs));
+				sizeof(struct v7m_thread_ctx_regs));
 
 	/* build a sigaction trampoline */
-	ctx = (struct thread_context_regs *)curr_thread->ti_mach.mi_psp;
+	ctx = curr_thread->ti_mach.thread_ctx.regs;
 	ctx->r0_r3__r12[1] = (u32)siginfo_ptr;
 	ctx->r0_r3__r12[2] = 0; /* ucontext_t *, but commonly unused */
 	ctx->r0_r3__r12[3] = 0;
@@ -110,38 +110,38 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 	ctx->xpsr = xPSR_T_Msk;
 
 	/* update current thread SP_process */
-	__set_PSP(curr_thread->ti_mach.mi_psp);
+	__set_PSP(curr_thread->ti_mach.thread_ctx.sp);
 }
 
 void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 {
 	CURRENT_THREAD_INFO(curr_thread);
-	struct thread_context_regs *ctx;
+	struct v7m_thread_ctx_regs *ctx;
 
 	//if (sigevent->sigev_notify == SIGEV_THREAD) {
 
 	/* update current thread SP_process */
 	if (thread == curr_thread)
-		thread->ti_mach.mi_psp = __get_PSP();
+		thread->ti_mach.thread_ctx.sp = __get_PSP();
 
 	/* the sigevent context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(thread, sizeof(struct thread_context_regs));
+	v7m_alloca_thread_context(thread, sizeof(struct v7m_thread_ctx_regs));
 
 	/* build a sigevent trampoline */
-	ctx = (struct thread_context_regs *)thread->ti_mach.mi_psp;
+	ctx = thread->ti_mach.thread_ctx.regs;
 	ctx->r0_r3__r12[0] = sigevent->sigev_value.sival_int;
 	ctx->r0_r3__r12[1] = 0;
 	ctx->r0_r3__r12[2] = 0;
 	ctx->r0_r3__r12[3] = 0;
 	ctx->r0_r3__r12[4] = 0;
-	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sighandler);
+	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
 	ctx->ret_addr =
-		(u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
+		(__u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
 	ctx->xpsr = xPSR_T_Msk;
 
 	/* update current thread SP_process */
 	if (thread == curr_thread)
-		__set_PSP(thread->ti_mach.mi_psp);
+		__set_PSP(thread->ti_mach.thread_ctx.sp);
 }
 
 static struct sigaction *find_sigaction_by_sig(pid_t pid, int sig)

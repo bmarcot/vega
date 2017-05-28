@@ -70,7 +70,7 @@ pid_t do_fork(void)
 
 	/* sync thread info, update current thread SP_process */
 	CURRENT_THREAD_INFO(parent_thread);
-	parent_thread->ti_mach.mi_psp = __get_PSP();
+	parent_thread->ti_mach.thread_ctx.sp = __get_PSP();
 
 	/* add a thread to child process */
 	struct thread_info *child_thread =
