@@ -1,7 +1,6 @@
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
-extern const struct sched sched_rr;
 extern const struct sched sched_o1;
 
 static const struct sched *sched;
@@ -9,9 +8,6 @@ static const struct sched *sched;
 int sched_select(int sched_type)
 {
 	switch (sched_type) {
-	case SCHED_CLASS_RR:
-		sched = &sched_rr;
-		break;
 	case SCHED_CLASS_O1:
 		sched = &sched_o1;
 		break;
