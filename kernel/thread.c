@@ -83,19 +83,24 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_mach.thread_ctx.regs = tcr;
 	thread->ti_mach.kernel_ctx.regs = kcr;
 	thread->ti_mach.priv = priv;
-	thread->ti_stacksize = stacksize;
-	thread->ti_id = thread_count++;
-	thread->ti_task = task;
-	thread->ti_joinable = false;
-	thread->ti_joining = NULL;
-	thread->ti_detached = false;
-	thread->ti_priority = PRI_MIN;
-	thread->ti_state = THREAD_STATE_NEW;
+
+	/* thread_struct is still located in the kernel stack'page */
+	thread->ti_struct = (struct thread_struct *)thread->ti_stacktop;
+
+	thread->ti_struct->info = thread;
+	thread->ti_struct->ti_stacksize = stacksize;
+	thread->ti_struct->ti_id = thread_count++;
+	thread->ti_struct->ti_task = task;
+	thread->ti_struct->ti_joinable = false;
+	thread->ti_struct->ti_joining = NULL;
+	thread->ti_struct->ti_detached = false;
+	thread->ti_struct->ti_priority = PRI_MIN;
+	thread->ti_struct->ti_state = THREAD_STATE_NEW;
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;
 #endif
-	list_add(&thread->ti_list, &task->thread_head);
+	list_add(&thread->ti_struct->ti_list, &task->thread_head);
 
 	return thread;
 }
@@ -104,14 +109,14 @@ static inline struct thread_info *init_thread_info(struct thread_info *thread)
 {
 	static int next_tid = 3000;
 
-	thread->ti_stacksize = 0;
-	thread->ti_id = next_tid++;
-	thread->ti_task = NULL;
-	thread->ti_joinable = false;
-	thread->ti_joining = NULL;
-	thread->ti_detached = false;
-	thread->ti_priority = PRI_MIN;
-	thread->ti_state = THREAD_STATE_NEW;
+	thread->ti_struct->ti_stacksize = 0;
+	thread->ti_struct->ti_id = next_tid++;
+	thread->ti_struct->ti_task = NULL;
+	thread->ti_struct->ti_joinable = false;
+	thread->ti_struct->ti_joining = NULL;
+	thread->ti_struct->ti_detached = false;
+	thread->ti_struct->ti_priority = PRI_MIN;
+	thread->ti_struct->ti_state = THREAD_STATE_NEW;
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;
@@ -133,7 +138,7 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 
 	struct v7m_thread_ctx_regs *other_tcr = other->ti_mach.thread_ctx.regs;
 	tcr = alloc_thread_stack((start_routine)other_tcr->ret_addr, arg,
-				other->ti_stacksize);
+				other->ti_struct->ti_stacksize);
 	memcpy(tcr, other_tcr, sizeof(struct v7m_thread_ctx_regs));
 	tcr->r0_r3__r12[0] = (__u32)arg;
 
@@ -146,9 +151,12 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 	new->ti_mach.thread_ctx.regs = tcr;
 	new->ti_mach.kernel_ctx.regs = kcr;
 	new->ti_mach.priv = other->ti_mach.priv;
-	new->ti_stacksize = other->ti_stacksize;
-	new->ti_task = task;
-	list_add(&new->ti_list, &task->thread_head);
+	new->ti_struct = (struct thread_struct *)new->ti_stacktop;
+
+	new->ti_struct->info = new;
+	new->ti_struct->ti_stacksize = other->ti_struct->ti_stacksize;
+	new->ti_struct->ti_task = task;
+	list_add(&new->ti_struct->ti_list, &task->thread_head);
 
 	return new;
 }
@@ -171,7 +179,7 @@ int thread_self(void)
 {
 	CURRENT_THREAD_INFO(curr_thread);
 
-	return curr_thread->ti_id;
+	return curr_thread->ti_struct->ti_id;
 }
 
 void thread_exit(void *retval)
@@ -179,20 +187,20 @@ void thread_exit(void *retval)
 	CURRENT_THREAD_INFO(curr_thread);
 
 #ifdef DEBUG
-	printk("thread: id=%d is exiting with retval=%d\n", curr_thread->ti_id,
+	printk("thread: id=%d is exiting with retval=%d\n", curr_thread->ti_struct->ti_id,
 		(int) retval);
 #endif
 
 	/* free thread stack memory */
-	free_pages(align(curr_thread->ti_mach.thread_ctx.sp, curr_thread->ti_stacksize),
-		size_to_page_order(curr_thread->ti_stacksize));
+	free_pages(align(curr_thread->ti_mach.thread_ctx.sp, curr_thread->ti_struct->ti_stacksize),
+		size_to_page_order(curr_thread->ti_struct->ti_stacksize));
 
-	if (curr_thread->ti_detached == false) {
-		curr_thread->ti_retval = retval;
-		if (curr_thread->ti_joining)
-			sched_enqueue(curr_thread->ti_joining);
+	if (curr_thread->ti_struct->ti_detached == false) {
+		curr_thread->ti_struct->ti_retval = retval;
+		if (curr_thread->ti_struct->ti_joining)
+			sched_enqueue(curr_thread->ti_struct->ti_joining);
 		else
-			curr_thread->ti_joinable = true;
+			curr_thread->ti_struct->ti_joinable = true;
 	} else {
 		/* We are freeing the stack we are running on, no kernel preemption
 		 * is allowed until we call sched_elect().  */
@@ -206,19 +214,19 @@ void thread_exit(void *retval)
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
-	thread->ti_priority = priority;
+	thread->ti_struct->ti_priority = priority;
 
 	return 0;
 }
 
 static struct thread_info *find_thread_by_id(int id)
 {
-	struct thread_info *tp;
+	struct thread_struct *tp;
 	CURRENT_TASK_INFO(curr_task);
 
 	list_for_each_entry(tp, &curr_task->thread_head, ti_list) {
 		if (tp->ti_id == id)
-			return tp;
+			return tp->info;
 	}
 
 	return NULL;
@@ -231,19 +239,19 @@ int thread_join(pthread_t thread, void **retval)
 	other = find_thread_by_id(thread);
 	if (other == NULL)
 		return -ESRCH;  /* No thread with the ID thread could be found. */
-	if (other->ti_detached == true)
+	if (other->ti_struct->ti_detached == true)
 		return -EINVAL;  /* thread is not a joinable thread. */
 
 	/* the other thread is not yet joinable, the current thread blocks */
-	if (other->ti_joinable == false) {
+	if (other->ti_struct->ti_joinable == false) {
 		CURRENT_THREAD_INFO(curr_thread);
-		if (other->ti_joining)
+		if (other->ti_struct->ti_joining)
 			return -EINVAL;  /* Another thread is already waiting to
 					    join with this thread. */
-		other->ti_joining = curr_thread;
+		other->ti_struct->ti_joining = curr_thread;
 		sched_elect(SCHED_OPT_NONE);
 	}
-	*retval = other->ti_retval;
+	*retval = other->ti_struct->ti_retval;
 
 	//XXX: free other's resources, interrupt stack
 
@@ -255,7 +263,7 @@ int thread_detach(pthread_t thread)
 	struct thread_info *thread_info;
 
 	thread_info = find_thread_by_id(thread);
-	thread_info->ti_detached = true;
+	thread_info->ti_struct->ti_detached = true;
 
 	return 0;
 }
@@ -301,7 +309,7 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 			current_task_info());
 	if (thread_info == NULL)
 		return EAGAIN; /* insufficient resources to create another thread */
-	*thread = (pthread_t)thread_info->ti_id;
+	*thread = (pthread_t)thread_info->ti_struct->ti_id;
 	sched_enqueue(thread_info);
 
 	return 0;

@@ -20,7 +20,7 @@ int sched_select(int sched_type)
 
 int sched_enqueue(struct thread_info *thread)
 {
-	thread->ti_state = THREAD_STATE_READY;
+	thread->ti_struct->ti_state = THREAD_STATE_READY;
 
 	return sched->enqueue(thread);
 }
@@ -38,7 +38,7 @@ int sched_elect(int flags)
 	KERNEL_STACK_CHECKING;
 
 	r = sched->elect(flags);
-	cur_thread->ti_state = THREAD_STATE_RUNNING;
+	cur_thread->ti_struct->ti_state = THREAD_STATE_RUNNING;
 
 	return r;
 }

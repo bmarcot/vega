@@ -14,9 +14,9 @@
 
 static LIST_HEAD(cond_head);
 
-static struct thread_info *find_other_thread(pthread_cond_t *cond)
+static struct thread_struct *find_other_thread(pthread_cond_t *cond)
 {
-	struct thread_info *other;
+	struct thread_struct *other;
 
 	list_for_each_entry(other, &cond_head, ti_q) {
 		if (other->ti_private == cond)
@@ -29,9 +29,9 @@ static struct thread_info *find_other_thread(pthread_cond_t *cond)
 int sys_pthread_cond_wait(pthread_cond_t *cond, kernel_mutex_t *mutex)
 {
 	CURRENT_THREAD_INFO(curr_thread);
-	curr_thread->ti_private = cond;
-	curr_thread->ti_state = THREAD_STATE_BLOCKED;
-	list_add_tail(&curr_thread->ti_q, &cond_head);
+	curr_thread->ti_struct->ti_private = cond;
+	curr_thread->ti_struct->ti_state = THREAD_STATE_BLOCKED;
+	list_add_tail(&curr_thread->ti_struct->ti_q, &cond_head);
 	sys_pthread_mutex_unlock(mutex);
 
 	/* contend for the lock */
@@ -42,15 +42,15 @@ int sys_pthread_cond_wait(pthread_cond_t *cond, kernel_mutex_t *mutex)
 
 int sys_pthread_cond_signal(pthread_cond_t *cond)
 {
-	struct thread_info *other;
+	struct thread_struct *other;
 
 	other = find_other_thread(cond);
 	if (other == NULL)
 		return 0;
 	list_del(&other->ti_q);
-	sched_enqueue(other);
+	sched_enqueue(other->info);
 	CURRENT_THREAD_INFO(curr_thread);
-	if (other->ti_priority >= curr_thread->ti_priority) {
+	if (other->ti_priority >= curr_thread->ti_struct->ti_priority) {
 		sched_enqueue(curr_thread);
 		sched_elect(SCHED_OPT_NONE);
 	}

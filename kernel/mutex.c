@@ -21,17 +21,17 @@ int sys_pthread_mutex_lock(kernel_mutex_t *mutex)
 	if (!mutex->val)
 		return 0;
 	CURRENT_THREAD_INFO(curr_thread);
-	curr_thread->ti_private = mutex;
-	curr_thread->ti_state = THREAD_STATE_BLOCKED;
-	list_add_tail(&curr_thread->ti_q, &mutex_head);
+	curr_thread->ti_struct->ti_private = mutex;
+	curr_thread->ti_struct->ti_state = THREAD_STATE_BLOCKED;
+	list_add_tail(&curr_thread->ti_struct->ti_q, &mutex_head);
 	sched_elect(SCHED_OPT_NONE);
 
 	return 0;
 }
 
-static struct thread_info *find_first_blocking_thread(kernel_mutex_t *mutex)
+static struct thread_struct *find_first_blocking_thread(kernel_mutex_t *mutex)
 {
-	struct thread_info *thread;
+	struct thread_struct *thread;
 
 	list_for_each_entry(thread, &mutex_head, ti_q) {
 		if (thread->ti_private == mutex)
@@ -43,7 +43,7 @@ static struct thread_info *find_first_blocking_thread(kernel_mutex_t *mutex)
 
 int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 {
-	struct thread_info *waiter = NULL;
+	struct thread_struct *waiter = NULL;
 
 	mutex->val--;
 	if (mutex->val >= 0) {
@@ -54,12 +54,12 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 			return -1;
 		}
 		list_del(&waiter->ti_q);
-		sched_enqueue(waiter);
+		sched_enqueue(waiter->info);
 	}
 	CURRENT_THREAD_INFO(curr_thread);
-	if (curr_thread->ti_state == THREAD_STATE_BLOCKED) {
+	if (curr_thread->ti_struct->ti_state == THREAD_STATE_BLOCKED) {
 		sched_elect(SCHED_OPT_NONE);
-	} else if (waiter && (curr_thread->ti_priority <= waiter->ti_priority)) {
+	} else if (waiter && (curr_thread->ti_struct->ti_priority <= waiter->ti_priority)) {
 		sched_enqueue(curr_thread);
 		sched_elect(SCHED_OPT_NONE);
 	}
