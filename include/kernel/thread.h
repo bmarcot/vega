@@ -89,27 +89,32 @@ struct v7m_thread_info {
 
 struct task_info;
 
-struct thread_info {
-	struct v7m_thread_info ti_mach;
+struct thread_struct {
+	struct thread_info *info;
 
-	int                    ti_priority;
-	int                    ti_id;
-	int                    ti_state;
-	int                    ti_stacksize; /* thread stack's size */
-	struct task_info       *ti_task;
+	int                ti_priority;
+	int                ti_id;
+	int                ti_state;
+	int                ti_stacksize; /* thread stack's size */
+	struct task_info   *ti_task;
 
-	struct list_head       ti_list; /* global list of threads */
-	struct list_head       ti_q;    /* sched runq, mutex waitq, thread joinq */
+	struct list_head   ti_list; /* global list of threads */
+	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */
 
 	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
-	void                   *ti_retval;
-	int                    ti_detached;
-	int                    ti_joinable;
-	struct thread_info     *ti_joining;
+	void               *ti_retval;
+	int                ti_detached;
+	int                ti_joinable;
+	struct thread_info *ti_joining;
 
 	/* Pointer to mutually exclusive data: the mutex the thread is blocking
 	 * on, the exit value when thread is not yet joined, etc. */
-	void                   *ti_private;
+	void               *ti_private;
+};
+
+struct thread_info {
+	struct v7m_thread_info ti_mach;
+	struct thread_struct   *ti_struct;
 
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	__u32                  ti_canary[2];
