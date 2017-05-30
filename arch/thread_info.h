@@ -34,24 +34,20 @@ struct thread_info {
 	} thread_ctx;
 	__u32 priv;
 	struct thread_struct   *ti_struct;
-
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	__u32                  ti_canary[2];
 #endif
-
 	char                   ti_stacktop[0]; /* top of kernel stack */
 };
 
+#define THREAD_SIZE 512
+
 static inline struct thread_info *current_thread_info(void)
 {
-	struct thread_info *this;
+	__u32 sp;
+	__asm__ __volatile__("mov %0, sp" : "=r" (sp));
 
-	__asm__ __volatile__("mov %0, sp \n\t"
-			"bfc %0, #0, %1"
-			: "=r" (this)
-			: "M" (9));
-
-	return this;
+	return (struct thread_info *)(sp & ~(THREAD_SIZE - 1));
 }
 
 #endif /* !_ARCH_THREAD_INFO_H */
