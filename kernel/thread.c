@@ -84,7 +84,8 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_mach.kernel_ctx.regs = kcr;
 	thread->ti_mach.priv = priv;
 
-	/* thread_struct is still located in the kernel stack'page */
+	/* thread_struct struct is still located in the kernel stack'page,
+	 * right after the thread_info struct. */
 	thread->ti_struct = (struct thread_struct *)thread->ti_stacktop;
 
 	thread->ti_struct->info = thread;
@@ -151,6 +152,8 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 	new->ti_mach.thread_ctx.regs = tcr;
 	new->ti_mach.kernel_ctx.regs = kcr;
 	new->ti_mach.priv = other->ti_mach.priv;
+
+	/* see comment in thread_create() */
 	new->ti_struct = (struct thread_struct *)new->ti_stacktop;
 
 	new->ti_struct->info = new;
@@ -177,9 +180,7 @@ int thread_yield(void)
 
 int thread_self(void)
 {
-	CURRENT_THREAD_INFO(curr_thread);
-
-	return curr_thread->ti_struct->ti_id;
+	return current_thread_info()->ti_struct->ti_id;
 }
 
 void thread_exit(void *retval)

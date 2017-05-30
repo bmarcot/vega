@@ -41,43 +41,44 @@ static struct thread_info *find_next_thread(void)
 
 static int sched_o1_enqueue(struct thread_info *thread)
 {
-	list_add_tail(&thread->ti_struct->ti_q, &pri_runq[thread->ti_struct->ti_priority]);
-	bitmap_set_bit(&pri_bitmap, thread->ti_struct->ti_priority);
+	struct thread_struct *thread_struct = thread->ti_struct;
+
+	list_add_tail(&thread_struct->ti_q, &pri_runq[thread_struct->ti_priority]);
+	bitmap_set_bit(&pri_bitmap, thread_struct->ti_priority);
 
 	return 0;
 }
 
 static int sched_o1_dequeue(struct thread_info *thread)
 {
-	CURRENT_THREAD_INFO(current);
-
 	/* active thread is not in the runqueue */
-	if (thread == current)
+	struct thread_info *curr_thread = current_thread_info();
+	if (thread == curr_thread)
 		return 0;
 
-	list_del(&thread->ti_struct->ti_q);
-	if (list_empty(&pri_runq[thread->ti_struct->ti_priority]))
-		bitmap_clear_bit(&pri_bitmap, thread->ti_struct->ti_priority);
+	struct thread_struct *thread_struct = thread->ti_struct;
+	list_del(&thread_struct->ti_q);
+	if (list_empty(&pri_runq[thread_struct->ti_priority]))
+		bitmap_clear_bit(&pri_bitmap, thread_struct->ti_priority);
 
 	return 0;
 }
 
 static int sched_o1_elect(int flags)
 {
-	CURRENT_THREAD_INFO(current);
-	struct thread_info *next;
-
-	next = find_next_thread();
-	if (next != thread_idle) {  // idle_thread
-		list_del(&next->ti_struct->ti_q);
-		if (list_empty(&pri_runq[next->ti_struct->ti_priority]))
-			bitmap_clear_bit(&pri_bitmap, next->ti_struct->ti_priority);
+	struct thread_info *next_thread = find_next_thread();
+	if (next_thread != thread_idle) {  // idle_thread
+		struct thread_struct *thread_struct = next_thread->ti_struct;
+		list_del(&thread_struct->ti_q);
+		if (list_empty(&pri_runq[thread_struct->ti_priority]))
+			bitmap_clear_bit(&pri_bitmap, thread_struct->ti_priority);
 	}
 
+	struct thread_info *curr_thread = current_thread_info();
 	if (flags & SCHED_OPT_RESTORE_ONLY)
-		thread_restore(next);  // switch_to_restore_only
+		thread_restore(next_thread);  // switch_to_restore_only
 	else
-		switch_to(next, current);
+		switch_to(next_thread, curr_thread);
 
 	return 0;
 }
