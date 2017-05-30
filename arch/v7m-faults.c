@@ -1,6 +1,8 @@
 #include <kernel/faults.h>
 #include <kernel/thread.h>
 
+#include <arch/thread_info.h>
+
 #include "kernel.h"
 
 #define UFSR_DIVBYZERO (1 << 9)
@@ -10,8 +12,8 @@
 #define UFSR_INVSTATE (1 << 1)
 #define UFSR_UNDEFINSTR 1
 
-void dump_frame(struct v7m_kernel_ctx_regs *noscratch,
-		struct v7m_thread_ctx_regs *scratch, u32 exc_return)
+void dump_frame(struct preserved_context *noscratch,
+		struct cpu_saved_context *scratch, u32 exc_return)
 {
 	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->r0_r3__r12[0],
 		scratch->r0_r3__r12[1], scratch->r0_r3__r12[2], scratch->r0_r3__r12[3]);
@@ -24,8 +26,8 @@ void dump_frame(struct v7m_kernel_ctx_regs *noscratch,
 	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
 
-void usagefault(struct v7m_kernel_ctx_regs *noscratch,
-		struct v7m_thread_ctx_regs *scratch, u32 exc_return)
+void usagefault(struct preserved_context *noscratch,
+		struct cpu_saved_context *scratch, u32 exc_return)
 {
 	u32 ufsr = (*((volatile u32 *) 0xe000ed28)) >> 16;
 	const char *cause = NULL;
@@ -51,16 +53,16 @@ void usagefault(struct v7m_kernel_ctx_regs *noscratch,
 	fault_exit();
 }
 
-void busfault(struct v7m_kernel_ctx_regs *noscratch,
-	struct v7m_thread_ctx_regs *scratch, u32 exc_return)
+void busfault(struct preserved_context *noscratch,
+	struct cpu_saved_context *scratch, u32 exc_return)
 {
 	fault_enter("BusFault");
 	dump_frame(noscratch, scratch, exc_return);
 	fault_exit();
 }
 
-void memmanage(struct v7m_kernel_ctx_regs *noscratch,
-	struct v7m_thread_ctx_regs *scratch, u32 exc_return)
+void memmanage(struct preserved_context *noscratch,
+	struct cpu_saved_context *scratch, u32 exc_return)
 {
 	fault_enter("MemManage");
 	dump_frame(noscratch, scratch, exc_return);

@@ -3,12 +3,13 @@
 
 #include <sys/types.h>
 #include <kernel/thread.h>
+#include <arch/thread_info.h>
 
 void fault_enter(const char *s);
 void fault_exit(void);
 
 /* arch-dependent (v6m, v7m) functions */
-void dump_frame(struct v7m_kernel_ctx_regs *noscratch,
-		struct v7m_thread_ctx_regs *scratch, u32 exc_return);
+void dump_frame(struct preserved_context *noscratch,
+		struct cpu_saved_context *scratch, u32 exc_return);
 
 #endif /* !KERNEL_FAULTS_H */

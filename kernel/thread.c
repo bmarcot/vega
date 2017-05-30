@@ -13,6 +13,7 @@
 
 #include <vega/sys/resource.h>
 
+#include <arch/thread_info.h>
 #include <arch/v7m-helper.h>
 
 #include <kernel/errno-base.h>
@@ -26,14 +27,14 @@
 #include "utils.h"
 #include "platform.h"
 
-static struct v7m_kernel_ctx_regs *alloc_interrupt_stack(void)
+static struct preserved_context *alloc_interrupt_stack(void)
 {
 	char *memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
 	if (memp == NULL)
 		return NULL;
 
-	struct v7m_kernel_ctx_regs *kcr = (struct v7m_kernel_ctx_regs *)
-		(memp + INTR_STACK_SIZE - sizeof(struct v7m_kernel_ctx_regs));
+	struct preserved_context *kcr = (struct preserved_context *)
+		(memp + INTR_STACK_SIZE - sizeof(struct preserved_context));
 	memset(kcr->r4_r12, 0, 9 * sizeof(__u32));
 	kcr->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
@@ -44,15 +45,15 @@ static struct v7m_kernel_ctx_regs *alloc_interrupt_stack(void)
 void pthread_exit(void *retval);
 
 //XXX: Detecting a stack-overflow on v7M: #memf && (SP_Process == MMFAR)
-static struct v7m_thread_ctx_regs *alloc_thread_stack(
+static struct cpu_saved_context *alloc_thread_stack(
 	void *(*start_routine)(void *),	void *arg, size_t stacksize)
 {
 	char *memp = alloc_pages(size_to_page_order(stacksize));
 	if (!memp)
 		return NULL;
 
-	struct v7m_thread_ctx_regs *tcr = (struct v7m_thread_ctx_regs*)
-		(memp + stacksize - sizeof(struct v7m_thread_ctx_regs));
+	struct cpu_saved_context *tcr = (struct cpu_saved_context*)
+		(memp + stacksize - sizeof(struct cpu_saved_context));
 	memset(&tcr->r0_r3__r12[1], 0, 4 * sizeof(__u32));
 	tcr->r0_r3__r12[0] = (__u32)arg;
 	tcr->lr = (__u32)pthread_exit; //FIXME: Should libc be dynamically loaded?
@@ -67,8 +68,8 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 				struct task_info *task)
 {
 	struct thread_info *thread;
-	struct v7m_kernel_ctx_regs *kcr;
-	struct v7m_thread_ctx_regs *tcr;
+	struct preserved_context *kcr;
+	struct cpu_saved_context *tcr;
 	static int thread_count = 0;
 
 	kcr = alloc_interrupt_stack();
@@ -80,9 +81,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 		free(thread);
 		return NULL;
 	}
-	thread->ti_mach.thread_ctx.regs = tcr;
-	thread->ti_mach.kernel_ctx.regs = kcr;
-	thread->ti_mach.priv = priv;
+	thread->thread_ctx.ctx = tcr;
+	thread->kernel_ctx.ctx = kcr;
+	thread->priv = priv;
 
 	/* thread_struct struct is still located in the kernel stack'page,
 	 * right after the thread_info struct. */
@@ -130,17 +131,17 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 				struct task_info *task /* will die.. */)
 {
 	struct thread_info *new;
-	struct v7m_kernel_ctx_regs *kcr;
-	struct v7m_thread_ctx_regs *tcr;
+	struct preserved_context *kcr;
+	struct cpu_saved_context *tcr;
 
 	kcr = alloc_interrupt_stack();
 	if (kcr == NULL)
 		return NULL;
 
-	struct v7m_thread_ctx_regs *other_tcr = other->ti_mach.thread_ctx.regs;
+	struct cpu_saved_context *other_tcr = other->thread_ctx.ctx;
 	tcr = alloc_thread_stack((start_routine)other_tcr->ret_addr, arg,
 				other->ti_struct->ti_stacksize);
-	memcpy(tcr, other_tcr, sizeof(struct v7m_thread_ctx_regs));
+	memcpy(tcr, other_tcr, sizeof(struct cpu_saved_context));
 	tcr->r0_r3__r12[0] = (__u32)arg;
 
 	new = THREAD_INFO(kcr);
@@ -149,9 +150,9 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 		free(new);
 		return NULL;
 	}
-	new->ti_mach.thread_ctx.regs = tcr;
-	new->ti_mach.kernel_ctx.regs = kcr;
-	new->ti_mach.priv = other->ti_mach.priv;
+	new->thread_ctx.ctx = tcr;
+	new->kernel_ctx.ctx = kcr;
+	new->priv = other->priv;
 
 	/* see comment in thread_create() */
 	new->ti_struct = (struct thread_struct *)new->ti_stacktop;
@@ -193,7 +194,7 @@ void thread_exit(void *retval)
 #endif
 
 	/* free thread stack memory */
-	free_pages(align(curr_thread->ti_mach.thread_ctx.sp, curr_thread->ti_struct->ti_stacksize),
+	free_pages(align(curr_thread->thread_ctx.sp, curr_thread->ti_struct->ti_stacksize),
 		size_to_page_order(curr_thread->ti_struct->ti_stacksize));
 
 	if (curr_thread->ti_struct->ti_detached == false) {

@@ -12,6 +12,8 @@
 #include <kernel/kernel.h>
 #include <kernel/types.h>
 
+#include <arch/thread_info.h>
+
 #include "linux/list.h"
 
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
@@ -62,31 +64,6 @@ enum thread_state {
  *   CPU. We initialize the task non-scratch registers to 0.
  */
 
-/* Restored in thread's context when switching to a new thread. */
-struct v7m_kernel_ctx_regs {
-	__u32 r4_r12[9]; /* zero-filled */
-	__u32 lr;        /* loaded with EXC_RETURN value */
-};
-
-struct v7m_thread_ctx_regs {
-	__u32 r0_r3__r12[5]; /* r0 to r3, r12; args or zero-filled */
-	__u32 lr;            /* initially loaded with pthread_exit() */
-	__u32 ret_addr;      /* thread entry-point function */
-	__u32 xpsr;          /* forced to Thumb_Mode */
-};
-
-struct v7m_thread_info {
-	union {
-		__u32 sp;                         /* msp special register */
-		struct v7m_kernel_ctx_regs *regs; /* non-scratch registers */
-	} kernel_ctx;
-	union {
-		__u32 sp;                         /* psp special register */
-		struct v7m_thread_ctx_regs *regs; /* auto-saved registers */
-	} thread_ctx;
-	__u32 priv;
-};
-
 struct task_info;
 
 struct thread_struct {
@@ -110,17 +87,6 @@ struct thread_struct {
 	/* Pointer to mutually exclusive data: the mutex the thread is blocking
 	 * on, the exit value when thread is not yet joined, etc. */
 	void               *ti_private;
-};
-
-struct thread_info {
-	struct v7m_thread_info ti_mach;
-	struct thread_struct   *ti_struct;
-
-#ifdef CONFIG_KERNEL_STACK_CHECKING
-	__u32                  ti_canary[2];
-#endif
-
-	char                   ti_stacktop[0]; /* top of kernel stack */
 };
 
 #define THREAD_SIZE 512
@@ -147,23 +113,6 @@ int thread_set_priority(struct thread_info *thread, int priority);
 int thread_detach(pthread_t thread);
 struct thread_info *thread_clone(struct thread_info *other, void *arg,
 				struct task_info *task);
-
-//FIXME: this proc should be in an asm/machine source file
-#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
-struct thread_info *current_thread_info(void);
-#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-static inline struct thread_info *current_thread_info(void)
-{
-	struct thread_info *this;
-
-	__asm__ __volatile__("mov %0, sp \n\t"
-			"bfc %0, #0, %1"
-			: "=r" (this)
-			: "M" (INTR_STACK_ORDER));
-
-	return this;
-}
-#endif
 
 #define CURRENT_THREAD_INFO(var) \
 	struct thread_info *var = current_thread_info();

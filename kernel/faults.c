@@ -1,6 +1,8 @@
 #include <kernel/faults.h>
 #include <kernel/thread.h>
 
+#include <arch/thread_info.h>
+
 #include "kernel.h"
 #include "utils.h"
 #include "platform.h"
@@ -17,8 +19,8 @@ void fault_exit(void)
 	__platform_halt();
 }
 
-void hardfault(struct v7m_kernel_ctx_regs *noscratch,
-	struct v7m_thread_ctx_regs *scratch, u32 exc_return)
+void hardfault(struct preserved_context *noscratch,
+	struct cpu_saved_context *scratch, u32 exc_return)
 {
 	fault_enter("HardFault");
 	dump_frame(noscratch, scratch, exc_return);
