@@ -5,6 +5,7 @@
  */
 
 #include <kernel/bitops.h>
+#include <kernel/sched.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 

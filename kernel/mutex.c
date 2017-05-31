@@ -6,6 +6,7 @@
 
 #include <kernel/kernel.h>
 #include <kernel/mutex.h>
+#include <kernel/sched.h>
 #include <kernel/scheduler.h>
 #include <kernel/thread.h>
 

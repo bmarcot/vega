@@ -15,6 +15,7 @@
 #include <kernel/fs.h>
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
+#include <kernel/sched.h>
 #include <kernel/task.h>
 
 struct file *fget(unsigned int fd)
