@@ -18,7 +18,7 @@
 struct file;
 
 struct task_struct {
-	struct thread_info *info;
+	union thread_union *stack; /* the kernel stack */
 
 	int                ti_priority;
 	int                ti_id;

@@ -37,7 +37,7 @@ static struct thread_info *find_next_thread(void)
 
 	struct task_struct *next =
 		list_first_entry(&pri_runq[max_pri], struct task_struct, ti_q);
-	return next->info;
+	return &next->stack->thread_info;
 }
 
 static int sched_o1_enqueue(struct thread_info *thread)

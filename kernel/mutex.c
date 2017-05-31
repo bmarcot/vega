@@ -56,14 +56,14 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 			return -1;
 		}
 		list_del(&waiter->ti_q);
-		sched_enqueue(waiter->info);
+		sched_enqueue(&waiter->stack->thread_info);
 	}
 
 	struct task_struct *current = current_thread_info()->task;
 	if (current->ti_state == THREAD_STATE_BLOCKED) {
 		sched_elect(SCHED_OPT_NONE);
 	} else if (waiter && (current->ti_priority <= waiter->ti_priority)) {
-		sched_enqueue(current->info);
+		sched_enqueue(&current->stack->thread_info);
 		sched_elect(SCHED_OPT_NONE);
 	}
 

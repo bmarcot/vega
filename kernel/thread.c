@@ -99,7 +99,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	for (int i = 0; i < FILE_MAX; i++)
 		thread->task->filetable[i] = NULL;
 
-	thread->task->info = thread;
+	thread->task->stack = (union thread_union *)thread;
 	thread->task->ti_stacksize = stacksize;
 	thread->task->ti_id = thread_count++;
 	thread->task->ti_joinable = false;
@@ -170,7 +170,7 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	for (int i = 0; i < FILE_MAX; i++)
 		new->task->filetable[i] = NULL;
 
-	new->task->info = new;
+	new->task->stack = (union thread_union *)new;
 	new->task->ti_stacksize = other->task->ti_stacksize;
 	list_add(&new->task->ti_list, &thread_head);
 
@@ -239,7 +239,7 @@ static struct thread_info *find_thread_by_id(int id)
 
 	list_for_each_entry(tp, &thread_head, ti_list) {
 		if (tp->ti_id == id)
-			return tp->info;
+			return &tp->stack->thread_info;
 	}
 
 	return NULL;
