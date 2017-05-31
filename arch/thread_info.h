@@ -21,7 +21,7 @@ struct cpu_saved_context {
 	__u32 xpsr;          /* forced to Thumb_Mode */
 };
 
-struct thread_struct;
+struct task_struct;
 
 struct thread_info {
 	union {
@@ -33,7 +33,7 @@ struct thread_info {
 		struct cpu_saved_context *ctx;
 	} thread_ctx;
 	__u32 priv;
-	struct thread_struct   *ti_struct;
+	struct task_struct     *ti_struct;
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	__u32                  ti_canary[2];
 #endif

@@ -85,9 +85,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->kernel_ctx.ctx = kcr;
 	thread->priv = priv;
 
-	/* thread_struct struct is still located in the kernel stack'page,
+	/* task_struct struct is still located in the kernel stack'page,
 	 * right after the thread_info struct. */
-	thread->ti_struct = (struct thread_struct *)thread->ti_stacktop;
+	thread->ti_struct = (struct task_struct *)thread->ti_stacktop;
 
 	thread->ti_struct->info = thread;
 	thread->ti_struct->ti_stacksize = stacksize;
@@ -155,7 +155,7 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 	new->priv = other->priv;
 
 	/* see comment in thread_create() */
-	new->ti_struct = (struct thread_struct *)new->ti_stacktop;
+	new->ti_struct = (struct task_struct *)new->ti_stacktop;
 
 	new->ti_struct->info = new;
 	new->ti_struct->ti_stacksize = other->ti_struct->ti_stacksize;
@@ -223,7 +223,7 @@ int thread_set_priority(struct thread_info *thread, int priority)
 
 static struct thread_info *find_thread_by_id(int id)
 {
-	struct thread_struct *tp;
+	struct task_struct *tp;
 	CURRENT_TASK_INFO(curr_task);
 
 	list_for_each_entry(tp, &curr_task->thread_head, ti_list) {

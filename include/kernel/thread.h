@@ -66,7 +66,7 @@ enum thread_state {
 
 struct task_info;
 
-struct thread_struct {
+struct task_struct {
 	struct thread_info *info;
 
 	int                ti_priority;
