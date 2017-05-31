@@ -42,6 +42,7 @@ void __printk_init(void);
 int minishell(void *options);
 void memdev_init(void);
 void kernel_heap_init(void *heap_start, size_t heap_size);
+int open(const char *pathname, int flags);
 
 void print_version(void)
 {
