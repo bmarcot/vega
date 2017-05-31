@@ -22,14 +22,9 @@ void task_exit(struct task_struct *task)
 	free(task);
 }
 
-struct task_struct *current_task_struct(void)
-{
-	return current_thread_info()->task;
-}
-
 int sys_getpid(void)
 {
-	return current_task_struct()->pid;
+	return get_current()->pid;
 }
 
 pid_t do_fork(void)

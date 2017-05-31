@@ -51,4 +51,10 @@ union thread_union {
 	unsigned long      stack[THREAD_SIZE / sizeof(long)];
 };
 
+//FIXME: This should go to arch/arm/asm/current.h
+static inline struct task_struct *get_current(void)
+{
+	return current_thread_info()->task;
+}
+
 #endif /* !_KERNEL_SCHED_H */

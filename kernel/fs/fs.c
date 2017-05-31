@@ -20,18 +20,16 @@
 
 struct file *fget(unsigned int fd)
 {
-	CURRENT_TASK_STRUCT(curr_task);
-
-	return curr_task->filetable[fd];
+	return get_current()->filetable[fd];
 }
 
 static struct file *fput(unsigned int fd, struct file *file)
 {
 	struct file *old_file;
-	CURRENT_TASK_STRUCT(curr_task);
+	struct task_struct *current = get_current();
 
-	old_file = curr_task->filetable[fd];
-	curr_task->filetable[fd] = file;
+	old_file = current->filetable[fd];
+	current->filetable[fd] = file;
 
 	return old_file;
 }
@@ -39,21 +37,20 @@ static struct file *fput(unsigned int fd, struct file *file)
 static int alloc_fd(void)
 {
 	int fd;
-	CURRENT_TASK_STRUCT(curr_task);
+	struct task_struct *current = get_current();
 
-	fd = find_first_zero_bit(&curr_task->filemap, FILE_MAX);
+	fd = find_first_zero_bit(&current->filemap, FILE_MAX);
 	if (fd == FILE_MAX)
 		return -1;
-	bitmap_set_bit(&curr_task->filemap, fd);
+	bitmap_set_bit(&current->filemap, fd);
 
 	return fd;
 }
 
 static void release_fd(int fd)
 {
-	CURRENT_TASK_STRUCT(curr_task);
-
-	bitmap_clear_bit(&curr_task->filemap, fd);
+	struct task_struct *current = get_current();
+	bitmap_clear_bit(&current->filemap, fd);
 }
 
 int validate_fd(unsigned int fd)

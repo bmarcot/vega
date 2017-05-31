@@ -18,9 +18,5 @@
 
 struct task_struct *task_create(void *(*start_routine)(void *), void *arg);
 void             task_exit(struct task_struct *task);
-struct task_struct *current_task_struct(void);
-
-#define CURRENT_TASK_STRUCT(var) \
-	struct task_struct *var = current_task_struct();
 
 #endif /* !_KERNEL_TASK_H */
