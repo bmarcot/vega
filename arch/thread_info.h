@@ -37,7 +37,7 @@ struct thread_info {
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	__u32                  ti_canary[2];
 #endif
-	char                   ti_stacktop[0]; /* top of kernel stack */
+	char               stackend[0];
 };
 
 #define THREAD_SIZE 512
