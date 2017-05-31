@@ -22,6 +22,8 @@
 #include "kernel.h"
 #include "platform.h"
 
+static LIST_HEAD(signal_head); /* list of installed handlers */
+
 extern void return_from_sighandler(void);
 extern void return_from_sigaction(void);
 
@@ -150,9 +152,8 @@ static struct sigaction *find_sigaction_by_sig(pid_t pid, int sig)
 	(void)pid; //XXX: Multi-tasking not implemented yet
 
 	struct signal_info *signal;
-	CURRENT_TASK_INFO(curr_task);
 
-	list_for_each_entry(signal, &curr_task->signal_head, list) {
+	list_for_each_entry(signal, &signal_head, list) {
 		if (signal->signo == sig)
 			return &signal->act_storage;
 	}
@@ -185,8 +186,7 @@ int sys_sigaction(int signo, const struct sigaction *restrict act,
 	}
 
 	signal->signo = signo;
-	CURRENT_TASK_INFO(curr_task);
-	list_add(&signal->list, &curr_task->signal_head);
+	list_add(&signal->list, &signal_head);
 	memcpy(&signal->act_storage, act, sizeof(struct sigaction));
 
 	return 0;

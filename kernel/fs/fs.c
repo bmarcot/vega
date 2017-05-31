@@ -19,7 +19,7 @@
 
 struct file *fget(unsigned int fd)
 {
-	CURRENT_TASK_INFO(curr_task);
+	CURRENT_TASK_STRUCT(curr_task);
 
 	return curr_task->filetable[fd];
 }
@@ -27,7 +27,7 @@ struct file *fget(unsigned int fd)
 static struct file *fput(unsigned int fd, struct file *file)
 {
 	struct file *old_file;
-	CURRENT_TASK_INFO(curr_task);
+	CURRENT_TASK_STRUCT(curr_task);
 
 	old_file = curr_task->filetable[fd];
 	curr_task->filetable[fd] = file;
@@ -38,7 +38,7 @@ static struct file *fput(unsigned int fd, struct file *file)
 static int alloc_fd(void)
 {
 	int fd;
-	CURRENT_TASK_INFO(curr_task);
+	CURRENT_TASK_STRUCT(curr_task);
 
 	fd = find_first_zero_bit(&curr_task->filemap, FILE_MAX);
 	if (fd == FILE_MAX)
@@ -50,7 +50,7 @@ static int alloc_fd(void)
 
 static void release_fd(int fd)
 {
-	CURRENT_TASK_INFO(curr_task);
+	CURRENT_TASK_STRUCT(curr_task);
 
 	bitmap_clear_bit(&curr_task->filemap, fd);
 }

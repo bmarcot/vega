@@ -198,11 +198,9 @@ out:
 		return err;
 
 	/* Create a new task. */
-	struct task_info *bin_task = malloc(sizeof(struct task_info));
-	task_init(bin_task);
 	struct thread_info *thread_main;
 	thread_main = thread_create((start_routine)ehdr.e_entry, NULL,
-				THREAD_PRIV_USER, 1024,	bin_task);
+				THREAD_PRIV_USER, 1024);
 	sched_enqueue(thread_main);
 
 	return 0;

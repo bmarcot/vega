@@ -27,6 +27,8 @@
 #include "utils.h"
 #include "platform.h"
 
+static LIST_HEAD(thread_head);
+
 static struct preserved_context *alloc_interrupt_stack(void)
 {
 	char *memp = alloc_pages(size_to_page_order(INTR_STACK_SIZE));
@@ -63,9 +65,10 @@ static struct cpu_saved_context *alloc_thread_stack(
 	return tcr;
 }
 
+static pid_t pid = 8000;
+
 struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
-				enum thread_privilege priv, size_t stacksize,
-				struct task_info *task)
+				enum thread_privilege priv, size_t stacksize)
 {
 	struct thread_info *thread;
 	struct preserved_context *kcr;
@@ -81,6 +84,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 		free(thread);
 		return NULL;
 	}
+
 	thread->thread_ctx.ctx = tcr;
 	thread->kernel_ctx.ctx = kcr;
 	thread->priv = priv;
@@ -89,10 +93,14 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	 * right after the thread_info struct. */
 	thread->ti_struct = (struct task_struct *)thread->ti_stacktop;
 
+	thread->ti_struct->pid = pid++;
+	thread->ti_struct->filemap = 0;
+	for (int i = 0; i < FILE_MAX; i++)
+		thread->ti_struct->filetable[i] = NULL;
+
 	thread->ti_struct->info = thread;
 	thread->ti_struct->ti_stacksize = stacksize;
 	thread->ti_struct->ti_id = thread_count++;
-	thread->ti_struct->ti_task = task;
 	thread->ti_struct->ti_joinable = false;
 	thread->ti_struct->ti_joining = NULL;
 	thread->ti_struct->ti_detached = false;
@@ -102,7 +110,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->ti_canary[0] = THREAD_CANARY0;
 	thread->ti_canary[1] = THREAD_CANARY1;
 #endif
-	list_add(&thread->ti_struct->ti_list, &task->thread_head);
+	list_add(&thread->ti_struct->ti_list, &thread_head);
 
 	return thread;
 }
@@ -113,7 +121,6 @@ static inline struct thread_info *init_thread_info(struct thread_info *thread)
 
 	thread->ti_struct->ti_stacksize = 0;
 	thread->ti_struct->ti_id = next_tid++;
-	thread->ti_struct->ti_task = NULL;
 	thread->ti_struct->ti_joinable = false;
 	thread->ti_struct->ti_joining = NULL;
 	thread->ti_struct->ti_detached = false;
@@ -127,8 +134,7 @@ static inline struct thread_info *init_thread_info(struct thread_info *thread)
 	return thread;
 }
 
-struct thread_info *thread_clone(struct thread_info *other, void *arg,
-				struct task_info *task /* will die.. */)
+struct thread_info *thread_clone(struct thread_info *other, void *arg)
 {
 	struct thread_info *new;
 	struct preserved_context *kcr;
@@ -150,6 +156,7 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 		free(new);
 		return NULL;
 	}
+
 	new->thread_ctx.ctx = tcr;
 	new->kernel_ctx.ctx = kcr;
 	new->priv = other->priv;
@@ -157,10 +164,14 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg,
 	/* see comment in thread_create() */
 	new->ti_struct = (struct task_struct *)new->ti_stacktop;
 
+	new->ti_struct->pid = pid++;
+	new->ti_struct->filemap = 0;
+	for (int i = 0; i < FILE_MAX; i++)
+		new->ti_struct->filetable[i] = NULL;
+
 	new->ti_struct->info = new;
 	new->ti_struct->ti_stacksize = other->ti_struct->ti_stacksize;
-	new->ti_struct->ti_task = task;
-	list_add(&new->ti_struct->ti_list, &task->thread_head);
+	list_add(&new->ti_struct->ti_list, &thread_head);
 
 	return new;
 }
@@ -224,9 +235,8 @@ int thread_set_priority(struct thread_info *thread, int priority)
 static struct thread_info *find_thread_by_id(int id)
 {
 	struct task_struct *tp;
-	CURRENT_TASK_INFO(curr_task);
 
-	list_for_each_entry(tp, &curr_task->thread_head, ti_list) {
+	list_for_each_entry(tp, &thread_head, ti_list) {
 		if (tp->ti_id == id)
 			return tp->info;
 	}
@@ -307,8 +317,7 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 	//FIXME: Check start_routine's address belongs to process' address-space
 	struct thread_info *thread_info =
-		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize,
-			current_task_info());
+		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
 	if (thread_info == NULL)
 		return EAGAIN; /* insufficient resources to create another thread */
 	*thread = (pthread_t)thread_info->ti_struct->ti_id;

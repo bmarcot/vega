@@ -16,21 +16,11 @@
 #define PID_BASE 7000
 #define PID_MAX  32768
 
-struct task_info {
-	pid_t            pid;
-	unsigned long    filemap;
-	struct file      *filetable[FILE_MAX];
-	struct list_head list;
-	struct list_head thread_head;
-	struct list_head signal_head; /* list of installed handlers */
-};
+struct task_struct *task_create(void *(*start_routine)(void *), void *arg);
+void             task_exit(struct task_struct *task);
+struct task_struct *current_task_struct(void);
 
-struct task_info *task_init(struct task_info *task);
-struct task_info *task_create(void *(*start_routine)(void *), void *arg);
-void             task_exit(struct task_info *task);
-struct task_info *current_task_info(void);
-
-#define CURRENT_TASK_INFO(var) \
-	struct task_info *var = current_task_info();
+#define CURRENT_TASK_STRUCT(var) \
+	struct task_struct *var = current_task_struct();
 
 #endif /* !_KERNEL_TASK_H */

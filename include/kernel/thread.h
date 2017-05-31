@@ -64,7 +64,7 @@ enum thread_state {
  *   CPU. We initialize the task non-scratch registers to 0.
  */
 
-struct task_info;
+#include <kernel/fs.h>
 
 struct task_struct {
 	struct thread_info *info;
@@ -73,7 +73,6 @@ struct task_struct {
 	int                ti_id;
 	int                ti_state;
 	int                ti_stacksize; /* thread stack's size */
-	struct task_info   *ti_task;
 
 	struct list_head   ti_list; /* global list of threads */
 	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */
@@ -87,6 +86,11 @@ struct task_struct {
 	/* Pointer to mutually exclusive data: the mutex the thread is blocking
 	 * on, the exit value when thread is not yet joined, etc. */
 	void               *ti_private;
+
+	/* old task_info struct */
+	pid_t            pid;
+	unsigned long    filemap;
+	struct file      *filetable[FILE_MAX];
 };
 
 #define THREAD_SIZE 512
@@ -104,15 +108,13 @@ void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_
 typedef void *(*start_routine)(void *);
 
 struct thread_info *thread_create(void *(*)(void *), void *,
-				enum thread_privilege, size_t,
-				struct task_info *);
+				enum thread_privilege, size_t);
 int thread_yield(void);
 int thread_self(void);
 void thread_exit(void *);
 int thread_set_priority(struct thread_info *thread, int priority);
 int thread_detach(pthread_t thread);
-struct thread_info *thread_clone(struct thread_info *other, void *arg,
-				struct task_info *task);
+struct thread_info *thread_clone(struct thread_info *other, void *arg);
 
 #define CURRENT_THREAD_INFO(var) \
 	struct thread_info *var = current_thread_info();

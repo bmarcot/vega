@@ -43,9 +43,6 @@ int minishell(void *options);
 void memdev_init(void);
 void kernel_heap_init(void *heap_start, size_t heap_size);
 
-struct task_info idle_task;
-struct task_info main_task;
-
 void print_version(void)
 {
 	char buf[] = {0, 0};
@@ -122,9 +119,7 @@ struct thread_info *start_kernel(void)
 	sched_select(SCHED_CLASS_O1);
 
 	/* idle_thread is not added to the runqueue */
-	task_init(&idle_task);
-	thread_idle = thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024,
-				&idle_task);
+	thread_idle = thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
 	if (thread_idle == NULL) {
 		printk("[!] Could not create system idle thread.\n");
 		return NULL;
@@ -134,10 +129,8 @@ struct thread_info *start_kernel(void)
 	/* The main_thread is the user's entry-point to the system.  It is not
 	 * added to the runqueue because it has been implicitly "elected" when
 	 * start_kernel() returns.    */
-	task_init(&main_task);
-	struct thread_info *thread_main = thread_create(main, NULL,
-							THREAD_PRIV_USER, 1024,
-							&main_task);
+	struct thread_info *thread_main =
+		thread_create(main, NULL, THREAD_PRIV_USER, 1024);
 	if (thread_main == NULL) {
 		printk("[!] Could not create user main thread.\n");
 		return NULL;
