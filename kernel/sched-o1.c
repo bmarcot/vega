@@ -41,7 +41,7 @@ static struct thread_info *find_next_thread(void)
 
 static int sched_o1_enqueue(struct thread_info *thread)
 {
-	struct task_struct *task_struct = thread->ti_struct;
+	struct task_struct *task_struct = thread->task;
 
 	list_add_tail(&task_struct->ti_q, &pri_runq[task_struct->ti_priority]);
 	bitmap_set_bit(&pri_bitmap, task_struct->ti_priority);
@@ -56,7 +56,7 @@ static int sched_o1_dequeue(struct thread_info *thread)
 	if (thread == curr_thread)
 		return 0;
 
-	struct task_struct *task_struct = thread->ti_struct;
+	struct task_struct *task_struct = thread->task;
 	list_del(&task_struct->ti_q);
 	if (list_empty(&pri_runq[task_struct->ti_priority]))
 		bitmap_clear_bit(&pri_bitmap, task_struct->ti_priority);
@@ -68,7 +68,7 @@ static int sched_o1_elect(int flags)
 {
 	struct thread_info *next_thread = find_next_thread();
 	if (next_thread != thread_idle) {  // idle_thread
-		struct task_struct *task_struct = next_thread->ti_struct;
+		struct task_struct *task_struct = next_thread->task;
 		list_del(&task_struct->ti_q);
 		if (list_empty(&pri_runq[task_struct->ti_priority]))
 			bitmap_clear_bit(&pri_bitmap, task_struct->ti_priority);

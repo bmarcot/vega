@@ -23,16 +23,12 @@ void task_exit(struct task_struct *task)
 
 struct task_struct *current_task_struct(void)
 {
-	CURRENT_THREAD_INFO(curr_thread);
-
-	return curr_thread->ti_struct; //FIXME: current->task
+	return current_thread_info()->task;
 }
 
 int sys_getpid(void)
 {
-	CURRENT_TASK_STRUCT(curr_task);
-
-	return curr_task->pid;
+	return current_task_struct()->pid;
 }
 
 pid_t do_fork(void)
@@ -51,7 +47,7 @@ pid_t do_fork(void)
 		thread_clone(parent_thread, 0);
 	sched_enqueue(child_thread);
 
-	return child_thread->ti_struct->pid;
+	return child_thread->task->pid;
 }
 
 pid_t sys_fork(void)

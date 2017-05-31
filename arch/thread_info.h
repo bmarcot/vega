@@ -33,7 +33,7 @@ struct thread_info {
 		struct cpu_saved_context *ctx;
 	} thread_ctx;
 	__u32 priv;
-	struct task_struct     *ti_struct;
+	struct task_struct *task;
 #ifdef CONFIG_KERNEL_STACK_CHECKING
 	__u32                  ti_canary[2];
 #endif

@@ -21,7 +21,7 @@ int sys_pthread_mutex_lock(kernel_mutex_t *mutex)
 	if (!mutex->val)
 		return 0;
 
-	struct task_struct *current = current_thread_info()->ti_struct;
+	struct task_struct *current = current_thread_info()->task;
 	current->ti_private = mutex;
 	current->ti_state = THREAD_STATE_BLOCKED;
 	list_add_tail(&current->ti_q, &mutex_head);
@@ -58,7 +58,7 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 		sched_enqueue(waiter->info);
 	}
 
-	struct task_struct *current = current_thread_info()->ti_struct;
+	struct task_struct *current = current_thread_info()->task;
 	if (current->ti_state == THREAD_STATE_BLOCKED) {
 		sched_elect(SCHED_OPT_NONE);
 	} else if (waiter && (current->ti_priority <= waiter->ti_priority)) {
