@@ -17,6 +17,5 @@
 #define PID_MAX  32768
 
 struct task_struct *task_create(void *(*start_routine)(void *), void *arg);
-void             task_exit(struct task_struct *task);
 
 #endif /* !_KERNEL_TASK_H */

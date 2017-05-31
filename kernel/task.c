@@ -15,13 +15,6 @@
 
 static LIST_HEAD(task_head);
 
-void task_exit(struct task_struct *task)
-{
-	// this is called after last thread has exited, or when the
-	// task is killed
-	free(task);
-}
-
 int sys_getpid(void)
 {
 	return get_current()->pid;
