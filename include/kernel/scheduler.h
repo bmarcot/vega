@@ -27,9 +27,11 @@ struct sched {
 	int (*elect)(int switch_type);
 };
 
+struct task_struct;
+
 int sched_select(int sched_type);
-int sched_enqueue(struct thread_info *thread);
-int sched_dequeue(struct thread_info *thread);
+int sched_enqueue(struct task_struct *task);
+int sched_dequeue(struct task_struct *task);
 int sched_elect(int flags);
 
 #endif /* !KERNEL_SCHEDULER_H */

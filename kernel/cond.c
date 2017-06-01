@@ -48,11 +48,11 @@ int sys_pthread_cond_signal(pthread_cond_t *cond)
 	if (other == NULL)
 		return 0;
 	list_del(&other->ti_q);
-	sched_enqueue(&other->stack->thread_info);
+	sched_enqueue(other);
 
 	struct task_struct *current = current_thread_info()->task;
 	if (other->ti_priority >= current->ti_priority) {
-		sched_enqueue(&current->stack->thread_info);
+		sched_enqueue(current);
 		sched_elect(SCHED_OPT_NONE);
 	}
 

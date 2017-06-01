@@ -201,7 +201,7 @@ out:
 	struct thread_info *thread_main;
 	thread_main = thread_create((start_routine)ehdr.e_entry, NULL,
 				THREAD_PRIV_USER, 1024);
-	sched_enqueue(thread_main);
+	sched_enqueue(thread_main->task);
 
 	return 0;
 }

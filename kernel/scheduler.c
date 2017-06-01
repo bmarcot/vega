@@ -19,16 +19,16 @@ int sched_select(int sched_type)
 	return sched->init();
 }
 
-int sched_enqueue(struct thread_info *thread)
+int sched_enqueue(struct task_struct *task)
 {
-	thread->task->ti_state = THREAD_STATE_READY;
+	task->ti_state = THREAD_STATE_READY;
 
-	return sched->enqueue(thread);
+	return sched->enqueue(&task->stack->thread_info);
 }
 
-int sched_dequeue(struct thread_info *thread)
+int sched_dequeue(struct task_struct *task)
 {
-	return sched->dequeue(thread);
+	return sched->dequeue(&task->stack->thread_info);
 }
 
 int sched_elect(int flags)
