@@ -1,7 +1,7 @@
 /*
  * include/kernel/sched.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2016-2017 Baruch Marcot
  */
 
 #ifndef _KERNEL_SCHED_H
@@ -12,6 +12,29 @@
 #include <arch/thread_info.h>
 
 #include "linux/list.h"
+
+/*
+ * Scheduling
+ */
+
+/* 0 <= PRI_MAX <= PRI_MIN */
+#define PRI_MAX    0
+#define PRI_MIN    31
+
+#define SCHED_OPT_NONE            0
+#define SCHED_OPT_RESTORE_ONLY    1
+#define SCHED_OPT_RESET           2
+
+struct task_struct;
+
+int sched_init(void);
+int sched_enqueue(struct task_struct *task);
+int sched_dequeue(struct task_struct *task);
+int sched_elect(int flags);
+
+/*
+ * Tasking
+ */
 
 #define FILE_MAX 8
 

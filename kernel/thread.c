@@ -20,7 +20,6 @@
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
-#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 #include <kernel/task.h>
 #include <kernel/types.h>

@@ -11,7 +11,7 @@
 #include <kernel/errno-base.h> //FIXME: <uapi/...>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
-#include <kernel/scheduler.h>
+#include <kernel/sched.h>
 #include <kernel/task.h>
 #include <kernel/thread.h>
 

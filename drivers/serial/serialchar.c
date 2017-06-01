@@ -7,7 +7,7 @@
 #include <sys/types.h>
 
 #include <kernel/fs.h>
-#include <kernel/scheduler.h>
+#include <kernel/sched.h>
 #include <kernel/serial.h>
 #include <kernel/thread.h>
 

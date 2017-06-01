@@ -1,16 +1,15 @@
 /*
  * kernel/sched-o1.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <kernel/bitops.h>
+#include <kernel/kernel.h>
 #include <kernel/sched.h>
-#include <kernel/scheduler.h>
 #include <kernel/thread.h>
 
 #include "linux/list.h"
-#include "kernel.h"
 
 extern struct thread_info *thread_idle;
 
@@ -84,9 +83,32 @@ static int sched_o1_elect(int flags)
 	return 0;
 }
 
-const struct sched sched_o1 = {
-	.init = sched_o1_init,
-	.enqueue = sched_o1_enqueue,
-	.dequeue = sched_o1_dequeue,
-	.elect = sched_o1_elect
-};
+int sched_enqueue(struct task_struct *task)
+{
+	task->ti_state = THREAD_STATE_READY;
+
+	return sched_o1_enqueue(&task->stack->thread_info);
+}
+
+int sched_dequeue(struct task_struct *task)
+{
+	return sched_o1_dequeue(&task->stack->thread_info);
+}
+
+int sched_elect(int flags)
+{
+	int r;
+	CURRENT_THREAD_INFO(cur_thread);
+
+	KERNEL_STACK_CHECKING;
+
+	r = sched_o1_elect(flags);
+	cur_thread->task->ti_state = THREAD_STATE_RUNNING;
+
+	return r;
+}
+
+int sched_init(void)
+{
+	return sched_o1_init();
+}

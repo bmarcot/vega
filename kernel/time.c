@@ -11,7 +11,7 @@
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
-#include <kernel/scheduler.h>
+#include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
 #include <kernel/time.h>
