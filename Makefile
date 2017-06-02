@@ -20,7 +20,8 @@ include target/$(TARGET)/Makefile
 CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	-Iinclude/kernel -D_POSIX_THREADS=1 -D_POSIX_TIMERS=1 -D_POSIX_REALTIME_SIGNALS=1 \
 	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color \
-	-ffunction-sections -fdata-sections -Os
+	-ffunction-sections -fdata-sections -Os \
+	-DCONFIG_THREAD_INFO_IN_TASK \
 
 LDFLAGS += -nostartfiles -specs=nano.specs \
 	-Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections
