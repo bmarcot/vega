@@ -28,7 +28,7 @@ static struct task_struct *find_other_thread(pthread_cond_t *cond)
 
 int sys_pthread_cond_wait(pthread_cond_t *cond, kernel_mutex_t *mutex)
 {
-	struct task_struct *current = current_thread_info()->task;
+	struct task_struct *current = get_current();
 
 	current->ti_private = cond;
 	current->ti_state = THREAD_STATE_BLOCKED;
@@ -49,7 +49,7 @@ int sys_pthread_cond_signal(pthread_cond_t *cond)
 	list_del(&other->ti_q);
 	sched_enqueue(other);
 
-	struct task_struct *current = current_thread_info()->task;
+	struct task_struct *current = get_current();
 	if (other->ti_priority >= current->ti_priority) {
 		sched_enqueue(current);
 		sched_elect(SCHED_OPT_NONE);

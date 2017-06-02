@@ -106,7 +106,7 @@ int sched_init(void)
 		pr_err("Could not create the idle task");
 		return -1;
 	}
-	idle_task = it->task;
+	idle_task = TASK_STRUCT(it);
 	pr_info("Created idle_thread at <%p> with pid=%d", it, idle_task->pid);
 
 	return 0;

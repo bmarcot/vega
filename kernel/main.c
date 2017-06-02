@@ -123,7 +123,7 @@ struct thread_info *start_kernel(void)
 		return NULL;
 	}
 	pr_info("Created main_thread at <%p> with priority=%d", thread_main,
-		thread_main->task->ti_priority);
+		TASK_STRUCT(thread_main)->ti_priority);
 
 	/* Reclaim the early-stack physical memory.  In the current context, no
 	 * page allocation after this point are allowed.    */

@@ -33,9 +33,7 @@ struct thread_info {
 		struct cpu_saved_context *ctx;
 	} thread_ctx;
 	__u32 priv;
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-	struct task_struct task[0];
-#else
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 	struct task_struct *task;
 #endif
 };

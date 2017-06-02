@@ -27,9 +27,9 @@ pid_t do_fork(void)
 
 	/* add a thread to child process */
 	struct thread_info *child_thread = thread_clone(parent_thread, 0);
-	sched_enqueue(child_thread->task);
+	sched_enqueue(TASK_STRUCT(child_thread));
 
-	return child_thread->task->pid;
+	return TASK_STRUCT(child_thread)->pid;
 }
 
 pid_t sys_fork(void)

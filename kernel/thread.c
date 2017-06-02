@@ -90,7 +90,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 	/* task_struct struct is still located in the kernel stack'page,
 	 * right after the thread_info struct. */
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 	thread->task = (struct task_struct *)(thread + 1);
+#endif
 
 	struct task_struct *task = TASK_STRUCT(thread);
 	task->pid = pid++;
@@ -98,7 +100,9 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
 
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 	task->thread_info = thread;
+#endif
 	task->ti_stacksize = stacksize;
 	task->ti_id = thread_count++;
 	task->ti_joinable = false;
@@ -156,7 +160,9 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	new->priv = other->priv;
 
 	/* see comment in thread_create() */
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 	new->task = (struct task_struct *)(new + 1);
+#endif
 
 	struct task_struct *task = TASK_STRUCT(new);
 	task->pid = pid++;
@@ -164,7 +170,9 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
 
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 	task->thread_info = new;
+#endif
 	task->ti_stacksize = other_task->ti_stacksize;
 	list_add(&task->ti_list, &thread_head);
 
@@ -179,15 +187,14 @@ int thread_yield(void)
 #endif /* DEBUG */
 
 	//FIXME: elect iff there is a higher-priority thread ready to run
-	CURRENT_THREAD_INFO(curr_thread);
-	sched_enqueue(curr_thread->task);
+	sched_enqueue(get_current());
 
 	return sched_elect(SCHED_OPT_NONE);
 }
 
 int thread_self(void)
 {
-	return current_thread_info()->task->ti_id;
+	return get_current()->ti_id;
 }
 
 void thread_exit(void *retval)
@@ -200,15 +207,16 @@ void thread_exit(void *retval)
 #endif
 
 	/* free thread stack memory */
-	free_pages(align(curr_thread->thread_ctx.sp, curr_thread->task->ti_stacksize),
-		size_to_page_order(curr_thread->task->ti_stacksize));
+	struct task_struct *current = get_current();
+	free_pages(align(curr_thread->thread_ctx.sp, current->ti_stacksize),
+		size_to_page_order(current->ti_stacksize));
 
-	if (curr_thread->task->ti_detached == false) {
-		curr_thread->task->ti_retval = retval;
-		if (curr_thread->task->ti_joining)
-			sched_enqueue(curr_thread->task->ti_joining->task);
+	if (current->ti_detached == false) {
+		current->ti_retval = retval;
+		if (current->ti_joining)
+			sched_enqueue(TASK_STRUCT(current->ti_joining));
 		else
-			curr_thread->task->ti_joinable = true;
+			current->ti_joinable = true;
 	} else {
 		/* We are freeing the stack we are running on, no kernel preemption
 		 * is allowed until we call sched_elect().  */
@@ -222,7 +230,7 @@ void thread_exit(void *retval)
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
-	thread->task->ti_priority = priority;
+	TASK_STRUCT(thread)->ti_priority = priority;
 
 	return 0;
 }
@@ -233,7 +241,7 @@ static struct thread_info *find_thread_by_id(int id)
 
 	list_for_each_entry(tp, &thread_head, ti_list) {
 		if (tp->ti_id == id)
-			return tp->thread_info;
+			return task_thread_info(tp);
 	}
 
 	return NULL;
@@ -246,19 +254,21 @@ int thread_join(pthread_t thread, void **retval)
 	other = find_thread_by_id(thread);
 	if (other == NULL)
 		return -ESRCH;  /* No thread with the ID thread could be found. */
-	if (other->task->ti_detached == true)
+
+	struct task_struct *other_task = TASK_STRUCT(other);
+	if (other_task->ti_detached == true)
 		return -EINVAL;  /* thread is not a joinable thread. */
 
 	/* the other thread is not yet joinable, the current thread blocks */
-	if (other->task->ti_joinable == false) {
+	if (other_task->ti_joinable == false) {
 		CURRENT_THREAD_INFO(curr_thread);
-		if (other->task->ti_joining)
+		if (other_task->ti_joining)
 			return -EINVAL;  /* Another thread is already waiting to
 					    join with this thread. */
-		other->task->ti_joining = curr_thread;
+		other_task->ti_joining = curr_thread;
 		sched_elect(SCHED_OPT_NONE);
 	}
-	*retval = other->task->ti_retval;
+	*retval = other_task->ti_retval;
 
 	//XXX: free other's resources, interrupt stack
 
@@ -270,7 +280,7 @@ int thread_detach(pthread_t thread)
 	struct thread_info *thread_info;
 
 	thread_info = find_thread_by_id(thread);
-	thread_info->task->ti_detached = true;
+	TASK_STRUCT(thread_info)->ti_detached = true;
 
 	return 0;
 }
@@ -315,8 +325,8 @@ int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
 	if (thread_info == NULL)
 		return EAGAIN; /* insufficient resources to create another thread */
-	*thread = (pthread_t)thread_info->task->ti_id;
-	sched_enqueue(thread_info->task);
+	*thread = (pthread_t)(TASK_STRUCT(thread_info)->ti_id);
+	sched_enqueue(TASK_STRUCT(thread_info));
 
 	return 0;
 }

@@ -74,19 +74,27 @@ struct task_struct {
 //FIXME: This should go to arch/arm/asm/current.h
 static inline struct task_struct *get_current(void)
 {
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+	return (struct task_struct *)current_thread_info();
+#else
 	return current_thread_info()->task;
+#endif
 }
 
 static inline struct thread_info *task_thread_info(struct task_struct *task)
 {
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+	return &task->thread_info;
+#else
 	return task->thread_info;
+#endif
 }
 
 //XXX: Will die...
 static inline struct task_struct *TASK_STRUCT(struct thread_info *ti)
 {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
-	return (struct task_struct *)(ti + 1);
+	return (struct task_struct *)ti;
 #else
 	return ti->task;
 #endif

@@ -24,10 +24,9 @@ extern struct task_struct *idle_task;
 
 static void msleep_callback(struct timer_info *timer)
 {
-	sched_enqueue(timer->owner->task);
-	CURRENT_THREAD_INFO(curr_thread);
-	if (curr_thread->task != idle_task)
-		sched_enqueue(curr_thread->task);
+	sched_enqueue(TASK_STRUCT(timer->owner));
+	if (get_current() != idle_task)
+		sched_enqueue(get_current());
 	sched_elect(SCHED_OPT_NONE);
 	timer->disarmed = 1;
 }
@@ -47,7 +46,7 @@ int sys_msleep(unsigned int msec)
 	struct timespec value = { .tv_sec  = msec / 1000,
 				  .tv_nsec = (msec % 1000) * 1000000 };
 	timer_set(timer, &value);
-	sched_dequeue(curr_thread->task);
+	sched_dequeue(TASK_STRUCT(curr_thread));
 	sched_elect(SCHED_OPT_NONE);
 	timer_free(timer);
 
