@@ -13,7 +13,6 @@
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
-#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include "platform.h"

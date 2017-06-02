@@ -17,7 +17,6 @@
 #include <kernel/errno-base.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
-#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include "kernel.h"

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 
 #include <kernel/sched.h>
-#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include "linux/list.h"

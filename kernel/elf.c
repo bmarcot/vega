@@ -12,7 +12,6 @@
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
-#include <kernel/task.h>
 #include <kernel/thread.h>
 
 #include <lib/array.h>
