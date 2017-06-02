@@ -55,6 +55,16 @@ int sched_dequeue(struct task_struct *task)
 	return 0;
 }
 
+static inline __always_inline void
+context_switch(struct task_struct *next, struct task_struct *prev)
+{
+	if (prev == NULL)
+		thread_restore(&next->stack->thread_info);  // switch_to_restore_only
+	else
+		switch_to(&next->stack->thread_info,
+			&prev->stack->thread_info);
+}
+
 int sched_elect(int flags)
 {
 	KERNEL_STACK_CHECKING;
@@ -68,10 +78,9 @@ int sched_elect(int flags)
 
 	struct task_struct *current = get_current();
 	if (flags & SCHED_OPT_RESTORE_ONLY)
-		thread_restore(&next->stack->thread_info);  // switch_to_restore_only
+		context_switch(next, NULL);
 	else
-		switch_to(&next->stack->thread_info,
-			&current->stack->thread_info);
+		context_switch(next, current);
 	current->ti_state = THREAD_STATE_RUNNING;
 
 	return 0;
