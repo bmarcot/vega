@@ -1,17 +1,13 @@
 /*
- * kernel/task.c
+ * kernel/fork.c
  *
  * Copyright (c) 2017 Benoit Marcot
  */
-
-#include <stdlib.h>
 
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 
 #include "linux/list.h"
-
-static LIST_HEAD(task_head);
 
 int sys_getpid(void)
 {
@@ -30,8 +26,7 @@ pid_t do_fork(void)
 	parent_thread->thread_ctx.sp = __get_PSP();
 
 	/* add a thread to child process */
-	struct thread_info *child_thread =
-		thread_clone(parent_thread, 0);
+	struct thread_info *child_thread = thread_clone(parent_thread, 0);
 	sched_enqueue(child_thread->task);
 
 	return child_thread->task->pid;
