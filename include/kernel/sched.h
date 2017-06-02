@@ -82,4 +82,14 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 	return task->thread_info;
 }
 
+//XXX: Will die...
+static inline struct task_struct *TASK_STRUCT(struct thread_info *ti)
+{
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+	return (struct task_struct *)(ti + 1);
+#else
+	return ti->task;
+#endif
+}
+
 #endif /* !_KERNEL_SCHED_H */

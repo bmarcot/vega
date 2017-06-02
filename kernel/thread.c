@@ -92,20 +92,21 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	 * right after the thread_info struct. */
 	thread->task = (struct task_struct *)(thread + 1);
 
-	thread->task->pid = pid++;
-	thread->task->filemap = 0;
+	struct task_struct *task = TASK_STRUCT(thread);
+	task->pid = pid++;
+	task->filemap = 0;
 	for (int i = 0; i < FILE_MAX; i++)
-		thread->task->filetable[i] = NULL;
+		task->filetable[i] = NULL;
 
-	thread->task->thread_info = thread;
-	thread->task->ti_stacksize = stacksize;
-	thread->task->ti_id = thread_count++;
-	thread->task->ti_joinable = false;
-	thread->task->ti_joining = NULL;
-	thread->task->ti_detached = false;
-	thread->task->ti_priority = PRI_MIN;
-	thread->task->ti_state = THREAD_STATE_NEW;
-	list_add(&thread->task->ti_list, &thread_head);
+	task->thread_info = thread;
+	task->ti_stacksize = stacksize;
+	task->ti_id = thread_count++;
+	task->ti_joinable = false;
+	task->ti_joining = NULL;
+	task->ti_detached = false;
+	task->ti_priority = PRI_MIN;
+	task->ti_state = THREAD_STATE_NEW;
+	list_add(&task->ti_list, &thread_head);
 
 	return thread;
 }
@@ -113,14 +114,15 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 static inline struct thread_info *init_thread_info(struct thread_info *thread)
 {
 	static int next_tid = 3000;
+	struct task_struct *task = TASK_STRUCT(thread);
 
-	thread->task->ti_stacksize = 0;
-	thread->task->ti_id = next_tid++;
-	thread->task->ti_joinable = false;
-	thread->task->ti_joining = NULL;
-	thread->task->ti_detached = false;
-	thread->task->ti_priority = PRI_MIN;
-	thread->task->ti_state = THREAD_STATE_NEW;
+	task->ti_stacksize = 0;
+	task->ti_id = next_tid++;
+	task->ti_joinable = false;
+	task->ti_joining = NULL;
+	task->ti_detached = false;
+	task->ti_priority = PRI_MIN;
+	task->ti_state = THREAD_STATE_NEW;
 
 	return thread;
 }
@@ -135,9 +137,10 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	if (kcr == NULL)
 		return NULL;
 
+	struct task_struct *other_task = TASK_STRUCT(other);
 	struct cpu_saved_context *other_tcr = other->thread_ctx.ctx;
 	tcr = alloc_thread_stack((start_routine)other_tcr->ret_addr, arg,
-				other->task->ti_stacksize);
+				other_task->ti_stacksize);
 	memcpy(tcr, other_tcr, sizeof(struct cpu_saved_context));
 	tcr->r0_r3__r12[0] = (__u32)arg;
 
@@ -155,14 +158,15 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	/* see comment in thread_create() */
 	new->task = (struct task_struct *)(new + 1);
 
-	new->task->pid = pid++;
-	new->task->filemap = 0;
+	struct task_struct *task = TASK_STRUCT(new);
+	task->pid = pid++;
+	task->filemap = 0;
 	for (int i = 0; i < FILE_MAX; i++)
-		new->task->filetable[i] = NULL;
+		task->filetable[i] = NULL;
 
-	new->task->thread_info = new;
-	new->task->ti_stacksize = other->task->ti_stacksize;
-	list_add(&new->task->ti_list, &thread_head);
+	task->thread_info = new;
+	task->ti_stacksize = other_task->ti_stacksize;
+	list_add(&task->ti_list, &thread_head);
 
 	return new;
 }
