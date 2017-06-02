@@ -59,10 +59,9 @@ static inline __always_inline void
 context_switch(struct task_struct *next, struct task_struct *prev)
 {
 	if (prev == NULL)
-		thread_restore(&next->stack->thread_info);  // switch_to_restore_only
+		thread_restore(task_thread_info(next));  // switch_to_restore_only
 	else
-		switch_to(&next->stack->thread_info,
-			&prev->stack->thread_info);
+		switch_to(task_thread_info(next), task_thread_info(prev));
 }
 
 int sched_elect(int flags)

@@ -44,7 +44,7 @@ struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	struct thread_info thread_info;
 #else
-	union thread_union *stack; /* the kernel stack */
+	struct thread_info  *thread_info; /* the kernel stack */
 #endif
 
 	int                ti_priority;
@@ -71,17 +71,15 @@ struct task_struct {
 	struct file      *filetable[FILE_MAX];
 };
 
-#define THREAD_SIZE 512
-
-union thread_union {
-	struct thread_info thread_info;
-	unsigned long      stack[THREAD_SIZE / sizeof(long)];
-};
-
 //FIXME: This should go to arch/arm/asm/current.h
 static inline struct task_struct *get_current(void)
 {
 	return current_thread_info()->task;
+}
+
+static inline struct thread_info *task_thread_info(struct task_struct *task)
+{
+	return task->thread_info;
 }
 
 #endif /* !_KERNEL_SCHED_H */
