@@ -34,8 +34,6 @@ extern char __heap_start__;
 extern char __heap_end__;
 extern char __heap_size__;
 
-void __do_idle(void);
-void *do_idle(void *);
 int mtdchar_init(void);
 void __printk_init(void);
 int minishell(void *options);
@@ -61,8 +59,6 @@ void __weak_symbol *main(__unused void *arg)
 
 	return 0;
 }
-
-struct thread_info *thread_idle;
 
 /* Cortex-M3 & Cortex-M4 system initialization */
 #if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
@@ -117,14 +113,6 @@ struct thread_info *start_kernel(void)
 
 	sched_init();
 
-	/* idle_thread is not added to the runqueue */
-	thread_idle = thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
-	if (thread_idle == NULL) {
-		printk("[!] Could not create system idle thread.\n");
-		return NULL;
-	}
-	pr_info("Created idle_thread at <%p>", thread_idle);
-
 	/* The main_thread is the user's entry-point to the system.  It is not
 	 * added to the runqueue because it has been implicitly "elected" when
 	 * start_kernel() returns.    */
@@ -155,10 +143,4 @@ struct thread_info *start_kernel(void)
 	printk("Kernel bootstrap done.\n--\n");
 
 	return thread_main;
-}
-
-void *do_idle(__unused void *arg)
-{
-	for (;;)
-		__do_idle();
 }

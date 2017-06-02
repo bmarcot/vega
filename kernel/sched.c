@@ -11,7 +11,7 @@
 
 #include "linux/list.h"
 
-extern struct thread_info *thread_idle;
+extern struct task_struct *idle_task;
 
 static unsigned long pri_bitmap;
 static struct list_head pri_runq[32];
@@ -23,7 +23,7 @@ static struct task_struct *pick_next_task(void)
 
 	/* all runqueues are empty, return the idle_thread */
 	if (max_pri == 32)
-		return thread_idle->task;  //FIXME: idle_task
+		return idle_task;
 
 	struct task_struct *next =
 		list_first_entry(&pri_runq[max_pri], struct task_struct, ti_q);
@@ -70,7 +70,7 @@ int sched_elect(int flags)
 	KERNEL_STACK_CHECKING;
 
 	struct task_struct *next = pick_next_task();
-	if (next != thread_idle->task) {  //FIXME: idle_task
+	if (next != idle_task) {
 		list_del(&next->ti_q);
 		if (list_empty(&pri_runq[next->ti_priority]))
 			bitmap_clear_bit(&pri_bitmap, next->ti_priority);
@@ -86,10 +86,31 @@ int sched_elect(int flags)
 	return 0;
 }
 
+struct task_struct *idle_task;
+
+void __do_idle(void);
+
+void *do_idle(__unused void *arg)
+{
+	for (;;)
+		__do_idle();
+}
+
 int sched_init(void)
 {
+	/* initialize the runqueues */
 	for (int i = PRI_MAX; i <= PRI_MIN; i++)
 		INIT_LIST_HEAD(&pri_runq[i]);
+
+	/* idle_task is not added to the runqueue */
+	struct thread_info *it =
+		thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
+	if (it == NULL) {
+		pr_err("Could not create the idle task");
+		return -1;
+	}
+	idle_task = it->task;
+	pr_info("Created idle_thread at <%p> with pid=%d", it, idle_task->pid);
 
 	return 0;
 }

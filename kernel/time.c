@@ -20,13 +20,13 @@
 
 //XXX: sleep() is part of <unistd.h>, but nanosleep() is part of <time.h>
 
-extern struct thread_info *thread_idle;
+extern struct task_struct *idle_task;
 
 static void msleep_callback(struct timer_info *timer)
 {
 	sched_enqueue(timer->owner->task);
 	CURRENT_THREAD_INFO(curr_thread);
-	if (curr_thread != thread_idle)
+	if (curr_thread->task != idle_task)
 		sched_enqueue(curr_thread->task);
 	sched_elect(SCHED_OPT_NONE);
 	timer->disarmed = 1;
