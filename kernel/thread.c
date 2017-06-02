@@ -90,7 +90,7 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 
 	/* task_struct struct is still located in the kernel stack'page,
 	 * right after the thread_info struct. */
-	thread->task = (struct task_struct *)thread->stackend;
+	thread->task = (struct task_struct *)(thread + 1);
 
 	thread->task->pid = pid++;
 	thread->task->filemap = 0;
@@ -153,7 +153,7 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	new->priv = other->priv;
 
 	/* see comment in thread_create() */
-	new->task = (struct task_struct *)new->stackend;
+	new->task = (struct task_struct *)(new + 1);
 
 	new->task->pid = pid++;
 	new->task->filemap = 0;

@@ -38,7 +38,6 @@ struct thread_info {
 #else
 	struct task_struct *task;
 #endif
-	char               stackend[0];
 };
 
 #define THREAD_SIZE 512
