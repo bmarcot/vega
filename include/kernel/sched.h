@@ -41,7 +41,11 @@ int sched_elect(int flags);
 struct file;
 
 struct task_struct {
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+	struct thread_info thread_info;
+#else
 	union thread_union *stack; /* the kernel stack */
+#endif
 
 	int                ti_priority;
 	int                ti_id;
