@@ -67,8 +67,6 @@ context_switch(struct task_struct *next, struct task_struct *prev)
 
 int sched_elect(int flags)
 {
-	KERNEL_STACK_CHECKING;
-
 	struct task_struct *next = pick_next_task();
 	if (next != idle_task) {
 		list_del(&next->ti_q);

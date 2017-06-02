@@ -87,22 +87,4 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg);
 	({ (struct thread_info *)align((unsigned long)addr,	\
 					INTR_STACK_SIZE); })
 
-#define THREAD_CANARY0 0xee48a608
-#define THREAD_CANARY1 0x840dc3bc
-
-#ifdef CONFIG_KERNEL_STACK_CHECKING
-#  define KERNEL_STACK_CHECKING  ({					\
-	__auto_type cur_thread = current_thread_info();			\
-	if ((cur_thread->ti_canary[0] != THREAD_CANARY0)		\
-	    || (cur_thread->ti_canary[1] != THREAD_CANARY1)) {		\
-		printk("\nkernel panic: Overflow in kernel stack\n");	\
-		printk("  0  %08x  %08x\n", THREAD_CANARY0, cur_thread->ti_canary[0]); \
-		printk("  1  %08x  %08x\n", THREAD_CANARY1, cur_thread->ti_canary[1]); \
-		for (;;)						\
-			;						\
-	} })
-#else
-#  define KERNEL_STACK_CHECKING
-#endif
-
 #endif /* !_KERNEL_THREAD_H */

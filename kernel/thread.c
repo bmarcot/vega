@@ -105,10 +105,6 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 	thread->task->ti_detached = false;
 	thread->task->ti_priority = PRI_MIN;
 	thread->task->ti_state = THREAD_STATE_NEW;
-#ifdef CONFIG_KERNEL_STACK_CHECKING
-	thread->ti_canary[0] = THREAD_CANARY0;
-	thread->ti_canary[1] = THREAD_CANARY1;
-#endif
 	list_add(&thread->task->ti_list, &thread_head);
 
 	return thread;
@@ -125,10 +121,6 @@ static inline struct thread_info *init_thread_info(struct thread_info *thread)
 	thread->task->ti_detached = false;
 	thread->task->ti_priority = PRI_MIN;
 	thread->task->ti_state = THREAD_STATE_NEW;
-#ifdef CONFIG_KERNEL_STACK_CHECKING
-	thread->ti_canary[0] = THREAD_CANARY0;
-	thread->ti_canary[1] = THREAD_CANARY1;
-#endif
 
 	return thread;
 }
