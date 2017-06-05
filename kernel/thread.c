@@ -26,7 +26,7 @@
 #include "utils.h"
 #include "platform.h"
 
-static LIST_HEAD(thread_head);
+/* static */ LIST_HEAD(thread_head);
 
 static struct preserved_context *alloc_interrupt_stack(void)
 {
