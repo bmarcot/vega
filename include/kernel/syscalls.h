@@ -42,5 +42,6 @@
 #define SYS_GETPID 28
 #define SYS_MMAP 29
 #define SYS_MUNMAP 30
+#define SYS_CLONE 31
 
 #endif /* !KERNEL_SYSCALLS_H */

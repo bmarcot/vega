@@ -43,6 +43,9 @@ xs = [
     # <sys/mman.h>
     'mmap',
     'munmap',
+
+    # Linux
+    'clone',
 ]
 
 import datetime
