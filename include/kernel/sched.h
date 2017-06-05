@@ -100,4 +100,9 @@ static inline struct task_struct *TASK_STRUCT(struct thread_info *ti)
 #endif
 }
 
+int init_task(struct task_struct *task);
+
+int arch_thread_setup(struct task_struct *task, void *start_routine,
+		void *arg, void *stack_start);
+
 #endif /* !_KERNEL_SCHED_H */

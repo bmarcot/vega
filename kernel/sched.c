@@ -111,3 +111,28 @@ int sched_init(void)
 
 	return 0;
 }
+
+extern struct list_head thread_head;
+
+int init_task(struct task_struct *task)
+{
+	static int next_tid = 3000;
+	static int pid = 9000;
+
+	task->ti_stacksize = 256;
+	task->ti_id = next_tid++;
+	task->ti_joinable = false;
+	task->ti_joining = NULL;
+	task->ti_detached = false;
+	task->ti_priority = PRI_MIN;
+	task->ti_state = THREAD_STATE_NEW;
+
+	task->pid = pid++;
+	task->filemap = 0;
+	for (int i = 0; i < FILE_MAX; i++)
+		task->filetable[i] = NULL;
+
+	list_add(&task->ti_list, &thread_head);
+
+	return 0;
+}
