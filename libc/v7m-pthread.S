@@ -4,6 +4,10 @@
 	.syntax unified
 	.thumb
 
+	//
+	// Mutexes
+	//
+
 	// -1: unlocked, 0: locked, positive: locked, possible waiters
 
 	@ int pthread_mutex_lock(pthread_mutex_t *mutex)
@@ -57,3 +61,17 @@ ENTRY(pthread_mutex_unlock)
 	movs	r0, #0
 	bx	lr
 ENDPROC(pthread_mutex_lock)
+
+	//
+	// Threads
+	//
+
+	@ int __pthread_trampoline(struct __pthread_struct *)
+ENTRY(__pthread_trampoline)
+	adr	lr, 0f
+	orr	lr, #1		// set THUMB_BIT
+	mov	sp, r0
+	ldm.w	sp, {r0, pc}
+0:	mov	r1, sp		// sp points to struct pthread
+	b	__pthread_exit
+ENDPROC(__pthread_trampoline)
