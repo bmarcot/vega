@@ -127,6 +127,7 @@ int init_task(struct task_struct *task)
 	task->ti_priority = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 
+	task->stack = &task->thread_info;
 	task->pid = pid++;
 	task->filemap = 0;
 	for (int i = 0; i < FILE_MAX; i++)

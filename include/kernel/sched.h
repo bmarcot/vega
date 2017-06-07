@@ -47,6 +47,7 @@ struct task_struct {
 	struct thread_info  *thread_info; /* the kernel stack */
 #endif
 
+	void               *stack;
 	int                ti_priority;
 	int                ti_id;
 	int                ti_state;
