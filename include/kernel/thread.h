@@ -7,6 +7,7 @@
 #ifndef _KERNEL_THREAD_H
 #define _KERNEL_THREAD_H
 
+#include <sys/pthread_types.h>
 #include <sys/types.h>
 
 #include <kernel/kernel.h>
