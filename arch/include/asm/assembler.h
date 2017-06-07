@@ -1,7 +1,7 @@
 /*
- * proc-macros.S
+ * arch/include/asm/assembler.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #ifndef _ASM_ASSEMBLER_H
@@ -13,13 +13,13 @@
  * mov32 - loads a 32-bit value into a register without a data access
  */
 	.macro	mov32 rd, imm32
-#if __ARM_ARCH == 6 /* __ARM_ARCH_6M__ */
+#if defined(__ARM_ARCH_6M__)
 	.if 	\imm32 & 0xffffff00
-	ldr	\rd, =\imm32
+	 .error	"immediate value is larger than 8bits"
 	.else
 	movs	\rd, \imm32
 	.endif
-#elif __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
+#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 	movw	\rd, #:lower16:\imm32
 	.if	\imm32 & 0xffff0000
 	movt	\rd, #:upper16:\imm32
