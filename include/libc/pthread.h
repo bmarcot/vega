@@ -1,6 +1,7 @@
 #ifndef PTHREAD_H
 #define PTHREAD_H
 
+#include <sys/pthread_types.h>
 #include <sys/types.h>
 
 /* pthread attributes */
