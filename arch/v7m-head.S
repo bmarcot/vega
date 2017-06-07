@@ -5,7 +5,8 @@
  */
 
 #include <kernel/linkage.h>
-#include "proc-macros.S"
+
+#include <asm/assembler.h>
 
 	.syntax unified
 	.thumb

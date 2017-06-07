@@ -4,6 +4,9 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#ifndef _ASM_ASSEMBLER_H
+#define _ASM_ASSEMBLER_H
+
 #ifdef __ASSEMBLER__
 
 /*
@@ -24,4 +27,6 @@
 #endif
 	.endm
 
-#endif
+#endif /* __ASSEMBLER__ */
+
+#endif /* !_ASM_ASSEMBLER_H */
