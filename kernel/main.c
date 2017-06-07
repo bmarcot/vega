@@ -9,6 +9,7 @@
 #include <sys/cdefs.h>
 
 #include <kernel/fs.h>
+#include <kernel/init.h>
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
@@ -60,23 +61,6 @@ void __weak_symbol *main(__unused void *arg)
 	return 0;
 }
 
-/* Cortex-M3 & Cortex-M4 system initialization */
-#if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-static void v7m_init(void)
-{
-	/* enable UsageFault, BusFault, MemManage faults */
-	SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk
-		| SCB_SHCSR_MEMFAULTENA_Msk);
-
-	/* Configure the System Control Register to ensure 8-byte stack
-	   alignment */
-	SCB->CCR |= SCB_CCR_STKALIGN_Msk;
-
-	/* follow the architectural requirements */
-	__DSB();
-}
-#endif
-
 void print_linker_sections(void)
 {
 	printk("Memory map:\n");
@@ -96,9 +80,7 @@ void print_linker_sections(void)
 
 struct thread_info *start_kernel(void)
 {
-#if __ARM_ARCH == 7 /* __ARM_ARCH_7M__ || __ARM_ARCH_7EM__ */
-	v7m_init();
-#endif
+	setup_arch();
 
 	__printk_init();
 
