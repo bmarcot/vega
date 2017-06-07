@@ -46,6 +46,7 @@ xs = [
 
     # Linux
     'clone',
+    'exit',
 ]
 
 import datetime
