@@ -30,3 +30,8 @@ pid_t fork(void)
 {
 	return do_syscall0(SYS_FORK);
 }
+
+void SYS_exit(int status)
+{
+	do_syscall1((void *)status, SYS_EXIT);
+}
