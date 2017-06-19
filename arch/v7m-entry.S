@@ -13,23 +13,27 @@
 	@
 	@ r0: struct thread_info *next
 	@ r1: struct thread_info *prev (i.e. the current thread)
-	@ (r1), r2, r3, r12: scratch registers
-ENTRY(switch_to)
+	@ r2: do saving if not zero
+ENTRY(__switch_to)
 	/* save previous thread context */
-	push	{r4-r12, lr}
-	mov	r2, sp
-	mrs	r3, psp
-	stm	r1!, {r2, r3}
+	tst	r2, r2
+	itttt	ne
+	pushne	{r4-r12, lr}
+	movne	r2, sp
+	mrsne	r3, psp
+	strdne	r2, r3, [r1]
 
 ENTRY(thread_restore)
 	/* restore next task context */
-	ldm	r0!, {r1-r3}
-	mov	sp, r1
-	msr	psp, r2
-	msr	control, r3		@ write to SPSEL is ignored in Handler_Mode
+	ldm	r0!, {r2, r3, r12}
+	mov	sp, r2
+	msr	psp, r3
+	msr	control, r12		@ write to SPSEL is ignored in Handler_Mode
+	mov	r0, r1
 	pop	{r4-r12, pc}
+
 ENDPROC(thread_restore)
-ENDPROC(switch_to)
+ENDPROC(__switch_to)
 
 	.macro	emulate_iret
 	ldrd	r0, r1, [sp, #24]	/* r0 = ret_addr, r1 = xpsr */

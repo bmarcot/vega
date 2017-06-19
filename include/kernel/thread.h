@@ -67,7 +67,6 @@ enum thread_state {
 
 /* forward declarations */
 
-void switch_to(struct thread_info *, struct thread_info *);
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
 typedef void *(*start_routine)(void *);

@@ -36,6 +36,13 @@ int sched_elect(int flags);
  * Tasking
  */
 
+enum task_state {
+	TASK_RUNNING,
+	TASK_INTERRUPTIBLE,
+	EXIT_ZOMBIE,
+	EXIT_DEAD,
+};
+
 #define FILE_MAX 8
 
 struct file;
@@ -44,10 +51,11 @@ struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	struct thread_info thread_info;
 #else
-	struct thread_info  *thread_info; /* the kernel stack */
+	struct thread_info *thread_info;
 #endif
-
 	void               *stack;
+	int                state;
+
 	int                ti_priority;
 	int                ti_id;
 	int                ti_state;

@@ -1,5 +1,5 @@
 /*
- * kernel/sched-o1.c
+ * kernel/sched.c
  *
  * Copyright (c) 2016-2017 Benoit Marcot
  */
@@ -34,6 +34,7 @@ static struct task_struct *pick_next_task(void)
 int sched_enqueue(struct task_struct *task)
 {
 	task->ti_state = THREAD_STATE_READY;
+	task->state = TASK_RUNNING;
 	list_add_tail(&task->ti_q, &pri_runq[task->ti_priority]);
 	bitmap_set_bit(&pri_bitmap, task->ti_priority);
 
@@ -55,14 +56,7 @@ int sched_dequeue(struct task_struct *task)
 	return 0;
 }
 
-static inline __always_inline void
-context_switch(struct task_struct *next, struct task_struct *prev)
-{
-	if (prev == NULL)
-		thread_restore(task_thread_info(next));  // switch_to_restore_only
-	else
-		switch_to(task_thread_info(next), task_thread_info(prev));
-}
+#include <asm/switch_to.h>
 
 int sched_elect(int flags)
 {
@@ -73,12 +67,10 @@ int sched_elect(int flags)
 			bitmap_clear_bit(&pri_bitmap, next->ti_priority);
 	}
 
-	struct task_struct *current = get_current();
-	if (flags & SCHED_OPT_RESTORE_ONLY)
-		context_switch(next, NULL);
-	else
-		context_switch(next, current);
-	current->ti_state = THREAD_STATE_RUNNING;
+	next->ti_state = THREAD_STATE_RUNNING; //XXX: will die
+
+	struct task_struct *prev = get_current();
+	switch_to(prev, next, prev);
 
 	return 0;
 }

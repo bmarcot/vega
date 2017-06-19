@@ -16,6 +16,8 @@ void sys_exit(int status)
 
 	struct task_struct *current = get_current();
 
+	current->state = EXIT_ZOMBIE;
+
 	list_del(&current->ti_list);
 	/* We are freeing the stack we are running on, no kernel preemption
 	 * is allowed until we call sched_elect().  */
