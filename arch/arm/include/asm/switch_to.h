@@ -1,5 +1,5 @@
 /*
- * arch/include/asm/switch_to.h
+ * arch/arm/include/asm/switch_to.h
  *
  * Copyright (c) 2017 Baruch Marcot
  */

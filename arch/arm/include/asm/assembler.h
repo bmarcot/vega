@@ -1,5 +1,5 @@
 /*
- * arch/include/asm/assembler.h
+ * arch/arm/include/asm/assembler.h
  *
  * Copyright (c) 2016-2017 Benoit Marcot
  */

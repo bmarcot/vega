@@ -22,7 +22,7 @@ CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color \
 	-ffunction-sections -fdata-sections -Os \
 	-DCONFIG_THREAD_INFO_IN_TASK \
-	-Iarch/include \
+	-Iarch/arm/include \
 
 LDFLAGS += -nostartfiles -specs=nano.specs \
 	-Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections
