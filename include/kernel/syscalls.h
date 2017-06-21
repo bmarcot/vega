@@ -44,5 +44,6 @@
 #define SYS_MUNMAP 30
 #define SYS_CLONE 31
 #define SYS_EXIT 32
+#define SYS_FUTEX 33
 
 #endif /* !KERNEL_SYSCALLS_H */

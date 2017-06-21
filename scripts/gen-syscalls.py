@@ -47,6 +47,7 @@ xs = [
     # Linux
     'clone',
     'exit',
+    'futex',
 ]
 
 import datetime
