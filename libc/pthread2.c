@@ -43,6 +43,8 @@ int __pthread_trampoline(void *);
 #define IS_DETACHED(pd) ((pd)->flags & PF_DETACHED)
 #define IS_EXITING(pd)  ((pd)->flags & PF_EXITING)
 
+#define CLONE_THREAD 1 //XXX: in <uapi/kernel/sched.h>
+
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
 {
@@ -75,7 +77,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	pthread->joiner = NULL;
 	pr_info("pthread_struct at %p", pthread);
 
-	if (clone(__pthread_trampoline, pthread, 0, pthread) < 0) {
+	if (clone(__pthread_trampoline, pthread, CLONE_THREAD, pthread) < 0) {
 		if (flags & PF_STACKALLOC)
 			munmap(stack, stacksize);
 		return EAGAIN;
