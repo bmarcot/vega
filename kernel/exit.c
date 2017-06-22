@@ -19,9 +19,7 @@ void sys_exit(int status)
 	current->state = EXIT_ZOMBIE;
 
 	list_del(&current->ti_list);
-	/* We are freeing the stack we are running on, no kernel preemption
-	 * is allowed until we call sched_elect().  */
-	free_pages((unsigned long)current->stack,
-		size_to_page_order(THREAD_SIZE));
 	sched_elect(SCHED_OPT_RESTORE_ONLY);
+
+	//FIXME: we should notify parent before releaseing system resources
 }

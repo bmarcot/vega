@@ -6,6 +6,7 @@
 
 #include <kernel/bitops.h>
 #include <kernel/kernel.h>
+#include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 
@@ -58,7 +59,9 @@ int sched_dequeue(struct task_struct *task)
 
 #include <asm/switch_to.h>
 
-int sched_elect(int flags)
+#define CLONE_THREAD 1
+
+int sched_elect(__unused int flags)
 {
 	struct task_struct *next = pick_next_task();
 	if (next != idle_task) {
@@ -71,6 +74,10 @@ int sched_elect(int flags)
 
 	struct task_struct *prev = get_current();
 	switch_to(prev, next, prev);
+
+	if ((prev->state == EXIT_ZOMBIE) && (prev->flags == CLONE_THREAD))
+		free_pages((unsigned long)prev->stack,
+			size_to_page_order(THREAD_SIZE));
 
 	return 0;
 }
