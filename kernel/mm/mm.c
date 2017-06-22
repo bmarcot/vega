@@ -83,9 +83,10 @@ void *sys_mmap(void *addr, size_t length, int prot, int flags, int fd,
 	return addr;
 }
 
-int sys_munmap(__unused void *addr, __unused size_t length)
+int sys_munmap(void *addr, size_t length)
 {
 	/* Closing the file descriptor does not unmap the region. */
+	free_pages((unsigned long)addr, size_to_page_order(length));
 
 	return 0;
 }
