@@ -41,11 +41,12 @@ pid_t sys_fork(void)
 #define THREAD_SIZE 512
 
 struct task_struct *do_clone(int (*fn)(void *), void *child_stack,
-			__unused int flags, void *arg)
+			int flags, void *arg)
 {
 	struct task_struct *tsk = alloc_pages(size_to_page_order(THREAD_SIZE));
 
 	init_task(tsk);
+	tsk->flags = flags;
 	arch_thread_setup(tsk, fn, arg, child_stack);
 	sched_enqueue(tsk);
 
