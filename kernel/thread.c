@@ -173,24 +173,6 @@ struct thread_info *thread_clone(struct thread_info *other, void *arg)
 	return new;
 }
 
-int thread_yield(void)
-{
-#ifdef DEBUG
-	CURRENT_THREAD_INFO(thread);
-	printk("thread: id=%d is yielding\n", thread->ti_id);
-#endif /* DEBUG */
-
-	//FIXME: elect iff there is a higher-priority thread ready to run
-	sched_enqueue(get_current());
-
-	return sched_elect(SCHED_OPT_NONE);
-}
-
-int thread_self(void)
-{
-	return get_current()->ti_id;
-}
-
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
