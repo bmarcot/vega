@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 xs = [
+    'yield',
+
     # <pthread.h>
-    'pthread_yield',
     'pthread_mutex_lock',
     'pthread_mutex_unlock',
     'pthread_cond_signal',

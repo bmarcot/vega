@@ -138,3 +138,11 @@ int init_task(struct task_struct *task)
 
 	return 0;
 }
+
+int sys_yield(void)
+{
+	sched_enqueue(get_current());
+	schedule();
+
+	return 0;
+}

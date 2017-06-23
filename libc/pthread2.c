@@ -200,3 +200,19 @@ int pthread_detach(pthread_t thread)
 
 	return 0;
 }
+
+// yield() syscall wrapper
+
+int SYS_yield(void)
+{
+	return do_syscall0(SYS_YIELD);
+}
+
+// !syscall wrapper
+
+int sched_yield(void)
+{
+	return SYS_yield();
+}
+
+int pthread_yield(void) __attribute__ ((alias ("sched_yield")));

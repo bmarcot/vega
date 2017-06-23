@@ -1,6 +1,6 @@
 
 
-__SYSCALL_ARM(2, pthread_yield)
+__SYSCALL_ARM(2, yield)
 
 
 

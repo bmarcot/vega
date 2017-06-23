@@ -198,10 +198,3 @@ int thread_set_priority(struct thread_info *thread, int priority)
 
 	return 0;
 }
-
-/* pthread interface */
-
-int sys_pthread_yield(void)
-{
-	return thread_yield();
-}
