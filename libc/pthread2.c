@@ -88,6 +88,39 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	return 0;
 }
 
+__attribute__(( always_inline )) __STATIC_INLINE uint32_t __get_SP(void)
+{
+	uint32_t result;
+
+	__ASM volatile ("mov %0, sp\n" : "=r" (result));
+
+	return result;
+}
+
+struct pthread *__pthread_self(void)
+{
+	struct pthread *pthread;
+	unsigned long sp = __get_SP();
+
+	//XXX: This is the dirty way to retrieve a pthread struct from the
+	// current stack pointer. Another way could be using TLS (as ELF TLS,
+	// or specific syscalls like get_tls() and set_tls()). Or find a user
+	// RW register in Cortex-M that is not a Core register; but it does
+	// not exist so far...
+	list_for_each_entry(pthread, &threads, list) {
+		if ((pthread->stackaddr <= (void *)sp)
+			&& (pthread->stackaddr + pthread->stacksize > (void *)sp))
+			break;
+	}
+
+	return pthread;
+}
+
+pthread_t pthread_self(void)
+{
+	return (pthread_t)__pthread_self();
+}
+
 static void release_pthread(struct pthread *pthread)
 {
 	pr_info("  releasae stack@%p", pthread->stackaddr);
@@ -132,34 +165,6 @@ void __pthread_exit(void *retval, struct pthread *pthread)
 	/* 	do_syscall1((void *)retval, SYS_EXIT); */
 	/* else */
 	/* 	do_syscall1((void *)retval, SYS_EXIT_GROUP); */
-}
-
-__attribute__(( always_inline )) __STATIC_INLINE uint32_t __get_SP(void)
-{
-	uint32_t result;
-
-	__ASM volatile ("mov %0, sp\n" : "=r" (result));
-
-	return result;
-}
-
-struct pthread *__pthread_self(void)
-{
-	struct pthread *pthread;
-	unsigned long sp = __get_SP();
-
-	//XXX: This is the dirty way to retrieve a pthread struct from the
-	// current stack pointer. Another way could be using TLS (as ELF TLS,
-	// or specific syscalls like get_tls() and set_tls()). Or find a user
-	// RW register in Cortex-M that is not a Core register; but it does
-	// not exist so far...
-	list_for_each_entry(pthread, &threads, list) {
-		if ((pthread->stackaddr <= (void *)sp)
-			&& (pthread->stackaddr + pthread->stacksize > (void *)sp))
-			break;
-	}
-
-	return pthread;
 }
 
 void pthread_exit(void *retval)
