@@ -56,6 +56,7 @@ struct task_struct {
 	void               *stack;
 	int                state;
 	int                flags;
+	int                exit_code;
 
 	int                ti_priority;
 	int                ti_id;
