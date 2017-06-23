@@ -120,9 +120,6 @@ int init_task(struct task_struct *task)
 
 	task->ti_stacksize = 256;
 	task->ti_id = next_tid++;
-	task->ti_joinable = false;
-	task->ti_joining = NULL;
-	task->ti_detached = false;
 	task->ti_priority = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 

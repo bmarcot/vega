@@ -105,9 +105,6 @@ struct thread_info *thread_create(void *(*start_routine)(void *), void *arg,
 #endif
 	task->ti_stacksize = stacksize;
 	task->ti_id = thread_count++;
-	task->ti_joinable = false;
-	task->ti_joining = NULL;
-	task->ti_detached = false;
 	task->ti_priority = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 	list_add(&task->ti_list, &thread_head);
@@ -122,9 +119,6 @@ static inline struct thread_info *init_thread_info(struct thread_info *thread)
 
 	task->ti_stacksize = 0;
 	task->ti_id = next_tid++;
-	task->ti_joinable = false;
-	task->ti_joining = NULL;
-	task->ti_detached = false;
 	task->ti_priority = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 
@@ -203,18 +197,6 @@ int thread_set_priority(struct thread_info *thread, int priority)
 	TASK_STRUCT(thread)->ti_priority = priority;
 
 	return 0;
-}
-
-static struct thread_info *find_thread_by_id(int id)
-{
-	struct task_struct *tp;
-
-	list_for_each_entry(tp, &thread_head, ti_list) {
-		if (tp->ti_id == id)
-			return task_thread_info(tp);
-	}
-
-	return NULL;
 }
 
 /* pthread interface */

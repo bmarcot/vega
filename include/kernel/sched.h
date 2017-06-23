@@ -66,12 +66,6 @@ struct task_struct {
 	struct list_head   ti_list; /* global list of threads */
 	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */
 
-	/* http://www.domaigne.com/blog/computing/joinable-and-detached-threads/ */
-	void               *ti_retval;
-	int                ti_detached;
-	int                ti_joinable;
-	struct thread_info *ti_joining;
-
 	/* Pointer to mutually exclusive data: the mutex the thread is blocking
 	 * on, the exit value when thread is not yet joined, etc. */
 	void               *ti_private;
