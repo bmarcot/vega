@@ -61,7 +61,7 @@ int sched_dequeue(struct task_struct *task)
 
 #define CLONE_THREAD 1
 
-int sched_elect(__unused int flags)
+int schedule(void)
 {
 	struct task_struct *next = pick_next_task();
 	if (next != idle_task) {
@@ -80,6 +80,11 @@ int sched_elect(__unused int flags)
 			size_to_page_order(THREAD_SIZE));
 
 	return 0;
+}
+
+int sched_elect(__unused int flags)
+{
+	return schedule();
 }
 
 struct task_struct *idle_task;
