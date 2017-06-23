@@ -75,7 +75,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	pthread->flags = flags;
 	pthread->lock = 0;
 	pthread->joiner = NULL;
-	pr_info("pthread_struct at %p", pthread);
+	pr_info("thread@%p", pthread);
 
 	if (clone(__pthread_trampoline, pthread, CLONE_THREAD, pthread) < 0) {
 		if (flags & PF_STACKALLOC)
@@ -123,7 +123,6 @@ pthread_t pthread_self(void)
 
 static void release_pthread(struct pthread *pthread)
 {
-	pr_info("  releasae stack@%p", pthread->stackaddr);
 	if (pthread->flags & PF_STACKALLOC)
 		munmap((void *)pthread->stackaddr, pthread->stacksize);
 	list_del(&pthread->list);
@@ -148,11 +147,10 @@ void SYS_exit(int status);
 
 void __pthread_exit(void *retval, struct pthread *pthread)
 {
-	pr_info("libpthread: exiting thread %p [stacksize=%p, flags=%x]",
+	pr_info("thread@%p, stacksize=0x%x, flags=%x",
 		pthread, pthread->stacksize, pthread->flags);
 
 	if (IS_DETACHED(pthread)) {
-		pr_info("exiting a detached thread");
 		release_pthread(pthread);
 	} else {
 		pthread->flags |= PF_EXITING;
@@ -186,7 +184,6 @@ int pthread_join(pthread_t thread, void **retval)
 
 	if (!IS_EXITING(other)) {
 		other->joiner = __pthread_self();
-		//pr_info("other lock = %p", &other->lock);
 		SYS_futex((int *)&other->lock, FUTEX_WAIT, 0);
 	}
 	*retval = other->retval;
