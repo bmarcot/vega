@@ -55,11 +55,6 @@ int sched_yield(void)
 
 int pthread_yield(void) __attribute__ ((alias ("sched_yield")));
 
-pthread_t pthread_self(void)
-{
-	return (pthread_t)do_syscall0(SYS_PTHREAD_SELF);
-}
-
 int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
 	return do_syscall2((void *)cond, (void *)mutex, SYS_PTHREAD_COND_WAIT);

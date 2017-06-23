@@ -197,36 +197,6 @@ int thread_self(void)
 	return get_current()->ti_id;
 }
 
-void thread_exit(void *retval)
-{
-	CURRENT_THREAD_INFO(curr_thread);
-
-#ifdef DEBUG
-	printk("thread: id=%d is exiting with retval=%d\n", curr_thread->task->ti_id,
-		(int) retval);
-#endif
-
-	/* free thread stack memory */
-	struct task_struct *current = get_current();
-	free_pages(align(curr_thread->thread_ctx.sp, current->ti_stacksize),
-		size_to_page_order(current->ti_stacksize));
-
-	if (current->ti_detached == false) {
-		current->ti_retval = retval;
-		if (current->ti_joining)
-			sched_enqueue(TASK_STRUCT(current->ti_joining));
-		else
-			current->ti_joinable = true;
-	} else {
-		/* We are freeing the stack we are running on, no kernel preemption
-		 * is allowed until we call sched_elect().  */
-		free_pages((unsigned long)curr_thread,
-			size_to_page_order(INTR_STACK_SIZE));
-	}
-
-	sched_elect(SCHED_OPT_RESTORE_ONLY);
-}
-
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
@@ -247,91 +217,9 @@ static struct thread_info *find_thread_by_id(int id)
 	return NULL;
 }
 
-int thread_join(pthread_t thread, void **retval)
-{
-	struct thread_info *other;
-
-	other = find_thread_by_id(thread);
-	if (other == NULL)
-		return -ESRCH;  /* No thread with the ID thread could be found. */
-
-	struct task_struct *other_task = TASK_STRUCT(other);
-	if (other_task->ti_detached == true)
-		return -EINVAL;  /* thread is not a joinable thread. */
-
-	/* the other thread is not yet joinable, the current thread blocks */
-	if (other_task->ti_joinable == false) {
-		CURRENT_THREAD_INFO(curr_thread);
-		if (other_task->ti_joining)
-			return -EINVAL;  /* Another thread is already waiting to
-					    join with this thread. */
-		other_task->ti_joining = curr_thread;
-		sched_elect(SCHED_OPT_NONE);
-	}
-	*retval = other_task->ti_retval;
-
-	//XXX: free other's resources, interrupt stack
-
-	return 0;
-}
-
-int thread_detach(pthread_t thread)
-{
-	struct thread_info *thread_info;
-
-	thread_info = find_thread_by_id(thread);
-	TASK_STRUCT(thread_info)->ti_detached = true;
-
-	return 0;
-}
-
 /* pthread interface */
 
 int sys_pthread_yield(void)
 {
 	return thread_yield();
-}
-
-pthread_t sys_pthread_self(void)
-{
-	return (pthread_t) thread_self();
-}
-
-void sys_pthread_exit(void *retval)
-{
-	thread_exit(retval);
-}
-
-int sys_pthread_detach(pthread_t thread)
-{
-	return thread_detach(thread);
-}
-
-int sys_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
-		void *(*start_routine)(void *), void *arg)
-{
-	struct rlimit stacklimit;
-	size_t stacksize;
-
-	/* get the thread default stack size */
-	sys_getrlimit(RLIMIT_STACK, &stacklimit);
-	if (attr)
-		stacksize = MIN(attr->stacksize, stacklimit.rlim_max);
-	else
-		stacksize = stacklimit.rlim_cur;
-
-	//FIXME: Check start_routine's address belongs to process' address-space
-	struct thread_info *thread_info =
-		thread_create(start_routine, arg, THREAD_PRIV_USER, stacksize);
-	if (thread_info == NULL)
-		return EAGAIN; /* insufficient resources to create another thread */
-	*thread = (pthread_t)(TASK_STRUCT(thread_info)->ti_id);
-	sched_enqueue(TASK_STRUCT(thread_info));
-
-	return 0;
-}
-
-int sys_pthread_join(pthread_t thread, void **retval)
-{
-	return thread_join(thread, retval);
 }

@@ -1,9 +1,9 @@
-__SYSCALL_ARM(0, pthread_exit)
-__SYSCALL_ARM(1, pthread_self)
+
+
 __SYSCALL_ARM(2, pthread_yield)
-__SYSCALL_ARM(3, pthread_create)
-__SYSCALL_ARM(4, pthread_join)
-__SYSCALL_ARM(5, pthread_detach)
+
+
+
 __SYSCALL_ARM(6, pthread_mutex_lock)
 __SYSCALL_ARM(7, pthread_mutex_unlock)
 __SYSCALL_ARM(8, pthread_cond_signal)

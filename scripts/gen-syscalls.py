@@ -2,12 +2,7 @@
 
 xs = [
     # <pthread.h>
-    'pthread_exit',
-    'pthread_self',
     'pthread_yield',
-    'pthread_create',
-    'pthread_join',
-    'pthread_detach',
     'pthread_mutex_lock',
     'pthread_mutex_unlock',
     'pthread_cond_signal',
