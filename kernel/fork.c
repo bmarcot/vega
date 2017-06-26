@@ -18,8 +18,8 @@ int sys_getpid(void)
 pid_t do_fork(void)
 {
 	/* create a new child process */
-	void *child_stack = alloc_pages(size_to_page_order(512));
-	struct task_struct *child = clone_task(NULL, child_stack, 0, NULL);
+	char *child_stack = alloc_pages(size_to_page_order(512));
+	struct task_struct *child = clone_task(NULL, child_stack + 512, 0, NULL);
 	if (child == NULL)
 		return -1;
 	// child->parent = get_current();
@@ -59,5 +59,5 @@ int sys_clone(int (*fn)(void *), void *child_stack, int flags, void *arg)
 		return -1;
 	sched_enqueue(tsk);
 
-	return tsk->ti_id;
+	return tsk->pid;
 }

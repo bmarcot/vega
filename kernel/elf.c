@@ -200,9 +200,9 @@ out:
 		return err;
 
 	/* Create a new task. */
-	void *stack = alloc_pages(size_to_page_order(512));
+	char *stack = alloc_pages(size_to_page_order(512));
 	struct task_struct *main;
-	main = clone_task((start_routine)ehdr.e_entry, stack,
+	main = clone_task((start_routine)ehdr.e_entry, stack + 512,
 			0, NULL);
 	sched_enqueue(main);
 
