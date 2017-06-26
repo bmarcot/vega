@@ -69,8 +69,6 @@ enum thread_state {
 
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 
-typedef void *(*start_routine)(void *);
-
 struct thread_info *thread_create(void *(*)(void *), void *,
 				enum thread_privilege, size_t);
 int thread_yield(void);
