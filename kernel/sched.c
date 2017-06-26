@@ -87,11 +87,12 @@ int sched_elect(__unused int flags)
 	return schedule();
 }
 
+static unsigned int idle_stack[32];
 struct task_struct *idle_task;
 
 void __do_idle(void);
 
-void *do_idle(__unused void *arg)
+static __attribute__((noreturn)) int do_idle(__unused void *arg)
 {
 	for (;;)
 		__do_idle();
@@ -104,14 +105,12 @@ int sched_init(void)
 		INIT_LIST_HEAD(&pri_runq[i]);
 
 	/* idle_task is not added to the runqueue */
-	struct thread_info *it =
-		thread_create(do_idle, NULL, THREAD_PRIV_SUPERVISOR, 1024);
-	if (it == NULL) {
+	idle_task = clone_task(do_idle, &idle_stack[32], 0, NULL);
+	if (idle_task == NULL) {
 		pr_err("Could not create the idle task");
 		return -1;
 	}
-	idle_task = TASK_STRUCT(it);
-	pr_info("Created idle_thread at <%p> with pid=%d", it, idle_task->pid);
+	pr_info("Created idle_thread at <%p> with pid=%d", idle_task, idle_task->pid);
 
 	return 0;
 }

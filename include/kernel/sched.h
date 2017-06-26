@@ -107,6 +107,8 @@ static inline struct task_struct *TASK_STRUCT(struct thread_info *ti)
 }
 
 int init_task(struct task_struct *task);
+struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
+			int flags, void *arg);
 
 int arch_thread_setup(struct task_struct *task, void *start_routine,
 		void *arg, void *stack_start);
