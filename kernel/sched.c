@@ -115,7 +115,7 @@ int sched_init(void)
 	return 0;
 }
 
-extern struct list_head thread_head;
+static struct list_head tasks;
 
 int init_task(struct task_struct *task)
 {
@@ -130,7 +130,7 @@ int init_task(struct task_struct *task)
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
 
-	list_add(&task->ti_list, &thread_head);
+	list_add(&task->ti_list, &tasks);
 
 	return 0;
 }

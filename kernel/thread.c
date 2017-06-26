@@ -26,8 +26,6 @@
 #include "utils.h"
 #include "platform.h"
 
-/* static */ LIST_HEAD(thread_head);
-
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
