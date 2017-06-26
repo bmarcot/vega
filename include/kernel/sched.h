@@ -60,9 +60,7 @@ struct task_struct {
 	int                exit_code;
 
 	int                ti_priority;
-	int                ti_id;
 	int                ti_state;
-	int                ti_stacksize; /* thread stack's size */
 
 	struct list_head   ti_list; /* global list of threads */
 	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */

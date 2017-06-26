@@ -119,11 +119,8 @@ extern struct list_head thread_head;
 
 int init_task(struct task_struct *task)
 {
-	static int next_tid = 3000;
 	static int pid = 9000;
 
-	task->ti_stacksize = 256;
-	task->ti_id = next_tid++;
 	task->ti_priority = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 
