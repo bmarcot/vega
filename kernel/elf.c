@@ -170,7 +170,10 @@ static int copy_load_segments(struct file *file, Elf32_Ehdr *ehdr)
 	return 0;
 }
 
-typedef void *(*start_routine)(void *);
+#include <kernel/mm/page.h>
+#include <kernel/sched.h>
+
+typedef int (*start_routine)(void *);
 
 int elf_load_binary(const char *pathname)
 {
@@ -197,10 +200,11 @@ out:
 		return err;
 
 	/* Create a new task. */
-	struct thread_info *thread_main;
-	thread_main = thread_create((start_routine)ehdr.e_entry, NULL,
-				THREAD_PRIV_USER, 1024);
-	sched_enqueue(TASK_STRUCT(thread_main));
+	void *stack = alloc_pages(size_to_page_order(512));
+	struct task_struct *main;
+	main = clone_task((start_routine)ehdr.e_entry, stack,
+			0, NULL);
+	sched_enqueue(main);
 
 	return 0;
 }
