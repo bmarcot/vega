@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 xs = [
-    'yield',
-
     # <pthread.h>
     'pthread_mutex_lock',
     'pthread_mutex_unlock',
@@ -44,6 +42,7 @@ xs = [
     'clone',
     'exit',
     'futex',
+    'sched_yield',
 ]
 
 import datetime

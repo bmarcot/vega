@@ -75,7 +75,9 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	pthread->flags = flags;
 	pthread->lock = 0;
 	pthread->joiner = NULL;
+#ifdef DBG_PTHREAD
 	pr_info("thread@%p", pthread);
+#endif
 
 	if (clone(__pthread_trampoline, pthread, CLONE_THREAD, pthread) < 0) {
 		if (flags & PF_STACKALLOC)
@@ -147,8 +149,10 @@ void SYS_exit(int status);
 
 void __pthread_exit(void *retval, struct pthread *pthread)
 {
+#ifdef DBG_PTHREAD
 	pr_info("thread@%p, stacksize=0x%x, flags=%x",
 		pthread, pthread->stacksize, pthread->flags);
+#endif
 
 	if (IS_DETACHED(pthread)) {
 		release_pthread(pthread);
@@ -203,16 +207,16 @@ int pthread_detach(pthread_t thread)
 
 // yield() syscall wrapper
 
-int SYS_yield(void)
+int SYS_sched_yield(void)
 {
-	return do_syscall0(SYS_YIELD);
+	return do_syscall0(SYS_SCHED_YIELD);
 }
 
 // !syscall wrapper
 
 int sched_yield(void)
 {
-	return SYS_yield();
+	return SYS_sched_yield();
 }
 
 int pthread_yield(void) __attribute__ ((alias ("sched_yield")));
