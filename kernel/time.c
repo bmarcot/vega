@@ -16,6 +16,8 @@
 #include <kernel/thread.h>
 #include <kernel/time.h>
 
+#include <asm/current.h>
+
 /* sleep functions */
 
 //XXX: sleep() is part of <unistd.h>, but nanosleep() is part of <time.h>

@@ -10,6 +10,8 @@
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 
+#include <asm/current.h>
+
 #include "linux/list.h"
 
 extern struct task_struct *idle_task;
@@ -44,8 +46,6 @@ int sched_enqueue(struct task_struct *task)
 
 int sched_dequeue(struct task_struct *task)
 {
-	struct task_struct *current = get_current();
-
 	/* active task is not in the runqueue */
 	if (task == current)
 		return 0;
@@ -137,7 +137,7 @@ int init_task(struct task_struct *task)
 
 int sys_sched_yield(void)
 {
-	sched_enqueue(get_current());
+	sched_enqueue(current);
 	schedule();
 
 	return 0;

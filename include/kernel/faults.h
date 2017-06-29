@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <kernel/thread.h>
-#include <arch/thread_info.h>
+#include <asm/thread_info.h>
 
 void fault_enter(const char *s);
 void fault_exit(void);

@@ -1,7 +1,7 @@
 #include <kernel/faults.h>
 #include <kernel/thread.h>
 
-#include <arch/thread_info.h>
+/* #include <arch/thread_info.h> */
 
 #include "kernel.h"
 #include "utils.h"
@@ -18,6 +18,9 @@ void fault_exit(void)
 	printk("-------------------------------------------------------------\n");
 	__platform_halt();
 }
+
+struct preserved_context;
+struct cpu_saved_context;
 
 void hardfault(struct preserved_context *noscratch,
 	struct cpu_saved_context *scratch, u32 exc_return)

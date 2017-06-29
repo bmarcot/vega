@@ -6,13 +6,15 @@
 
 #include <kernel/sched.h>
 #include <kernel/thread.h>
-#include <mm/page.h>
+#include <kernel/mm/page.h>
+
+#include <asm/current.h>
 
 #include "linux/list.h"
 
 int sys_getpid(void)
 {
-	return get_current()->pid;
+	return (int)get_current()->pid;
 }
 
 pid_t do_fork(void)

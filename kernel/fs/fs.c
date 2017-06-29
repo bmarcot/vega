@@ -17,6 +17,8 @@
 #include <kernel/fs/romfs.h>
 #include <kernel/sched.h>
 
+#include <asm/current.h>
+
 struct file *fget(unsigned int fd)
 {
 	return get_current()->filetable[fd];
@@ -25,7 +27,6 @@ struct file *fget(unsigned int fd)
 static struct file *fput(unsigned int fd, struct file *file)
 {
 	struct file *old_file;
-	struct task_struct *current = get_current();
 
 	old_file = current->filetable[fd];
 	current->filetable[fd] = file;
@@ -36,7 +37,6 @@ static struct file *fput(unsigned int fd, struct file *file)
 static int alloc_fd(void)
 {
 	int fd;
-	struct task_struct *current = get_current();
 
 	fd = find_first_zero_bit(&current->filemap, FILE_MAX);
 	if (fd == FILE_MAX)
@@ -48,7 +48,6 @@ static int alloc_fd(void)
 
 static void release_fd(int fd)
 {
-	struct task_struct *current = get_current();
 	bitmap_clear_bit(&current->filemap, fd);
 }
 

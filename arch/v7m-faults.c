@@ -1,7 +1,7 @@
 #include <kernel/faults.h>
 #include <kernel/thread.h>
 
-#include <arch/thread_info.h>
+#include <asm/thread_info.h>
 
 #include "kernel.h"
 

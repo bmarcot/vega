@@ -9,7 +9,7 @@
 
 #include <sys/types.h>
 
-#include <arch/thread_info.h>
+#include <asm/thread_info.h>
 
 #include "linux/list.h"
 
@@ -58,6 +58,7 @@ struct task_struct {
 	int                state;
 	int                flags;
 	int                exit_code;
+	int                prio;
 
 	int                ti_priority;
 	int                ti_state;
@@ -74,16 +75,6 @@ struct task_struct {
 	unsigned long    filemap;
 	struct file      *filetable[FILE_MAX];
 };
-
-//FIXME: This should go to arch/arm/asm/current.h
-static inline struct task_struct *get_current(void)
-{
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-	return (struct task_struct *)current_thread_info();
-#else
-	return current_thread_info()->task;
-#endif
-}
 
 static inline struct thread_info *task_thread_info(struct task_struct *task)
 {

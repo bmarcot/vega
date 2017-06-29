@@ -13,7 +13,6 @@
 
 #include <vega/sys/resource.h>
 
-#include <arch/thread_info.h>
 #include <arch/v7m-helper.h>
 
 #include <kernel/errno-base.h>
@@ -22,6 +21,8 @@
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
+
+#include <asm/thread_info.h>
 
 #include "utils.h"
 #include "platform.h"

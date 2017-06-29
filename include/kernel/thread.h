@@ -13,8 +13,6 @@
 #include <kernel/kernel.h>
 #include <kernel/types.h>
 
-#include <arch/thread_info.h>
-
 #include "linux/list.h"
 
 #define INTR_STACK_ORDER  9  /* 512 Bytes */
@@ -66,6 +64,8 @@ enum thread_state {
  */
 
 /* forward declarations */
+
+struct thread_info;
 
 void thread_restore(struct thread_info *); //FIXME: rename to switch_to_restore_only ? meh..
 

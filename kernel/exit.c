@@ -6,12 +6,12 @@
 
 #include <kernel/sched.h>
 
+#include <asm/current.h>
+
 #include "linux/list.h"
 
 void sys_exit(int status)
 {
-	struct task_struct *current = get_current();
-
 	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
 	list_del(&current->ti_list);

@@ -11,6 +11,8 @@
 #include <kernel/futex.h>
 #include <kernel/sched.h>
 
+#include <asm/current.h>
+
 #include <uapi/kernel/futex.h>
 
 #include "linux/list.h"

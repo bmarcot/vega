@@ -20,5 +20,4 @@ extern struct task_struct *__switch_to(struct thread_info *next,
 				prev->state < EXIT_ZOMBIE);		\
 	} while (0);
 
-
 #endif /* !_ASM_SWITCH_TO_H */

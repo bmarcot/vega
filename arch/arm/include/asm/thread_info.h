@@ -1,11 +1,11 @@
 /*
- * arch/thread_info.h
+ * arch/arm/include/asm/thread_info.h
  *
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#ifndef _ARCH_THREAD_INFO_H
-#define _ARCH_THREAD_INFO_H
+#ifndef _ASM_THREAD_INFO_H
+#define _ASM_THREAD_INFO_H
 
 #include <kernel/types.h>
 
@@ -48,4 +48,4 @@ static inline struct thread_info *current_thread_info(void)
 	return (struct thread_info *)(sp & ~(THREAD_SIZE - 1));
 }
 
-#endif /* !_ARCH_THREAD_INFO_H */
+#endif /* !_ASM_THREAD_INFO_H */
