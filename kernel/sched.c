@@ -38,8 +38,8 @@ int sched_enqueue(struct task_struct *task)
 {
 	task->ti_state = THREAD_STATE_READY;
 	task->state = TASK_RUNNING;
-	list_add_tail(&task->ti_q, &pri_runq[task->ti_priority]);
-	bitmap_set_bit(&pri_bitmap, task->ti_priority);
+	list_add_tail(&task->ti_q, &pri_runq[task->prio]);
+	bitmap_set_bit(&pri_bitmap, task->prio);
 
 	return 0;
 }
@@ -51,8 +51,8 @@ int sched_dequeue(struct task_struct *task)
 		return 0;
 
 	list_del(&task->ti_q);
-	if (list_empty(&pri_runq[task->ti_priority]))
-		bitmap_clear_bit(&pri_bitmap, task->ti_priority);
+	if (list_empty(&pri_runq[task->prio]))
+		bitmap_clear_bit(&pri_bitmap, task->prio);
 
 	return 0;
 }
@@ -66,8 +66,8 @@ int schedule(void)
 	struct task_struct *next = pick_next_task();
 	if (next != idle_task) {
 		list_del(&next->ti_q);
-		if (list_empty(&pri_runq[next->ti_priority]))
-			bitmap_clear_bit(&pri_bitmap, next->ti_priority);
+		if (list_empty(&pri_runq[next->prio]))
+			bitmap_clear_bit(&pri_bitmap, next->prio);
 	}
 
 	next->ti_state = THREAD_STATE_RUNNING; //XXX: will die
@@ -121,7 +121,7 @@ int init_task(struct task_struct *task)
 {
 	static int pid = 9000;
 
-	task->ti_priority = PRI_MIN;
+	task->prio = PRI_MIN;
 	task->ti_state = THREAD_STATE_NEW;
 
 	task->stack = &task->thread_info;

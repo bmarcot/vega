@@ -49,7 +49,7 @@ int sys_pthread_cond_signal(pthread_cond_t *cond)
 	list_del(&other->ti_q);
 	sched_enqueue(other);
 
-	if (other->ti_priority >= current->ti_priority) {
+	if (other->prio >= current->prio) {
 		sched_enqueue(current);
 		sched_elect(SCHED_OPT_NONE);
 	}

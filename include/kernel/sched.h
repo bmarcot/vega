@@ -60,7 +60,6 @@ struct task_struct {
 	int                exit_code;
 	int                prio;
 
-	int                ti_priority;
 	int                ti_state;
 
 	struct list_head   ti_list; /* global list of threads */

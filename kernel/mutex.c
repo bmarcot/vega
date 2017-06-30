@@ -61,7 +61,7 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 
 	if (current->ti_state == THREAD_STATE_BLOCKED) {
 		sched_elect(SCHED_OPT_NONE);
-	} else if (waiter && (current->ti_priority <= waiter->ti_priority)) {
+	} else if (waiter && (current->prio <= waiter->prio)) {
 		sched_enqueue(current);
 		sched_elect(SCHED_OPT_NONE);
 	}

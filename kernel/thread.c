@@ -30,7 +30,7 @@
 int thread_set_priority(struct thread_info *thread, int priority)
 {
 	/* priority change is effective on next scheduling */
-	TASK_STRUCT(thread)->ti_priority = priority;
+	TASK_STRUCT(thread)->prio = priority;
 
 	return 0;
 }
