@@ -25,4 +25,9 @@ int setrlimit(int resource, const struct rlimit *rlim);
 
 #endif /* __KERNEL__ */
 
+#include <sys/types.h>
+
+int getpriority(int which, id_t who);
+int setpriority(int which, id_t who, int prio);
+
 #endif /* !SYS_RESOURCE_H */
