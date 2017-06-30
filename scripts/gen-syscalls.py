@@ -43,6 +43,8 @@ xs = [
     'exit',
     'futex',
     'sched_yield',
+    'getpriority',
+    'setpriority',
 ]
 
 import datetime

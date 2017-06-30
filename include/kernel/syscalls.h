@@ -45,5 +45,7 @@
 #define SYS_CLONE 31
 #define SYS_EXIT 32
 #define SYS_FUTEX 33
+#define SYS_GETPRIORITY 34
+#define SYS_SETPRIORITY 35
 
 #endif /* !KERNEL_SYSCALLS_H */
