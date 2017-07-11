@@ -10,8 +10,16 @@
 #include <kernel/types.h>
 
 struct preserved_context {
-	__u32 r4_r12[9]; /* zero-filled */
-	__u32 lr;        /* loaded with EXC_RETURN value */
+	u32 r4;  /* zero-filled */
+	u32 r5;
+	u32 r6;
+	u32 r7;
+	u32 r8;
+	u32 r9;
+	u32 r10;
+	u32 r11;
+	u32 r12;
+	u32 lr;  /* loaded with EXC_RETURN value */
 };
 
 struct cpu_saved_context {

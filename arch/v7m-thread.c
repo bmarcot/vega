@@ -29,15 +29,15 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 	 */
 	thread->kernel_ctx.sp = (__u32)thread + THREAD_SIZE
 		- sizeof(struct preserved_context); // msp
-	thread->kernel_ctx.ctx->r4_r12[0] = 0; // r4
-	thread->kernel_ctx.ctx->r4_r12[1] = 0; // r5
-	thread->kernel_ctx.ctx->r4_r12[2] = 0; // r6
-	thread->kernel_ctx.ctx->r4_r12[3] = 0; // r7
-	thread->kernel_ctx.ctx->r4_r12[4] = 0; // r8
-	thread->kernel_ctx.ctx->r4_r12[5] = 0; // r9
-	thread->kernel_ctx.ctx->r4_r12[6] = 0; // r10
-	thread->kernel_ctx.ctx->r4_r12[7] = 0; // r11
-	thread->kernel_ctx.ctx->r4_r12[8] = 0; // r12
+	thread->kernel_ctx.ctx->r4 = 0;
+	thread->kernel_ctx.ctx->r5 = 0;
+	thread->kernel_ctx.ctx->r6 = 0;
+	thread->kernel_ctx.ctx->r7 = 0;
+	thread->kernel_ctx.ctx->r8 = 0;
+	thread->kernel_ctx.ctx->r9 = 0;
+	thread->kernel_ctx.ctx->r10 = 0;
+	thread->kernel_ctx.ctx->r11 = 0;
+	thread->kernel_ctx.ctx->r12 = 0;
 	thread->kernel_ctx.ctx->lr = V7M_EXC_RETURN_THREAD_PROCESS;
 
 	thread->thread_ctx.sp = (__u32)stack_start
