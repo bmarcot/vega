@@ -24,7 +24,7 @@ int sys_pthread_mutex_lock(kernel_mutex_t *mutex)
 		return 0;
 
 	current->ti_private = mutex;
-	current->ti_state = THREAD_STATE_BLOCKED;
+	current->state = TASK_INTERRUPTIBLE;
 	list_add_tail(&current->ti_q, &mutex_head);
 	sched_elect(SCHED_OPT_NONE);
 
@@ -59,7 +59,7 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 		sched_enqueue(waiter);
 	}
 
-	if (current->ti_state == THREAD_STATE_BLOCKED) {
+	if (current->state == TASK_INTERRUPTIBLE) {
 		sched_elect(SCHED_OPT_NONE);
 	} else if (waiter && (current->prio <= waiter->prio)) {
 		sched_enqueue(current);

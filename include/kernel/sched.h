@@ -38,6 +38,7 @@ int schedule(void);
  */
 
 enum task_state {
+	TASK_NEW,
 	TASK_RUNNING,
 	TASK_INTERRUPTIBLE,
 	EXIT_ZOMBIE,
@@ -59,8 +60,6 @@ struct task_struct {
 	int                flags;
 	int                exit_code;
 	int                prio;
-
-	int                ti_state;
 
 	struct list_head   ti_list; /* global list of threads */
 	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */

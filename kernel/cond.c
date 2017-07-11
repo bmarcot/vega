@@ -31,7 +31,7 @@ static struct task_struct *find_other_thread(pthread_cond_t *cond)
 int sys_pthread_cond_wait(pthread_cond_t *cond, kernel_mutex_t *mutex)
 {
 	current->ti_private = cond;
-	current->ti_state = THREAD_STATE_BLOCKED;
+	current->state = TASK_INTERRUPTIBLE;
 	list_add_tail(&current->ti_q, &cond_head);
 	sys_pthread_mutex_unlock(mutex);
 

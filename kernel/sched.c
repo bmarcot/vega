@@ -36,7 +36,6 @@ static struct task_struct *pick_next_task(void)
 
 int sched_enqueue(struct task_struct *task)
 {
-	task->ti_state = THREAD_STATE_READY;
 	task->state = TASK_RUNNING;
 	list_add_tail(&task->ti_q, &pri_runq[task->prio]);
 	bitmap_set_bit(&pri_bitmap, task->prio);
@@ -69,8 +68,6 @@ int schedule(void)
 		if (list_empty(&pri_runq[next->prio]))
 			bitmap_clear_bit(&pri_bitmap, next->prio);
 	}
-
-	next->ti_state = THREAD_STATE_RUNNING; //XXX: will die
 
 	struct task_struct *prev = get_current();
 	switch_to(prev, next, prev);
