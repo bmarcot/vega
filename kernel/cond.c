@@ -51,7 +51,7 @@ int sys_pthread_cond_signal(pthread_cond_t *cond)
 
 	if (other->prio >= current->prio) {
 		sched_enqueue(current);
-		sched_elect(SCHED_OPT_NONE);
+		schedule();
 	}
 
 	return 0;

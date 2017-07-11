@@ -29,7 +29,7 @@ static void msleep_callback(struct timer_info *timer)
 	sched_enqueue(TASK_STRUCT(timer->owner));
 	if (get_current() != idle_task)
 		sched_enqueue(get_current());
-	sched_elect(SCHED_OPT_NONE);
+	schedule();
 	timer->disarmed = 1;
 }
 
@@ -49,7 +49,7 @@ int sys_msleep(unsigned int msec)
 				  .tv_nsec = (msec % 1000) * 1000000 };
 	timer_set(timer, &value);
 	sched_dequeue(TASK_STRUCT(curr_thread));
-	sched_elect(SCHED_OPT_NONE);
+	schedule();
 	timer_free(timer);
 
 	return 0;

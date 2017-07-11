@@ -28,7 +28,7 @@ int futex_wait(int *uaddr, int val)
 		};
 		list_add(&futex.list, &futexes);
 		/* pr_info("-- go to sleep with lockptr=%p", futex.lock_ptr); */
-		sched_elect(SCHED_OPT_NONE); //schedule();
+		schedule();
 	}
 
 	return 0;

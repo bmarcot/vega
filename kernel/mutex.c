@@ -26,7 +26,7 @@ int sys_pthread_mutex_lock(kernel_mutex_t *mutex)
 	current->ti_private = mutex;
 	current->state = TASK_INTERRUPTIBLE;
 	list_add_tail(&current->ti_q, &mutex_head);
-	sched_elect(SCHED_OPT_NONE);
+	schedule();
 
 	return 0;
 }
@@ -60,10 +60,10 @@ int sys_pthread_mutex_unlock(kernel_mutex_t *mutex)
 	}
 
 	if (current->state == TASK_INTERRUPTIBLE) {
-		sched_elect(SCHED_OPT_NONE);
+		schedule();
 	} else if (waiter && (current->prio <= waiter->prio)) {
 		sched_enqueue(current);
-		sched_elect(SCHED_OPT_NONE);
+		schedule();
 	}
 
 	return 0;

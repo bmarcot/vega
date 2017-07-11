@@ -15,7 +15,7 @@ void sys_exit(int status)
 	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
 	list_del(&current->ti_list);
-	sched_elect(SCHED_OPT_RESTORE_ONLY);
+	schedule();
 
 	//XXX: We should send a kernel signal to task's parent, and the
 	// parent would release system resources (when? on its next scheduling?
