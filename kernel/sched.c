@@ -72,9 +72,11 @@ int schedule(void)
 	struct task_struct *prev = get_current();
 	switch_to(prev, next, prev);
 
-	if ((prev->state == EXIT_ZOMBIE) && (prev->flags == CLONE_THREAD))
+	if ((prev->state == EXIT_ZOMBIE) && (prev->flags == CLONE_THREAD)) {
+		list_del(&prev->list);
 		free_pages((unsigned long)prev->stack,
 			size_to_page_order(THREAD_SIZE));
+	}
 
 	return 0;
 }

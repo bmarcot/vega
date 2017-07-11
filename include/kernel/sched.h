@@ -7,8 +7,6 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <sys/types.h>
-
 #include <asm/thread_info.h>
 
 #include "linux/list.h"
@@ -60,8 +58,9 @@ struct task_struct {
 	int                flags;
 	int                exit_code;
 	int                prio;
+	int                pid;
+	struct list_head   list;    /* global list of tasks */
 
-	struct list_head   ti_list; /* global list of threads */
 	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */
 
 	/* Pointer to mutually exclusive data: the mutex the thread is blocking
@@ -69,7 +68,6 @@ struct task_struct {
 	void               *ti_private;
 
 	/* old task_info struct */
-	pid_t            pid;
 	unsigned long    filemap;
 	struct file      *filetable[FILE_MAX];
 };

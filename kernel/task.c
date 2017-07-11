@@ -20,7 +20,7 @@ int init_task(struct task_struct *task)
 	task->filemap = 0;
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
-	list_add(&task->ti_list, &tasks);
+	list_add(&task->list, &tasks);
 
 	return 0;
 }
