@@ -15,14 +15,14 @@
 void dump_frame(struct preserved_context *noscratch,
 		struct cpu_saved_context *scratch, u32 exc_return)
 {
-	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n", scratch->r0_r3__r12[0],
-		scratch->r0_r3__r12[1], scratch->r0_r3__r12[2], scratch->r0_r3__r12[3]);
+	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n",
+		scratch->r0, scratch->r1, scratch->r2, scratch->r3);
 	printk(" r4: %08x    r5: %08x    r6: %08x    r7: %08x\n",
 		noscratch->r4, noscratch->r5, noscratch->r6, noscratch->r7);
 	printk(" r8: %08x    r9: %08x   r10: %08x   r11: %08x\n",
 		noscratch->r8, noscratch->r9, noscratch->r10, noscratch->r11);
-	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n", scratch->r0_r3__r12[4],
-		(u32) scratch, scratch->lr, scratch->ret_addr);
+	printk("r12: %08x    sp: %08x    lr: %08x    pc: %08x\n",
+		scratch->r12, (u32)scratch, scratch->lr, scratch->ret_addr);
 	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
 

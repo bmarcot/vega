@@ -54,7 +54,7 @@ static void stage_sighandler(struct sigaction *sigaction)
 	ctx = curr_thread->thread_ctx.ctx;
 
 	/* return value of syscall, cannot fail after this point */
-	ctx->r0_r3__r12[0] = 0;
+	ctx->r0 = 0;
 
 	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(curr_thread,
@@ -63,10 +63,10 @@ static void stage_sighandler(struct sigaction *sigaction)
 	/* build the sigaction trampoline */
 	ctx = curr_thread->thread_ctx.ctx;
 /* #ifdef SECURE_KERNEL */
-	ctx->r0_r3__r12[1] = 0;
-	ctx->r0_r3__r12[2] = 0;
-	ctx->r0_r3__r12[3] = 0;
-	ctx->r0_r3__r12[4] = 0;
+	ctx->r1 = 0;
+	ctx->r2 = 0;
+	ctx->r3 = 0;
+	ctx->r12 = 0;
 /* #endif */
 	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
 	ctx->ret_addr = (__u32)v7m_clear_thumb_bit(sigaction->sa_handler);
@@ -89,7 +89,7 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 	ctx = curr_thread->thread_ctx.ctx;
 
 	/* return value of syscall, cannot fail after this point */
-	ctx->r0_r3__r12[0] = 0;
+	ctx->r0 = 0;
 
 	/* The siginfo_t struct is allocated on thread's stack; that memory
 	 * will be reclaimed during return_from_sigaction. */
@@ -105,10 +105,10 @@ static void stage_sigaction(const struct sigaction *sigaction, int sig,
 
 	/* build a sigaction trampoline */
 	ctx = curr_thread->thread_ctx.ctx;
-	ctx->r0_r3__r12[1] = (u32)siginfo_ptr;
-	ctx->r0_r3__r12[2] = 0; /* ucontext_t *, but commonly unused */
-	ctx->r0_r3__r12[3] = 0;
-	ctx->r0_r3__r12[4] = 0;
+	ctx->r1 = (u32)siginfo_ptr;
+	ctx->r2 = 0; /* ucontext_t *, but commonly unused */
+	ctx->r3 = 0;
+	ctx->r12 = 0;
 	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sigaction);
 	ctx->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_sigaction);
 	ctx->xpsr = xPSR_T_Msk;
@@ -133,11 +133,11 @@ void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 
 	/* build a sigevent trampoline */
 	ctx = thread->thread_ctx.ctx;
-	ctx->r0_r3__r12[0] = sigevent->sigev_value.sival_int;
-	ctx->r0_r3__r12[1] = 0;
-	ctx->r0_r3__r12[2] = 0;
-	ctx->r0_r3__r12[3] = 0;
-	ctx->r0_r3__r12[4] = 0;
+	ctx->r0 = sigevent->sigev_value.sival_int;
+	ctx->r1 = 0;
+	ctx->r2 = 0;
+	ctx->r3 = 0;
+	ctx->r12 = 0;
 	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
 	ctx->ret_addr =
 		(__u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);

@@ -42,11 +42,11 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 
 	thread->thread_ctx.sp = (__u32)stack_start
 		- sizeof(struct cpu_saved_context); // psp
-	thread->thread_ctx.ctx->r0_r3__r12[0] = (__u32)arg; // r0
-	thread->thread_ctx.ctx->r0_r3__r12[1] = 0; // r1
-	thread->thread_ctx.ctx->r0_r3__r12[2] = 0; // r2
-	thread->thread_ctx.ctx->r0_r3__r12[3] = 0; // r3
-	thread->thread_ctx.ctx->r0_r3__r12[4] = 0; // r12
+	thread->thread_ctx.ctx->r0 = (__u32)arg;
+	thread->thread_ctx.ctx->r1 = 0;
+	thread->thread_ctx.ctx->r2 = 0;
+	thread->thread_ctx.ctx->r3 = 0;
+	thread->thread_ctx.ctx->r12 = 0;
 	thread->thread_ctx.ctx->lr = (__u32)pthread_exit;
 	//FIXME: Should libc be dynamically loaded?
 	//FIXME: Alternatively, let the user manage the thread's last return.
