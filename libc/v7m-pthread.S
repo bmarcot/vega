@@ -1,6 +1,8 @@
 #include <kernel/syscalls.h>
 #include <kernel/linkage.h>
 
+#include <uapi/kernel/futex.h>
+
 	.syntax unified
 	.thumb
 
@@ -8,57 +10,60 @@
 	// Mutexes
 	//
 
-	// -1: unlocked, 0: locked, positive: locked, possible waiters
+	// 1: unlocked, 0: locked, [n .. -1]: locked, possible waiters queued
 
 	@ int pthread_mutex_lock(pthread_mutex_t *mutex)
 ENTRY(pthread_mutex_lock)
-	movs	r2, #0
-0:	ldrex	r1, [r0]
-	tst	r1, r1
-	ittt	pl
-	movpl	r1, #SYS_PTHREAD_MUTEX_LOCK
-	svcpl	#1
-	bxpl	lr
+0:	ldrex	r2, [r0]
+	subs	r2, #1
+	it	mi
+	movmi	r2, #-1
 	strex	r1, r2, [r0]
 	tst	r1, r1
 	bne	0b
 	dmb			@ ARMv7-M ARM, A3.4.6
-	movs	r0, #0
-	bx	lr
+	tst	r2, r2
+	itt	eq
+	moveq	r0, #0
+	bxeq	lr
+	push	{r0}
+	mov	r1, #FUTEX_WAIT
+	mov	r3, #SYS_FUTEX
+	svc	#3
+	pop	{r0}
+	b	0b
 ENDPROC(pthread_mutex_lock)
 
 	@ int pthread_mutex_trylock(pthread_mutex_t *mutex)
 ENTRY(pthread_mutex_trylock)
-	movs	r2, #0
-0:	ldrex	r1, [r0]
-	tst	r1, r1
-	itt	pl
-	movspl	r0, #-1
-	bxpl	lr
+0:	ldrex	r2, [r0]
+	subs	r2, #1
+	itt	mi
+	movmi	r0, #-1
+	bxmi	lr
 	strex	r1, r2, [r0]
 	tst	r1, r1
-	itt	ne
-	movsne	r0, #-1
-	bxne	lr
+	bne	0b
 	dmb			@ ARMv7-M ARM, A3.4.6
-	movs	r0, #0
+	mov	r0, #0
 	bx	lr
 ENDPROC(pthread_mutex_trylock)
 
 	@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
 ENTRY(pthread_mutex_unlock)
-	movs	r2, #-1
-0:	ldrex	r1, [r0]
-	tst	r1, r1
-	ittt	ne
-	movne	r1, #SYS_PTHREAD_MUTEX_UNLOCK
-	svcne	#1
-	bxne	lr
-	strex	r1, r2, [r0]
+0:	ldrex	r2, [r0]
+	mov	r1, #1
+	strex	r1, r1, [r0]
 	tst	r1, r1
 	bne	0b
 	dmb			@ ARMv7-M ARM, A3.4.6
-	movs	r0, #0
+	tst	r2, r2
+	itttt	mi
+	movmi	r1, #FUTEX_WAKE
+	movmi	r2, #0xff	// INT_MAX, THREAD_MAX
+	movmi	r3, #SYS_FUTEX
+	svcmi	#3
+	mov	r0, #0
 	bx	lr
 ENDPROC(pthread_mutex_lock)
 
