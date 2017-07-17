@@ -13,6 +13,9 @@
 #include <kernel/thread.h>
 
 #include <asm/current.h>
+#include <asm/switch_to.h>
+
+#include <uapi/kernel/sched.h>
 
 #include "linux/list.h"
 
@@ -57,10 +60,6 @@ int sched_dequeue(struct task_struct *task)
 
 	return 0;
 }
-
-#include <asm/switch_to.h>
-
-#define CLONE_THREAD 1
 
 int schedule(void)
 {
