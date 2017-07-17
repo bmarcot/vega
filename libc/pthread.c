@@ -30,7 +30,7 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 {
 	(void)attr;
 
-	*mutex = -1;
+	*mutex = PTHREAD_MUTEX_INITIALIZER;
 
 	return 0;
 }

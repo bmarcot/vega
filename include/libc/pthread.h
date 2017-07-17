@@ -22,7 +22,11 @@ int pthread_detach(pthread_t thread);
 
 /* mutex */
 
-#define PTHREAD_MUTEX_INITIALIZER { .val = -1, }
+#define PTHREAD_MUTEX_UNLOCKED        1
+#define PTHREAD_MUTEX_LOCKED          0
+#define PTHREAD_MUTEX_WAITERS_QUEUED -1 /* locked, possible waiters queued */
+
+#define PTHREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_UNLOCKED
 
 int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
 int pthread_mutex_lock(pthread_mutex_t *mutex);
