@@ -8,9 +8,7 @@
 #ifndef _UAPI_KERNEL_FUTEX_H
 #define _UAPI_KERNEL_FUTEX_H
 
-enum futex_op {
-	FUTEX_WAIT,
-	FUTEX_WAKE,
-};
+#define FUTEX_WAIT 0
+#define FUTEX_WAKE 1
 
 #endif /* !_UAPI_KERNEL_FUTEX_H */
