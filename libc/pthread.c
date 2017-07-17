@@ -254,21 +254,35 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 
 int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-	(void)cond, (void)attr;
+	(void)attr;
+
+	cond->__lock = PTHREAD_MUTEX_INITIALIZER;
+	cond->__futex = 0;
 
 	return 0;
 }
 
 int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
-	(void)cond, (void)mutex;
+	pthread_mutex_lock(&cond->__lock);
+	pthread_mutex_unlock(mutex);
+	int futex_val = cond->__futex;
+	cond->__nwaiters++;
+	pthread_mutex_unlock(&cond->__lock);
+	SYS_futex(&cond->__futex, FUTEX_WAIT, futex_val);
 
-	return -1;
+	return pthread_mutex_lock(mutex);
 }
 
 int pthread_cond_signal(pthread_cond_t *cond)
 {
-	(void)cond;
+	pthread_mutex_lock(&cond->__lock);
+	if (cond->__nwaiters) {
+		cond->__nwaiters--;
+		cond->__futex++;
+		SYS_futex(&cond->__futex, FUTEX_WAKE, 1);
+	}
+	pthread_mutex_unlock(&cond->__lock);
 
-	return -1;
+	return 0;
 }
