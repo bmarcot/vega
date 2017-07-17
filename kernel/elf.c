@@ -8,13 +8,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <kernel/array.h>
 #include <kernel/errno-base.h> //FIXME: <uapi/...>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
-
-#include <lib/array.h>
 
 #include <uapi/elf32.h>
 

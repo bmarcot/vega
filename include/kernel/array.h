@@ -1,11 +1,11 @@
 /*
- * lib/array.h
+ * include/kernel/array.h
  *
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#ifndef _LIB_ARRAY_H
-#define _LIB_ARRAY_H
+#ifndef _KERNEL_ARRAY_H
+#define _KERNEL_ARRAY_H
 
 /* Iterate over an array of elements where each element can use
  * more storage than the size of its type. */
@@ -14,4 +14,4 @@
 	     (char *)pos < (char *)(first) + (num) * (size);	\
 	     pos = (__typeof__(pos))((char *)pos + (size)))
 
-#endif /* !_LIB_ARRAY_H */
+#endif /* !_KERNEL_ARRAY_H */
