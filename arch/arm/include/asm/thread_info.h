@@ -7,6 +7,7 @@
 #ifndef _ASM_THREAD_INFO_H
 #define _ASM_THREAD_INFO_H
 
+#include <kernel/log2.h>
 #include <kernel/types.h>
 
 struct preserved_context {
@@ -54,10 +55,16 @@ struct thread_info {
 
 static inline struct thread_info *current_thread_info(void)
 {
-	__u32 sp;
-	__asm__ __volatile__("mov %0, sp" : "=r" (sp));
+	struct thread_info *thread;
 
-	return (struct thread_info *)(sp & ~(THREAD_SIZE - 1));
+	__asm__ __volatile__(
+		"mov	%0, sp		\n"
+		"bfc	%0, #0, %1        "
+		: "=r" (thread)
+		: "M" (ilog2(THREAD_SIZE))
+		);
+
+	return thread;
 }
 
 #endif /* !_ASM_THREAD_INFO_H */
