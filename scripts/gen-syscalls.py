@@ -2,8 +2,6 @@
 
 xs = [
     # <pthread.h>
-    'pthread_mutex_lock',
-    'pthread_mutex_unlock',
     'pthread_cond_signal',
     'pthread_cond_wait',
 

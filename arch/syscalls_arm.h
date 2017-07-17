@@ -4,8 +4,6 @@ __SYSCALL_ARM(2, sched_yield)
 
 
 
-__SYSCALL_ARM(6, pthread_mutex_lock)
-__SYSCALL_ARM(7, pthread_mutex_unlock)
 __SYSCALL_ARM(8, pthread_cond_signal)
 __SYSCALL_ARM(9, pthread_cond_wait)
 __SYSCALL_ARM(10, timer_create)
