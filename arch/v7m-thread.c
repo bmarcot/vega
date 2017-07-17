@@ -8,7 +8,7 @@
 #include <kernel/types.h>
 
 #include <asm/thread_info.h>
-#include <arch/v7m-helper.h>
+#include <asm/v7m-helper.h>
 
 #include <pthread.h> //FIXME: because of pthread_exit()
 

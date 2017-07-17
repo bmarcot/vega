@@ -10,8 +10,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <arch/v7m-helper.h>
-
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/sched.h>
@@ -19,6 +17,7 @@
 #include <kernel/thread.h>
 
 #include <asm/thread_info.h>
+#include <asm/v7m-helper.h>
 
 #include "kernel.h"
 #include "platform.h"
