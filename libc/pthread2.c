@@ -5,6 +5,8 @@
 #include <kernel/syscalls.h>
 #include "vega/syscalls.h"
 
+#include <uapi/kernel/sched.h>
+
 #include "linux/list.h"
 
 #include <vega/sys/mman.h>
@@ -42,8 +44,6 @@ int __pthread_trampoline(void *);
 #define IS_JOINED(pd)   ((pd)->joiner != NULL)
 #define IS_DETACHED(pd) ((pd)->flags & PF_DETACHED)
 #define IS_EXITING(pd)  ((pd)->flags & PF_EXITING)
-
-#define CLONE_THREAD 1 //XXX: in <uapi/kernel/sched.h>
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 		void *(*start_routine)(void *), void *arg)
