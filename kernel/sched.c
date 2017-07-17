@@ -4,6 +4,8 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
+#include <sys/cdefs.h>
+
 #include <kernel/bitops.h>
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
