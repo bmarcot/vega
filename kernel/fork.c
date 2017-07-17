@@ -14,10 +14,10 @@
 
 int sys_getpid(void)
 {
-	return (int)get_current()->pid;
+	return get_current()->pid;
 }
 
-pid_t do_fork(void)
+int do_fork(void)
 {
 	/* create a new child process */
 	char *child_stack = alloc_pages(size_to_page_order(512));
@@ -30,7 +30,7 @@ pid_t do_fork(void)
 	return child->pid;
 }
 
-pid_t sys_fork(void)
+int sys_fork(void)
 {
 	return do_fork();
 }
