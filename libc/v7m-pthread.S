@@ -12,8 +12,8 @@
 
 	// 1: unlocked, 0: locked, [n .. -1]: locked, possible waiters queued
 
-	@ int pthread_mutex_lock(pthread_mutex_t *mutex)
-ENTRY(pthread_mutex_lock)
+	@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
+ENTRY(__pthread_mutex_lock)
 0:	ldrex	r2, [r0]
 	subs	r2, #1
 	it	mi
@@ -32,10 +32,10 @@ ENTRY(pthread_mutex_lock)
 	svc	#3
 	pop	{r0}
 	b	0b
-ENDPROC(pthread_mutex_lock)
+ENDPROC(__pthread_mutex_lock)
 
-	@ int pthread_mutex_trylock(pthread_mutex_t *mutex)
-ENTRY(pthread_mutex_trylock)
+	@ int __pthread_mutex_trylock(pthread_mutex_t *mutex)
+ENTRY(__pthread_mutex_trylock)
 0:	ldrex	r2, [r0]
 	subs	r2, #1
 	itt	mi
@@ -47,10 +47,10 @@ ENTRY(pthread_mutex_trylock)
 	dmb			@ ARMv7-M ARM, A3.4.6
 	mov	r0, #0
 	bx	lr
-ENDPROC(pthread_mutex_trylock)
+ENDPROC(__pthread_mutex_trylock)
 
-	@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
-ENTRY(pthread_mutex_unlock)
+	@ int __pthread_mutex_unlock(pthread_mutex_t *mutex)
+ENTRY(__pthread_mutex_unlock)
 0:	ldrex	r2, [r0]
 	mov	r1, #1
 	strex	r1, r1, [r0]
@@ -65,7 +65,7 @@ ENTRY(pthread_mutex_unlock)
 	svcmi	#3
 	mov	r0, #0
 	bx	lr
-ENDPROC(pthread_mutex_lock)
+ENDPROC(__pthread_mutex_lock)
 
 	//
 	// Threads

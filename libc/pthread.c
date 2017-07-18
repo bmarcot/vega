@@ -286,3 +286,18 @@ int pthread_cond_signal(pthread_cond_t *cond)
 
 	return 0;
 }
+
+int pthread_mutex_lock(pthread_mutex_t *mutex)
+{
+	return __pthread_mutex_lock(mutex);
+}
+
+int pthread_mutex_trylock(pthread_mutex_t *mutex)
+{
+	return __pthread_mutex_trylock(mutex);
+}
+
+int pthread_mutex_unlock(pthread_mutex_t *mutex)
+{
+	return __pthread_mutex_unlock(mutex);
+}
