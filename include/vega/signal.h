@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-#include "linux/list.h"
+#include <kernel/types.h>
 
 typedef struct {
 	void *ss_sp;     /* Base address of stack */

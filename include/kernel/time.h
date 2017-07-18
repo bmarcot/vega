@@ -14,9 +14,8 @@
 
 #include <vega/signal.h>
 
+#include <kernel/list.h>
 #include <kernel/types.h>
-
-#include "linux/list.h"
 
 struct timer_info;
 

@@ -10,10 +10,9 @@
 
 #include <kernel/bitops.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
-
-#include "linux/list.h"
 
 #define OBJECTS_PER_SLAB(objsize) \
 	((CACHE_PAGE_SIZE - sizeof(struct slab)) / (objsize))

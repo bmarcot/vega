@@ -12,8 +12,7 @@
 #include <vega/signal.h>
 
 #include <kernel/thread.h>
-
-#include "linux/types.h"
+#include <kernel/types.h>
 
 #define SIGMAX  31
 

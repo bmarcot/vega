@@ -10,8 +10,6 @@
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 
-#include "linux/list.h"
-
 static int fillonedir(struct dir_context *ctx, const char *name, int namlen,
 		off_t offset, unsigned int ino, unsigned int d_type)
 {

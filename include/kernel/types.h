@@ -52,7 +52,8 @@ typedef  s8 __s8;
 typedef __u32          kdev_t;
 typedef unsigned short fmode_t;
 
-/* import struct list_head */
-#include "linux/types.h"
+struct list_head {
+    struct list_head *next, *prev;
+};
 
 #endif /* !_KERNEL_TYPES_H */

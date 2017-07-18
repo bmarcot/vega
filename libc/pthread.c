@@ -1,13 +1,12 @@
-#include <pthread.h> //FIXME: Will die...
+#include <pthread.h>
 #include <stdlib.h>
 #include <sys/pthread_types.h>
 
+#include <kernel/list.h>
 #include <kernel/syscalls.h>
 #include "vega/syscalls.h"
 
 #include <uapi/kernel/sched.h>
-
-#include "linux/list.h"
 
 #include <vega/sys/mman.h>
 

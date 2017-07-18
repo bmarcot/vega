@@ -8,16 +8,16 @@
 
 #include <kernel/bitops.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/thread.h>
+#include <kernel/types.h>
 
 #include <asm/current.h>
 #include <asm/switch_to.h>
 
 #include <uapi/kernel/sched.h>
-
-#include "linux/list.h"
 
 extern struct task_struct *idle_task;
 

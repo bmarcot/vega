@@ -7,7 +7,7 @@
 #ifndef _KERNEL_FUTEX_H
 #define _KERNEL_FUTEX_H
 
-#include "linux/list.h"
+#include <kernel/list.h>
 
 struct futex {
 	int                *lock_ptr;

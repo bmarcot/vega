@@ -9,7 +9,7 @@
 
 #include <sys/cdefs.h>
 
-#include "linux/list.h"
+#include <kernel/types.h>
 
 #define CACHE_PAGE_SIZE 256
 #define CACHE_NAMELEN   16

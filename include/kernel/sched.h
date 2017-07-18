@@ -7,9 +7,9 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <asm/thread_info.h>
+#include <kernel/list.h>
 
-#include "linux/list.h"
+#include <asm/thread_info.h>
 
 /*
  * Scheduling

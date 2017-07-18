@@ -7,13 +7,12 @@
 
 #include <kernel/errno-base.h>
 #include <kernel/futex.h>
+#include <kernel/list.h>
 #include <kernel/sched.h>
 
 #include <asm/current.h>
 
 #include <uapi/kernel/futex.h>
-
-#include "linux/list.h"
 
 static LIST_HEAD(futexes);
 

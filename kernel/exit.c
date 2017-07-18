@@ -8,8 +8,6 @@
 
 #include <asm/current.h>
 
-#include "linux/list.h"
-
 void sys_exit(int status)
 {
 	current->state = EXIT_ZOMBIE;

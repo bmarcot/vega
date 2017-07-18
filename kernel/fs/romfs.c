@@ -18,8 +18,6 @@
 
 #include <drivers/mtd/mtd.h>
 
-#include "linux/list.h"
-
 const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;

@@ -4,13 +4,13 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
+#include <stddef.h>
+
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/mm/page.h>
 
 #include <asm/current.h>
-
-#include "linux/list.h"
 
 int sys_getpid(void)
 {

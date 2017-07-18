@@ -10,8 +10,7 @@
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
-
-#include "linux/list.h"
+#include <kernel/list.h>
 
 struct __dirent {
 	struct inode     *inode;

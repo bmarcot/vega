@@ -5,9 +5,10 @@
  */
 
 #include <string.h>
+
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/mm/slab.h>
-#include "linux/list.h"
 
 extern struct list_head caches;
 

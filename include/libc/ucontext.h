@@ -3,8 +3,6 @@
 
 #include <signal.h>
 
-#include "linux/types.h"
-
 /* machine context on ARM */
 typedef struct mcontext {
 	u32 sp;        //FIXME: reuse uc_stack.ss_sp

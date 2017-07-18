@@ -13,9 +13,8 @@
 #include <time.h>
 
 #include <kernel/errno-base.h>
+#include <kernel/list.h>
 #include <kernel/time.h>
-
-#include "linux/list.h"
 
 struct systick_timer {
 	unsigned long     start_clocktime;

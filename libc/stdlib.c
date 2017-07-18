@@ -1,10 +1,9 @@
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/types.h>
-
-#include "linux/types.h"
-#include "linux/list.h"
 
 /* This is a boundary tag, located at the beginning of the block wether it's
  * free or allocated.    */

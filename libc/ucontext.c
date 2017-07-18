@@ -1,8 +1,6 @@
 #include <stdarg.h>
 #include <ucontext.h>
 
-#include "linux/types.h"
-
 void return_from_makecontext();
 
 void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...)
