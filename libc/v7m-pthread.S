@@ -12,7 +12,7 @@
 
 	// 1: unlocked, 0: locked, [n .. -1]: locked, possible waiters queued
 
-	@ int __pthread_mutex_lock(pthread_mutex_t *mutex)
+	@ int __pthread_mutex_lock(int *lock)
 ENTRY(__pthread_mutex_lock)
 0:	ldrex	r2, [r0]
 	subs	r2, #1
@@ -34,7 +34,7 @@ ENTRY(__pthread_mutex_lock)
 	b	0b
 ENDPROC(__pthread_mutex_lock)
 
-	@ int __pthread_mutex_trylock(pthread_mutex_t *mutex)
+	@ int __pthread_mutex_trylock(int *lock)
 ENTRY(__pthread_mutex_trylock)
 0:	ldrex	r2, [r0]
 	subs	r2, #1
@@ -49,7 +49,7 @@ ENTRY(__pthread_mutex_trylock)
 	bx	lr
 ENDPROC(__pthread_mutex_trylock)
 
-	@ int __pthread_mutex_unlock(pthread_mutex_t *mutex)
+	@ int __pthread_mutex_unlock(int *lock)
 ENTRY(__pthread_mutex_unlock)
 0:	ldrex	r2, [r0]
 	mov	r1, #1

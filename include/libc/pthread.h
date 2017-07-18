@@ -26,15 +26,15 @@ int pthread_detach(pthread_t thread);
 #define PTHREAD_MUTEX_LOCKED          0
 #define PTHREAD_MUTEX_WAITERS_QUEUED -1 /* locked, possible waiters queued */
 
-#define PTHREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_UNLOCKED
+#define PTHREAD_MUTEX_INITIALIZER { .__lock = PTHREAD_MUTEX_UNLOCKED, }
 
 int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
 int pthread_mutex_lock(pthread_mutex_t *mutex);
 int pthread_mutex_trylock(pthread_mutex_t *mutex);
 int pthread_mutex_unlock(pthread_mutex_t *mutex);
-int __pthread_mutex_lock(pthread_mutex_t *mutex);
-int __pthread_mutex_trylock(pthread_mutex_t *mutex);
-int __pthread_mutex_unlock(pthread_mutex_t *mutex);
+int __pthread_mutex_lock(int *lock);
+int __pthread_mutex_trylock(int *lock);
+int __pthread_mutex_unlock(int *lock);
 
 /* cond variable */
 
