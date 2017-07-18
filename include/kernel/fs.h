@@ -43,7 +43,7 @@ struct inode {
 	umode_t                       i_mode;        /* access permissions */
 	// kernel_ino_t
 	unsigned long                 i_ino;         /* inode number */
-	atomic_t                      i_count;       /* reference counter */
+	unsigned int                  i_count;       /* reference counter */
 	kdev_t                        i_rdev;        /* real device node */
 	off_t                         i_size;        /* file size in bytes */
 	const struct inode_operations *i_op;         /* inode ops table */
