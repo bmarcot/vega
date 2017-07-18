@@ -4,6 +4,8 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
+#include <stddef.h>
+
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 
