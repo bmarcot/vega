@@ -1,7 +1,7 @@
+#include <limits.h>
 #include <string.h> //XXX: for strlen, strcpy
 #include "utils.h"
 #include <stdarg.h>
-#include "linux/types.h"
 
 int vsnprintf(char *str, size_t size, const char *format, va_list ap)
 {
@@ -90,7 +90,7 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap)
 
 int vsprintf(char *str, const char *format, va_list ap)
 {
-	return vsnprintf(str, S32_MAX, format, ap);
+	return vsnprintf(str, INT_MAX, format, ap);
 }
 
 /* int printf(const char *format, ...) */
