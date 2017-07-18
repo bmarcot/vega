@@ -62,11 +62,7 @@ struct task_struct {
 	int                pid;
 	struct list_head   list;    /* global list of tasks */
 
-	struct list_head   ti_q;    /* sched runq, mutex waitq, thread joinq */
-
-	/* Pointer to mutually exclusive data: the mutex the thread is blocking
-	 * on, the exit value when thread is not yet joined, etc. */
-	void               *ti_private;
+	struct list_head   ti_q;    /* sched runqueue */
 
 	/* old task_info struct */
 	unsigned long    filemap;
