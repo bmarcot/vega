@@ -7,6 +7,8 @@
 #ifndef _KERNEL_KERNEL_H
 #define _KERNEL_KERNEL_H
 
+#include <stddef.h> /* for offsetof() definition */
+
 /* round-down to a power of 2 */
 #define align(x, a)          align_mask(x, (__typeof__(x))((a) - 1))
 #define align_mask(x, mask)  ((x) & ~(mask))
