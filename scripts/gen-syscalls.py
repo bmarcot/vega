@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
 xs = [
-    # <pthread.h>
-    'pthread_cond_signal',
-    'pthread_cond_wait',
-
     # <time.h>
     'timer_create',
     'timer_settime',
