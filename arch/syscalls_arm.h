@@ -4,8 +4,8 @@ __SYSCALL_ARM(2, sched_yield)
 
 
 
-__SYSCALL_ARM(8, pthread_cond_signal)
-__SYSCALL_ARM(9, pthread_cond_wait)
+
+
 __SYSCALL_ARM(10, timer_create)
 __SYSCALL_ARM(11, timer_settime)
 __SYSCALL_ARM(12, timer_gettime)
