@@ -12,6 +12,8 @@
 
 #include <pthread.h> //FIXME: because of pthread_exit()
 
+#include "platform.h"
+
 // setup_init_task (or preallocated struct in .rodata/.data) then only do
 // copy_thread()...
 int arch_thread_setup(struct task_struct *task, void *start_routine,
