@@ -17,6 +17,12 @@
 ENTRY(svcall)
 	push	{lr}
 	mrs	lr, psp
+
+	/* save psp value in thread_info struct */
+	mov	r12, sp
+	bfc	r12, #0, #9
+	str	lr, [r12, #4]		//FIXME: offsetof thread_ctx->sp
+
 	ldr	r12, [lr, #RET_ADDRESS]
 	ldrb	r12, [r12, #-2]		@ address of the SVC call site
 	tbb	[pc, r12]
@@ -90,7 +96,12 @@ $6:	ldr	r12, [lr, #xPSR]	@ test stack alignment
 
 	.global syscall_return
 syscall_return:
-0:	mrs	r1, psp
+	/* restore psp value from thread_info struct */
+0:	mov	r1, sp
+	bfc	r1, #0, #9
+	ldr	r1, [r1, #4]		//FIXME: offsetof thread_ctx->sp
+	msr	psp, r1
+
 	str	r0, [r1, #R0]           @ update return value in exception frame
 	pop	{pc}
 ENDPROC(svcall)

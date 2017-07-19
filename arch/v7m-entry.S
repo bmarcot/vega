@@ -17,21 +17,18 @@
 ENTRY(__switch_to)
 	/* save previous thread context */
 	tst	r2, r2
-	itttt	ne
+	ittt	ne
 	pushne	{r4-r12, lr}
 	movne	r2, sp
-	mrsne	r3, psp
-	strdne	r2, r3, [r1]
+	strne	r2, [r1]
 
 ENTRY(thread_restore)
 	/* restore next task context */
 	ldm	r0!, {r2, r3, r12}
 	mov	sp, r2
-	msr	psp, r3
 	msr	control, r12		@ write to SPSEL is ignored in Handler_Mode
 	mov	r0, r1
 	pop	{r4-r12, pc}
-
 ENDPROC(thread_restore)
 ENDPROC(__switch_to)
 
@@ -48,6 +45,15 @@ ENTRY(return_from_sigaction)
 	add	sp, #12			/* reclaim siginfo_t storage */
 	emulate_iret
 END(return_from_sigaction)
+
+ENTRY(v7m_task_start_trampoline)
+	mov	r0, sp
+	bfc	r0, #0, #9
+	ldr	r0, [r0, #4] 		//FIXME: offsetof(thread_ctx->sp)
+	msr	psp, r0
+	ldr	r0, =0xfffffffd
+	bx	r0
+ENDPROC(v7m_task_start_trampoline)
 
 ENTRY(return_from_sighandler)
 	emulate_iret

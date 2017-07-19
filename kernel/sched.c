@@ -71,6 +71,7 @@ int schedule(void)
 	}
 
 	struct task_struct *prev = get_current();
+
 	switch_to(prev, next, prev);
 
 	if ((prev->state == EXIT_ZOMBIE) && (prev->flags == CLONE_THREAD)) {

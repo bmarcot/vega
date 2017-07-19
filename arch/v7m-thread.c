@@ -14,6 +14,8 @@
 
 #include "platform.h"
 
+void v7m_task_start_trampoline(void);
+
 // setup_init_task (or preallocated struct in .rodata/.data) then only do
 // copy_thread()...
 int arch_thread_setup(struct task_struct *task, void *start_routine,
@@ -30,7 +32,7 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 	 *   in kernel-stack by function prologues/epilogues.
 	 */
 	thread->kernel_ctx.sp = (__u32)thread + THREAD_SIZE
-		- sizeof(struct preserved_context); // msp
+		- sizeof(struct preserved_context) - 8; // msp
 	thread->kernel_ctx.ctx->r4 = 0;
 	thread->kernel_ctx.ctx->r5 = 0;
 	thread->kernel_ctx.ctx->r6 = 0;
@@ -40,7 +42,7 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 	thread->kernel_ctx.ctx->r10 = 0;
 	thread->kernel_ctx.ctx->r11 = 0;
 	thread->kernel_ctx.ctx->r12 = 0;
-	thread->kernel_ctx.ctx->lr = V7M_EXC_RETURN_THREAD_PROCESS;
+	thread->kernel_ctx.ctx->lr = (u32)v7m_task_start_trampoline;
 
 	thread->thread_ctx.sp = (__u32)stack_start
 		- sizeof(struct cpu_saved_context); // psp
