@@ -39,6 +39,7 @@ xs = [
     'sched_yield',
     'getpriority',
     'setpriority',
+    'sigreturn',
 ]
 
 import datetime

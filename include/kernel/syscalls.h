@@ -38,5 +38,6 @@
 #define SYS_SCHED_YIELD 24
 #define SYS_GETPRIORITY 25
 #define SYS_SETPRIORITY 26
+#define SYS_SIGRETURN   27
 
 #endif /* !KERNEL_SYSCALLS_H */
