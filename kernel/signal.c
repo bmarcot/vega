@@ -19,13 +19,12 @@
 #include <asm/thread_info.h>
 #include <asm/v7m-helper.h>
 
+#include <uapi/kernel/signal.h>
+
 #include "kernel.h"
 #include "platform.h"
 
-static LIST_HEAD(signal_head); /* list of installed handlers */
-
 extern void return_from_sighandler(void);
-extern void return_from_sigaction(void);
 
 void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
 {
@@ -39,81 +38,6 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 	void *stack_pointer = v7m_alloca_thread_context(tip, len);
 
 	memcpy(stack_pointer, data, len);
-}
-
-static void stage_sighandler(struct sigaction *sigaction)
-{
-	CURRENT_THREAD_INFO(curr_thread);
-	struct cpu_saved_context *ctx;
-
-	/* update current thread SP_process */
-	curr_thread->thread_ctx.sp = __get_PSP();
-
-	/* this is the exception stacked-context */
-	ctx = curr_thread->thread_ctx.ctx;
-
-	/* return value of syscall, cannot fail after this point */
-	ctx->r0 = 0;
-
-	/* the sigaction context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(curr_thread,
-				sizeof(struct cpu_saved_context));
-
-	/* build the sigaction trampoline */
-	ctx = curr_thread->thread_ctx.ctx;
-/* #ifdef SECURE_KERNEL */
-	ctx->r1 = 0;
-	ctx->r2 = 0;
-	ctx->r3 = 0;
-	ctx->r12 = 0;
-/* #endif */
-	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
-	ctx->ret_addr = (__u32)v7m_clear_thumb_bit(sigaction->sa_handler);
-	ctx->xpsr = xPSR_T_Msk;
-
-	/* update current thread SP_process */
-	__set_PSP(curr_thread->thread_ctx.sp);
-}
-
-static void stage_sigaction(const struct sigaction *sigaction, int sig,
-			union sigval value)
-{
-	CURRENT_THREAD_INFO(curr_thread);
-	struct cpu_saved_context *ctx;
-
-	/* update current thread SP_process */
-	curr_thread->thread_ctx.sp = __get_PSP();
-
-	/* this is the exception stacked-context */
-	ctx = curr_thread->thread_ctx.ctx;
-
-	/* return value of syscall, cannot fail after this point */
-	ctx->r0 = 0;
-
-	/* The siginfo_t struct is allocated on thread's stack; that memory
-	 * will be reclaimed during return_from_sigaction. */
-	siginfo_t *siginfo_ptr =
-		v7m_alloca_thread_context(curr_thread, sizeof(siginfo_t));
-	siginfo_ptr->si_signo = sig;
-	siginfo_ptr->si_value = value;
-	siginfo_ptr->si_pid = TASK_STRUCT(curr_thread)->pid;
-
-	/* the sigaction context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(curr_thread,
-				sizeof(struct cpu_saved_context));
-
-	/* build a sigaction trampoline */
-	ctx = curr_thread->thread_ctx.ctx;
-	ctx->r1 = (u32)siginfo_ptr;
-	ctx->r2 = 0; /* ucontext_t *, but commonly unused */
-	ctx->r3 = 0;
-	ctx->r12 = 0;
-	ctx->lr = (u32)v7m_set_thumb_bit(return_from_sigaction);
-	ctx->ret_addr = (u32)v7m_clear_thumb_bit(sigaction->sa_sigaction);
-	ctx->xpsr = xPSR_T_Msk;
-
-	/* update current thread SP_process */
-	__set_PSP(curr_thread->thread_ctx.sp);
 }
 
 void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
@@ -147,112 +71,173 @@ void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
 		__set_PSP(thread->thread_ctx.sp);
 }
 
-static struct sigaction *find_sigaction_by_sig(pid_t pid, int sig)
+/* new signals */
+
+#include <asm/current.h>
+
+//FIXME: this is part of the task_struct->signal_struct
+static LIST_HEAD(ksignals); /* list of installed handlers */
+
+static struct ksignal *get_ksignal(int sig)
 {
-	(void)pid; //XXX: Multi-tasking not implemented yet
+	struct ksignal *ks;
 
-	struct signal_info *signal;
-
-	list_for_each_entry(signal, &signal_head, list) {
-		if (signal->signo == sig)
-			return &signal->act_storage;
+	list_for_each_entry(ks, &ksignals, list) {
+		if (ks->sig == sig)
+			return ks;
 	}
 
 	return NULL;
 }
 
-int sys_sigaction(int signo, const struct sigaction *restrict act,
-		struct sigaction *restrict oldact)
+int sys_sigaction(int signum, const struct sigaction *act,
+		struct sigaction *oldact)
 {
-	if ((signo == SIGKILL) || (signo == SIGSTOP)) {
+	if ((signum == SIGKILL) || (signum == SIGSTOP)) {
 		errno = EINVAL;
 		return -1;
 	}
-	if (act == NULL) {
+
+	/* do checks on act variable: is address valid, not nil, etc. */
+	if (!act) {
 		errno = EFAULT;
 		return -1;
 	}
 
-	if (oldact) {
-		struct sigaction *oact = find_sigaction_by_sig(0, signo);
-		if (oact != NULL)
-			memcpy(oldact, oact, sizeof(struct sigaction));
+	/* lookup fo a previous installed handler */
+	struct ksignal *ks = get_ksignal(signum);
+
+	//FIXME: is user-supplied address valid?
+	if (ks && oldact)
+		memcpy(oldact, ks, sizeof(struct sigaction));
+
+	if (!ks) {
+		ks = malloc(sizeof(struct ksignal));
+		if (!ks) {
+			errno = ENOMEM;
+			return -1;
+		}
 	}
 
-	struct signal_info *signal = malloc(sizeof(struct signal_info));
-	if (signal == NULL) {
-		errno = ENOMEM;
-		return -1;
-	}
-
-	signal->signo = signo;
-	list_add(&signal->list, &signal_head);
-	memcpy(&signal->act_storage, act, sizeof(struct sigaction));
+	ks->sig = signum;
+	ks->val.sival_int = 0;
+	memcpy(&ks->sa, act, sizeof(struct sigaction));
+	list_add(&ks->list, &ksignals);
 
 	return 0;
 }
 
-/* enabled signal mask */
-static unsigned long supported_signal_mask = (1 << SIGKILL) | (1 << SIGUSR1)
-	| (1 << SIGUSR2) | (1 << SIGSTOP);
-
-static int is_signal_supported(int sig)
+static inline void init_sigctx(struct cpu_saved_context *sigctx, u32 arg1,
+			u32 arg2, struct sigaction *sa)
 {
-	if (sig > SIGMAX)
-		return 0;
-	return bitmap_get_bit(&supported_signal_mask, sig);
+	sigctx->r1 = arg1; /* siginfo_t or nil */
+	sigctx->r2 = arg2; /* ucontext_t *, but commonly unused */
+	sigctx->r3 = 0;
+	sigctx->r12 = 0;
+	if (sa->sa_flags & SA_RESTORER)
+		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
+	else
+		sigctx->lr = 0;
+	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
+	sigctx->xpsr = xPSR_T_Msk;
 }
 
-/* How signal works?
- *
- * - A fake exception return context is allocated to the user thread stack.
- * - This context is a trampoline to the signal handler.
- * - When the syscall handler returns, the return value is pushed to the user
- *   stack in r0.  For signal handling, r0 must contain the first parameter to
- *   the signal handler function.  The actual return code of the syscall must
- *   be written into the auto-pushed stack context.  The staging functions
- *   handle the update of the error code in the cpu-pushed stackframe.
- */
+static void do_handler(struct sigaction *sa)
+{
+	/* the sigaction context will be poped by cpu on exception return */
+	v7m_alloca_thread_context(current_thread_info(),
+				sizeof(struct cpu_saved_context));
+
+	struct cpu_saved_context *sigctx =
+		current_thread_info()->thread_ctx.ctx;
+
+	/* build the sigaction trampoline */
+	sigctx->r1 = 0;
+	sigctx->r2 = 0;
+	sigctx->r3 = 0;
+	sigctx->r12 = 0;
+	if (sa->sa_flags & SA_RESTORER)
+		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
+	else
+		sigctx->lr = 0;
+	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
+	sigctx->xpsr = xPSR_T_Msk;
+}
+
+static void do_sigaction(struct ksignal *ks)
+{
+	v7m_alloca_thread_context(current_thread_info(),
+				align_next(sizeof(siginfo_t), 8));
+
+	/* The siginfo_t struct is allocated on thread's stack; that memory
+	 * will be reclaimed during return_from_sigaction. */
+	siginfo_t *siginfop =
+		(siginfo_t *)current_thread_info()->thread_ctx.sp;
+	// or next alloc must be 8 bytes aligned
+	siginfop->si_signo = ks->sig;
+	siginfop->si_value = ks->val;
+	siginfop->si_pid = current->pid;
+
+	/* the sigaction context will be poped by cpu on exception return */
+	//v7m_alloca_thread_context(current_thread_info(), off);
+	v7m_alloca_thread_context(current_thread_info(),
+				sizeof(struct cpu_saved_context));
+
+	struct cpu_saved_context *sigctx =
+		current_thread_info()->thread_ctx.ctx;
+
+	/* build a sigaction trampoline */
+	sigctx->r1 = (u32)siginfop;
+	sigctx->r2 = 0; /* ucontext_t *, but commonly unused */
+	sigctx->r3 = 0;
+	sigctx->r12 = 0;
+	struct sigaction *sa = &ks->sa;
+	if (sa->sa_flags & SA_RESTORER)
+		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
+	else
+		sigctx->lr = 0;
+	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
+	sigctx->xpsr = xPSR_T_Msk;
+}
+
+static int do_sigqueue(__unused pid_t pid, int sig, const union sigval value)
+{
+	struct ksignal *ks = get_ksignal(sig);
+	if (!ks)
+		return -EINVAL;
+
+	ks->val = value;
+	current->sig = sig;
+	if (ks->sa.sa_flags & SA_SIGINFO)
+		do_sigaction(ks);
+	else
+		do_handler(&ks->sa);
+
+	return sig;
+}
+
+int sys_sigqueue(__unused pid_t pid, int sig, const union sigval value)
+{
+	return do_sigqueue(pid, sig, value);
+}
 
 int sys_kill(pid_t pid, int sig)
 {
-	(void)pid;
-
-	if (!is_signal_supported(sig))
-		return -EINVAL;
-
-	struct sigaction *act = find_sigaction_by_sig(0, sig);
-	if (act == NULL)
-		return -EINVAL;
-
-	if (act->sa_flags & SA_SIGINFO)
-		stage_sigaction(act, sig, (union sigval){ .sival_int = 0 });
-	else
-		stage_sighandler(act);
-
-	return sig;
+	return do_sigqueue(pid, sig, (union sigval){0});
 }
 
-int sys_sigqueue(pid_t pid, int sig, const union sigval value)
+int sys_sigreturn(void)
 {
-	(void)pid; //XXX: Multi-tasking not implemented yet
+	struct ksignal *ks = get_ksignal(current->sig);
 
-	if (!is_signal_supported(sig)) {
-		errno = EINVAL;
-		return -1;
+	int off = sizeof(struct cpu_saved_context);
+	if (ks->sa.sa_flags & SA_SIGINFO) {
+		off += align_next(sizeof(siginfo_t), 8);
+		pr_info("has SA_SIGINFO");
 	}
+	current_thread_info()->thread_ctx.sp += off;
+	current->sig = -1;
 
-	struct sigaction *act = find_sigaction_by_sig(0, sig);
-	if (act == NULL) {
-		errno = EINVAL;
-		return -1;
-	}
-
-	//FIXME: must check there is enough space on user thread stack
-	if (act->sa_flags & SA_SIGINFO)
-		stage_sigaction(act, sig, value);
-	else
-		stage_sighandler(act);
-
-	return sig;
+	/* this is the actual return value to the kill() syscall */
+	return 0;
 }
