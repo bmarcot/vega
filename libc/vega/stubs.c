@@ -54,3 +54,8 @@ int _getpid(void)
 {
 	return do_syscall0(SYS_GETPID);
 }
+
+void sigreturn(void)
+{
+	do_syscall0(SYS_SIGRETURN);
+}
