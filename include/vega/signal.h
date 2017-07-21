@@ -59,13 +59,15 @@ struct sigaction {
 	};
 	sigset_t sa_mask;
 	int sa_flags;
+	void (*sa_restorer)(void);
 
 	/* Storage for kernel fields.  Not compliant with the POSIX specs.  */
 	struct list_head sa_list;
 	int sa_signo;
 };
 
-#define SA_SIGINFO  (1 << 0)
+#define SA_SIGINFO  0x1
+#define SA_RESTORER 0x2
 
 #define SIGKILL  9   /* Kill (can't be caught or ignored) (POSIX) */
 #define SIGUSR1  10  /* User defined signal 1 (POSIX) */
