@@ -5,6 +5,8 @@
 
 #include <kernel/types.h>
 
+#include <uapi/kernel/signal.h>
+
 typedef struct {
 	void *ss_sp;     /* Base address of stack */
 	int ss_flags;    /* Flags */
@@ -12,11 +14,6 @@ typedef struct {
 } stack_t;
 
 /* sigevent - structure for notification from asynchronous routines */
-
-union sigval {            /* Data passed with notification */
-	int sival_int;    /* Integer value */
-	void *sival_ptr;  /* Pointer value */
-};
 
 struct sigevent {
 	int sigev_notify; /* Notification method */
@@ -37,37 +34,6 @@ struct sigevent {
 
 /* sigaction - used to change the action taken by a process on receipt of a
      specific signal  */
-
-typedef struct {
-	int si_signo;
-	/* int si_code; */
-	union sigval si_value;
-	/* int si_errno; */
-	pid_t si_pid;
-	/* uid_t si_uid; */
-	/* void *si_addr; */
-	/* int si_status; */
-	/* int si_band; */
-} siginfo_t;
-
-typedef int sigset_t;
-
-struct sigaction {
-	union {
-		void (*sa_handler)(int);
-		void (*sa_sigaction)(int, siginfo_t *, void *);
-	};
-	sigset_t sa_mask;
-	int sa_flags;
-	void (*sa_restorer)(void);
-
-	/* Storage for kernel fields.  Not compliant with the POSIX specs.  */
-	struct list_head sa_list;
-	int sa_signo;
-};
-
-#define SA_SIGINFO  0x1
-#define SA_RESTORER 0x2
 
 #define SIGKILL  9   /* Kill (can't be caught or ignored) (POSIX) */
 #define SIGUSR1  10  /* User defined signal 1 (POSIX) */
