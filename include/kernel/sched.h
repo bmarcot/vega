@@ -60,6 +60,7 @@ struct task_struct {
 	int                exit_code;
 	int                prio;
 	int                pid;
+	int                sig;
 	struct list_head   list;    /* global list of tasks */
 
 	struct list_head   ti_q;    /* sched runqueue */
