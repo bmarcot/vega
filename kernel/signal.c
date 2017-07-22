@@ -143,24 +143,11 @@ static inline void init_sigctx(struct cpu_saved_context *sigctx, u32 arg1,
 
 static void do_handler(struct sigaction *sa)
 {
-	/* the sigaction context will be poped by cpu on exception return */
 	v7m_alloca_thread_context(current_thread_info(),
 				sizeof(struct cpu_saved_context));
-
 	struct cpu_saved_context *sigctx =
 		current_thread_info()->thread_ctx.ctx;
-
-	/* build the sigaction trampoline */
-	sigctx->r1 = 0;
-	sigctx->r2 = 0;
-	sigctx->r3 = 0;
-	sigctx->r12 = 0;
-	if (sa->sa_flags & SA_RESTORER)
-		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
-	else
-		sigctx->lr = 0;
-	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
-	sigctx->xpsr = xPSR_T_Msk;
+	init_sigctx(sigctx, 0, 0, sa);
 }
 
 static void do_sigaction(int sig, struct sigaction *sa, union sigval value)
@@ -177,18 +164,7 @@ static void do_sigaction(int sig, struct sigaction *sa, union sigval value)
 				sizeof(struct cpu_saved_context));
 	struct cpu_saved_context *sigctx =
 		current_thread_info()->thread_ctx.ctx;
-
-	/* build a sigaction trampoline */
-	sigctx->r1 = (u32)siginfop;
-	sigctx->r2 = 0; /* ucontext_t *, but commonly unused */
-	sigctx->r3 = 0;
-	sigctx->r12 = 0;
-	if (sa->sa_flags & SA_RESTORER)
-		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
-	else
-		sigctx->lr = 0;
-	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
-	sigctx->xpsr = xPSR_T_Msk;
+	init_sigctx(sigctx, (u32)siginfop, 0, sa);
 }
 
 static int do_sigqueue(__unused pid_t pid, int sig, union sigval value)
