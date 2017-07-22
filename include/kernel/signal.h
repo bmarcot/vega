@@ -32,7 +32,6 @@ void do_sigevent(const struct sigevent *sigevent,
 
 struct ksignal {
 	int              sig;
-	union sigval     val;
 	struct sigaction sa;
 	struct list_head list;
 };

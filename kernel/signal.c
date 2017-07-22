@@ -120,7 +120,6 @@ int sys_sigaction(int signum, const struct sigaction *act,
 	}
 
 	ks->sig = signum;
-	ks->val.sival_int = 0;
 	memcpy(&ks->sa, act, sizeof(struct sigaction));
 	list_add(&ks->list, &ksignals);
 
@@ -164,25 +163,18 @@ static void do_handler(struct sigaction *sa)
 	sigctx->xpsr = xPSR_T_Msk;
 }
 
-static void do_sigaction(struct ksignal *ks)
+static void do_sigaction(int sig, struct sigaction *sa, union sigval value)
 {
 	v7m_alloca_thread_context(current_thread_info(),
 				align_next(sizeof(siginfo_t), 8));
-
-	/* The siginfo_t struct is allocated on thread's stack; that memory
-	 * will be reclaimed during return_from_sigaction. */
 	siginfo_t *siginfop =
 		(siginfo_t *)current_thread_info()->thread_ctx.sp;
-	// or next alloc must be 8 bytes aligned
-	siginfop->si_signo = ks->sig;
-	siginfop->si_value = ks->val;
+	siginfop->si_signo = sig;
+	siginfop->si_value = value;
 	siginfop->si_pid = current->pid;
 
-	/* the sigaction context will be poped by cpu on exception return */
-	//v7m_alloca_thread_context(current_thread_info(), off);
 	v7m_alloca_thread_context(current_thread_info(),
 				sizeof(struct cpu_saved_context));
-
 	struct cpu_saved_context *sigctx =
 		current_thread_info()->thread_ctx.ctx;
 
@@ -191,7 +183,6 @@ static void do_sigaction(struct ksignal *ks)
 	sigctx->r2 = 0; /* ucontext_t *, but commonly unused */
 	sigctx->r3 = 0;
 	sigctx->r12 = 0;
-	struct sigaction *sa = &ks->sa;
 	if (sa->sa_flags & SA_RESTORER)
 		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
 	else
@@ -200,23 +191,22 @@ static void do_sigaction(struct ksignal *ks)
 	sigctx->xpsr = xPSR_T_Msk;
 }
 
-static int do_sigqueue(__unused pid_t pid, int sig, const union sigval value)
+static int do_sigqueue(__unused pid_t pid, int sig, union sigval value)
 {
 	struct ksignal *ks = get_ksignal(sig);
 	if (!ks)
 		return -EINVAL;
 
-	ks->val = value;
 	current->sig = sig;
 	if (ks->sa.sa_flags & SA_SIGINFO)
-		do_sigaction(ks);
+		do_sigaction(sig, &ks->sa, value);
 	else
 		do_handler(&ks->sa);
 
 	return sig;
 }
 
-int sys_sigqueue(__unused pid_t pid, int sig, const union sigval value)
+int sys_sigqueue(pid_t pid, int sig, union sigval value)
 {
 	return do_sigqueue(pid, sig, value);
 }
