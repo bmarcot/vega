@@ -7,6 +7,8 @@
 #ifndef _KERNEL_TYPES_H
 #define _KERNEL_TYPES_H
 
+#include <uapi/kernel/posix_types.h>
+
 #ifndef _U32
 #define _U32
 typedef unsigned int u32;
