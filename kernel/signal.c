@@ -24,8 +24,6 @@
 #include "kernel.h"
 #include "platform.h"
 
-extern void return_from_sighandler(void);
-
 void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
 {
 	tip->thread_ctx.sp -= len;
@@ -38,37 +36,6 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 	void *stack_pointer = v7m_alloca_thread_context(tip, len);
 
 	memcpy(stack_pointer, data, len);
-}
-
-void do_sigevent(const struct sigevent *sigevent, struct thread_info *thread)
-{
-	CURRENT_THREAD_INFO(curr_thread);
-	struct cpu_saved_context *ctx;
-
-	//if (sigevent->sigev_notify == SIGEV_THREAD) {
-
-	/* update current thread SP_process */
-	if (thread == curr_thread)
-		thread->thread_ctx.sp = __get_PSP();
-
-	/* the sigevent context will be poped by cpu on exception return */
-	v7m_alloca_thread_context(thread, sizeof(struct cpu_saved_context));
-
-	/* build a sigevent trampoline */
-	ctx = thread->thread_ctx.ctx;
-	ctx->r0 = sigevent->sigev_value.sival_int;
-	ctx->r1 = 0;
-	ctx->r2 = 0;
-	ctx->r3 = 0;
-	ctx->r12 = 0;
-	ctx->lr = (__u32)v7m_set_thumb_bit(return_from_sighandler);
-	ctx->ret_addr =
-		(__u32)v7m_clear_thumb_bit(sigevent->sigev_notify_function);
-	ctx->xpsr = xPSR_T_Msk;
-
-	/* update current thread SP_process */
-	if (thread == curr_thread)
-		__set_PSP(thread->thread_ctx.sp);
 }
 
 /* new signals */
@@ -197,13 +164,20 @@ int sys_sigreturn(void)
 	struct ksignal *ks = get_ksignal(current->sig);
 
 	int off = sizeof(struct cpu_saved_context);
-	if (ks->sa.sa_flags & SA_SIGINFO) {
+	if (ks->sa.sa_flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
-		pr_info("has SA_SIGINFO");
-	}
 	current_thread_info()->thread_ctx.sp += off;
 	current->sig = -1;
 
 	/* this is the actual return value to the kill() syscall */
 	return 0;
+}
+
+void do_sigevent(struct thread_info *thread, struct sigevent *sigevent)
+{
+	(void)thread;
+
+	if (sigevent->sigev_notify != SIGEV_SIGNAL)
+		return;
+	do_sigqueue(0, sigevent->sigev_signo, sigevent->sigev_value);
 }

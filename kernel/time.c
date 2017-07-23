@@ -88,7 +88,7 @@ static void timer_callback(struct timer_info *timer)
 {
 	if (timer->type == ONESHOT_TIMER)
 		timer->disarmed = 1;
-	do_sigevent(&timer->sigev, timer->owner);
+	do_sigevent(timer->owner, &timer->sigev);
 }
 
 static void timer_callback_and_link(struct timer_info *timer)
@@ -96,7 +96,7 @@ static void timer_callback_and_link(struct timer_info *timer)
 	timer->type = INTERVAL_TIMER;
 	timer->callback = timer_callback;
 	timer_set(timer, &timer->value.it_interval);
-	do_sigevent(&timer->sigev, timer->owner);
+	do_sigevent(timer->owner, &timer->sigev);
 }
 
 int sys_timer_create(clockid_t clockid, struct sigevent *sevp,

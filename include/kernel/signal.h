@@ -22,9 +22,6 @@ struct signal_info {
 	struct sigaction act_storage;
 };
 
-void do_sigevent(const struct sigevent *sigevent,
-		struct thread_info *thread);
-
 /* new signals */
 
 #include <kernel/list.h>
@@ -35,5 +32,8 @@ struct ksignal {
 	struct sigaction sa;
 	struct list_head list;
 };
+
+void do_sigevent(struct thread_info *thread, /* struct task_struct *task, */
+		struct sigevent *sigevent);
 
 #endif /* !_KERNEL_SIGNAL_H */
