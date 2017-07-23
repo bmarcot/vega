@@ -2,6 +2,7 @@
 #define UCONTEXT_H
 
 #include <signal.h>
+#include <vega/signal.h>
 
 /* machine context on ARM */
 typedef struct mcontext {
