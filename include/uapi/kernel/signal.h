@@ -48,4 +48,16 @@ struct sigaction {
 	int sa_signo;
 };
 
+#define SIGEV_NONE   0
+#define SIGEV_SIGNAL 1
+
+struct sigevent {
+	int          sigev_notify;
+	int          sigev_signo;
+	union sigval sigev_value;
+	void         (*sigev_notify_function)(union sigval);
+	void         *sigev_notify_attributes;
+	pid_t        sigev_notify_thread_id;
+};
+
 #endif /* !_UAPI_KERNEL_SIGNAL_H */
