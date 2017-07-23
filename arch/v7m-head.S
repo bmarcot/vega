@@ -27,7 +27,7 @@
 	.long	0				@ Debug Monitor
 	.long	0				@ Reserved
 	.long	0				@ PendSV
-	.long	systick				@ SysTick
+	.long	systick_entry			@ SysTick
 	.long	irq_entry			@ IRQ 0
 	.long	irq_entry			@ IRQ 1
 	.long	irq_entry			@ IRQ 2
@@ -141,14 +141,49 @@ ENDPROC(reset)
 
 ENTRY(irq_entry)
 	push	{lr}
+
+	/* save psp value in thread_info struct */
+	mov	r0, sp
+	bfc	r0, #0, #9
+	mrs	r1, psp
+	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+
 	ldr	r0, =irq_handler
 	mrs	r1, ipsr
 	sub	r1, #16
 	ldr.w	r0, [r0, r1, lsl #2]
 	blx	r0
+
+	/* restore psp */
+	mov	r0, sp
+	bfc	r0, #0, #9
+	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	msr	psp, r0
+
 	pop	{pc}
 ENDPROC(irq_entry)
 
+ENTRY(systick_entry)
+	push	{lr}
+
+	/* save PSP into thread_info struct */
+	mov	r0, sp
+	bfc	r0, #0, #9
+	mrs	r1, psp
+	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+
+	bl	systick
+
+	/* restore PSP from thread_info struct */
+	mov	r0, sp
+	bfc	r0, #0, #9
+	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	msr	psp, r0
+
+	pop	{pc}
+ENDPROC(systick_entry)
+
+	//XXX: Thumb_Bit is not set
 	.weak systick
 systick:
 	bx	lr
