@@ -5,10 +5,8 @@
  */
 
 #include <errno.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
@@ -16,13 +14,11 @@
 #include <kernel/signal.h>
 #include <kernel/thread.h>
 
+#include <asm/current.h>
 #include <asm/thread_info.h>
 #include <asm/v7m-helper.h>
 
 #include <uapi/kernel/signal.h>
-
-#include "kernel.h"
-#include "platform.h"
 
 void *v7m_alloca_thread_context(struct thread_info *tip, size_t len)
 {
@@ -37,10 +33,6 @@ void v7m_push_thread_context(struct thread_info *tip, void *data, size_t len)
 
 	memcpy(stack_pointer, data, len);
 }
-
-/* new signals */
-
-#include <asm/current.h>
 
 //FIXME: this is part of the task_struct->signal_struct
 static LIST_HEAD(ksignals); /* list of installed handlers */
