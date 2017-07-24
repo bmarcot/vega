@@ -5,17 +5,15 @@
 
 typedef unsigned long pthread_t;
 
-typedef struct
-{
-	int           stackaddr_set; //FIXME: Replace with __flags | PA_STACKSET
+typedef struct {
+	int           stackaddr_set;
 	void          *stackaddr;
 	unsigned long stacksize;
 } pthread_attr_t;
 
 /* mutex structs */
 
-typedef struct
-{
+typedef struct {
 	int __lock;
 } pthread_mutex_t;
 
@@ -23,8 +21,7 @@ typedef unsigned long pthread_mutexattr_t;
 
 /* condvar structs */
 
-typedef struct
-{
+typedef struct {
 	int          __lock;
 	int          __futex;
 	unsigned int __nwaiters;
