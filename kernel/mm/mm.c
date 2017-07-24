@@ -10,11 +10,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <vega/sys/mman.h>
-
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
+
+#include <uapi/kernel/mman.h>
 
 #define M_ISANON(f)     (((f) & MAP_ANONYMOUS)     == MAP_ANONYMOUS)
 #define M_ISUNINIT(f)   (((f) & MAP_UNINITIALIZED) == MAP_UNINITIALIZED)
