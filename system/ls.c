@@ -9,11 +9,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <vega/dirent.h>
+#include <dirent.h>
 
 #include <kernel/device.h>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+
+#include <uapi/kernel/dirent.h>
 
 int ls(int argc, char *argv[])
 {

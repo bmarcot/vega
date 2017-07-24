@@ -10,9 +10,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <vega/dirent.h>
-
 #include <kernel/types.h>
+
+#include <uapi/kernel/dirent.h>
 
 #define NAME_MAX 32 //FIXME: Include <limits.h>
 #define FILE_MAX 8
