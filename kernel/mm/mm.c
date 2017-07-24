@@ -13,6 +13,7 @@
 #include <vega/sys/mman.h>
 
 #include <kernel/fs.h>
+#include <kernel/kernel.h>
 #include <kernel/mm/page.h>
 
 #define M_ISANON(f)     (((f) & MAP_ANONYMOUS)     == MAP_ANONYMOUS)

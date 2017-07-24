@@ -1,5 +1,5 @@
-#ifndef LIBC_SIGNAL_H
-#define LIBC_SIGNAL_H
+#ifndef _LIBC_SIGNAL_H
+#define _LIBC_SIGNAL_H
 
 #include <sys/types.h>
 #include <uapi/kernel/signal.h>
@@ -15,4 +15,4 @@ int sigaction(int sig, const struct sigaction *restrict act,
 int raise(int sig);
 int sigqueue(pid_t pid, int sig, const union sigval value);
 
-#endif /* !LIBC_SIGNAL_H */
+#endif /* !_LIBC_SIGNAL_H */

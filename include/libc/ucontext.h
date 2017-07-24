@@ -1,15 +1,14 @@
 #ifndef UCONTEXT_H
 #define UCONTEXT_H
 
-#include <signal.h>
-#include <vega/signal.h>
+#include <libc/include/signal.h>
 
 /* machine context on ARM */
 typedef struct mcontext {
-	u32 sp;        //FIXME: reuse uc_stack.ss_sp
-	u32 lr;
-	u32 gprs[13];  /* r0-r12 */
-	u32 pc;
+	unsigned long sp;        //FIXME: reuse uc_stack.ss_sp
+	unsigned long lr;
+	unsigned long gprs[13];  /* r0-r12 */
+	unsigned long pc;
 } __attribute__((packed)) mcontext_t;
 
 typedef struct ucontext {

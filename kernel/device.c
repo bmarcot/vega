@@ -12,6 +12,8 @@
 #include <kernel/errno-base.h>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
+#include <kernel/types.h>
 
 static struct char_dev {
 	const struct file_operations *fops;

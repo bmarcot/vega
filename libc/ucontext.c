@@ -21,12 +21,12 @@ void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...)
 	}
 
 	/* top of the stack has a back-link pointer to the context's struct */
-	ucp->uc_stack.ss_sp = (void *)((u32)ucp->uc_stack.ss_sp - sizeof(u32));
-	*(u32 *)ucp->uc_stack.ss_sp = (u32) ucp;
+	ucp->uc_stack.ss_sp = (void *)((unsigned long)ucp->uc_stack.ss_sp - sizeof(unsigned long));
+	*(unsigned long *)ucp->uc_stack.ss_sp = (unsigned long) ucp;
 
 	/* initialize the machine context */
 	//FIXME: ss_sp and mcontext_sp are mutually redundant
-	ucp->uc_mcontext.sp = (u32) ucp->uc_stack.ss_sp;
-	ucp->uc_mcontext.lr = (u32) return_from_makecontext;
-	ucp->uc_mcontext.pc = (u32) func | 1;    /* force Thumb_Mode */
+	ucp->uc_mcontext.sp = (unsigned long) ucp->uc_stack.ss_sp;
+	ucp->uc_mcontext.lr = (unsigned long) return_from_makecontext;
+	ucp->uc_mcontext.pc = (unsigned long) func | 1;    /* force Thumb_Mode */
 }
