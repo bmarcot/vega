@@ -8,7 +8,7 @@
 #ifndef _UAPI_KERNEL_DIRENT_H
 #define _UAPI_KERNEL_DIRENT_H
 
-#include <uapi/kernel/posix_types.h>
+#include <asm/posix_types.h>
 
 struct dirent {
 	ino_t d_ino;

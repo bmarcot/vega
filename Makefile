@@ -24,6 +24,7 @@ CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
 	-DCONFIG_THREAD_INFO_IN_TASK \
 	-Iarch/arm/include \
 	-Ilibc/include \
+	-Iarch/arm/include/uapi \
 
 LDFLAGS += -nostartfiles -specs=nano.specs \
 	-Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections

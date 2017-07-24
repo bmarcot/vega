@@ -8,7 +8,7 @@
 #ifndef _UAPI_KERNEL_SIGNAL_H
 #define _UAPI_KERNEL_SIGNAL_H
 
-#include <uapi/kernel/posix_types.h>
+#include <asm/posix_types.h>
 
 #define SIGKILL  9
 #define SIGUSR1 10
