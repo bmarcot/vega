@@ -8,6 +8,7 @@
 #ifndef _ASM_POSIX_TYPES_H
 #define _ASM_POSIX_TYPES_H
 
-typedef int pid_t;
+typedef int          pid_t;
+typedef unsigned int rlim_t;
 
 #endif /* !_ASM_POSIX_TYPES_H */

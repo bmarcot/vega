@@ -5,10 +5,11 @@
  */
 
 #include <kernel/sched.h>
+#include <kernel/types.h>
 
 #include <asm/current.h>
 
-#include <vega/sys/resource.h>
+#include <uapi/kernel/resource.h>
 
 static struct rlimit rlimits[] = {
 	{ .rlim_cur = 1024, .rlim_max = 1024 }  /* RLIMIT_STACK */
