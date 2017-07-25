@@ -7,7 +7,9 @@
 #ifndef _KERNEL_FUTEX_H
 #define _KERNEL_FUTEX_H
 
-#include <kernel/list.h>
+#include <kernel/types.h>
+
+struct task_struct;
 
 struct futex {
 	int                *lock_ptr;
