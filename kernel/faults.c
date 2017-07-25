@@ -1,11 +1,5 @@
 #include <kernel/faults.h>
-#include <kernel/thread.h>
-
-/* #include <arch/thread_info.h> */
-
-#include "kernel.h"
-#include "utils.h"
-#include "platform.h"
+#include <kernel/kernel.h>
 
 void fault_enter(const char *s)
 {

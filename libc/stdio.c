@@ -1,6 +1,6 @@
 #include <limits.h>
 #include <string.h> //XXX: for strlen, strcpy
-#include "utils.h"
+#include <utils.h>
 #include <stdarg.h>
 
 int vsnprintf(char *str, size_t size, const char *format, va_list ap)

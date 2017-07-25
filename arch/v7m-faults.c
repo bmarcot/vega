@@ -1,9 +1,8 @@
 #include <kernel/faults.h>
+#include <kernel/kernel.h>
 #include <kernel/thread.h>
 
 #include <asm/thread_info.h>
-
-#include "kernel.h"
 
 #define UFSR_DIVBYZERO (1 << 9)
 #define UFSR_UNALIGNED (1 << 8)
