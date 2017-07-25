@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# Copyright (c) 2017 Benoit Marcot
+# Copyright (c) 2015-2017 Benoit Marcot
 #
 
 include Makefile.opt
@@ -17,17 +17,27 @@ TARGET ?= qemu
 include target/$(TARGET)/Makefile
 
 # warning: return type of 'main' is not 'int' [-Wmain]
-CFLAGS += -Iinclude -Iinclude/libc -I. -Icmsis/arm \
-	-D_POSIX_TIMERS=1 -D_POSIX_REALTIME_SIGNALS=1 \
-	-Wno-main -DCONFIG_KERNEL_STACK_CHECKING -fdiagnostics-color \
+CFLAGS += \
+	-D_POSIX_TIMERS=1			\
+	-DCONFIG_KERNEL_STACK_CHECKING		\
+	-DCONFIG_THREAD_INFO_IN_TASK		\
+	-Wno-main				\
+	-fdiagnostics-color			\
 	-ffunction-sections -fdata-sections -Os \
-	-DCONFIG_THREAD_INFO_IN_TASK \
-	-Iarch/arm/include \
-	-Ilibc/include \
-	-Iarch/arm/include/uapi \
+	-I.					\
+	-Iinclude				\
+	-Iinclude/libc				\
+	-Icmsis/arm				\
+	-Ilibc/include				\
+	-Iarch/arm/include			\
+	-Iarch/arm/include/uapi			\
 
-LDFLAGS += -nostartfiles -specs=nano.specs \
-	-Wl,-Map=$(NAME).map -Wl,-Tvega.lds -Wl,--gc-sections
+LDFLAGS += \
+	-nostartfiles		\
+	-specs=nano.specs	\
+	-Wl,-Map=$(NAME).map	\
+	-Wl,-Tvega.lds		\
+	-Wl,--gc-sections
 
 #FIXME: revisit the arch-specific imports
 ifeq ($(ARCH),armv6-m)
