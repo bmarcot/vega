@@ -7,13 +7,6 @@
 #ifndef _KERNEL_SIGNAL_H
 #define _KERNEL_SIGNAL_H
 
-/* #include <signal.h> */
-
-/* #include <vega/signal.h> */
-
-/* #include <kernel/thread.h> */
-/* #include <kernel/types.h> */
-
 #include <kernel/types.h>
 #include <uapi/kernel/signal.h>
 

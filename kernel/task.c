@@ -6,8 +6,9 @@
 
 #include <stddef.h>
 
+#include <kernel/list.h>
 #include <kernel/sched.h>
-#include <kernel/thread.h>
+#include <kernel/types.h>
 
 static struct list_head tasks;
 

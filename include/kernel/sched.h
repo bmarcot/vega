@@ -7,7 +7,7 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <kernel/list.h>
+#include <kernel/types.h>
 
 #include <asm/thread_info.h>
 

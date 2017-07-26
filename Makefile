@@ -18,7 +18,6 @@ include target/$(TARGET)/Makefile
 
 # warning: return type of 'main' is not 'int' [-Wmain]
 CFLAGS += \
-	-D_POSIX_TIMERS=1			\
 	-DCONFIG_KERNEL_STACK_CHECKING		\
 	-DCONFIG_THREAD_INFO_IN_TASK		\
 	-Wno-main				\

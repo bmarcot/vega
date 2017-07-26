@@ -4,13 +4,13 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
+#include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
