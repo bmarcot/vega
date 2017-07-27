@@ -4,6 +4,7 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
