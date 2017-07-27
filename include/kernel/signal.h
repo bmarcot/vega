@@ -16,9 +16,6 @@ struct ksignal {
 	struct list_head list;
 };
 
-struct thread_info; //XXX: Will die, replace with task_struct.
-
-void do_sigevent(struct thread_info *thread, /* struct task_struct *task, */
-		struct sigevent *sigevent);
+void do_sigevent(struct task_struct *task, struct sigevent *sigevent);
 
 #endif /* !_KERNEL_SIGNAL_H */

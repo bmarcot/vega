@@ -166,9 +166,9 @@ int sys_sigreturn(void)
 	return 0;
 }
 
-void do_sigevent(struct thread_info *thread, struct sigevent *sigevent)
+void do_sigevent(struct task_struct *tsk, struct sigevent *sigevent)
 {
-	(void)thread;
+	(void)tsk;
 
 	if (sigevent->sigev_notify != SIGEV_SIGNAL)
 		return;

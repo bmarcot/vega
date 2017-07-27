@@ -12,7 +12,6 @@
 #include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
-#include <kernel/thread.h>
 #include <kernel/time.h>
 
 #include <asm/current.h>
@@ -25,9 +24,9 @@ extern struct task_struct *idle_task;
 
 static void msleep_callback(struct timer_info *timer)
 {
-	sched_enqueue(TASK_STRUCT(timer->owner));
-	if (get_current() != idle_task)
-		sched_enqueue(get_current());
+	sched_enqueue(timer->owner);
+	if (current != idle_task)
+		sched_enqueue(current);
 	schedule();
 	timer->disarmed = 1;
 }
@@ -39,15 +38,14 @@ int sys_msleep(unsigned int msec)
 
 	if (timer == NULL)
 		return -1;
-	CURRENT_THREAD_INFO(curr_thread);
-	timer->owner = curr_thread;
+	timer->owner = current;
 	timer->disarmed = 0;
 	timer->type = ONESHOT_TIMER;
 	timer->callback = msleep_callback;
 	struct timespec value = { .tv_sec  = msec / 1000,
 				  .tv_nsec = (msec % 1000) * 1000000 };
 	timer_set(timer, &value);
-	sched_dequeue(TASK_STRUCT(curr_thread));
+	sched_dequeue(current);
 	schedule();
 	timer_free(timer);
 
@@ -143,8 +141,7 @@ int sys_timer_settime(timer_t timerid, int flags,
 		return 0;
 	}
 
-	CURRENT_THREAD_INFO(curr_thread);
-	timer->owner = curr_thread;
+	timer->owner = current;
 	timer->disarmed = 0;
 	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_nsec) {
 		if ((new_value->it_value.tv_sec == new_value->it_interval.tv_sec)

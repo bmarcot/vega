@@ -7,6 +7,7 @@
 #ifndef _KERNEL_TIME_H
 #define _KERNEL_TIME_H
 
+#include <kernel/sched.h>
 #include <kernel/types.h>
 
 #include <uapi/kernel/signal.h>
@@ -30,7 +31,7 @@ struct timer_info {
 	int                disarmed;
 	enum timer_type    type;
 	void               (*callback)(struct timer_info *self);
-	struct thread_info *owner;
+	struct task_struct *owner;
 	struct itimerspec  value;
 	struct sigevent    sigev;
 	struct list_head   list;
