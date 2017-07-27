@@ -4,9 +4,8 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/serial.h>
+#include <kernel/types.h>
 
 void serial_activity_callback(struct serial_info *serial)
 {

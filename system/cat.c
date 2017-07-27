@@ -4,9 +4,8 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#include <fcntl.h>
-#include <sys/cdefs.h>
 #include <unistd.h>
+#include <sys/cdefs.h>
 
 #include <kernel/kernel.h>
 

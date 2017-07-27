@@ -1,7 +1,7 @@
 /* syscall wrappers */
 
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <uapi/kernel/stat.h>
+#include <asm/posix_types.h>
 
 #include <kernel/fs.h>
 #include <kernel/syscalls.h>

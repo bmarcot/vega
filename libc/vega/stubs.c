@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <sys/cdefs.h>
-#include <unistd.h>
+#include <sys/types.h>
 
 #include <kernel/kernel.h>
 #include <kernel/syscalls.h>

@@ -4,18 +4,16 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
+#include <uapi/kernel/stat.h>
+#include <asm/stat.h>
 #include <dirent.h>
-
 #include <kernel/device.h>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
-
 #include <uapi/kernel/dirent.h>
+
+int stat(const char *pathname, struct stat *buf);
 
 int ls(int argc, char *argv[])
 {

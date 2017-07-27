@@ -5,7 +5,6 @@
  */
 
 #include <stdarg.h>
-#include <stdio.h>
 #include <ucontext.h>
 
 #define VSNPRINTF_BUF_SIZE 256
@@ -15,6 +14,8 @@ static ucontext_t vsnprintf_context = { .uc_link = &printk_context };
 static unsigned int ctx_stack[128];
 static char vsnprintf_buf[VSNPRINTF_BUF_SIZE];
 static int retval;
+
+int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 
 /* this coroutine is not thread-safe, not reentrant */
 void co_vsnprintf(const char *format, va_list ap)

@@ -7,13 +7,10 @@
 #ifndef _KERNEL_TIME_H
 #define _KERNEL_TIME_H
 
-#include <sys/types.h>
-#include <sys/timespec.h> //FIXME: Why including this header explicitly?
-#include <time.h>
-
 #include <kernel/types.h>
 
 #include <uapi/kernel/signal.h>
+#include <uapi/kernel/time.h>
 
 struct timer_info;
 

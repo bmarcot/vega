@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>

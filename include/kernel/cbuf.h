@@ -7,7 +7,7 @@
 #ifndef _KERNEL_CBUF_H
 #define _KERNEL_CBUF_H
 
-#include <sys/types.h>
+#include <kernel/types.h>
 
 struct cbuf_info {
 	size_t len;

@@ -7,12 +7,11 @@
 #ifndef _KERNEL_FS_H
 #define _KERNEL_FS_H
 
-#include <sys/types.h>
-#include <unistd.h>
-
+#include <kernel/stat.h>
 #include <kernel/types.h>
 
 #include <uapi/kernel/dirent.h>
+#include <uapi/kernel/fs.h>
 
 #define NAME_MAX 32 //FIXME: Include <limits.h>
 #define FILE_MAX 8

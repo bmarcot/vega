@@ -6,9 +6,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 #include <kernel/fs.h>
+#include <kernel/stat.h>
+#include <kernel/types.h>
 
 int vfs_iterate(struct file *file, struct dir_context *ctx)
 {

@@ -7,8 +7,6 @@
 #ifndef _DRIVERS_MTD_MTD_H
 #define _DRIVERS_MTD_MTD_H
 
-#include <sys/types.h>
-
 #include <kernel/errno-base.h>
 #include <kernel/types.h>
 

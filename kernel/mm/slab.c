@@ -4,7 +4,6 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#include <stdio.h>
 #include <string.h>
 #include <sys/cdefs.h>
 

@@ -6,10 +6,10 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include <kernel/errno-base.h>
 #include <kernel/time.h>
+#include <kernel/types.h>
 
 static struct timer_operations *timer_operations;
 

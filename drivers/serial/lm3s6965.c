@@ -4,8 +4,6 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/cbuf.h>
 #include <kernel/fs.h>
 #include <kernel/irq.h>

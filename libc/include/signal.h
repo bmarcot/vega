@@ -1,8 +1,9 @@
 #ifndef _LIBC_SIGNAL_H
 #define _LIBC_SIGNAL_H
 
-#include <sys/types.h>
 #include <uapi/kernel/signal.h>
+
+#include <asm/posix_types.h>
 
 typedef struct {
 	void   *ss_sp;

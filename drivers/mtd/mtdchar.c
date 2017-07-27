@@ -4,11 +4,10 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/device.h>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/types.h>
 
 #include <drivers/mtd/mtd.h>
 #include <drivers/mtd/mtdchar.h>

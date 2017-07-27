@@ -4,12 +4,11 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <fcntl.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
 #include <kernel/kernel.h>
+#include <kernel/types.h>
 
 #include <system/cat.h>
 #include <system/echo.h>
@@ -95,6 +94,8 @@ static void exec_command(char *buf, int fd)
 	write(fd, buf, strlen(buf));
 	write(fd, TERM_CRLF, sizeof(TERM_CRLF) - 1);
 }
+
+int sprintf(char *str, const char *format, ...);
 
 static void cursor_backward(int n, int fd)
 {

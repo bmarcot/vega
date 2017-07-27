@@ -4,7 +4,6 @@
  * Copyright (c) 2015-2017 Baruch Marcot
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
@@ -41,6 +40,10 @@ int minishell(void *options);
 void memdev_init(void);
 void kernel_heap_init(void *heap_start, size_t heap_size);
 int open(const char *pathname, int flags);
+
+/* <unistd.h> */
+ssize_t read(int fd, void *buf, size_t count);
+int close(int fd);
 
 void print_version(void)
 {

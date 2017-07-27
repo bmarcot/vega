@@ -2,7 +2,8 @@
 #define PTHREAD_H
 
 #include <sys/pthread_types.h>
-#include <sys/types.h>
+
+#include <asm/posix_types.h>
 
 /* pthread attributes */
 

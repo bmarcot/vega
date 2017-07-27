@@ -9,7 +9,7 @@
 #ifndef _KERNEL_SERIAL_H
 #define _KERNEL_SERIAL_H
 
-#include <sys/types.h>
+#include <kernel/types.h>
 
 struct device;
 struct thread_info;

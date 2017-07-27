@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <sys/types.h>
 
 #include <kernel/kernel.h>
 #include <kernel/list.h>

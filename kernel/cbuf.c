@@ -4,9 +4,8 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/cbuf.h>
+#include <kernel/types.h>
 
 void cbuf_init(struct cbuf_info *cbuf, void *buf, size_t len)
 {

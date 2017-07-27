@@ -1,7 +1,6 @@
 #ifndef KERNEL_FAULTS_H
 #define KERNEL_FAULTS_H
 
-#include <sys/types.h>
 #include <kernel/thread.h>
 #include <asm/thread_info.h>
 

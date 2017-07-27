@@ -7,12 +7,12 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/cdefs.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
+#include <kernel/stat.h>
+#include <kernel/types.h>
 
 #include <uapi/kernel/mman.h>
 

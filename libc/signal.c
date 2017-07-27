@@ -1,8 +1,8 @@
 /* syscall wrappers */
 
-#include <unistd.h>
 #include <string.h>
-#include <signal.h>
+
+#include <uapi/kernel/signal.h>
 
 #include <kernel/syscalls.h>
 #include "vega/syscalls.h"

@@ -1,7 +1,6 @@
-#include <unistd.h>
-
 enum sc_varname {
 	PAGESIZE,
+	_SC_CLK_TCK,
 };
 
 struct sys_param {

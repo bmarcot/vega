@@ -10,11 +10,11 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include <kernel/errno-base.h>
 #include <kernel/list.h>
 #include <kernel/time.h>
+#include <kernel/types.h>
 
 struct systick_timer {
 	unsigned long     start_clocktime;

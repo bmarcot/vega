@@ -4,12 +4,11 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/fs.h>
 #include <kernel/sched.h>
 #include <kernel/serial.h>
 #include <kernel/thread.h>
+#include <kernel/types.h>
 
 void serialchar_callback(struct serial_info *serial)
 {
