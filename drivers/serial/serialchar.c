@@ -14,7 +14,7 @@
 void serialchar_callback(struct serial_info *serial)
 {
 	sched_enqueue(serial->owner);
-	sched_elect(0);
+	schedule();
 }
 
 int serialchar_open(struct inode *inode, struct file *file)
@@ -36,7 +36,7 @@ ssize_t serialchar_read(struct file *file, char *buf, size_t count, off_t offset
 
 	while (serial->rx_count < count) {
 		sched_dequeue(current);
-		sched_elect(0);
+		schedule();
 	}
 	if (count == 1)
 		return serial_getc(serial, buf);

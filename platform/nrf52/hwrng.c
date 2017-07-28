@@ -4,21 +4,21 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
-#include <sys/types.h>
-
 #include <kernel/fs.h>
 #include <kernel/irq.h>
-#include <kernel/scheduler.h>
-#include <kernel/thread.h>
+#include <kernel/sched.h>
+#include <kernel/types.h>
+
+#include <asm/current.h>
 
 #include "platform.h"
 
-struct thread_info *owner;
+struct task_struct *owner;
 
 static void hwrng_isr(void)
 {
 	sched_enqueue(owner);
-	sched_elect(SCHED_OPT_NONE);
+	schedule();
 }
 
 static ssize_t hwrng_read(struct file *file, char *buf, size_t count, off_t offset)
@@ -28,9 +28,8 @@ static ssize_t hwrng_read(struct file *file, char *buf, size_t count, off_t offs
 	for (int i = 0; i < (int)count; i++) {
 		NRF_RNG->TASKS_START = 1;
 		if (!NRF_RNG->EVENTS_VALRDY) {
-			CURRENT_THREAD_INFO(curr_thread);
-			owner = curr_thread;
-			sched_elect(SCHED_OPT_NONE);
+			owner = current;
+			schedule();
 			NRF_RNG->EVENTS_VALRDY = 0;
 		}
 		buf[i] = NRF_RNG->VALUE;

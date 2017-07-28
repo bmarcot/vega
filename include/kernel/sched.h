@@ -28,7 +28,6 @@ struct task_struct;
 int sched_init(void);
 int sched_enqueue(struct task_struct *task);
 int sched_dequeue(struct task_struct *task);
-int sched_elect(int flags);
 int schedule(void);
 
 /*

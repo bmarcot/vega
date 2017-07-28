@@ -83,11 +83,6 @@ int schedule(void)
 	return 0;
 }
 
-int sched_elect(__unused int flags)
-{
-	return schedule();
-}
-
 static unsigned int idle_stack[32];
 struct task_struct *idle_task;
 
