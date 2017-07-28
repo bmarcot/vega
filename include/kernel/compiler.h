@@ -12,4 +12,8 @@
 #  define __weak __attribute__((weak))
 #endif
 
+#ifndef offsetof
+#  define offsetof(type, member) __builtin_offsetof(type, member)
+#endif
+
 #endif /* !_KERNEL_COMPILER_H */

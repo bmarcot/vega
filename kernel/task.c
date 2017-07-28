@@ -4,11 +4,9 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <stddef.h>
-
 #include <kernel/list.h>
 #include <kernel/sched.h>
-#include <kernel/types.h>
+#include <kernel/stddef.h>
 
 static struct list_head tasks;
 

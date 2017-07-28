@@ -4,8 +4,6 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <stddef.h>
-
 #include <kernel/bitops.h>
 #include <kernel/hash.h>
 #include <kernel/kernel.h>

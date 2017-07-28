@@ -9,7 +9,7 @@
  *   - http://softwareengineering.stackexchange.com/q/49550
  */
 
-#include <stddef.h>
+#include <kernel/types.h>
 
 unsigned long hash_djb2(unsigned char *str, size_t len)
 {

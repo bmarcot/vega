@@ -6,7 +6,6 @@
 
 /* https://www.kernel.org/doc/Documentation/filesystems/romfs.txt */
 
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,7 +13,6 @@
 #include <kernel/fs/romfs.h>
 #include <kernel/kernel.h>
 #include <kernel/stat.h>
-#include <kernel/types.h>
 
 #include <drivers/mtd/mtd.h>
 
