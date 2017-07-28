@@ -79,16 +79,6 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 #endif
 }
 
-//XXX: Will die...
-static inline struct task_struct *TASK_STRUCT(struct thread_info *ti)
-{
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-	return (struct task_struct *)ti;
-#else
-	return ti->task;
-#endif
-}
-
 int init_task(struct task_struct *task);
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);

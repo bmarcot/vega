@@ -7,12 +7,13 @@
 #include <kernel/fs.h>
 #include <kernel/sched.h>
 #include <kernel/serial.h>
-#include <kernel/thread.h>
 #include <kernel/types.h>
+
+#include <asm/current.h>
 
 void serialchar_callback(struct serial_info *serial)
 {
-	sched_enqueue(TASK_STRUCT(serial->owner));
+	sched_enqueue(serial->owner);
 	sched_elect(0);
 }
 
@@ -20,8 +21,7 @@ int serialchar_open(struct inode *inode, struct file *file)
 {
 	file->f_private = inode->i_private;
 	struct serial_info *serial = file->f_private;
-	CURRENT_THREAD_INFO(cur_thread);
-	serial->owner = cur_thread;
+	serial->owner = current;
 	serial->callback = serialchar_callback;
 
 	return 0;
@@ -35,8 +35,7 @@ ssize_t serialchar_read(struct file *file, char *buf, size_t count, off_t offset
 	struct serial_info *serial = file->f_private;
 
 	while (serial->rx_count < count) {
-		CURRENT_THREAD_INFO(cur_thread);
-		sched_dequeue(TASK_STRUCT(cur_thread));
+		sched_dequeue(current);
 		sched_elect(0);
 	}
 	if (count == 1)
