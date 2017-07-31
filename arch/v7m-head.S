@@ -146,6 +146,7 @@ ENTRY(irq_entry)
 	mov	r0, sp
 	bfc	r0, #0, #9
 	mrs	r1, psp
+	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
 	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 
 	ldr	r0, =irq_handler
@@ -158,6 +159,7 @@ ENTRY(irq_entry)
 	mov	r0, sp
 	bfc	r0, #0, #9
 	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r0
 
 	pop	{pc}
@@ -170,6 +172,7 @@ ENTRY(systick_entry)
 	mov	r0, sp
 	bfc	r0, #0, #9
 	mrs	r1, psp
+	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
 	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 
 	bl	systick
@@ -178,6 +181,7 @@ ENTRY(systick_entry)
 	mov	r0, sp
 	bfc	r0, #0, #9
 	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r0
 
 	pop	{pc}
