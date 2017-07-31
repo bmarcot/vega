@@ -14,6 +14,8 @@
 
 #include "platform.h"
 
+#include <kernel/kernel.h>
+
 void v7m_task_start_trampoline(void);
 
 // setup_init_task (or preallocated struct in .rodata/.data) then only do
@@ -31,35 +33,44 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 	 *   registers for the user context are implicitely saved/restored
 	 *   in kernel-stack by function prologues/epilogues.
 	 */
-	thread->kernel_ctx.sp = (__u32)thread + THREAD_SIZE
-		- sizeof(struct preserved_context) - 8; // msp
-	thread->kernel_ctx.ctx->r4 = 0;
-	thread->kernel_ctx.ctx->r5 = 0;
-	thread->kernel_ctx.ctx->r6 = 0;
-	thread->kernel_ctx.ctx->r7 = 0;
-	thread->kernel_ctx.ctx->r8 = 0;
-	thread->kernel_ctx.ctx->r9 = 0;
-	thread->kernel_ctx.ctx->r10 = 0;
-	thread->kernel_ctx.ctx->r11 = 0;
-	thread->kernel_ctx.ctx->r12 = 0;
-	thread->kernel_ctx.ctx->lr = (u32)v7m_task_start_trampoline;
+	thread->kernel.msp = (__u32)thread + THREAD_SIZE
+		- sizeof(struct cpu_kernel_context) - 8; // msp
+	thread->kernel.ctx->r4 = 0;
+	thread->kernel.ctx->r5 = 0;
+	thread->kernel.ctx->r6 = 0;
+	thread->kernel.ctx->r7 = 0;
+	thread->kernel.ctx->r8 = 0;
+	thread->kernel.ctx->r9 = 0;
+	thread->kernel.ctx->r10 = 0;
+	thread->kernel.ctx->r11 = 0;
+	thread->kernel.ctx->r12 = 0;
+	thread->kernel.ctx->lr = (u32)v7m_task_start_trampoline;
 
-	thread->thread_ctx.sp = (__u32)stack_start
-		- sizeof(struct cpu_saved_context); // psp
-	thread->thread_ctx.ctx->r0 = (__u32)arg;
-	thread->thread_ctx.ctx->r1 = 0;
-	thread->thread_ctx.ctx->r2 = 0;
-	thread->thread_ctx.ctx->r3 = 0;
-	thread->thread_ctx.ctx->r12 = 0;
-	thread->thread_ctx.ctx->lr = (__u32)pthread_exit;
+	thread->user.psp = (__u32)stack_start
+		- sizeof(struct cpu_user_context); // psp
+	thread->user.ctx->r0 = (__u32)arg;
+	thread->user.ctx->r1 = 0;
+	thread->user.ctx->r2 = 0;
+	thread->user.ctx->r3 = 0;
+	thread->user.ctx->r12 = 0;
+	thread->user.ctx->lr = (__u32)pthread_exit;
 	//FIXME: Should libc be dynamically loaded?
 	//FIXME: Alternatively, let the user manage the thread's last return.
 	// i.e. the last return in thread should be explicitely a call exit()
 	// or pthread_exit(); not just 'return 0'. If doing so, then take the
 	// exception (and core is dumped).
-	thread->thread_ctx.ctx->ret_addr =
+	thread->user.ctx->ret_addr =
 		(__u32)v7m_clear_thumb_bit(start_routine);
-	thread->thread_ctx.ctx->xpsr = xPSR_T_Msk;
+	thread->user.ctx->xpsr = xPSR_T_Msk;
+
+	thread->user.ctx->r4 = 0;
+	thread->user.ctx->r5 = 0;
+	thread->user.ctx->r6 = 0;
+	thread->user.ctx->r7 = 0;
+	thread->user.ctx->r8 = 0;
+	thread->user.ctx->r9 = 0;
+	thread->user.ctx->r10 = 0;
+	thread->user.ctx->r11 = 0;
 
 	/* if (task->flags == KERNEL_THREAD) // TASK_OPT_KERNEL, OPT_KERNEL */
 	/* 	thread->priv = THREAD_PRIV_SUPERVISOR; */

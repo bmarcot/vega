@@ -50,6 +50,7 @@ ENTRY(v7m_task_start_trampoline)
 	mov	r0, sp
 	bfc	r0, #0, #9
 	ldr	r0, [r0, #4] 		//FIXME: offsetof(thread_ctx->sp)
+	ldmia	r0!, {r4-r11}
 	msr	psp, r0
 	ldr	r0, =0xfffffffd
 	bx	r0

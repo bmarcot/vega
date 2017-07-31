@@ -69,17 +69,17 @@ int sys_sigaction(int signum, const struct sigaction *act,
 	return 0;
 }
 
-#define __USER_STACK_ALLOCA(__ptr, __align) ({		 \
-	u32 __sp = current_thread_info()->thread_ctx.sp; \
-	__sp -= sizeof(__typeof__(*(__ptr)));		 \
-	__sp = align(__sp, __align);			 \
-	current_thread_info()->thread_ctx.sp = __sp;	 \
+#define __USER_STACK_ALLOCA(__ptr, __align) ({		\
+	u32 __sp = current_thread_info()->user.psp;	\
+	__sp -= sizeof(__typeof__(*(__ptr)));		\
+	__sp = align(__sp, __align);			\
+	current_thread_info()->user.psp = __sp;		\
 	__ptr = (__typeof__(__ptr))__sp; })
 
 static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 {
 	siginfo_t *siginfo = NULL;
-	struct cpu_saved_context *sigctx;
+	struct cpu_user_context *sigctx;
 
 	if (sa->sa_flags & SA_SIGINFO) {
 		__USER_STACK_ALLOCA(siginfo, 4);
@@ -127,10 +127,10 @@ int sys_sigreturn(void)
 {
 	struct ksignal *ks = get_ksignal(current->sig);
 
-	int off = sizeof(struct cpu_saved_context);
+	int off = sizeof(struct cpu_user_context);
 	if (ks->sa.sa_flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
-	current_thread_info()->thread_ctx.sp += off;
+	current_thread_info()->user.psp += off;
 	current->sig = -1;
 
 	/* this is the actual return value to the kill() syscall */

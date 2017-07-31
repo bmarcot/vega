@@ -15,17 +15,16 @@
 	.set	xPSR, 0x1c
 
 ENTRY(svcall)
-	push	{lr}
-	mrs	lr, psp
+	push	{lr}			/* save LR on the kernel stack */
+	mrs	lr, psp			/* save non-scratch regs on user stack */
+	stmdb	lr!, {r4-r11}
+	mov	r4, sp			/* save PSP in thread_info struct */
+	bfc	r4, #0, #9
+	str	lr, [r4, #4]
+	ldr	r4, [lr, #(RET_ADDRESS + 0x20)] /* read memory at SVC call site */
+	ldrb	r4, [r4, #-2]
 
-	/* save psp value in thread_info struct */
-	mov	r12, sp
-	bfc	r12, #0, #9
-	str	lr, [r12, #4]		//FIXME: offsetof thread_ctx->sp
-
-	ldr	r12, [lr, #RET_ADDRESS]
-	ldrb	r12, [r12, #-2]		@ address of the SVC call site
-	tbb	[pc, r12]
+	tbb	[pc, r4]
 
 0:	.irpc	argc, 0123456
 	.byte	($\argc - 0b) / 2
@@ -33,42 +32,44 @@ ENTRY(svcall)
 	.balign 2
 
 	.balign	2
-$0:	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, r0, lsl #2]
-	blx	r12
+$0:	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, r0, lsl #2]
+	blx	r4
 	b	0f
 
 	.balign	2
-$1:	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, r1, lsl #2]
-	blx	r12
+$1:	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, r1, lsl #2]
+	blx	r4
 	b	0f
 
 	.balign	2
-$2:	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, r2, lsl #2]
-	blx	r12
+$2:	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, r2, lsl #2]
+	blx	r4
 	b	0f
 
 	.balign	2
-$3:	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, r3, lsl #2]
-	blx	r12
+$3:	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, r3, lsl #2]
+	blx	r4
 	b	0f
 
 	.balign	2
-$4:	ldr	r12, [lr, #xPSR]	@ test stack alignment
-	tst	r12, #1 << 9
+$4:	add	lr, #0x20
+	ldr	r4, [lr, #xPSR]	@ test stack alignment
+	tst	r4, #1 << 9
 	ite	eq
 	ldreq	lr, [lr, #0x20]		@ load syscall id
 	ldrne	lr, [lr, #0x24]
-	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, lr, lsl #2]
-	blx	r12
+	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, lr, lsl #2]
+	blx	r4
 	b	0f
 
 	.balign	2
-$5:	ldr	r12, [lr, #xPSR]	@ test stack alignment
+$5:	add	lr, #0x20
+	ldr	r12, [lr, #xPSR]	@ test stack alignment
 	tst	r12, #1 << 9
 	ite	eq
 	addeq	lr, #0x20
@@ -82,26 +83,26 @@ $5:	ldr	r12, [lr, #xPSR]	@ test stack alignment
 	b	0f
 
 	.balign	2
-$6:	ldr	r12, [lr, #xPSR]	@ test stack alignment
-	tst	r12, #1 << 9
+$6:	add	lr, #0x20
+	ldr	r5, [lr, #xPSR]	@ test stack alignment
+	tst	r5, #1 << 9
 	ite	eq
 	addeq	lr, #0x20
 	addne	lr, #0x24
-	ldm	lr, {r11, r12, lr}	@ load syscall id, arg4, arg5
-	push	{r11, r12}		@ copy arg4, arg5 to kernel stack
-	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, lr, lsl #2]
-	blx	r12
-	pop	{r11, r12}		//FIXME: pop {r11}; add	sp, #4;
+	ldm	lr, {r4, r5, lr}	@ load syscall id, arg4, arg5
+	push	{r4, r5}		@ copy arg4, arg5 to kernel stack
+	ldr	r5, =syscall_vect
+	ldr.w	r5, [r5, lr, lsl #2]
+	blx	r5
+	pop	{r4, r5}		//FIXME: pop {r4}; add	sp, #4;
 
 	.global syscall_return
 syscall_return:
-	/* restore psp value from thread_info struct */
-0:	mov	r1, sp
+0:	mov	r1, sp			/* restore PSP from thread_info struct */
 	bfc	r1, #0, #9
 	ldr	r1, [r1, #4]		//FIXME: offsetof thread_ctx->sp
+	ldmia	r1!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r1
-
-	str	r0, [r1, #R0]           @ update return value in exception frame
+	str	r0, [r1, #R0]           /* update return value in exception frame */
 	pop	{pc}
 ENDPROC(svcall)

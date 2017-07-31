@@ -23,13 +23,13 @@ int do_fork(void)
 	/* create a new child process */
 	char *child_stack = alloc_pages(size_to_page_order(512));
 
-	struct task_struct *child = clone_task(current->thread_info.thread_ctx.ctx->ret_addr,
+	struct task_struct *child = clone_task(current->thread_info.user.ctx->ret_addr,
 			child_stack + 504, 0, NULL);
 	if (child == NULL)
 		return -1;
 	// child->parent = get_current();
-	child->thread_info.thread_ctx.ctx->lr =
-		current->thread_info.thread_ctx.ctx->lr | 1;
+	child->thread_info.user.ctx->lr =
+		current->thread_info.user.ctx->lr | 1;
 	sched_enqueue(child);
 
 	return child->pid;

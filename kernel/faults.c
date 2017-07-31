@@ -16,10 +16,9 @@ void fault_exit(void)
 struct preserved_context;
 struct cpu_saved_context;
 
-void hardfault(struct preserved_context *noscratch,
-	struct cpu_saved_context *scratch, u32 exc_return)
+void hardfault(struct cpu_user_context *ctx, u32 exc_return)
 {
 	fault_enter("HardFault");
-	dump_frame(noscratch, scratch, exc_return);
+	dump_frame(ctx, exc_return);
 	fault_exit();
 }
