@@ -11,13 +11,6 @@
 #include <asm/current.h>
 #include <asm/thread_info.h>
 
-#include <kernel/kernel.h>
-
-int sys_getpid(void)
-{
-	return get_current()->pid;
-}
-
 int do_fork(void)
 {
 	/* create a new child process */
