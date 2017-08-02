@@ -1,5 +1,5 @@
 /*
- * arch/kernel/setup.c
+ * arch/arm/kernel/setup.c
  *
  * Copyright (c) 2017 Baruch Marcot
  */
