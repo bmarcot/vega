@@ -11,17 +11,9 @@
 
 #include <asm/thread_info.h>
 
-/*
- * Scheduling
- */
-
 /* 0 <= PRI_MAX <= PRI_MIN */
 #define PRI_MAX    0
 #define PRI_MIN    31
-
-#define SCHED_OPT_NONE            0
-#define SCHED_OPT_RESTORE_ONLY    1
-#define SCHED_OPT_RESET           2
 
 struct task_struct;
 
@@ -30,18 +22,12 @@ int sched_enqueue(struct task_struct *task);
 int sched_dequeue(struct task_struct *task);
 int schedule(void);
 
-/*
- * Tasking
- */
-
-enum task_state {
-	TASK_NEW,
-	TASK_RUNNING,
-	TASK_INTERRUPTIBLE,
-	TASK_UNINTERRUPTIBLE,
-	EXIT_ZOMBIE,
-	EXIT_DEAD,
-};
+#define TASK_RUNNING         0
+#define TASK_INTERRUPTIBLE   0x1
+#define TASK_UNINTERRUPTIBLE 0x2
+#define TASK_NEW             0x4
+#define EXIT_ZOMBIE          0x8
+#define EXIT_DEAD            0x16
 
 #define FILE_MAX 8
 
