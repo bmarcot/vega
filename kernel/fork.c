@@ -13,16 +13,28 @@
 
 int do_fork(void)
 {
-	/* create a new child process */
 	char *child_stack = alloc_pages(size_to_page_order(512));
-
-	struct task_struct *child = clone_task(current->thread_info.user.ctx->ret_addr,
-			child_stack + 504, 0, NULL);
-	if (child == NULL)
+	if (!child_stack)
 		return -1;
-	// child->parent = get_current();
-	child->thread_info.user.ctx->lr =
-		current->thread_info.user.ctx->lr | 1;
+
+	void *fn = (void *)current->thread_info.user.ctx->ret_addr;
+	struct task_struct *child = clone_task(fn, child_stack + 504, 0, NULL);
+	if (child == NULL) {
+		free_pages((unsigned long)child_stack, size_to_page_order(512));
+		return -1;
+	}
+
+	child->thread_info.user.ctx->r4 = current->thread_info.user.ctx->r4;
+	child->thread_info.user.ctx->r5 = current->thread_info.user.ctx->r5;
+	child->thread_info.user.ctx->r6 = current->thread_info.user.ctx->r6;
+	child->thread_info.user.ctx->r7 = current->thread_info.user.ctx->r7;
+	child->thread_info.user.ctx->r8 = current->thread_info.user.ctx->r8;
+	child->thread_info.user.ctx->r9 = current->thread_info.user.ctx->r9;
+	child->thread_info.user.ctx->r10 = current->thread_info.user.ctx->r10;
+	child->thread_info.user.ctx->r11 = current->thread_info.user.ctx->r11;
+	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
+
+	/* child->parent = get_current(); */
 	sched_enqueue(child);
 
 	return child->pid;
