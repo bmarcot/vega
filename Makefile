@@ -38,15 +38,13 @@ LDFLAGS += \
 	-Wl,-Tvega.lds		\
 	-Wl,--gc-sections
 
-#FIXME: revisit the arch-specific imports
 ifeq ($(ARCH),armv6-m)
 	SSRC += v6m-entry.S
 	CSRC += v6m-faults.c
 else
-	CSRC += arch/v7m-faults.c arch/v7m-thread.c
-
 	SSRC += $(wildcard arch/arm/kernel/*.S)
 	CSRC += $(wildcard arch/arm/kernel/*.c)
+	CSRC += arch/v7m-faults.c
 endif
 
 LIBVEGA_CSRC = $(wildcard libc/*.c)

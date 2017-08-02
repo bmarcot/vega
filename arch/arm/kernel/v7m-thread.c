@@ -1,5 +1,5 @@
 /*
- * arch/v7m-thread.c
+ * arch/arm/kernel/v7m-thread.c
  *
  * Copyright (c) 2017 Benoit Marcot
  */
