@@ -131,9 +131,11 @@ ENTRY(reset)
 	@ start_kernel procedure returns the first thread to run on the CPU
 	bl	start_kernel
 	cmp	r0, #0
-	itt	ne
-	ldrne	r1, =thread_restore
-	bxne	r1
+	itttt	ne
+	eorne	r1, r1
+	eorne	r2, r2
+	ldrne	r3, =__switch_to
+	bxne	r3
 0:	b	0b
 ENDPROC(reset)
 

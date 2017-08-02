@@ -22,14 +22,12 @@ ENTRY(__switch_to)
 	movne	r2, sp
 	strne	r2, [r1]
 
-ENTRY(thread_restore)
 	/* restore next task context */
 	ldm	r0!, {r2, r3, r12}
 	mov	sp, r2
 	msr	control, r12		@ write to SPSEL is ignored in Handler_Mode
 	mov	r0, r1
 	pop	{r4-r12, pc}
-ENDPROC(thread_restore)
 ENDPROC(__switch_to)
 
 	.macro	emulate_iret
