@@ -41,11 +41,6 @@ ENDPROC(__switch_to)
 	ldr	pc, [sp], #8		/* return into user thread */
 	.endm
 
-ENTRY(return_from_sigaction)
-	add	sp, #12			/* reclaim siginfo_t storage */
-	emulate_iret
-END(return_from_sigaction)
-
 ENTRY(v7m_task_start_trampoline)
 	mov	r0, sp
 	bfc	r0, #0, #9
@@ -55,10 +50,6 @@ ENTRY(v7m_task_start_trampoline)
 	ldr	r0, =0xfffffffd
 	bx	r0
 ENDPROC(v7m_task_start_trampoline)
-
-ENTRY(return_from_sighandler)
-	emulate_iret
-END(return_from_sighandler)
 
 	.set MC_SP, 0
 	.set MC_LR, 4
