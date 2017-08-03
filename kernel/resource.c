@@ -31,9 +31,7 @@ int sys_setrlimit(int resource, const struct rlimit *rlim)
 	return 0;
 }
 
-#define PRIO_PROCESS 0
-
-int sys_getpriority(int which, /* id_t */ int who)
+int sys_getpriority(int which, int who)
 {
 	if (which != PRIO_PROCESS)
 		return -1;
@@ -47,7 +45,7 @@ int sys_getpriority(int which, /* id_t */ int who)
 	return 0;
 }
 
-int sys_setpriority(int which, /* id_t */ int who, int prio)
+int sys_setpriority(int which, int who, int prio)
 {
 	if (which != PRIO_PROCESS)
 		return -1;
