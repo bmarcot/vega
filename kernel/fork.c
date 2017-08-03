@@ -34,7 +34,7 @@ int do_fork(void)
 	child->thread_info.user.ctx->r11 = current->thread_info.user.ctx->r11;
 	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
 
-	/* child->parent = get_current(); */
+	child->parent = current;
 	sched_enqueue(child);
 
 	return child->pid;

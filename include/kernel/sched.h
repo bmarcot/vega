@@ -47,6 +47,7 @@ struct task_struct {
 	int                pid;
 	int                sig;
 	struct list_head   list;    /* global list of tasks */
+	struct task_struct *parent;
 
 	struct list_head   ti_q;    /* sched runqueue */
 
