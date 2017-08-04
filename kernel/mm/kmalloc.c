@@ -11,74 +11,45 @@
 /* This is a boundary tag, located at the beginning of each allocated
  * and free blocks of memory.    */
 struct malloc_tag {
-	/* composite field:
-	 *   -  bit 31       0 = allocated block, 1 = free block
-	 *   -  bit 30..0    block length (including this tag)
-	 */
-	u32              free__length;
+	struct {
+		u32      is_free : 1;
+		u32      length  : 31;
+	};
 	struct list_head list;
 	unsigned char    data[0];
-};
+} __attribute__((packed));
 
 static LIST_HEAD(blocks);
-
-#define BLOCK_FREE_MASK   0x80000000
-#define BLOCK_LENGTH_MASK 0x7fffffff
-
-static inline size_t get_blk_length(struct malloc_tag *block)
-{
-	return block->free__length & BLOCK_LENGTH_MASK;
-}
-
-static inline void set_blk_length(struct malloc_tag *block, size_t len)
-{
-	block->free__length = (block->free__length & BLOCK_FREE_MASK) | len;
-}
-
-static inline int is_blk_free(struct malloc_tag *block)
-{
-	return !!(block->free__length & BLOCK_FREE_MASK);
-}
-
-static inline void alloc_blk(struct malloc_tag *block)
-{
-	block->free__length &= BLOCK_LENGTH_MASK;
-}
-
-static inline void free_blk(struct malloc_tag *block)
-{
-	block->free__length |= BLOCK_FREE_MASK;
-}
 
 void kernel_heap_init(void *heap_start, size_t heap_size)
 {
 	struct malloc_tag *first_block = heap_start;
 
-	first_block->free__length = BLOCK_FREE_MASK | heap_size;
+	first_block->is_free = 1;
+	first_block->length = heap_size;
 	list_add(&first_block->list, &blocks);
 }
 
 void *kmalloc(size_t size)
 {
-	struct malloc_tag *free_blk, *new_block;
+	struct malloc_tag *block, *new_block;
 
-	 /* allocation size is a multiple of 4-byte aligned, plus size of tag */
-	size = align_next(size, 4) + sizeof(struct malloc_tag);
+	 /* word-aligned */
+	size = align_next(size, sizeof(long)) + sizeof(struct malloc_tag);
 
-	/* find a free block wich is large enough to fullfill the memory requirement */
-	list_for_each_entry(free_blk, &blocks, list) {
-		if (is_blk_free(free_blk) && (get_blk_length(free_blk) >= size)) {
-			if ((get_blk_length(free_blk) - size) > sizeof(struct malloc_tag)) {
-				set_blk_length(free_blk, get_blk_length(free_blk) - size);
-				new_block = (struct malloc_tag *)((u32)free_blk
-								+ get_blk_length(free_blk));
-				alloc_blk(new_block);
-				set_blk_length(new_block, size);
-				list_add(&new_block->list, &free_blk->list);
+	/* first-fit search */
+	list_for_each_entry(block, &blocks, list) {
+		if (block->is_free && (block->length >= size)) {
+			if ((block->length - size) > sizeof(struct malloc_tag)) {
+				block->length -= size;
+				new_block = (struct malloc_tag *)((u32)block + block->length);
+				new_block->is_free = 0;
+				new_block->length = size;
+				list_add(&new_block->list, &block->list);
 				return new_block->data;
 			} else {
-				alloc_blk(free_blk);
-				return free_blk->data;
+				block->is_free = 0;
+				return block->data;
 			}
 		}
 	}
@@ -89,27 +60,24 @@ void *kmalloc(size_t size)
 void kfree(void *ptr)
 {
 	struct malloc_tag *block = container_of(ptr, struct malloc_tag, data);
-	struct malloc_tag *prev_block, *next_block;
 
-	free_blk(block);
+	block->is_free = 1;
 
-	/* merge with previous block if free */
-	if (block->list.prev != &blocks) {
-		prev_block = list_prev_entry(block, list);
-		if (is_blk_free(prev_block)) {
-			set_blk_length(prev_block, get_blk_length(prev_block)
-					+ get_blk_length(block));
+	/* merge with a free previous block */
+	if (!list_is_first(&block->list, &blocks)) {
+		struct malloc_tag *prev_block = list_prev_entry(block, list);
+		if (prev_block->is_free) {
+			prev_block->length += block->length;
 			list_del(&block->list);
 			block = prev_block;
 		}
 	}
 
-	/* merge with next block if free */
-	if (block->list.next != &blocks) {
-		next_block = list_next_entry(block, list);
-		if (is_blk_free(next_block)) {
-			set_blk_length(block, get_blk_length(block)
-				+ get_blk_length(next_block));
+	/* merge with a free next block */
+	if (!list_is_last(&block->list, &blocks)) {
+		struct malloc_tag *next_block = list_next_entry(block, list);
+		if (next_block->is_free) {
+			block->length += next_block->length;
 			list_del(&next_block->list);
 		}
 	}
