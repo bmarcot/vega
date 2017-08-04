@@ -9,6 +9,8 @@
 
 #include <kernel/types.h>
 
+#define KMALLOC_MIN_SIZE 4
+
 void *kmalloc(size_t size);
 void kfree(void *ptr);
 

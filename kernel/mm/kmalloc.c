@@ -6,6 +6,7 @@
 
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/types.h>
 
 /* This is a boundary tag, located at the beginning of each allocated
@@ -35,7 +36,7 @@ void *kmalloc(size_t size)
 	struct malloc_tag *block, *new_block;
 
 	 /* word-aligned */
-	size = align_next(size, sizeof(long)) + sizeof(struct malloc_tag);
+	size = align_next(size, KMALLOC_MIN_SIZE) + sizeof(struct malloc_tag);
 
 	/* first-fit search */
 	list_for_each_entry(block, &blocks, list) {
