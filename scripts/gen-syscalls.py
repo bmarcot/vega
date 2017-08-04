@@ -8,7 +8,6 @@ xs = [
 
     # <unistd.h>
     'msleep',
-    'sysconf',
     'execve',
     'fork',
 
