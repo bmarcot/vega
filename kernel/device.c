@@ -4,7 +4,6 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include <kernel/device.h>
@@ -12,6 +11,7 @@
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <kernel/stdlib.h>
 #include <kernel/types.h>
 
 #include <uapi/kernel/stat.h>
@@ -109,7 +109,7 @@ struct device *device_get(dev_t devt)
 struct device *device_alloc(void)
 {
 	//FIXME: Get memory from dev-cache
-	struct device *dev = malloc(sizeof(struct device));
+	struct device *dev = kmalloc(sizeof(struct device));
 
 	return dev;
 }
