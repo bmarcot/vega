@@ -5,6 +5,7 @@
  */
 
 #include <kernel/linkage.h>
+#include <asm/assembler.h>
 
 	.syntax unified
 	.thumb
@@ -20,7 +21,6 @@
 	.set	U_LAST_ARG_UNALIGN, 0x44
 
 ENTRY(svcall)
-	push	{lr}			/* save LR on the kernel stack */
 	mrs	lr, psp			/* save non-scratch regs on user stack */
 	stmdb	lr!, {r4-r11}
 	mov	r4, sp			/* save PSP in thread_info struct */
@@ -104,5 +104,6 @@ syscall_return:
 	ldmia	r1!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r1
 	str	r0, [r1, #C_R0]		/* update return value in exception frame */
-	pop	{pc}
+	mov32	lr, 0xfffffffd
+	bx	lr
 ENDPROC(svcall)
