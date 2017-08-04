@@ -1,8 +1,13 @@
-#include <kernel/faults.h>
-#include <kernel/kernel.h>
-#include <kernel/thread.h>
+/*
+ * arch/arm/kernel/v7m-faults.c
+ *
+ * Copyright (c) 2016-2017 Baruch Marcot
+ */
 
+#include <kernel/kernel.h>
 #include <asm/thread_info.h>
+
+#include "platform.h"
 
 #define UFSR_DIVBYZERO (1 << 9)
 #define UFSR_UNALIGNED (1 << 8)
@@ -11,7 +16,19 @@
 #define UFSR_INVSTATE (1 << 1)
 #define UFSR_UNDEFINSTR 1
 
-void dump_frame(struct cpu_user_context *ctx, u32 exc_return)
+static inline void PRINT_ENTRY_HEADER(const char *s)
+{
+	printk("\n-------------------------------------------------------------\n");
+	printk(" #%s\n\n", s);
+}
+
+static inline void PRINT_EXIT_HEADER(void)
+{
+	printk("-------------------------------------------------------------\n");
+	__platform_halt();
+}
+
+static void dump_frame(struct cpu_user_context *ctx, u32 exc_return)
 {
 	printk(" r0: %08x    r1: %08x    r2: %08x    r3: %08x\n",
 		ctx->r0, ctx->r1, ctx->r2, ctx->r3);
@@ -24,12 +41,19 @@ void dump_frame(struct cpu_user_context *ctx, u32 exc_return)
 	printk("\nEXC_RETURN: %08x\n", exc_return);
 }
 
+void hardfault(struct cpu_user_context *ctx, u32 exc_return)
+{
+	PRINT_ENTRY_HEADER("HardFault");
+	dump_frame(ctx, exc_return);
+	PRINT_EXIT_HEADER();
+}
+
 void usagefault(struct cpu_user_context *ctx, u32 exc_return)
 {
 	u32 ufsr = (*((volatile u32 *) 0xe000ed28)) >> 16;
 	const char *cause = NULL;
 
-	fault_enter("UsageFault");
+	PRINT_ENTRY_HEADER("UsageFault");
 	dump_frame(ctx, exc_return);
 	if (ufsr & UFSR_DIVBYZERO)
 		cause = "DIVBYZERO";
@@ -47,19 +71,19 @@ void usagefault(struct cpu_user_context *ctx, u32 exc_return)
 		printk("      ufsr: %08x  <%s>\n", ufsr, cause);
 	else
 		printk("      ufsr: %08x\n", ufsr);
-	fault_exit();
+	PRINT_EXIT_HEADER();
 }
 
 void busfault(struct cpu_user_context *ctx, u32 exc_return)
 {
-	fault_enter("BusFault");
+	PRINT_ENTRY_HEADER("BusFault");
 	dump_frame(ctx, exc_return);
-	fault_exit();
+	PRINT_EXIT_HEADER();
 }
 
 void memmanage(struct cpu_user_context *ctx, u32 exc_return)
 {
-	fault_enter("MemManage");
+	PRINT_ENTRY_HEADER("MemManage");
 	dump_frame(ctx, exc_return);
-	fault_exit();
+	PRINT_EXIT_HEADER();
 }

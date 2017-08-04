@@ -44,7 +44,6 @@ ifeq ($(ARCH),armv6-m)
 else
 	SSRC += $(wildcard arch/arm/kernel/*.S)
 	CSRC += $(wildcard arch/arm/kernel/*.c)
-	CSRC += arch/v7m-faults.c
 endif
 
 LIBVEGA_CSRC = $(wildcard libc/*.c)
