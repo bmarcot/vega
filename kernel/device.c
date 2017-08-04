@@ -11,7 +11,7 @@
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
-#include <kernel/stdlib.h>
+#include <kernel/mm.h>
 #include <kernel/types.h>
 
 #include <uapi/kernel/stat.h>
