@@ -72,7 +72,7 @@ ENDPROC(reset_entry)
 	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r0
-	ldr	lr, =0xfffffffd
+	mov32	lr, 0xfffffffd
 	bx	lr
 	.endm
 
@@ -105,7 +105,7 @@ ENDPROC(systick_entry)
 	.long	0				@ Reserved
 	.long	0				@ Reserved
 	.long	0				@ Reserved
-	.long	svcall				@ SVCall
+	.long	svcall_entry			@ SVCall
 	.long	0				@ Debug Monitor
 	.long	0				@ Reserved
 	.long	0				@ PendSV

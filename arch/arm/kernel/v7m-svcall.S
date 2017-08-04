@@ -20,7 +20,7 @@
 	.set	U_LAST_ARG,	    0x40
 	.set	U_LAST_ARG_UNALIGN, 0x44
 
-ENTRY(svcall)
+ENTRY(svcall_entry)
 	mrs	lr, psp			/* save non-scratch regs on user stack */
 	stmdb	lr!, {r4-r11}
 	mov	r4, sp			/* save PSP in thread_info struct */
@@ -70,16 +70,16 @@ $4:	ldr	r4, [lr, #U_xPSR]	/* test stack alignment */
 	b	0f
 
 	.balign	2
-$5:	ldr	r12, [lr, #U_xPSR]	@ test stack alignment
-	tst	r12, #1 << 9
+$5:	ldr	r4, [lr, #U_xPSR]	@ test stack alignment
+	tst	r4, #1 << 9
 	ite	eq
 	addeq	lr, #U_LAST_ARG
 	addne	lr, #U_LAST_ARG_UNALIGN
-	ldm	lr, {r12, lr}		@ load syscall id, arg4
-	push	{r12}			@ copy arg4 to kernel stack
-	ldr	r12, =syscall_vect
-	ldr.w	r12, [r12, lr, lsl #2]
-	blx	r12
+	ldm	lr, {r4, lr}		@ load syscall id, arg4
+	push	{r4}			@ copy arg4 to kernel stack
+	ldr	r4, =syscall_vect
+	ldr.w	r4, [r4, lr, lsl #2]
+	blx	r4
 	add	sp, #4
 	b	0f
 
@@ -94,10 +94,8 @@ $6:	ldr	r5, [lr, #U_xPSR]	@ test stack alignment
 	ldr	r5, =syscall_vect
 	ldr.w	r5, [r5, lr, lsl #2]
 	blx	r5
-	pop	{r4, r5}		//FIXME: pop {r4}; add	sp, #4;
+	add	sp, #8
 
-	.global syscall_return
-syscall_return:
 0:	mov	r1, sp			/* restore PSP from thread_info struct */
 	bfc	r1, #0, #9
 	ldr	r1, [r1, #4]		//FIXME: offsetof thread_ctx->sp
@@ -106,4 +104,4 @@ syscall_return:
 	str	r0, [r1, #C_R0]		/* update return value in exception frame */
 	mov32	lr, 0xfffffffd
 	bx	lr
-ENDPROC(svcall)
+ENDPROC(svcall_entry)
