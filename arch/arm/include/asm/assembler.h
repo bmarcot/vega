@@ -27,6 +27,13 @@
 #endif
 	.endm
 
+/*
+ * badr - get address of symbol and set Thumb_Bit
+ */
+	.macro	badr rd, sym
+	adr	\rd, \sym + 1
+	.endm
+
 #endif /* __ASSEMBLER__ */
 
 #endif /* !_ASM_ASSEMBLER_H */

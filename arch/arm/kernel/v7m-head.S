@@ -22,12 +22,11 @@ ENTRY(reset_entry)
 	@ switch to Handler_Mode
 	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
 	str	r1, [r0, #8]			/* update VTOR */
-	ldr	r2, =0f
-	orr	r2, #1				/* set thumb bit */
+	badr	r2, $0
 	str	r2, [r1, #11 * 4]		/* offset to SVC entry */
 	dsb					/* [1] */
 	svc	#0
-0:
+$0:
 
 	@ restore the early vector
 	ldr	r1, =__vector_start__
@@ -48,12 +47,12 @@ ENTRY(reset_entry)
 
 	@ start_kernel procedure returns the first thread to run on the CPU
 	bl	start_kernel
-	cmp	r0, #0
+	tst	r0, r0
 	itttt	ne
-	eorne	r1, r1
-	eorne	r2, r2
-	ldrne	r3, =__switch_to
-	bxne	r3
+	movne	r1, #0
+	movne	r2, #0
+	ldrne	lr, =__switch_to
+	bxne	lr
 0:	b	0b
 ENDPROC(reset_entry)
 
