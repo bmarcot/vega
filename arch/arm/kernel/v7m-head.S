@@ -13,7 +13,7 @@
 
 	.text
 
-ENTRY(reset)
+ENTRY(reset_entry)
 	ldr	r0, =SystemInit			/* CMSIS system init */
 	blx	r0
 
@@ -55,56 +55,42 @@ ENTRY(reset)
 	ldrne	r3, =__switch_to
 	bxne	r3
 0:	b	0b
-ENDPROC(reset)
+ENDPROC(reset_entry)
 
 /* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
 
-ENTRY(irq_entry)
-	push	{lr}
-
-	/* save psp value in thread_info struct */
-	mov	r0, sp
-	bfc	r0, #0, #9
+	.macro	int_enter
+	mov	r0, sp			/* save psp value in thread_info struct */
+	bfc	r0, #0, #9		//FIXME: ilog2(THREAD_SIZE)
 	mrs	r1, psp
 	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
 	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	.endm
 
+	.macro	int_leave
+	mov	r0, sp			/* restore psp */
+	bfc	r0, #0, #9
+	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
+	msr	psp, r0
+	ldr	lr, =0xfffffffd
+	bx	lr
+	.endm
+
+ENTRY(irq_entry)
+	int_enter
 	ldr	r0, =irq_handler
 	mrs	r1, ipsr
 	sub	r1, #16
 	ldr.w	r0, [r0, r1, lsl #2]
 	blx	r0
-
-	/* restore psp */
-	mov	r0, sp
-	bfc	r0, #0, #9
-	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
-	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
-	msr	psp, r0
-
-	pop	{pc}
+	int_leave
 ENDPROC(irq_entry)
 
 ENTRY(systick_entry)
-	push	{lr}
-
-	/* save PSP into thread_info struct */
-	mov	r0, sp
-	bfc	r0, #0, #9
-	mrs	r1, psp
-	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
-	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
-
+	int_enter
 	bl	systick
-
-	/* restore PSP from thread_info struct */
-	mov	r0, sp
-	bfc	r0, #0, #9
-	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
-	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
-	msr	psp, r0
-
-	pop	{pc}
+	int_leave
 ENDPROC(systick_entry)
 
 	//XXX: Thumb_Bit is not set
@@ -115,7 +101,7 @@ systick:
 	.section ".vector", "a"
 
 	.long	__early_stack_start__		@ SP_main value
-	.long	reset				@ Reset
+	.long	reset_entry			@ Reset
 	.long	0				@ NMI
 	.long	hardf				@ HardFault
 	.long	memf				@ MemManage
