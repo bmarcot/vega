@@ -1,41 +1,30 @@
 /*
  * kernel/printk.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #include <stdarg.h>
-#include <ucontext.h>
+
+#include <kernel/types.h>
 
 #define VSNPRINTF_BUF_SIZE 256
 
-static ucontext_t printk_context;
-static ucontext_t vsnprintf_context = { .uc_link = &printk_context };
-static unsigned int ctx_stack[128];
-static char vsnprintf_buf[VSNPRINTF_BUF_SIZE];
-static int retval;
-
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
-
-/* this coroutine is not thread-safe, not reentrant */
-void co_vsnprintf(const char *format, va_list ap)
-{
-	retval = vsnprintf(vsnprintf_buf, VSNPRINTF_BUF_SIZE, format, ap);
-}
-
 void __printk_putchar(char c);
 
 int printk(const char *format, ...)
 {
+	static char buf[VSNPRINTF_BUF_SIZE];
 	va_list ap;
+	int count = 0;
 
 	va_start(ap, format);
-	vsnprintf_context.uc_stack.ss_sp = &ctx_stack[128];
-	makecontext(&vsnprintf_context, co_vsnprintf, 2, format, ap);
-	swapcontext(&printk_context, &vsnprintf_context);
-	for (char *c = vsnprintf_buf; *c != '\0'; c++)
+	if (vsnprintf(buf, VSNPRINTF_BUF_SIZE, format, ap) < 0)
+		return -1;
+	for (char *c = buf; *c != '\0'; c++, count++)
 		__printk_putchar(*c);
 	va_end(ap);
 
-	return retval;
+	return count;
 }
