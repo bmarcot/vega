@@ -25,27 +25,27 @@ static LIST_HEAD(blocks);
 #define BLOCK_FREE_MASK   0x80000000
 #define BLOCK_LENGTH_MASK 0x7fffffff
 
-static inline size_t get_length(struct malloc_tag *block)
+static inline size_t get_blk_length(struct malloc_tag *block)
 {
 	return block->free__length & BLOCK_LENGTH_MASK;
 }
 
-static inline void set_length(struct malloc_tag *block, size_t len)
+static inline void set_blk_length(struct malloc_tag *block, size_t len)
 {
 	block->free__length = (block->free__length & BLOCK_FREE_MASK) | len;
 }
 
-static inline int is_free(struct malloc_tag *block)
+static inline int is_blk_free(struct malloc_tag *block)
 {
 	return !!(block->free__length & BLOCK_FREE_MASK);
 }
 
-static inline void allocate_block(struct malloc_tag *block)
+static inline void alloc_blk(struct malloc_tag *block)
 {
 	block->free__length &= BLOCK_LENGTH_MASK;
 }
 
-static inline void free_block(struct malloc_tag *block)
+static inline void free_blk(struct malloc_tag *block)
 {
 	block->free__length |= BLOCK_FREE_MASK;
 }
@@ -60,25 +60,25 @@ void kernel_heap_init(void *heap_start, size_t heap_size)
 
 void *kmalloc(size_t size)
 {
-	struct malloc_tag *free_block, *new_block;
+	struct malloc_tag *free_blk, *new_block;
 
 	 /* allocation size is a multiple of 4-byte aligned, plus size of tag */
 	size = align_next(size, 4) + sizeof(struct malloc_tag);
 
 	/* find a free block wich is large enough to fullfill the memory requirement */
-	list_for_each_entry(free_block, &blocks, list) {
-		if (is_free(free_block) && (get_length(free_block) >= size)) {
-			if ((get_length(free_block) - size) > sizeof(struct malloc_tag)) {
-				set_length(free_block, get_length(free_block) - size);
-				new_block = (struct malloc_tag *)((u32)free_block
-								+ get_length(free_block));
-				allocate_block(new_block);
-				set_length(new_block, size);
-				list_add(&new_block->list, &free_block->list);
+	list_for_each_entry(free_blk, &blocks, list) {
+		if (is_blk_free(free_blk) && (get_blk_length(free_blk) >= size)) {
+			if ((get_blk_length(free_blk) - size) > sizeof(struct malloc_tag)) {
+				set_blk_length(free_blk, get_blk_length(free_blk) - size);
+				new_block = (struct malloc_tag *)((u32)free_blk
+								+ get_blk_length(free_blk));
+				alloc_blk(new_block);
+				set_blk_length(new_block, size);
+				list_add(&new_block->list, &free_blk->list);
 				return new_block->data;
 			} else {
-				allocate_block(free_block);
-				return free_block->data;
+				alloc_blk(free_blk);
+				return free_blk->data;
 			}
 		}
 	}
@@ -91,14 +91,14 @@ void kfree(void *ptr)
 	struct malloc_tag *block = container_of(ptr, struct malloc_tag, data);
 	struct malloc_tag *prev_block, *next_block;
 
-	free_block(block);
+	free_blk(block);
 
 	/* merge with previous block if free */
 	if (block->list.prev != &blocks) {
 		prev_block = list_prev_entry(block, list);
-		if (is_free(prev_block)) {
-			set_length(prev_block, get_length(prev_block)
-					+ get_length(block));
+		if (is_blk_free(prev_block)) {
+			set_blk_length(prev_block, get_blk_length(prev_block)
+					+ get_blk_length(block));
 			list_del(&block->list);
 			block = prev_block;
 		}
@@ -107,9 +107,9 @@ void kfree(void *ptr)
 	/* merge with next block if free */
 	if (block->list.next != &blocks) {
 		next_block = list_next_entry(block, list);
-		if (is_free(next_block)) {
-			set_length(block, get_length(block)
-				+ get_length(next_block));
+		if (is_blk_free(next_block)) {
+			set_blk_length(block, get_blk_length(block)
+				+ get_blk_length(next_block));
 			list_del(&next_block->list);
 		}
 	}
