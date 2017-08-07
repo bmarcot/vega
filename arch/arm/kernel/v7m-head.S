@@ -22,13 +22,13 @@ ENTRY(reset_entry)
 	@ switch to Handler_Mode
 	ldr	r1, =__early_stack_end__	/* allocate a temporary vector */
 	str	r1, [r0, #8]			/* update VTOR */
-	badr	r2, $0
+	badr	r2, 0f
 	str	r2, [r1, #11 * 4]		/* offset to SVC entry */
 	dsb					/* [1] */
 	svc	#0
-$0:
+0:
 
-	@ restore the early vector
+	@ restore the exception vector
 	ldr	r1, =__vector_start__
 	str	r1, [r0, #8]			/* restore VTOR */
 	dsb					/* [1] */
@@ -41,7 +41,7 @@ $0:
 
 	@ zero-fill the non-initialized data sections
 	ldr	r0, =__bss_start__
-	movs	r1, #0
+	mov	r1, #0
 	ldr	r2, =__bss_size__
 	bl	memset
 
@@ -78,11 +78,11 @@ ENDPROC(reset_entry)
 
 ENTRY(irq_entry)
 	int_enter
-	ldr	r0, =irq_handler
-	mrs	r1, ipsr
-	sub	r1, #16
-	ldr.w	r0, [r0, r1, lsl #2]
-	blx	r0
+	ldr	lr, =irq_handler
+	mrs	r0, ipsr
+	sub	r0, #16
+	ldr.w	lr, [lr, r0, lsl #2]
+	blx	lr
 	int_leave
 ENDPROC(irq_entry)
 

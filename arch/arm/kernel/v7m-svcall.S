@@ -30,36 +30,36 @@ ENTRY(svcall_entry)
 	ldrb	r4, [r4, #-2]
 	tbb	[pc, r4]
 
-0:	.irpc	argc, 0123456
-	.byte	($\argc - 0b) / 2
+0:	.irp	argc, 0f, 1f, 2f, 3f, 4f, 5f, 6f
+	.byte	(\argc - 0b) / 2
 	.endr
 
 	.balign	2
-$0:	ldr	r4, =syscall_vect
+0:	ldr	r4, =syscall_vect
 	ldr.w	r4, [r4, r0, lsl #2]
 	blx	r4
 	b	0f
 
 	.balign	2
-$1:	ldr	r4, =syscall_vect
+1:	ldr	r4, =syscall_vect
 	ldr.w	r4, [r4, r1, lsl #2]
 	blx	r4
 	b	0f
 
 	.balign	2
-$2:	ldr	r4, =syscall_vect
+2:	ldr	r4, =syscall_vect
 	ldr.w	r4, [r4, r2, lsl #2]
 	blx	r4
 	b	0f
 
 	.balign	2
-$3:	ldr	r4, =syscall_vect
+3:	ldr	r4, =syscall_vect
 	ldr.w	r4, [r4, r3, lsl #2]
 	blx	r4
 	b	0f
 
 	.balign	2
-$4:	ldr	r4, [lr, #U_xPSR]	/* test stack alignment */
+4:	ldr	r4, [lr, #U_xPSR]	/* test stack alignment */
 	tst	r4, #1 << 9
 	ite	eq
 	ldreq	lr, [lr, #U_LAST_ARG]	/* syscall id is last arg pushed to user stack */
@@ -70,7 +70,7 @@ $4:	ldr	r4, [lr, #U_xPSR]	/* test stack alignment */
 	b	0f
 
 	.balign	2
-$5:	ldr	r4, [lr, #U_xPSR]	@ test stack alignment
+5:	ldr	r4, [lr, #U_xPSR]	@ test stack alignment
 	tst	r4, #1 << 9
 	ite	eq
 	addeq	lr, #U_LAST_ARG
@@ -84,7 +84,7 @@ $5:	ldr	r4, [lr, #U_xPSR]	@ test stack alignment
 	b	0f
 
 	.balign	2
-$6:	ldr	r5, [lr, #U_xPSR]	@ test stack alignment
+6:	ldr	r5, [lr, #U_xPSR]	@ test stack alignment
 	tst	r5, #1 << 9
 	ite	eq
 	addeq	lr, #U_LAST_ARG

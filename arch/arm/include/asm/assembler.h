@@ -28,10 +28,10 @@
 	.endm
 
 /*
- * badr - get address of symbol and set Thumb_Bit
+ * badr - get address of symbol, and set target's instruction set to Thumb
  */
 	.macro	badr rd, sym
-	adr	\rd, \sym + 1
+	adr	\rd, (\sym) + 1
 	.endm
 
 #endif /* __ASSEMBLER__ */

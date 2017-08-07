@@ -5,6 +5,7 @@
  */
 
 #include <kernel/linkage.h>
+#include <asm/assembler.h>
 
 	.syntax unified
 	.thumb
@@ -45,7 +46,7 @@ ENTRY(v7m_task_start_trampoline)
 	ldr	r0, [r0, #4] 		//FIXME: offsetof(thread_ctx->sp)
 	ldmia	r0!, {r4-r11}
 	msr	psp, r0
-	ldr	r0, =0xfffffffd
+	mov32	r0, 0xfffffffd
 	bx	r0
 ENDPROC(v7m_task_start_trampoline)
 
