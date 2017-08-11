@@ -4,6 +4,8 @@
  * Copyright (c) 2016-2017 Baruch Marcot
  */
 
+#include <string.h>
+
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
@@ -54,6 +56,17 @@ void *kmalloc(size_t size)
 			}
 		}
 	}
+
+	return NULL;
+}
+
+void *kzalloc(size_t size)
+{
+	void *memp = kmalloc(size);
+
+	if (!memp)
+		return NULL;
+	memset(memp, 0, size);
 
 	return NULL;
 }
