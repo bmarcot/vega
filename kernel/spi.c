@@ -55,7 +55,7 @@ struct spi_device *spi_new_device(struct spi_master *master,
 	spi->mode = chip->mode;
 	spi->controller_data = chip->controller_data;
 	spi->controller_state = NULL;
-	spi->cs_gpio = -1;
+	spi->cs_gpio = chip->chip_select; //FIXME: multiple chip_selects?
 
 	return spi;
 }
