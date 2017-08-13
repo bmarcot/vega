@@ -132,4 +132,26 @@ int spi_write_then_read(struct spi_device *spi,
 			const void *tx_buf, unsigned tx_len,
 			void *rx_buf, unsigned rx_len);
 
+static inline ssize_t spi_w8r8(struct spi_device *spi, u8 cmd)
+{
+	ssize_t status;
+	u8 result;
+
+	status = spi_write_then_read(spi, &cmd, 1, &result, 1);
+
+	/* return negative errno or unsigned value */
+	return (status < 0) ? status : result;
+}
+
+static inline ssize_t spi_w8r16(struct spi_device *spi, u8 cmd)
+{
+	ssize_t status;
+	u16 result;
+
+	status = spi_write_then_read(spi, &cmd, 1, &result, 2);
+
+	/* return negative errno or unsigned value */
+	return (status < 0) ? status : result;
+}
+
 #endif /* !_KERNEL_SPI_H */
