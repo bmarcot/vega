@@ -60,6 +60,13 @@ struct spi_device *spi_new_device(struct spi_master *master,
 	return spi;
 }
 
+int spi_sync(struct spi_device *spi, struct spi_message *mesg)
+{
+	struct spi_master *master = spi->master;
+
+	return master->transfer_one_message(master, mesg);
+}
+
 int spi_write_then_read(struct spi_device *spi,
 			const void *tx_buf, unsigned tx_len,
 			void *rx_buf, unsigned rx_len)

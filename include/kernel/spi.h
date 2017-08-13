@@ -68,6 +68,7 @@ struct spi_master {
 
 int spi_setup(struct spi_device *spi);
 int spi_transfer(struct spi_device *spi, struct spi_message *mesg);
+int spi_sync(struct spi_device *spi, struct spi_message *mesg);
 struct spi_master *spi_alloc_master(struct device *dev, unsigned size);
 
 static inline void spi_master_set_devdata(struct spi_master *master, void *data)
