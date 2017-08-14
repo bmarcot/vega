@@ -160,5 +160,7 @@ static inline ssize_t spi_w8r16(struct spi_device *spi, u8 cmd)
 
 int spi_write(struct spi_device *spi, const void *buf, size_t len);
 int spi_read(struct spi_device *spi, void *buf, size_t len);
+int spi_sync_transfer(struct spi_device *spi, struct spi_transfer *xfers,
+		unsigned int num_xfers);
 
 #endif /* !_KERNEL_SPI_H */

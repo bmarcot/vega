@@ -123,3 +123,15 @@ int spi_read(struct spi_device *spi, void *buf, size_t len)
 
 	return spi_sync(spi, &message);
 }
+
+int spi_sync_transfer(struct spi_device *spi, struct spi_transfer *xfers,
+		unsigned int num_xfers)
+{
+	struct spi_message message;
+
+	spi_message_init(&message);
+	for (unsigned int i = 0; i < num_xfers; ++i)
+		spi_message_add_tail(&xfers[i], &message);
+
+	return spi_sync(spi, &message);
+}
