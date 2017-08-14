@@ -60,6 +60,9 @@ struct spi_device *spi_new_device(struct spi_master *master,
 	// from the master->cs_gpios array?
 	spi->cs_gpio = chip->cs_gpio;
 
+	if (spi_setup(spi))
+		kfree(spi);
+
 	return spi;
 }
 
