@@ -70,7 +70,7 @@ int spi_sync(struct spi_device *spi, struct spi_message *mesg)
 {
 	struct spi_master *master = spi->master;
 
-	message->spi = spi;
+	mesg->spi = spi;
 
 	return master->transfer_one_message(master, mesg);
 }
@@ -104,8 +104,8 @@ int spi_write(struct spi_device *spi, const void *buf, size_t len)
 	struct spi_transfer x;
 
 	spi_message_init(&message);
-	memset(x, 0, sizeof(x));
-	x.tx_buf= buf;
+	memset(&x, 0, sizeof(x));
+	x.tx_buf = buf;
 	x.len= len;
 
 	return spi_sync(spi, &message);
@@ -117,8 +117,8 @@ int spi_read(struct spi_device *spi, void *buf, size_t len)
 	struct spi_transfer x;
 
 	spi_message_init(&message);
-	memset(x, 0, sizeof(x));
-	x.rx_buf= buf;
+	memset(&x, 0, sizeof(x));
+	x.rx_buf = buf;
 	x.len= len;
 
 	return spi_sync(spi, &message);
