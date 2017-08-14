@@ -55,7 +55,10 @@ struct spi_device *spi_new_device(struct spi_master *master,
 	spi->mode = chip->mode;
 	spi->controller_data = chip->controller_data;
 	spi->controller_state = NULL;
-	spi->cs_gpio = chip->chip_select; //FIXME: multiple chip_selects?
+
+	//FIXME: Attach the CS gpio pin from a different source,
+	// from the master->cs_gpios array?
+	spi->cs_gpio = chip->cs_gpio;
 
 	return spi;
 }
@@ -63,6 +66,8 @@ struct spi_device *spi_new_device(struct spi_master *master,
 int spi_sync(struct spi_device *spi, struct spi_message *mesg)
 {
 	struct spi_master *master = spi->master;
+
+	message->spi = spi;
 
 	return master->transfer_one_message(master, mesg);
 }

@@ -49,6 +49,10 @@ struct spi_board_info {
 	u16	bus_num;
 	u16	chip_select;
 	u16	mode;
+
+	//FIXME: The CS gpio pin should be decoupled from
+	// the spi_board_info, stored somewhere else
+	int	cs_gpio;
 };
 
 struct spi_message;
