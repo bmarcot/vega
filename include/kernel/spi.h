@@ -158,4 +158,7 @@ static inline ssize_t spi_w8r16(struct spi_device *spi, u8 cmd)
 	return (status < 0) ? status : result;
 }
 
+int spi_write(struct spi_device *spi, const void *buf, size_t len);
+int spi_read(struct spi_device *spi, void *buf, size_t len);
+
 #endif /* !_KERNEL_SPI_H */

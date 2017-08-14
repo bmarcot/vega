@@ -94,3 +94,29 @@ int spi_write_then_read(struct spi_device *spi,
 
 	return spi_sync(spi, &message);
 }
+
+int spi_write(struct spi_device *spi, const void *buf, size_t len)
+{
+	struct spi_message message;
+	struct spi_transfer x;
+
+	spi_message_init(&message);
+	memset(x, 0, sizeof(x));
+	x.tx_buf= buf;
+	x.len= len;
+
+	return spi_sync(spi, &message);
+}
+
+int spi_read(struct spi_device *spi, void *buf, size_t len)
+{
+	struct spi_message message;
+	struct spi_transfer x;
+
+	spi_message_init(&message);
+	memset(x, 0, sizeof(x));
+	x.rx_buf= buf;
+	x.len= len;
+
+	return spi_sync(spi, &message);
+}
