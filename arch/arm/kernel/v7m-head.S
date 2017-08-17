@@ -58,40 +58,6 @@ ENDPROC(reset_entry)
 
 /* [1] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0321a/BIHDGBJG.html */
 
-	.macro	int_enter
-	mov	r0, sp			/* save psp value in thread_info struct */
-	bfc	r0, #0, #9		//FIXME: ilog2(THREAD_SIZE)
-	mrs	r1, psp
-	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
-	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
-	.endm
-
-	.macro	int_leave
-	mov	r0, sp			/* restore psp */
-	bfc	r0, #0, #9
-	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
-	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
-	msr	psp, r0
-	mov32	lr, 0xfffffffd
-	bx	lr
-	.endm
-
-ENTRY(irq_entry)
-	int_enter
-	ldr	lr, =irq_handler
-	mrs	r0, ipsr
-	sub	r0, #16
-	ldr.w	lr, [lr, r0, lsl #2]
-	blx	lr
-	int_leave
-ENDPROC(irq_entry)
-
-ENTRY(systick_entry)
-	int_enter
-	bl	systick
-	int_leave
-ENDPROC(systick_entry)
-
 	.section ".vector", "a"
 
 	.long	__early_stack_start__		@ SP_main value

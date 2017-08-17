@@ -66,3 +66,9 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 
 	return 0;
 }
+
+void update_syscall_ret_val(u32 retval)
+{
+	struct thread_info *thread = current_thread_info();
+	thread->user.ctx->r0 = retval;
+}

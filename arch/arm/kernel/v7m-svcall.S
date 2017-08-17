@@ -20,6 +20,24 @@
 	.set	U_LAST_ARG,	    0x40
 	.set	U_LAST_ARG_UNALIGN, 0x44
 
+	.macro	enter_interrupt
+	mov	r0, sp			/* save psp value in thread_info struct */
+	bfc	r0, #0, #9		//FIXME: ilog2(THREAD_SIZE)
+	mrs	r1, psp
+	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
+	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	.endm
+
+	.macro	ret_from_interrupt
+	mov	r0, sp			/* restore psp */
+	bfc	r0, #0, #9
+	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
+	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
+	msr	psp, r0
+	mov32	lr, 0xfffffffd
+	bx	lr
+	.endm
+
 ENTRY(svcall_entry)
 	mrs	lr, psp			/* save non-scratch regs on user stack */
 	stmdb	lr!, {r4-r11}
@@ -96,12 +114,22 @@ ENTRY(svcall_entry)
 	blx	r5
 	add	sp, #8
 
-0:	mov	r1, sp			/* restore PSP from thread_info struct */
-	bfc	r1, #0, #9
-	ldr	r1, [r1, #4]		//FIXME: offsetof thread_ctx->sp
-	ldmia	r1!, {r4-r11}		/* restore non-scratch regs */
-	msr	psp, r1
-	str	r0, [r1, #C_R0]		/* update return value in exception frame */
-	mov32	lr, 0xfffffffd
-	bx	lr
+0:	bl	update_syscall_ret_val
+	ret_from_interrupt
 ENDPROC(svcall_entry)
+
+ENTRY(irq_entry)
+	enter_interrupt
+	ldr	lr, =irq_handler
+	mrs	r0, ipsr
+	sub	r0, #16
+	ldr.w	lr, [lr, r0, lsl #2]
+	blx	lr
+	ret_from_interrupt
+ENDPROC(irq_entry)
+
+ENTRY(systick_entry)
+	enter_interrupt
+	bl	systick
+	ret_from_interrupt
+ENDPROC(systick_entry)
