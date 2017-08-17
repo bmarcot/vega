@@ -5,10 +5,11 @@
  */
 
 #include <kernel/sched.h>
+#include <kernel/syscalls.h>
 
 #include <asm/current.h>
 
-int sys_getpid(void)
+SYSCALL_DEFINE(getpid, void)
 {
 	return current->pid;
 }

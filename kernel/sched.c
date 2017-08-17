@@ -13,6 +13,7 @@
 #include <kernel/sched.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
+#include <kernel/syscalls.h>
 
 #include <asm/current.h>
 #include <asm/switch_to.h>
@@ -111,7 +112,7 @@ int sched_init(void)
 	return 0;
 }
 
-int sys_sched_yield(void)
+SYSCALL_DEFINE(sched_yield, void)
 {
 	sched_enqueue(current);
 	schedule();

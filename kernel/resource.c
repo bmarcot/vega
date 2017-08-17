@@ -5,6 +5,7 @@
  */
 
 #include <kernel/sched.h>
+#include <kernel/syscalls.h>
 #include <kernel/types.h>
 
 #include <asm/current.h>
@@ -15,7 +16,9 @@ static struct rlimit rlimits[] = {
 	{ .rlim_cur = 1024, .rlim_max = 1024 }  /* RLIMIT_STACK */
 };
 
-int sys_getrlimit(int resource, struct rlimit *rlim)
+SYSCALL_DEFINE(getrlimit,
+	int		resource,
+	struct rlimit	*rlim)
 {
 	rlim->rlim_cur = rlimits[resource].rlim_cur;
 	rlim->rlim_max = rlimits[resource].rlim_max;
@@ -23,7 +26,9 @@ int sys_getrlimit(int resource, struct rlimit *rlim)
 	return 0;
 }
 
-int sys_setrlimit(int resource, const struct rlimit *rlim)
+SYSCALL_DEFINE(setrlimit,
+	int		resource,
+	const struct rlimit *rlim)
 {
 	rlimits[resource].rlim_cur = rlim->rlim_cur;
 	rlimits[resource].rlim_max = rlim->rlim_max;
@@ -31,7 +36,9 @@ int sys_setrlimit(int resource, const struct rlimit *rlim)
 	return 0;
 }
 
-int sys_getpriority(int which, int who)
+SYSCALL_DEFINE(getpriority,
+	int		which,
+	int		who)
 {
 	if (which != PRIO_PROCESS)
 		return -1;
@@ -45,7 +52,10 @@ int sys_getpriority(int which, int who)
 	return 0;
 }
 
-int sys_setpriority(int which, int who, int prio)
+SYSCALL_DEFINE(setpriority,
+	int		which,
+	int		who,
+	int		prio)
 {
 	if (which != PRIO_PROCESS)
 		return -1;

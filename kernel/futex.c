@@ -9,6 +9,7 @@
 #include <kernel/futex.h>
 #include <kernel/list.h>
 #include <kernel/sched.h>
+#include <kernel/syscalls.h>
 
 #include <asm/current.h>
 
@@ -52,7 +53,10 @@ int futex_wake(int *uaddr, int val)
 	return wake_count;
 }
 
-int sys_futex(int *uaddr, int futex_op, int val)
+SYSCALL_DEFINE(futex,
+	int		*uaddr,
+	int		futex_op,
+	int		val)
 {
 	if (futex_op == FUTEX_WAIT)
 		return futex_wait(uaddr, val);

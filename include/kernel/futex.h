@@ -19,6 +19,5 @@ struct futex {
 
 int futex_wait(int *uaddr, int val);
 int futex_wake(int *uaddr, int val);
-int sys_futex(int *uaddr, int futex_op, int val);
 
 #endif /* !_KERNEL_FUTEX_H */

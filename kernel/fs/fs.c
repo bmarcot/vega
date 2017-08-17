@@ -14,6 +14,7 @@
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/sched.h>
+#include <kernel/syscalls.h>
 
 #include <asm/current.h>
 
@@ -143,7 +144,9 @@ struct file *do_file_open(const char *pathname, int flags)
 	return file;
 }
 
-int sys_open(const char *pathname, int flags)
+SYSCALL_DEFINE(open,
+	const char	*pathname,
+	int		flags)
 {
 	int fd = alloc_fd();
 	if (fd < 0)
@@ -168,7 +171,10 @@ ssize_t do_file_read(struct file *file, void *buf, size_t count)
 	return count;
 }
 
-ssize_t sys_read(int fd, void *buf, size_t count)
+SYSCALL_DEFINE(read,
+	int		fd,
+	void		*buf,
+	size_t		count)
 {
 	struct file *file = fget(fd);
 
@@ -185,7 +191,10 @@ ssize_t do_file_write(struct file *file, void *buf, size_t count)
 	return count;
 }
 
-ssize_t sys_write(int fd, void *buf, size_t count)
+SYSCALL_DEFINE(write,
+	int		fd,
+	void		*buf,
+	size_t		count)
 {
 	struct file *file = fget(fd);
 
@@ -217,7 +226,10 @@ off_t do_file_lseek(struct file *file, off_t offset, int whence)
 	return 0;
 }
 
-off_t sys_lseek(int fd, off_t offset, int whence)
+SYSCALL_DEFINE(lseek,
+	int		fd,
+	off_t		offset,
+	int		whence)
 {
 	struct file *file = fget(fd);
 
@@ -232,7 +244,7 @@ int do_file_close(struct file *file)
 	return 0;
 }
 
-int sys_close(int fd)
+SYSCALL_DEFINE(close, int fd)
 {
 	struct file *file = fget(fd);
 
@@ -242,7 +254,9 @@ int sys_close(int fd)
 	return do_file_close(file);
 }
 
-int sys_stat(const char *pathname, struct stat *buf)
+SYSCALL_DEFINE(stat,
+	const char	*pathname,
+	struct stat	*buf)
 {
 	struct inode *inode = inode_from_pathname(pathname);
 
@@ -261,9 +275,12 @@ int sys_stat(const char *pathname, struct stat *buf)
 	return 0;
 }
 
-int sys_mount(const char *source, const char *target,
-	const char *filesystemtype,
-	unsigned long mountflags, const void *data)
+SYSCALL_DEFINE(mount,
+	const char	*source,
+	const char	*target,
+	const char	*filesystemtype,
+	unsigned long	mountflags,
+	const void	*data)
 {
 	if (!strcmp("romfs", filesystemtype))
 		return romfs_mount(source, target, filesystemtype, mountflags,

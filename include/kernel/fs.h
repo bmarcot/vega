@@ -83,7 +83,7 @@ struct file_operations {
 
 /*
  * dentry struct
-*/
+ */
 
 struct dentry {
 	_Atomic int                    d_count;           /* usage count */
@@ -101,7 +101,9 @@ struct dentry_operations {
 	void (*release) (struct dentry *dentry);
 };
 
-/* readdir */
+/*
+ * readdir
+ */
 
 typedef int (*filldir_t)(struct dir_context *, const char *, int, off_t,
 			unsigned int, unsigned int);
@@ -142,6 +144,8 @@ static inline int dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 			file->f_dentry->d_parent->d_inode->i_ino, 0);
 }
 
+typedef void DIR;
+
 /*
  * VFS-layer forward declarations
  */
@@ -153,20 +157,6 @@ int           vfs_link(struct dentry *old_dentry, struct inode *dir,
 int           vfs_delete(struct dentry *dentry);
 void          vfs_release(struct dentry *dentry);
 int           vfs_mmap(struct file *file, off_t offset, void **addr);
-
-/*
- * Syscall entries
- */
-
-typedef void DIR;
-
-int     sys_opendir(const char *name);
-int     sys_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
-int     sys_open(const char *pathname, int flags);
-ssize_t sys_read(int fd, void *buf, size_t count);
-ssize_t sys_write(int fd, void *buf, size_t count);
-off_t   sys_seek(int fd, off_t offset, int whence);
-int     sys_close(int fd);
 
 /*
  * Misc functions (most will die)
@@ -187,7 +177,7 @@ void proc_init(void);
 
 /*
  * Kernel common file-manipulation functions
-*/
+ */
 
 struct file *do_file_open(const char *pathname, int flags);
 ssize_t     do_file_read(struct file *file, void *buf, size_t count);

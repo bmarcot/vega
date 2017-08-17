@@ -13,6 +13,7 @@
 #include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
+#include <kernel/syscalls.h>
 
 #include <asm/current.h>
 #include <asm/thread_info.h>
@@ -33,8 +34,10 @@ static struct ksignal *get_ksignal(int sig)
 	return NULL;
 }
 
-int sys_sigaction(int signum, const struct sigaction *act,
-		struct sigaction *oldact)
+SYSCALL_DEFINE(sigaction,
+	int			signum,
+	const struct sigaction	*act,
+	struct sigaction	*oldact)
 {
 	if ((signum == SIGKILL) || (signum == SIGSTOP)) {
 		errno = EINVAL;
@@ -113,17 +116,22 @@ static int send_signal(__unused pid_t pid, int sig, union sigval value)
 	return sig;
 }
 
-int sys_sigqueue(pid_t pid, int sig, union sigval value)
+SYSCALL_DEFINE(sigqueue,
+	pid_t		pid,
+	int		sig,
+	union sigval	value)
 {
 	return send_signal(pid, sig, value);
 }
 
-int sys_kill(pid_t pid, int sig)
+SYSCALL_DEFINE(kill,
+	pid_t		pid,
+	int		sig)
 {
 	return send_signal(pid, sig, (union sigval){0});
 }
 
-int sys_sigreturn(void)
+SYSCALL_DEFINE(sigreturn, void)
 {
 	struct ksignal *ks = get_ksignal(current->sig);
 
