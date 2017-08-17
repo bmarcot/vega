@@ -2,9 +2,9 @@
 
 #include <uapi/kernel/stat.h>
 #include <asm/posix_types.h>
+#include <asm/syscalls.h>
 
 #include <kernel/fs.h>
-#include <kernel/syscalls.h>
 #include "vega/syscalls.h"
 
 int _open(const char *pathname, int flags)

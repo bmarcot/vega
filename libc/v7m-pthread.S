@@ -1,4 +1,4 @@
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include <kernel/linkage.h>
 
 #include <uapi/kernel/futex.h>

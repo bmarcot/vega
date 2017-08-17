@@ -1,14 +1,9 @@
 /* syscall wrappers */
 
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
 #include <sys/types.h>
-
-long sysconf(int name)
-{
-	return do_syscall1((void *)name, SYS_SYSCONF);
-}
 
 unsigned int msleep(unsigned int msecs)
 {

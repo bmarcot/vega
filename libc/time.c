@@ -4,7 +4,7 @@
 #include <kernel/types.h>
 #include <uapi/kernel/time.h>
 
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
 int timer_create(clockid_t clockid, struct sigevent *sevp,

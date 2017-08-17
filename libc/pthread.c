@@ -4,7 +4,7 @@
 #include <sys/pthread_types.h>
 
 #include <kernel/list.h>
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
 #include <uapi/kernel/sched.h>

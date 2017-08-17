@@ -4,7 +4,7 @@
 
 #include <uapi/kernel/signal.h>
 
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
 void sigreturn(void);

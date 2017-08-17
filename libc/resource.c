@@ -1,4 +1,4 @@
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
 #include <sys/types.h>

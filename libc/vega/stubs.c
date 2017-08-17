@@ -5,7 +5,7 @@
 #include <sys/types.h>
 
 #include <kernel/kernel.h>
-#include <kernel/syscalls.h>
+#include <asm/syscalls.h>
 
 #include "syscalls.h"
 
