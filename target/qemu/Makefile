@@ -15,6 +15,7 @@ CSRC	+= cmsis/lm3s6965/system_lm3s.c
 
 # Timer driver files
 CSRC	+= drivers/timer/systick.c
+CSRC	+= drivers/clockevents/timer-lm3s.c
 
 # Serial driver files
 CSRC	+= drivers/serial/lm3s6965.c
