@@ -51,6 +51,9 @@ typedef s16 __s16;
 typedef  u8 __u8;
 typedef  s8 __s8;
 
+typedef unsigned long long	u64;
+typedef signed long long	s64;
+
 typedef __u32          kdev_t;
 typedef unsigned short fmode_t;
 
