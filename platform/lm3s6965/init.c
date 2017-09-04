@@ -19,6 +19,7 @@ void config_timer_operations(struct timer_operations *tops);
 extern struct timer_operations systick_tops;
 
 void lm3s6965_init(void);
+void lm3s_timer_init(void);
 
 __weak void __platform_init(void)
 {
@@ -31,6 +32,9 @@ __weak void __platform_init(void)
 
 	/* create /dev/ttyS0, serial interface for Qemu UART0 */
 	lm3s6965_init();
+
+	/* initialize a clock event device (Timer0A) */
+	lm3s_timer_init();
 }
 
 __weak void __platform_halt(void)
