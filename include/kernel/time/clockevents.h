@@ -75,10 +75,22 @@ static inline int clockevent_state_oneshot_stopped(struct clock_event_device *de
 }
 
 static inline void
-clockevents_set_event_handler(struct clock_event_device *dev,
+clockevent_set_event_handler(struct clock_event_device *dev,
 			void (*event_handler) (struct clock_event_device *))
 {
 	dev->event_handler = event_handler;
+}
+
+static inline enum clock_event_state
+clockevent_get_state(struct clock_event_device *dev)
+{
+	return dev->state_use_accessors;
+}
+
+static inline void clockevent_set_state(struct clock_event_device *dev,
+					enum clock_event_state state)
+{
+	dev->state_use_accessors = state;
 }
 
 static inline ktime_t clockevents_read_elapsed(struct clock_event_device *dev)
@@ -90,5 +102,7 @@ int clockevents_register_device(struct clock_event_device *dev);
 struct clock_event_device *clockevents_get_device(const char *name);
 void clockevents_list_devices(void);
 int clockevents_program_event(struct clock_event_device *dev, ktime_t expires);
+void clockevents_switch_state(struct clock_event_device *dev,
+			enum clock_event_state state);
 
 #endif /* !_KERNEL_TIME_CLOCKEVENTS_H */
