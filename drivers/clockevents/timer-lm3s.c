@@ -57,18 +57,14 @@ static struct lm3s_clockevent lm3s_clockevent = {
 	.hw = TIMER0,
 };
 
-//XXX: Will die
-struct lm3s_clockevent *get_clockdev(void)
-{
-	return &lm3s_clockevent;
-}
-
 void lm3s_timer_interrupt(void)
 {
 	/* clear the interrupt */
-	lm3s_clockevent.hw->ICR |= (GPTM_GPTMICR_TATOCINT_Cleared << GPTM_GPTMICR_TATOCINT_Pos);
+	lm3s_clockevent.hw->ICR |=
+		(GPTM_GPTMICR_TATOCINT_Cleared << GPTM_GPTMICR_TATOCINT_Pos);
 
-	pr_info("Timer0A interrupt!");
+	if (lm3s_clockevent.dev.event_handler)
+		lm3s_clockevent.dev.event_handler(&lm3s_clockevent.dev);
 }
 
 int lm3s_timer_init(/* struct device_node *node */)
@@ -83,6 +79,8 @@ int lm3s_timer_init(/* struct device_node *node */)
 	TIMER0->IMR |= 1 << GPTM_GPTMIMR_TATOIM_Pos;
 	NVIC_EnableIRQ(lm3s_clockevent.dev.irq);
 	lm3s_clkevt_set_state_oneshot(&lm3s_clockevent.dev);
+	if (clockevents_register_device(&lm3s_clockevent.dev))
+		return -1;
 
 	return 0;
 }
