@@ -54,7 +54,7 @@ SSRC += $(LIBVEGA_SSRC)
 CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/fs/*.c)	\
 	$(wildcard kernel/mm/*.c)	\
-	$(wildcard kernel/time/clockevents.c) \
+	$(wildcard kernel/time/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
 	$(wildcard drivers/timer/timercore.c) \

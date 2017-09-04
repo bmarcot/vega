@@ -5,90 +5,98 @@
  */
 
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/time/clockevents.h>
+#include <kernel/time/clocksource.h>
 #include <kernel/time/hrtimer.h>
 
 #include <asm/ktime.h>
 
-static ktime_t hrtimer_clk; // clock is not monotonic, and can be suspended when no timers are running
+static LIST_HEAD(hrtimers);
 
-LIST_HEAD(hrtimers);
+extern struct clocksource clocksource_systick;
 
-int __hrtimer_insert_empty_list(struct hrtimer *timer, ktime_t expires)
+static ktime_t read_systick_clksrc(void)
 {
-	expires += hrtimer_clk;
-	timer->expires = expires;
-	list_add(&timer->list, &timers);
-
-	return clockevents_program_event(timer->dev, expires);
+	return clocksource_systick.read(&clocksource_systick);
 }
 
-int __hrtimer_insert_list(struct hrtimer *timer, ktime_t expires)
+static int enqueue_hrtimer_empty(struct hrtimer *timer, ktime_t expires)
 {
-	struct timer *t;
+	timer->expires = expires + read_systick_clksrc();
+	list_add(&timer->list, &hrtimers);
 
-	hrtimer_clk += clockevents_read_elapsed(timer->dev);
-	expires += hrtimer_clk;
+	return clockevents_program_event(timer->dev, timer->expires);
+}
+
+static int enqueue_hrtimer(struct hrtimer *timer, ktime_t expires)
+{
+	struct hrtimer *t;
+
+	expires += read_systick_clksrc();
 	timer->expires = expires;
-
 	list_for_each_entry(t, &hrtimers, list) {
 		if (t->expires > expires) {
 			list_add_tail(&timer->list, &t->list);
 			if (list_is_first(&timer->list, &hrtimers))
-				return clockevents_program_event(timer->dev, expires);
+				return clockevents_program_event(timer->dev,
+								expires);
 			return 0;
 		}
 	}
-	list_add_tail(&timer->list, &timers);
+	list_add_tail(&timer->list, &hrtimers);
 
 	return 0;
 }
 
-void hrtimer_event_handler(struct clock_event_device *)
+static void hrtimer_interrupt(struct clock_event_device *dev)
 {
+	(void)dev;
+
 	struct hrtimer *timer;
 
 	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (!timer) {
-		pr_err("Got interrupt, but no timers are registered");
+	if (!timer)
 		return; //XXX: Something went wrong
-	}
-	hrtimer_clk = timer->expires;
 	list_del(&timer->list);
+	if (timer->callback)
+		timer->callback(timer->context);
 
-	timer->callback(timer->context);
+	/* program next timer event */
+	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
+	if (timer) {
+		ktime_t next_expire = timer->expires - read_systick_clksrc();
+		clockevents_program_event(timer->dev, next_expire);
+	}
 }
 
-int htimer_new(struct hrtimer *timer/* , ktime_t expires */)
+int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
 {
-	//timer->dev = clockevents_get_device();
-	clockevents_set_event_handler(timer->dev, hrtimer_event_handler);
-
-	//XXX: suspend the clock_event_device while we insert?
-
-	if (list_is_empty(&timers))
-		__hrtimer_insert_empty_list(timer, expires);
+	if (list_empty(&hrtimers))
+		enqueue_hrtimer_empty(timer, expires);
 	else
-		__hrtimer_insert_list(timer, expires);
+		enqueue_hrtimer(timer, expires);
 
-	//XXX: resume the clock_event_device
+	return 0;
 }
 
-#define NSEC_PER_SEC 1000000000l
-
-static void callback(void *nothing)
+int hrtimer_init(struct hrtimer *timer)
 {
-	(void)nothing;
-	pr_info("In htrimer callback");
+	timer->state = HRTIMER_STATE_INACTIVE;
+	timer->dev = clockevents_get_device("lm3s-timer0");
+	clockevent_set_event_handler(timer->dev, hrtimer_interrupt);
+	clockevents_switch_state(timer->dev, CLOCK_EVT_STATE_ONESHOT);
+
+	return 0;
 }
 
-void hrtimer_test(void)
+struct hrtimer *hrtimer_alloc(void)
 {
-	struct hrtimer timer = {
-		.expires = 2 * NSEC_PER_SEC,
-		.dev = clockevt_dev,
-		.callback = callback,
-	};
+	struct hrtimer *timer = kzalloc(sizeof(*timer));
 
-	hrtimer_new(&timer);
+	if (!timer)
+		return NULL;
+	hrtimer_init(timer);
+
+	return timer;
 }
