@@ -11,3 +11,6 @@ include/cmsis
 
 # Travis-CI, unit test framework, platform tests
 test
+
+# Some parts of the buildsystem can generate log files
+*.log

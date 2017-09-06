@@ -9,4 +9,6 @@ run: $(NAME).elf
 		-nographic		\
 		-cpu cortex-m3		\
 		-machine lm3s6965evb	\
+		-d unimp		\
+		-D qemu.log		\
 		-kernel $^
