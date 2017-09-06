@@ -68,7 +68,7 @@ void *kzalloc(size_t size)
 		return NULL;
 	memset(memp, 0, size);
 
-	return NULL;
+	return memp;
 }
 
 void kfree(void *ptr)
