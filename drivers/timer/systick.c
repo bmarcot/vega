@@ -81,7 +81,8 @@ int systick_timer_free(struct timer_info *timer)
 #define SYSTICK_FREQ_IN_HZ 1000
 #define SYSTICK_PERIOD_IN_MSECS (SYSTICK_FREQ_IN_HZ / 1000)
 
-void systick(void)
+//XXX: This will die
+void __systick(void)
 {
 	clocktime_in_msec += SYSTICK_PERIOD_IN_MSECS;
 
