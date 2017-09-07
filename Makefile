@@ -57,7 +57,6 @@ CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard kernel/time/*.c)	\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
-	$(wildcard drivers/timer/timercore.c) \
 	$(wildcard drivers/serial/serial*.c) \
 	$(wildcard system/*.c)		\
 	libc/vega/stubs.c		\
