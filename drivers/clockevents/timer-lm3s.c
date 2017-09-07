@@ -23,6 +23,11 @@ static int lm3s_clkevt_set_next_ktime(ktime_t expires,
 	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
 	u32 ticks_per_usec = SystemFrequency / USEC_PER_SEC;
 
+	if (!expires) {
+		hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+		hw->ICR |= GPTM_GPTMICR_TATOCINT_Msk;
+	}
+
 	/*
 	 * We handle granularity of a microsecond, everything smaller is
 	 * just noise. SystemFrequency must be in the MHz range.

@@ -14,16 +14,9 @@
 
 static LIST_HEAD(hrtimers);
 
-extern struct clocksource clocksource_systick;
-
-static ktime_t read_systick_clksrc(void)
-{
-	return clocksource_systick.read(&clocksource_systick);
-}
-
 static int enqueue_hrtimer_empty(struct hrtimer *timer, ktime_t expires)
 {
-	timer->expires = expires + read_systick_clksrc();
+	timer->expires = expires + clocksource_read();
 	list_add(&timer->list, &hrtimers);
 
 	return clockevents_program_event(timer->dev, timer->expires);
@@ -33,7 +26,7 @@ static int enqueue_hrtimer(struct hrtimer *timer, ktime_t expires)
 {
 	struct hrtimer *t;
 
-	expires += read_systick_clksrc();
+	expires += clocksource_read();
 	timer->expires = expires;
 	list_for_each_entry(t, &hrtimers, list) {
 		if (t->expires > expires) {
@@ -65,13 +58,19 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 	/* program next timer event */
 	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
 	if (timer) {
-		ktime_t next_expire = timer->expires - read_systick_clksrc();
+		ktime_t next_expire = timer->expires - clocksource_read();
 		clockevents_program_event(timer->dev, next_expire);
 	}
 }
 
 int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
 {
+	/* cancel timer */
+	if (!expires) {
+		list_del(&timer->list);
+		return clockevents_program_event(timer->dev, 0);
+	}
+
 	if (list_empty(&hrtimers))
 		enqueue_hrtimer_empty(timer, expires);
 	else

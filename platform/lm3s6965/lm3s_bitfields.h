@@ -26,6 +26,7 @@
 
 /* GPTM Interrupt Clear (GPTMICR) */
 #define GPTM_GPTMICR_TATOCINT_Pos	0
+#define GPTM_GPTMICR_TATOCINT_Msk	(0x1 << GPTM_GPTMICR_TATOCINT_Pos)
 #define GPTM_GPTMICR_TATOCINT_Cleared	0x1
 
 #endif /* !_LM3S_BITFIELDS_H */
