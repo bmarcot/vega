@@ -43,11 +43,16 @@ void systick_resume(struct clocksource *cs)
 	SysTick_Config(SystemFrequency / SYSTICK_FREQ_IN_HZ);
 }
 
-struct clocksource clocksource_systick = {
+static struct clocksource clocksource_systick = {
 	.read = systick_read,
 	.suspend = systick_suspend,
 	.resume = systick_resume,
 };
+
+void init_systick()
+{
+	clocksource_register(&clocksource_systick);
+}
 
 /* int systick_clocksource_init(void) */
 /* { */
