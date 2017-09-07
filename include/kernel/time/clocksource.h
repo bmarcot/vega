@@ -17,5 +17,6 @@ struct clocksource {
 
 int clocksource_register(struct clocksource *cs);
 ktime_t clocksource_read(void);
+void clocksource_resume(void);
 
 #endif /* !_KERNEL_TIME_CLOCKSOURCE_H */

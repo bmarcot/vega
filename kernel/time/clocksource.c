@@ -19,3 +19,8 @@ ktime_t clocksource_read(void)
 {
 	return clksrc->read(clksrc);
 }
+
+void clocksource_resume(void)
+{
+	return clksrc->resume(clksrc);
+}
