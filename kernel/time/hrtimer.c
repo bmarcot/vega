@@ -4,12 +4,17 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
+#include <kernel/ktime.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
+#include <kernel/sched.h>
+#include <kernel/syscalls.h>
+#include <kernel/time.h>
 #include <kernel/time/clockevents.h>
 #include <kernel/time/clocksource.h>
 #include <kernel/time/hrtimer.h>
 
+#include <asm/current.h>
 #include <asm/ktime.h>
 
 static LIST_HEAD(hrtimers);
@@ -52,15 +57,16 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 	if (!timer)
 		return; //XXX: Something went wrong
 	list_del(&timer->list);
-	if (timer->callback)
-		timer->callback(timer->context);
 
 	/* program next timer event */
-	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (timer) {
-		ktime_t next_expire = timer->expires - clocksource_read();
-		clockevents_program_event(timer->dev, next_expire);
+	struct hrtimer *next_timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
+	if (next_timer) {
+		ktime_t next_expire = next_timer->expires - clocksource_read();
+		clockevents_program_event(next_timer->dev, next_expire);
 	}
+
+	if (timer->callback)
+		timer->callback(timer->context);
 }
 
 int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
@@ -98,4 +104,36 @@ struct hrtimer *hrtimer_alloc(void)
 	hrtimer_init(timer);
 
 	return timer;
+}
+
+static void nanosleep_callback(void *task)
+{
+	sched_enqueue(task);
+	sched_enqueue(current);
+	schedule();
+}
+
+static int hrtimer_nanosleep(const struct timespec *req)
+{
+	struct hrtimer timer;
+
+	if (hrtimer_init(&timer))
+		return -1;
+	timer.callback = nanosleep_callback;
+	timer.context = current;
+	if (hrtimer_set_expires(&timer, timespec_to_ktime(*req)))
+		return -1;
+	current->state = TASK_UNINTERRUPTIBLE;
+	schedule();
+
+	return 0;
+}
+
+SYSCALL_DEFINE(nanosleep,
+	const struct timespec	*req,
+	struct timespec		*rem)
+{
+	(void)rem;
+
+	return hrtimer_nanosleep(req);
 }

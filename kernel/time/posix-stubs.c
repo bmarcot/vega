@@ -4,12 +4,14 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
+#include <kernel/ktime.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
@@ -17,22 +19,6 @@
 #include <kernel/time/clocksource.h>
 
 #include <asm/current.h>
-
-/* sleep functions */
-
-static void msleep_callback(struct timer_info *timer)
-{
-}
-
-int sys_msleep(unsigned int msec)
-{
-	return 0;
-}
-
-/* POSIX timers */
-
-#include <kernel/ktime.h>
-#include <kernel/mm.h>
 
 static LIST_HEAD(posix_timers);
 
@@ -61,15 +47,19 @@ static int reserve_timer_id(timer_t *timerid)
 	return 0;
 }
 
-static void timer_callback(struct posix_timer *timer)
+static void timer_callback(void *context)
 {
+	struct posix_timer *timer = context;
+
 	if (timer->type == ONESHOT_TIMER)
 		timer->disarmed = 1;
 	do_sigevent(timer->owner, &timer->sigev);
 }
 
-static void timer_callback_and_link(struct posix_timer *timer)
+static void timer_callback_and_link(void *context)
 {
+	struct posix_timer *timer = context;
+
 	hrtimer_set_expires(&timer->hrtimer,
 			timespec_to_ktime(timer->value.it_interval));
 	do_sigevent(timer->owner, &timer->sigev);
