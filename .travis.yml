@@ -6,10 +6,9 @@ services:
 before_install:
   - svn export --force https://github.com/bmarcot/vega-test/trunk test
   - docker pull bmarcot/vega-test
-  - docker run -v `pwd`:/vega -itd --name vega-test bmarcot/vega-test
 
 script:
-  - docker exec vega-test python3 test/build.py
+  - docker run --rm -v `pwd`:/vega -t bmarcot/vega-test python3 test/build.py
 
 branches:
   only:
