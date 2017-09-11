@@ -12,6 +12,7 @@
 #include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
+#include <kernel/syscalls.h>
 #include <kernel/time.h>
 #include <kernel/time/clocksource.h>
 
@@ -74,8 +75,10 @@ static void timer_callback_and_link(struct posix_timer *timer)
 	do_sigevent(timer->owner, &timer->sigev);
 }
 
-int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
-		timer_t *timerid)
+SYSCALL_DEFINE(timer_create,
+	clockid_t		clockid,
+	struct sigevent		*sevp,
+	timer_t			*timerid)
 {
 	(void)clockid;
 
@@ -98,9 +101,11 @@ int sys_timer_create(clockid_t clockid, struct sigevent *sevp,
 	return 0;
 }
 
-int sys_timer_settime(timer_t timerid, int flags,
-		const struct itimerspec *new_value,
-		struct itimerspec *old_value)
+SYSCALL_DEFINE(timer_settime,
+	timer_t			timerid,
+	int			flags,
+	const struct itimerspec	*new_value,
+	struct itimerspec	*old_value)
 {
 	(void)flags;
 
@@ -145,7 +150,9 @@ int sys_timer_settime(timer_t timerid, int flags,
 
 }
 
-int sys_timer_gettime(timer_t timerid, struct itimerspec *curr_value)
+SYSCALL_DEFINE(timer_gettime,
+	timer_t			timerid,
+	struct itimerspec	*curr_value)
 {
 	struct posix_timer *pt = find_timer_by_id(timerid, &posix_timers);
 	ktime_t expires = pt->hrtimer.expires;
