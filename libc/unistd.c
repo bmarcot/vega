@@ -5,9 +5,11 @@
 
 #include <sys/types.h>
 
-unsigned int msleep(unsigned int msecs)
+#include <uapi/kernel/time.h>
+
+int nanosleep(const struct timespec *req, struct timespec *rem)
 {
-	return do_syscall1((void *)msecs, SYS_MSLEEP);
+	return do_syscall2((void *)req, (void *)rem, SYS_NANOSLEEP);
 }
 
 int close(int fd)

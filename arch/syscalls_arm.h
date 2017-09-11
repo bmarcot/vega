@@ -1,7 +1,7 @@
 __SYSCALL_ARM(0, timer_create)
 __SYSCALL_ARM(1, timer_settime)
 __SYSCALL_ARM(2, timer_gettime)
-__SYSCALL_ARM(3, msleep)
+__SYSCALL_ARM(3, nanosleep)
 __SYSCALL_ARM(4, execve)
 __SYSCALL_ARM(5, fork)
 __SYSCALL_ARM(6, sigaction)

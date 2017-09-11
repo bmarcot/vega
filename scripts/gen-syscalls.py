@@ -7,7 +7,6 @@ xs = [
     'timer_gettime',
 
     # <unistd.h>
-    'msleep',
     'execve',
     'fork',
 
@@ -39,6 +38,7 @@ xs = [
     'getpriority',
     'setpriority',
     'sigreturn',
+    'nanosleep',
 ]
 
 import datetime

@@ -7,7 +7,7 @@
 #define SYS_TIMER_CREATE 0
 #define SYS_TIMER_SETTIME 1
 #define SYS_TIMER_GETTIME 2
-#define SYS_MSLEEP 3
+#define SYS_NANOSLEEP 3
 #define SYS_EXECVE 4
 #define SYS_FORK 5
 #define SYS_SIGACTION 6
