@@ -42,6 +42,10 @@ static struct task_struct *pick_next_task(void)
 
 int sched_enqueue(struct task_struct *task)
 {
+	/* idle task is never in the runqueue */
+	if (task == idle_task)
+		return 0;
+
 	task->state = TASK_RUNNING;
 	list_add_tail(&task->ti_q, &pri_runq[task->prio]);
 	bitmap_set_bit(&pri_bitmap, task->prio);
