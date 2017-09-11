@@ -1,26 +1,15 @@
 sudo: required
-dist: trusty
 
-language: python
-python: 3.5
+services:
+  - docker
 
 before_install:
-  # install arm-none-eabi toolchain
-  - sudo add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
-  - sudo apt-get update -qq
-  - sudo apt-get install -y gcc-arm-embedded
-
-  # build romFS disks
-  - sudo apt-get install -y genromfs
-
-  # install QEMU
-  - sudo apt-get install -y qemu-system
-
-  # download the testsuite
   - svn export --force https://github.com/bmarcot/vega-test/trunk test
+  - docker pull bmarcot/vega-test
+  - docker run -v `pwd`:/vega -itd --name vega-test bmarcot/vega-test
 
 script:
-  - python test/build.py
+  - docker exec vega-test python3 test/build.py
 
 branches:
   only:
