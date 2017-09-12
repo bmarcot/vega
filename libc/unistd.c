@@ -1,5 +1,7 @@
 /* syscall wrappers */
 
+#include <stddef.h>
+
 #include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
@@ -31,4 +33,24 @@ pid_t fork(void)
 void SYS_exit(int status)
 {
 	do_syscall1((void *)status, SYS_EXIT);
+}
+
+int sleep(int secs)
+{
+	const struct timespec ts = {
+		.tv_sec = secs,
+		.tv_nsec = 0,
+	};
+
+	return nanosleep(&ts, NULL);
+}
+
+int msleep(int msecs)
+{
+	const struct timespec ts = {
+		.tv_sec = 0,
+		.tv_nsec = msecs * 1000000,
+	};
+
+	return nanosleep(&ts, NULL);
 }
