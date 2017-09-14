@@ -4,7 +4,6 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-//#include <stdlib.h>
 #include <string.h>
 
 #include <kernel/bitops.h>
@@ -75,6 +74,7 @@ SYSCALL_DEFINE(timer_create,
 	struct posix_timer *pt = kzalloc(sizeof(*pt));
 	if (!pt)
 		return -1;
+
 	hrtimer_init(&pt->hrtimer);
 	pt->hrtimer.context = pt;
 
@@ -102,9 +102,9 @@ SYSCALL_DEFINE(timer_settime,
 	struct posix_timer *timer = find_timer_by_id(timerid, &posix_timers);
 	ktime_t expires;
 
-	if (timer == NULL)
+	if (!timer)
 		return EINVAL;
-	if (old_value != NULL)
+	if (old_value)
 		memcpy(old_value, &timer->value, sizeof(struct itimerspec));
 	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
 
@@ -137,7 +137,6 @@ SYSCALL_DEFINE(timer_settime,
 	}
 
 	return 0;
-
 }
 
 SYSCALL_DEFINE(timer_gettime,
@@ -150,7 +149,7 @@ SYSCALL_DEFINE(timer_gettime,
 
 	if (!pt)
 		return EINVAL;
-	if (now >= expires) {
+	if (pt->disarmed || (now >= expires)) {
 		memset(&curr_value->it_value, 0, sizeof(struct timespec));
 	} else {
 		struct timespec ts = ktime_to_timespec(expires - now);
