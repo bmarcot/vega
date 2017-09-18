@@ -52,6 +52,7 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 	(void)dev;
 
 	struct hrtimer *timer;
+	struct hrtimer *next;
 
 	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
 	if (!timer)
@@ -59,10 +60,10 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 	list_del(&timer->list);
 
 	/* program next timer event */
-	struct hrtimer *next_timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (next_timer) {
-		ktime_t next_expire = next_timer->expires - clocksource_read();
-		clockevents_program_event(next_timer->dev, next_expire);
+	next = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
+	if (next) {
+		ktime_t expires = next->expires - clocksource_read();
+		clockevents_program_event(next->dev, expires);
 	}
 
 	if (timer->callback)
