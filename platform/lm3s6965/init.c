@@ -6,6 +6,7 @@
 
 #include <kernel/compiler.h>
 #include <kernel/kernel.h>
+#include <kernel/time/clocksource.h>
 
 #include "platform.h"
 
@@ -20,7 +21,7 @@ __weak void __platform_init(void)
 	/* create /dev/ttyS0, serial interface for Qemu UART0 */
 	lm3s6965_init();
 	init_systick(); /* SysTick as clocksource */
-	clocksource_resume();
+	clock_monotonic_resume();
 
 	/* initialize a clock event device (Timer0A) */
 	lm3s_timer_init();

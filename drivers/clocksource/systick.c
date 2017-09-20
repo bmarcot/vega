@@ -47,11 +47,12 @@ static struct clocksource clocksource_systick = {
 	.read = systick_read,
 	.suspend = systick_suspend,
 	.resume = systick_resume,
+	.name = "systick-clock",
 };
 
-void init_systick()
+void init_systick(void)
 {
-	clocksource_register(&clocksource_systick);
+	clock_monotonic_register(&clocksource_systick);
 }
 
 /* int systick_clocksource_init(void) */
