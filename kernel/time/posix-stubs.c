@@ -145,7 +145,7 @@ SYSCALL_DEFINE(timer_gettime,
 {
 	struct posix_timer *pt = find_timer_by_id(timerid, &posix_timers);
 	ktime_t expires = pt->hrtimer.expires;
-	ktime_t now = clocksource_read();
+	ktime_t now = clock_monotonic_read();
 
 	if (!pt)
 		return EINVAL;
