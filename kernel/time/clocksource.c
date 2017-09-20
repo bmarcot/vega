@@ -4,23 +4,29 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
+#include <kernel/list.h>
 #include <kernel/time/clocksource.h>
 
-static struct clocksource *clksrc;
+static LIST_HEAD(clocks);
 
-int clocksource_register(struct clocksource *cs)
+static struct clocksource *monotonic_clk;
+
+void clock_monotonic_resume(void)
 {
-	clksrc = cs;
+	return clocksource_resume(monotonic_clk);
+}
+
+ktime_t clock_monotonic_read(void)
+{
+	return clocksource_read(monotonic_clk);
+}
+
+int clock_monotonic_register(struct clocksource *clksrc)
+{
+	if (clksrc) {
+		list_add(&clksrc->list, &clocks);
+		monotonic_clk = clksrc;
+	}
 
 	return 0;
-}
-
-ktime_t clocksource_read(void)
-{
-	return clksrc->read(clksrc);
-}
-
-void clocksource_resume(void)
-{
-	return clksrc->resume(clksrc);
 }
