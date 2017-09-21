@@ -16,6 +16,7 @@ struct clocksource {
 	void	(*suspend) (struct clocksource *cs);
 	void	(*resume) (struct clocksource *cs);
 
+	unsigned int		freq_hz;
 	const char		*name;
 	struct list_head	list;
 };
