@@ -39,6 +39,7 @@ xs = [
     'setpriority',
     'sigreturn',
     'nanosleep',
+    'clock_gettime',
 ]
 
 import datetime

@@ -17,6 +17,8 @@
 #include <kernel/time.h>
 #include <kernel/time/clocksource.h>
 
+#include <uapi/kernel/time.h>
+
 #include <asm/current.h>
 
 static LIST_HEAD(posix_timers);
@@ -154,6 +156,20 @@ SYSCALL_DEFINE(timer_gettime,
 	} else {
 		struct timespec ts = ktime_to_timespec(expires - now);
 		memcpy(&curr_value->it_value, &ts, sizeof(ts));
+	}
+
+	return 0;
+}
+
+SYSCALL_DEFINE(clock_gettime,
+	clockid_t		clk_id,
+	struct timespec		*tp)
+{
+	struct timespec ts;
+
+	if (clk_id == CLOCK_MONOTONIC) {
+		ts = ktime_to_timespec(clock_monotonic_read());
+		memcpy(tp, &ts, sizeof(*tp));
 	}
 
 	return 0;

@@ -31,5 +31,6 @@
 #define SYS_GETPRIORITY 24
 #define SYS_SETPRIORITY 25
 #define SYS_SIGRETURN 26
+#define SYS_CLOCK_GETTIME 27
 
 #endif /* !_ASM_SYSCALLS_H */

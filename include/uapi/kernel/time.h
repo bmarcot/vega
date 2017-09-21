@@ -20,4 +20,7 @@ struct itimerspec {
 	struct timespec it_value;    /* timer expiration */
 };
 
+#define CLOCK_REALTIME	0
+#define CLOCK_MONOTONIC	1
+
 #endif /* !_UAPI_KERNEL_TIME_H */
