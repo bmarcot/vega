@@ -28,3 +28,8 @@ int timer_gettime(timer_t timerid, struct itimerspec *curr_value)
 	return do_syscall2((void *)timerid, (void *)curr_value,
 			SYS_TIMER_GETTIME);
 }
+
+int clock_gettime(clockid_t clk_id, struct timespec *tp)
+{
+	return do_syscall2((void *)clk_id, (void *)tp, SYS_CLOCK_GETTIME);
+}
