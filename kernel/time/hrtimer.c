@@ -24,17 +24,16 @@ static int enqueue_hrtimer_empty(struct hrtimer *timer, ktime_t expires)
 	timer->expires = expires + clock_monotonic_read();
 	list_add(&timer->list, &hrtimers);
 
-	return clockevents_program_event(timer->dev, timer->expires);
+	return clockevents_program_event(timer->dev, expires);
 }
 
 static int enqueue_hrtimer(struct hrtimer *timer, ktime_t expires)
 {
 	struct hrtimer *t;
 
-	expires += clock_monotonic_read();
-	timer->expires = expires;
+	timer->expires = expires + clock_monotonic_read();
 	list_for_each_entry(t, &hrtimers, list) {
-		if (t->expires > expires) {
+		if (t->expires > timer->expires) {
 			list_add_tail(&timer->list, &t->list);
 			if (list_is_first(&timer->list, &hrtimers))
 				return clockevents_program_event(timer->dev,
