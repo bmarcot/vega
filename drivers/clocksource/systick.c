@@ -33,14 +33,20 @@ void systick_suspend(struct clocksource *cs)
 {
 	(void)cs;
 
-	SysTick_Config(0);
+	SysTick->CTRL = 0;
 }
 
 void systick_resume(struct clocksource *cs)
 {
 	(void)cs;
 
-	SysTick_Config(SystemFrequency / SYSTICK_FREQ_IN_HZ);
+	u32 ticks = SystemFrequency / SYSTICK_FREQ_IN_HZ;
+
+	SysTick->LOAD = (u32)(ticks - 1);
+	SysTick->VAL = 0;
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk
+		| SysTick_CTRL_TICKINT_Msk
+		| SysTick_CTRL_ENABLE_Msk;
 }
 
 static struct clocksource clocksource_systick = {
