@@ -10,11 +10,9 @@
 
 #include "platform.h"
 
-#define SYSTICK_FREQ_IN_HZ 1000
-#define SYSTICK_PERIOD_IN_MSECS (SYSTICK_FREQ_IN_HZ / 1000)
-
 void lm3s6965_init(void);
 void lm3s_timer_init(void);
+void init_systick(void);
 
 __weak void __platform_init(void)
 {
