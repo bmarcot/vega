@@ -42,25 +42,6 @@ static int init_dirent(struct tmpfs_dirent *dirent, struct inode *dir,
 	return 0;
 }
 
-int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
-{
-	/* struct inode *inode; */
-
-	/* inode = malloc(sizeof(struct inode) + sizeof(struct dentry)); */
-	/* if (inode == NULL) */
-	/* 	return -1; */
-	/* inode->i_ino = tmpfs_ino++; */
-
-	dir->i_mode = mode | S_IFDIR;
-	dentry->d_inode = dir;
-	/* INIT_LIST_HEAD(&dentry->d_subdirs); */
-
-	struct list_head *dirlist = (struct list_head *)dir->i_private;
-	INIT_LIST_HEAD(dirlist);
-
-	return 0;
-}
-
 int tmpfs_link(struct dentry *old_dentry, struct inode *dir,
 	struct dentry *dentry)
 {
@@ -115,12 +96,19 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 
 int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
-	struct inode *inode;
+	struct inode *inode = __tmpfs_create(dir, dentry, mode);
 
-	inode = __tmpfs_create(dir, dentry, mode);
-	if (inode == NULL)
+	if (!inode)
 		return -1;
+	return 0;
+}
 
+int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+{
+	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFDIR);
+
+	if (!inode)
+		return -1;
 	return 0;
 }
 
@@ -184,6 +172,7 @@ int tmpfs_delete(struct dentry *dentry)
 const struct inode_operations tmpfs_iops = {
 	.lookup = tmpfs_lookup,
 	.link   = tmpfs_link,
+	.mkdir  = tmpfs_mkdir,
 };
 
 const struct file_operations tmpfs_fops = {
