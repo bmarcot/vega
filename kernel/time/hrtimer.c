@@ -19,25 +19,28 @@
 
 static LIST_HEAD(hrtimers);
 
-static int enqueue_hrtimer_empty(struct hrtimer *timer, ktime_t expires)
-{
-	timer->expires = expires + clock_monotonic_read();
-	list_add(&timer->list, &hrtimers);
-
-	return clockevents_program_event(timer->dev, expires);
-}
-
-static int enqueue_hrtimer(struct hrtimer *timer, ktime_t expires)
+int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
 {
 	struct hrtimer *t;
 
+	/* cancel timer */
+	if (!expires) {
+		list_del(&timer->list);
+		return clockevents_program_event(timer->dev, 0);
+	}
+
 	timer->expires = expires + clock_monotonic_read();
+
+	/* timer list is empty or timer is the new head */
+	t = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
+	if (!t || (t->expires > timer->expires)) {
+		list_add(&timer->list, &hrtimers);
+		return clockevents_program_event(timer->dev, expires);
+	}
+
 	list_for_each_entry(t, &hrtimers, list) {
 		if (t->expires > timer->expires) {
 			list_add_tail(&timer->list, &t->list);
-			if (list_is_first(&timer->list, &hrtimers))
-				return clockevents_program_event(timer->dev,
-								expires);
 			return 0;
 		}
 	}
@@ -67,22 +70,6 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 
 	if (timer->callback)
 		timer->callback(timer->context);
-}
-
-int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
-{
-	/* cancel timer */
-	if (!expires) {
-		list_del(&timer->list);
-		return clockevents_program_event(timer->dev, 0);
-	}
-
-	if (list_empty(&hrtimers))
-		enqueue_hrtimer_empty(timer, expires);
-	else
-		enqueue_hrtimer(timer, expires);
-
-	return 0;
 }
 
 int hrtimer_init(struct hrtimer *timer)
