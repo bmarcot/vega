@@ -56,6 +56,8 @@ struct inode_operations {
 	struct dentry * (*lookup) (struct inode *inode, struct dentry *dentry);
 	int             (*link) (struct dentry *old_dentry, struct inode *dir,
 				struct dentry *dentry);
+	int             (*mkdir) (struct inode *inode, struct dentry *dentry,
+				int mode);
 };
 
 /*
@@ -157,6 +159,7 @@ int           vfs_link(struct dentry *old_dentry, struct inode *dir,
 int           vfs_delete(struct dentry *dentry);
 void          vfs_release(struct dentry *dentry);
 int           vfs_mmap(struct file *file, off_t offset, void **addr);
+int           vfs_mkdir(struct inode *inode, struct dentry *dentry, int mode);
 
 /*
  * Misc functions (most will die)

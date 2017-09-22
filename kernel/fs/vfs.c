@@ -58,3 +58,11 @@ int vfs_mmap(struct file *file, off_t offset, void **addr)
 
 	return file->f_op->mmap(file, offset, addr);
 }
+
+int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+{
+	if (dir->i_op->mkdir)
+		return dir->i_op->mkdir(dir, dentry, mode);
+
+	return -1;
+}
