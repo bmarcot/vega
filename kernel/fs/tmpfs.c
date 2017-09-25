@@ -198,13 +198,6 @@ struct inode *root_inode(void)
 	return &in_root;
 }
 
-static struct inode *in_dev;
-
-struct inode *dev_inode(void)
-{
-	return in_dev;
-}
-
 struct dentry *root_dentry(void)
 {
 	static struct dentry dentry = {
@@ -225,10 +218,4 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 	inode->i_op = &tmpfs_iops;
 
 	return inode;
-}
-
-void tmpfs_init(void)
-{
-	struct dentry dev_dentry = { .d_name = "dev", .d_op = &tmpfs_dops, };
-	in_dev = __tmpfs_create(&in_root, &dev_dentry, S_IFDIR);
 }

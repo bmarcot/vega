@@ -119,8 +119,8 @@ struct thread_info *start_kernel(void)
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
-	tmpfs_init();
 	procfs_init();
+	devfs_init();
 	memdev_init();
 	mtdchar_init();
 

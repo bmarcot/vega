@@ -113,3 +113,21 @@ struct device *device_alloc(void)
 
 	return dev;
 }
+
+static struct inode *dev_i;
+
+struct inode *dev_inode(void)
+{
+	return dev_i;
+}
+
+int devfs_init(void)
+{
+	struct dentry dentry = { .d_name = "dev", };
+
+	dev_i = __tmpfs_create(root_inode(), &dentry, S_IFDIR);
+	if (!dev_i)
+		return -1;
+
+	return 0;
+}
