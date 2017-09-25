@@ -57,30 +57,23 @@ static const struct file_operations meminfo_fops = {
 	.read = read_meminfo,
 };
 
-extern const struct inode_operations tmpfs_iops;
-
-static struct inode proc_inodes[] = {
-	{	/* /proc/version */
-		.i_ino  = 1001,
-		.i_op   = &tmpfs_iops,
-		.i_fop  = &version_fops,
-	},
-	{	/* /proc/meminfo */
-		.i_ino  = 1002,
-		.i_op   = &tmpfs_iops,
-		.i_fop  = &meminfo_fops,
-	},
-};
-
-void proc_init(void)
+void procfs_init(void)
 {
-	struct dentry dentry;
-	const char *names[] = { "version", "meminfo", };
+	struct inode *proc_i;
+	struct inode *target_i;
+	struct dentry target_d;
 
-	for (int i = 0; i < 2; i++) {
-		printk("Creating /proc/%s\n", names[i]);
-		dentry.d_inode = &proc_inodes[i],
-		strcpy(dentry.d_name, names[i]);
-		vfs_link(0, proc_inode(), &dentry);
-	}
+	/* create /proc */
+	strcpy(target_d.d_name, "proc");
+	proc_i = __tmpfs_create(root_inode(), &target_d, S_IFDIR);
+
+	/* create /proc/version */
+	strcpy(target_d.d_name, "version");
+	target_i = __tmpfs_create(proc_i, &target_d, S_IFDIR);
+	target_i->i_fop = &version_fops;
+
+	/* create /proc/meminfo */
+	strcpy(target_d.d_name, "meminfo");
+	target_i = __tmpfs_create(proc_i, &target_d, S_IFDIR);
+	target_i->i_fop = &meminfo_fops;
 }

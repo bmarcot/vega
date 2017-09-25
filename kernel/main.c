@@ -120,7 +120,7 @@ struct thread_info *start_kernel(void)
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
 
 	tmpfs_init();
-	proc_init();
+	procfs_init();
 	memdev_init();
 	mtdchar_init();
 
