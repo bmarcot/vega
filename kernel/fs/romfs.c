@@ -12,6 +12,7 @@
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/kernel.h>
+#include <kernel/mm.h>
 #include <kernel/stat.h>
 
 #include <drivers/mtd/mtd.h>
@@ -48,38 +49,33 @@ int romfs_mount(const char *source, const char *target,
 {
 	(void)filesystemtype, (void)mountflags, (void)data;
 
-	struct inode *s_inode = inode_from_pathname(source);
-	if (s_inode == NULL)
+	struct inode *source_in = inode_from_pathname(source);
+	if (!source_in)
 		return -1;
-
-	//FIXME: Use mkdir() or create()
-	struct inode *inode = malloc(sizeof(struct inode));
-	if (inode == NULL)
-		return -1;
-	init_tmpfs_inode(inode);
-	inode->i_op = &romfs_iops;
-	inode->i_mode = S_IFDIR;
-	inode->i_size = 0;
 
 	// link mounted-over inode to parent directory
-	struct dentry dentry;
-	printk("Creating /dev/%s\n", basename(target));
-	dentry.d_inode = inode;
-	strcpy(dentry.d_name, basename(target));
-	vfs_link(0, dev_inode(), &dentry);
+	struct dentry target_de;
+	strcpy(target_de.d_name, basename(target));
 
-	/* Allocate a super_block struct that will be released on filesystem
-	 * unmount. */
-	struct super_block *super_block = malloc(sizeof(struct super_block));
-	if (super_block == NULL)
+	struct inode *target_in = __tmpfs_mkdir(dev_inode(), &target_de, 0);
+	if (!target_in)
 		return -1;
+	target_in->i_op = &romfs_iops;
+
+	/* Allocate a super_block struct. Unmounting the filesystem will release
+	 * the super_block. */
+	struct super_block *super_block = kmalloc(sizeof(*super_block));
+	if (!super_block) {
+		kfree(target_in);
+		return -1;
+	}
 	/* super_block is found at the begining of memory area on MTD dev */
-	super_block->s_dev = s_inode->i_rdev;
-	super_block->s_iroot = inode; //FIXME: super_block must point to dentry instead of inode
-	inode->i_sb = super_block;
+	super_block->s_dev = source_in->i_rdev;
+	super_block->s_iroot = target_in; //FIXME: super_block must point to dentry instead of inode
+	target_in->i_sb = super_block;
 
 	struct mtd_info *mtd = get_mtd_device(super_block->s_dev);
-	inode->i_private = (void *)offsetof_first_device_inode(ROMFS_SB(mtd));
+	target_in->i_private = (void *)offsetof_first_device_inode(ROMFS_SB(mtd));
 
 	return 0;
 }

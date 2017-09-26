@@ -188,4 +188,11 @@ ssize_t     do_file_write(struct file *file, void *buf, size_t count);
 off_t       do_file_lseek(struct file *file, off_t offset, int whence);
 int         do_file_close(struct file *file);
 
+/* misc functions */
+static inline struct inode *
+__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+{
+	return __tmpfs_create(dir, dentry, mode | S_IFDIR);
+}
+
 #endif /* !_KERNEL_FS_H */
