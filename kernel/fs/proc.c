@@ -69,11 +69,11 @@ void procfs_init(void)
 
 	/* create /proc/version */
 	strcpy(target_d.d_name, "version");
-	target_i = __tmpfs_create(proc_i, &target_d, S_IFDIR);
+	target_i = __tmpfs_create(proc_i, &target_d, 0);
 	target_i->i_fop = &version_fops;
 
 	/* create /proc/meminfo */
 	strcpy(target_d.d_name, "meminfo");
-	target_i = __tmpfs_create(proc_i, &target_d, S_IFDIR);
+	target_i = __tmpfs_create(proc_i, &target_d, 0);
 	target_i->i_fop = &meminfo_fops;
 }
