@@ -74,7 +74,6 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	inode->i_ino = ino++;
 	inode->i_size = 0;
 	inode->i_op = &tmpfs_iops;
-	inode->i_fop = &tmpfs_fops,
 	inode->i_mode |= mode;
 
 	dirent = alloc_dirent();
@@ -89,6 +88,9 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 		struct list_head *dirlist = (struct list_head *)(inode + 1);
 		INIT_LIST_HEAD(dirlist);
 		inode->i_private = dirlist;
+		inode->i_fop = &tmpfs_fops;
+	} else {
+		inode->i_fop = NULL;
 	}
 
 	return inode;
