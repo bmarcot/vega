@@ -222,3 +222,31 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 
 	return inode;
 }
+
+struct inode *creat_file(struct inode *dir, const char *filename,
+			struct file_operations *fops)
+{
+	struct inode *inode;
+	struct dentry dentry;
+
+	strncpy(dentry.d_name, filename, NAME_MAX);
+	inode = __tmpfs_create(dir, &dentry, 0);
+	if (!inode)
+		return NULL;
+	inode->i_fop = fops;
+
+	return inode;
+}
+
+struct inode *make_dir(struct inode *dir, const char *filename)
+{
+	struct inode *inode;
+	struct dentry dentry;
+
+	strncpy(dentry.d_name, filename, NAME_MAX);
+	inode = __tmpfs_mkdir(dir, &dentry, 0);
+	if (!inode)
+		return NULL;
+
+	return inode;
+}
