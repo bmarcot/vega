@@ -80,13 +80,16 @@ int romfs_mount(const char *source, const char *target,
 	return 0;
 }
 
-static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
+static struct inode *
+alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 {
 	struct inode *inode;
 	static int ino = 600;
 
-	inode = malloc(sizeof(struct inode));
-	if (inode == NULL)
+	struct dentry dentry;
+	strcpy(dentry.d_name, ri->file_name);
+	inode = __tmpfs_create(dir, &dentry, 0);
+	if (!inode)
 		return NULL;
 
 	switch (be32_to_cpu(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
@@ -117,10 +120,9 @@ static struct inode *alloc_inode(struct romfs_inode *ri, struct super_block *sb)
 	inode->i_fop = &romfs_fops;
 	inode->i_sb = sb;
 
-	/* We store the offset to on-device inode rather than the logical
-	 * address of the on-device inode, because that does not work if
-	 * fs is stored on a SPI flash for instance, and is not directly
-	 * mapped onto logical address space. */
+	/* We store the offset to the on-device inode rather than the logical
+	 * address of the on-device inode, because that does not work when the
+	 * filesystem is stored in an external SPI flash device. */
 	struct mtd_info *mtd = get_mtd_device(sb->s_dev);
 	inode->i_private =
 		(void *)offsetof_device_inode(ri, ROMFS_SB(mtd));
@@ -145,10 +147,9 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 
 	for (int i = 0; next_filehdr < rs->full_size; i++) {
 		if (!strcmp(ri->file_name, target->d_name)) {
-			struct inode *inode = alloc_inode(ri, dir->i_sb);
+			struct inode *inode = alloc_inode(ri, dir->i_sb, dir);
 			if (inode == NULL)
 				return NULL;
-
 			target->d_inode = inode;
 			target->d_op = &romfs_dops;
 
@@ -206,8 +207,8 @@ int romfs_delete(struct dentry *dentry)
 	/* the root inode is deleted on unmount(), operation is pointed
 	 * by i_sb->s_op->unmount() */
 	if (dentry->d_inode != dentry->d_inode->i_sb->s_iroot)
-		free(dentry->d_inode);
-	free(dentry);
+		kfree(dentry->d_inode);
+	kfree(dentry);
 
 	return 0;
 }
