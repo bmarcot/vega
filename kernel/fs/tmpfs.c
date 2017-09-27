@@ -66,9 +66,10 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	static ino_t ino = 300;
 
 	if (S_ISDIR(mode))
-		inode = kmalloc(sizeof(struct inode) + sizeof(struct list_head));
+		inode = kmalloc(sizeof(struct inode) + sizeof(struct tmpfs_dirent)
+				+ sizeof(struct list_head));
 	else
-		inode = kmalloc(sizeof(struct inode));
+		inode = kmalloc(sizeof(struct inode) + sizeof(struct tmpfs_dirent));
 	if (!inode)
 		return NULL;
 	inode->i_ino = ino++;
@@ -76,7 +77,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	inode->i_op = &tmpfs_iops;
 	inode->i_mode |= mode;
 
-	dirent = alloc_dirent();
+	dirent = (struct tmpfs_dirent *)(inode + 1);
 	if (!dirent) {
 		kfree(inode); //FIXME: delete(inode);
 		return NULL;
@@ -85,7 +86,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	init_dirent(dirent, dir, dentry);
 
 	if (S_ISDIR(mode)) {
-		struct list_head *dirlist = (struct list_head *)(inode + 1);
+		struct list_head *dirlist = (struct list_head *)((u32)(inode + 1) + (u32)(sizeof(*dirent)));
 		INIT_LIST_HEAD(dirlist);
 		inode->i_private = dirlist;
 		inode->i_fop = &tmpfs_fops;
