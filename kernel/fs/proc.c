@@ -59,21 +59,20 @@ static const struct file_operations meminfo_fops = {
 
 void procfs_init(void)
 {
-	struct inode *proc_i;
-	struct inode *target_i;
-	struct dentry target_d;
+	struct inode *proc;
 
 	/* create /proc */
-	strcpy(target_d.d_name, "proc");
-	proc_i = __tmpfs_create(root_inode(), &target_d, S_IFDIR);
+	proc = make_dir(root_inode(), "proc");
+	if (!proc) {
+		pr_err("Cannot create /proc");
+		return;
+	}
 
 	/* create /proc/version */
-	strcpy(target_d.d_name, "version");
-	target_i = __tmpfs_create(proc_i, &target_d, 0);
-	target_i->i_fop = &version_fops;
+	if (!creat_file(proc, "version", &version_fops))
+		pr_warn("Cannot create /proc/version");
 
 	/* create /proc/meminfo */
-	strcpy(target_d.d_name, "meminfo");
-	target_i = __tmpfs_create(proc_i, &target_d, 0);
-	target_i->i_fop = &meminfo_fops;
+	if (!creat_file(proc, "meminfo", &meminfo_fops))
+		pr_warn("Cannot create /proc/meminfo");
 }
