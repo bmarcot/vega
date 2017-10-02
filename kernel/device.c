@@ -70,12 +70,10 @@ void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev)
 
 int chrdev_add(kdev_t dev, const char *name)
 {
-	struct dentry dentry;
 	struct inode *inode;
 
-	strcpy(dentry.d_name, name);
-	inode = __tmpfs_create(dev_inode(), &dentry, 0);
-	if (inode == NULL) {
+	inode = creat_file(dev_inode(), name, NULL);
+	if (!inode) {
 		pr_err("Cannot add device %s (%d, %d)", name, MAJOR(dev),
 			MINOR(dev));
 		return -1;
@@ -123,9 +121,8 @@ struct inode *dev_inode(void)
 
 int devfs_init(void)
 {
-	struct dentry dentry = { .d_name = "dev", };
-
-	dev_i = __tmpfs_create(root_inode(), &dentry, S_IFDIR);
+	/* create /dev */
+	dev_i = make_dir(root_inode(), "dev");
 	if (!dev_i)
 		return -1;
 
