@@ -53,11 +53,8 @@ int romfs_mount(const char *source, const char *target,
 	if (!source_in)
 		return -1;
 
-	// link mounted-over inode to parent directory
-	struct dentry target_de;
-	strcpy(target_de.d_name, basename(target));
-
-	struct inode *target_in = __tmpfs_mkdir(dev_inode(), &target_de, 0);
+	/* link mounted-over inode to parent directory */
+	struct inode *target_in = make_dir(dev_inode(), basename(target));
 	if (!target_in)
 		return -1;
 	target_in->i_op = &romfs_iops;
@@ -86,38 +83,20 @@ alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 	struct inode *inode;
 	static int ino = 600;
 
-	struct dentry dentry;
-	strcpy(dentry.d_name, ri->file_name);
-	inode = __tmpfs_create(dir, &dentry, 0);
-	if (!inode)
-		return NULL;
-
 	switch (be32_to_cpu(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
 	case ROMFS_FILETYPE_DIR:
-		inode->i_mode = S_IFDIR;
+		inode = make_dir(dir, ri->file_name);
+		inode->i_op = &romfs_iops;
 		break;
 	case ROMFS_FILETYPE_REG:
-		inode->i_mode = S_IFREG;
-		break;
-	case ROMFS_FILETYPE_LNK:
-		inode->i_mode = S_IFLNK;
-		break;
-	case ROMFS_FILETYPE_BLK:
-		inode->i_mode = S_IFBLK;
-		break;
-	case ROMFS_FILETYPE_CHR:
-		inode->i_mode = S_IFCHR;
-		break;
-	case ROMFS_FILETYPE_FIFO:
-		inode->i_mode = S_IFIFO;
+		inode = creat_file(dir, ri->file_name, &romfs_fops);
 		break;
 	default:
-		inode->i_mode = 0;
+		pr_err("File type not supported");
+		return NULL;
 	}
 	inode->i_ino = ino++;
 	inode->i_size = be32_to_cpu(ri->size);
-	inode->i_op = &romfs_iops;
-	inode->i_fop = &romfs_fops;
 	inode->i_sb = sb;
 
 	/* We store the offset to the on-device inode rather than the logical
