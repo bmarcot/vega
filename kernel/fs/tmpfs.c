@@ -75,7 +75,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	inode->i_ino = ino++;
 	inode->i_size = 0;
 	inode->i_op = &tmpfs_iops;
-	inode->i_mode |= mode;
+	inode->i_mode = mode;
 
 	dirent = (struct tmpfs_dirent *)(inode + 1);
 	if (!dirent) {
@@ -99,7 +99,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 
 int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
-	struct inode *inode = __tmpfs_create(dir, dentry, mode);
+	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFREG);
 
 	if (!inode)
 		return -1;
@@ -230,7 +230,7 @@ struct inode *creat_file(struct inode *dir, const char *filename,
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_create(dir, &dentry, 0);
+	inode = __tmpfs_create(dir, &dentry, S_IFREG);
 	if (!inode)
 		return NULL;
 	inode->i_fop = fops;
@@ -244,7 +244,7 @@ struct inode *make_dir(struct inode *dir, const char *filename)
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_mkdir(dir, &dentry, 0);
+	inode = __tmpfs_create(dir, &dentry, S_IFDIR);
 	if (!inode)
 		return NULL;
 

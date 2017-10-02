@@ -192,12 +192,6 @@ int         do_file_close(struct file *file);
  * Helper functions
  */
 
-static inline struct inode *
-__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
-{
-	return __tmpfs_create(dir, dentry, mode | S_IFDIR);
-}
-
 struct inode *creat_file(struct inode *dir, const char *filename,
 			struct file_operations *fops);
 struct inode *make_dir(struct inode *dir, const char *filename);
