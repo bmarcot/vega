@@ -69,20 +69,16 @@ static void lm3s6965_uart0_isr(void)
 
 extern const struct file_operations serialchar_fops;
 
-static struct inode lm3s6965_inode = {
-	.i_fop     = &serialchar_fops,
-	.i_private = &lm3s6965_uart0,
-};
-
 int lm3s6965_init(void)
 {
-	struct dentry dentry = { .d_inode = &lm3s6965_inode,
-				 .d_name  = "ttyS0" };
+	struct inode *inode;
 
 	cbuf_init(&cbuf, buf, 16);
 
-	init_tmpfs_inode(&lm3s6965_inode);
-	vfs_link(0, dev_inode(), &dentry);
+	inode = creat_file(dev_inode(), "ttyS0", &serialchar_fops);
+	if (!inode)
+		return -1;
+	inode->i_private = &lm3s6965_uart0;
 
 	/* configure link */
 	UART0->CTL |= 1;
