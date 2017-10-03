@@ -176,7 +176,8 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry,
 			int mode);
 
 void tmpfs_init(void);
-void proc_init(void);
+void procfs_init(void);
+int devfs_init(void);
 
 /*
  * Kernel common file-manipulation functions
@@ -193,7 +194,7 @@ int         do_file_close(struct file *file);
  */
 
 struct inode *creat_file(struct inode *dir, const char *filename,
-			struct file_operations *fops);
+			const struct file_operations *fops);
 struct inode *make_dir(struct inode *dir, const char *filename);
 
 #endif /* !_KERNEL_FS_H */

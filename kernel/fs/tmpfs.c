@@ -224,7 +224,7 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 }
 
 struct inode *creat_file(struct inode *dir, const char *filename,
-			struct file_operations *fops)
+			const struct file_operations *fops)
 {
 	struct inode *inode;
 	struct dentry dentry;
