@@ -26,19 +26,12 @@ struct tmpfs_dirent {
 #define TMPFS_DIRLIST(dir) \
 	((struct list_head *)(dir)->i_private)
 
-static struct tmpfs_dirent *alloc_dirent(void)
-{
-	struct tmpfs_dirent *dirent;
-
-	dirent = kmalloc(sizeof(*dirent));
-
-	return dirent;
-}
-
-static int init_dirent(struct tmpfs_dirent *dirent, struct inode *dir,
+static int init_dirent(struct inode *inode, struct inode *dir,
 		struct dentry *dentry)
 {
-	dirent->inode = dentry->d_inode;
+	struct tmpfs_dirent *dirent = (struct tmpfs_dirent *)(inode + 1);
+
+	dirent->inode = inode;
 	strncpy(dirent->name, dentry->d_name, NAME_MAX);
 	list_add_tail(&dirent->list, TMPFS_DIRLIST(dir));
 	dir->i_size++;
@@ -49,15 +42,9 @@ static int init_dirent(struct tmpfs_dirent *dirent, struct inode *dir,
 int tmpfs_link(struct dentry *old_dentry, struct inode *dir,
 	struct dentry *dentry)
 {
-	(void)old_dentry;
+	(void)old_dentry, (void)dir, (void)dentry;
 
-	struct tmpfs_dirent *new = alloc_dirent();
-
-	if (!new)
-		return -1;
-	init_dirent(new, dir, dentry);
-
-	return 0;
+	return -1;
 }
 
 struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
@@ -81,32 +68,34 @@ struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
 	return inode;
 }
 
+static ino_t ino = 10000;
+
 struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
-	struct tmpfs_dirent *dirent;
-	static ino_t ino = 300;
 
 	inode = tmpfs_iget(NULL, ino++, mode);
 	if (!inode)
 		return NULL;
+	init_dirent(inode, dir, dentry);
 
-	dirent = (struct tmpfs_dirent *)(inode + 1);
-	if (!dirent) {
-		kfree(inode); //FIXME: delete(inode);
+	return inode;
+}
+
+struct inode *__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+{
+	struct inode *inode;
+
+	inode = tmpfs_iget(NULL, ino++, mode);
+	if (!inode)
 		return NULL;
-	}
-	dentry->d_inode = inode;
-	init_dirent(dirent, dir, dentry);
+	init_dirent(inode, dir, dentry);
 
-	if (S_ISDIR(mode)) {
-		struct list_head *dirlist = (struct list_head *)((u32)(inode + 1) + (u32)(sizeof(*dirent)));
-		INIT_LIST_HEAD(dirlist);
-		inode->i_private = dirlist;
-		inode->i_fop = &tmpfs_fops;
-	} else {
-		inode->i_fop = NULL;
-	}
+	struct list_head *dirlist =
+		(struct list_head *)((u32)(inode + 1) + (u32)(sizeof(struct tmpfs_dirent)));
+	INIT_LIST_HEAD(dirlist);
+	inode->i_private = dirlist;
+	inode->i_fop = &tmpfs_fops;
 
 	return inode;
 }
@@ -114,10 +103,12 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
 			umode_t mode, dev_t dev)
 {
-	struct inode *inode = __tmpfs_create(dir, dentry, mode);
+	struct inode *inode;
 
+	inode = tmpfs_iget(NULL, ino++, mode);
 	if (!inode)
 		return NULL;
+	init_dirent(inode, dir, dentry);
 	init_special_inode(inode, mode, dev);
 
 	return inode;
@@ -134,7 +125,7 @@ int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 
 int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFDIR);
+	struct inode *inode = __tmpfs_mkdir(dir, dentry, mode | S_IFDIR);
 
 	if (!inode)
 		return -1;
@@ -249,7 +240,7 @@ struct dentry *root_dentry(void)
 
 struct inode *init_tmpfs_inode(struct inode *inode)
 {
-	static ino_t ino = 9000;
+	static ino_t ino = 11000;
 
 	inode->i_ino = ino++;
 	inode->i_op = &tmpfs_iops;
@@ -278,7 +269,7 @@ struct inode *make_dir(struct inode *dir, const char *filename)
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_create(dir, &dentry, S_IFDIR);
+	inode = __tmpfs_mkdir(dir, &dentry, S_IFDIR);
 	if (!inode)
 		return NULL;
 
