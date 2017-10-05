@@ -13,6 +13,10 @@
 #include <kernel/stat.h>
 #include <kernel/types.h>
 
+const struct inode_operations tmpfs_iops;
+const struct file_operations tmpfs_fops;
+const struct dentry_operations tmpfs_dops;
+
 struct tmpfs_dirent {
 	struct inode		*inode;
 	char			name[NAME_MAX];
@@ -56,14 +60,9 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir,
 	return 0;
 }
 
-const struct inode_operations tmpfs_iops;
-const struct file_operations tmpfs_fops;
-
-struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
+struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
 {
 	struct inode *inode;
-	struct tmpfs_dirent *dirent;
-	static ino_t ino = 300;
 
 	if (S_ISDIR(mode))
 		inode = kmalloc(sizeof(struct inode) + sizeof(struct tmpfs_dirent)
@@ -72,10 +71,25 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 		inode = kmalloc(sizeof(struct inode) + sizeof(struct tmpfs_dirent));
 	if (!inode)
 		return NULL;
-	inode->i_ino = ino++;
+	inode->i_ino = ino;
 	inode->i_size = 0;
 	inode->i_op = &tmpfs_iops;
+	inode->i_fop = NULL;
 	inode->i_mode = mode;
+	inode->i_sb = sb;
+
+	return inode;
+}
+
+struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
+{
+	struct inode *inode;
+	struct tmpfs_dirent *dirent;
+	static ino_t ino = 300;
+
+	inode = tmpfs_iget(NULL, ino++, mode);
+	if (!inode)
+		return NULL;
 
 	dirent = (struct tmpfs_dirent *)(inode + 1);
 	if (!dirent) {
@@ -167,8 +181,6 @@ int tmpfs_iterate(struct file *file, struct dir_context *ctx)
 
 	return res;
 }
-
-const struct dentry_operations tmpfs_dops;
 
 struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 {
