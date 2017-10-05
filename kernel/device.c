@@ -40,7 +40,7 @@ static int chrdev_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static const struct file_operations def_chr_fops = {
+const struct file_operations def_chr_fops = {
 	.open = chrdev_open,
 };
 
@@ -59,26 +59,16 @@ int chrdev_register(unsigned int major, const struct file_operations *fops)
 	return 0;
 }
 
-void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev)
-{
-	inode->i_mode = mode;
-	if (S_ISCHR(mode)) {
-		inode->i_fop = &def_chr_fops;
-		inode->i_rdev = rdev;
-	}
-}
-
 int chrdev_add(kdev_t dev, const char *name)
 {
 	struct inode *inode;
 
-	inode = creat_file(dev_inode(), name, NULL);
+	inode = make_nod(dev_inode(), name, 0666 | S_IFCHR, dev);
 	if (!inode) {
 		pr_err("Cannot add device %s (%d, %d)", name, MAJOR(dev),
 			MINOR(dev));
 		return -1;
 	}
-	init_special_inode(inode, 0666 | S_IFCHR, dev);
 
 	return 0;
 }

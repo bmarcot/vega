@@ -97,6 +97,18 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 	return inode;
 }
 
+struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
+			umode_t mode, dev_t dev)
+{
+	struct inode *inode = __tmpfs_create(dir, dentry, mode);
+
+	if (!inode)
+		return NULL;
+	init_special_inode(inode, mode, dev);
+
+	return inode;
+}
+
 int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFREG);
@@ -109,6 +121,16 @@ int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFDIR);
+
+	if (!inode)
+		return -1;
+	return 0;
+}
+
+int tmpfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode,
+		dev_t dev)
+{
+	struct inode *inode = __tmpfs_mknod(dir, dentry, mode, dev);
 
 	if (!inode)
 		return -1;
@@ -245,6 +267,20 @@ struct inode *make_dir(struct inode *dir, const char *filename)
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
 	inode = __tmpfs_create(dir, &dentry, S_IFDIR);
+	if (!inode)
+		return NULL;
+
+	return inode;
+}
+
+struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
+		dev_t dev)
+{
+	struct inode *inode;
+	struct dentry dentry;
+
+	strncpy(dentry.d_name, filename, NAME_MAX);
+	inode = __tmpfs_mknod(dir, &dentry, mode, dev);
 	if (!inode)
 		return NULL;
 

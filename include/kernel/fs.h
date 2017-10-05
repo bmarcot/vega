@@ -58,6 +58,8 @@ struct inode_operations {
 				struct dentry *dentry);
 	int             (*mkdir) (struct inode *inode, struct dentry *dentry,
 				int mode);
+	int             (*mknod) (struct inode *dir, struct dentry *dentry,
+				umode_t mode, dev_t dev);
 };
 
 /*
@@ -196,5 +198,9 @@ int         do_file_close(struct file *file);
 struct inode *creat_file(struct inode *dir, const char *filename,
 			const struct file_operations *fops);
 struct inode *make_dir(struct inode *dir, const char *filename);
+struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
+		dev_t dev);
+
+void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev);
 
 #endif /* !_KERNEL_FS_H */
