@@ -60,6 +60,7 @@ static const struct file_operations meminfo_fops = {
 void procfs_init(void)
 {
 	struct inode *proc;
+	struct inode *inode;
 
 	/* create /proc */
 	proc = make_dir(root_inode(), "proc");
@@ -69,10 +70,14 @@ void procfs_init(void)
 	}
 
 	/* create /proc/version */
-	if (!creat_file(proc, "version", &version_fops))
+	inode = creat_file(proc, "version");
+	if (!inode)
 		pr_warn("Cannot create /proc/version");
+	inode->i_fop = &version_fops;
 
 	/* create /proc/meminfo */
-	if (!creat_file(proc, "meminfo", &meminfo_fops))
+	inode = creat_file(proc, "meminfo");
+	if (!inode)
 		pr_warn("Cannot create /proc/meminfo");
+	inode->i_fop = &meminfo_fops;
 }
