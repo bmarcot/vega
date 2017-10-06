@@ -54,6 +54,8 @@ struct inode {
 
 struct inode_operations {
 	struct dentry * (*lookup) (struct inode *inode, struct dentry *dentry);
+	int             (*create) (struct inode *dir, struct dentry *dentry,
+				umode_t mode, int /* bool */ exclusive);
 	int             (*link) (struct dentry *old_dentry, struct inode *dir,
 				struct dentry *dentry);
 	int             (*mkdir) (struct inode *inode, struct dentry *dentry,
@@ -195,8 +197,7 @@ int         do_file_close(struct file *file);
  * Helper functions
  */
 
-struct inode *creat_file(struct inode *dir, const char *filename,
-			const struct file_operations *fops);
+struct inode *creat_file(struct inode *dir, const char *filename);
 struct inode *make_dir(struct inode *dir, const char *filename);
 struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
 		dev_t dev);
