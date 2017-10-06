@@ -75,9 +75,12 @@ int lm3s6965_init(void)
 
 	cbuf_init(&cbuf, buf, 16);
 
-	inode = creat_file(dev_inode(), "ttyS0", &serialchar_fops);
+	inode = creat_file(dev_inode(), "ttyS0");
 	if (!inode)
 		return -1;
+	//FIXME: inverted, ttyS0 should be created by top-level, and i_fops
+	// points to chr_def_fops (chardev fops) that redirects here
+	inode->i_fop = &serialchar_fops;
 	inode->i_private = &lm3s6965_uart0;
 
 	/* configure link */
