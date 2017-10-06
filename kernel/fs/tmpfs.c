@@ -114,12 +114,18 @@ struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
 	return inode;
 }
 
-int tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
+int tmpfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
+		int /* bool */ exclusive)
 {
-	struct inode *inode = __tmpfs_create(dir, dentry, mode | S_IFREG);
+	(void)exclusive;
 
+	struct inode *inode;
+
+	inode = __tmpfs_create(dir, dentry, mode | S_IFREG);
+	dentry->d_inode = inode;
 	if (!inode)
 		return -1;
+
 	return 0;
 }
 
@@ -199,6 +205,7 @@ int tmpfs_delete(struct dentry *dentry)
 
 const struct inode_operations tmpfs_iops = {
 	.lookup = tmpfs_lookup,
+	.create = tmpfs_create,
 	.link   = tmpfs_link,
 	.mkdir  = tmpfs_mkdir,
 };
@@ -248,19 +255,15 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 	return inode;
 }
 
-struct inode *creat_file(struct inode *dir, const char *filename,
-			const struct file_operations *fops)
+struct inode *creat_file(struct inode *dir, const char *filename)
 {
-	struct inode *inode;
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_create(dir, &dentry, S_IFREG);
-	if (!inode)
+	if (dir->i_op->create(dir, &dentry, S_IFREG, 0))
 		return NULL;
-	inode->i_fop = fops;
 
-	return inode;
+	return dentry.d_inode;
 }
 
 struct inode *make_dir(struct inode *dir, const char *filename)
