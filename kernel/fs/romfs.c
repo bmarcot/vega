@@ -89,7 +89,8 @@ alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 		inode->i_op = &romfs_iops;
 		break;
 	case ROMFS_FILETYPE_REG:
-		inode = creat_file(dir, ri->file_name, &romfs_fops);
+		inode = creat_file(dir, ri->file_name);
+		inode->i_fop = &romfs_fops;
 		break;
 	default:
 		pr_err("File type not supported");
@@ -192,8 +193,11 @@ int romfs_delete(struct dentry *dentry)
 	return 0;
 }
 
+int tmpfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, int);
+
 const struct inode_operations romfs_iops = {
 	.lookup = romfs_lookup,
+	.create = tmpfs_create,
 };
 
 const struct file_operations romfs_fops = {
