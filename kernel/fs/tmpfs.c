@@ -26,10 +26,13 @@ struct tmpfs_dirent {
 #define TMPFS_DIRLIST(dir) \
 	((struct list_head *)(dir)->i_private)
 
+#define TMPFS_DIRENT(inode) \
+	((struct tmpfs_dirent *)((inode) + 1))
+
 static int init_dirent(struct inode *inode, struct inode *dir,
 		struct dentry *dentry)
 {
-	struct tmpfs_dirent *dirent = (struct tmpfs_dirent *)(inode + 1);
+	struct tmpfs_dirent *dirent = TMPFS_DIRENT(inode);
 
 	dirent->inode = inode;
 	strncpy(dirent->name, dentry->d_name, NAME_MAX);
@@ -61,13 +64,12 @@ struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
 	inode->i_ino = ino;
 	inode->i_size = 0;
 	inode->i_op = &tmpfs_iops;
-	inode->i_fop = NULL;
+	inode->i_fop = &tmpfs_fops;
 	inode->i_mode = mode;
 	inode->i_sb = sb;
 
 	return inode;
 }
-
 
 struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
