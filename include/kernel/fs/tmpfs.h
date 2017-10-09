@@ -7,7 +7,10 @@
 #ifndef _KERNEL_FS_TMPFS_H
 #define _KERNEL_FS_TMPFS_H
 
-#include <kernel/fs.h>
+#include <kernel/types.h>
+
+struct inode;
+struct dentry;
 
 int tmpfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		int /* bool */ exclusive);
