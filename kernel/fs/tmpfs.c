@@ -211,6 +211,7 @@ const struct inode_operations tmpfs_iops = {
 	.create = tmpfs_create,
 	.link   = tmpfs_link,
 	.mkdir  = tmpfs_mkdir,
+	.mknod  = tmpfs_mknod,
 };
 
 const struct file_operations tmpfs_fops = {
@@ -258,6 +259,10 @@ struct inode *init_tmpfs_inode(struct inode *inode)
 	return inode;
 }
 
+/*
+ * Filesystem helper functions
+ */
+
 struct inode *creat_file(struct inode *dir, const char *filename)
 {
 	struct dentry dentry;
@@ -283,13 +288,11 @@ struct inode *make_dir(struct inode *dir, const char *filename)
 struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
 		dev_t dev)
 {
-	struct inode *inode;
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_mknod(dir, &dentry, mode, dev);
-	if (!inode)
+	if (dir->i_op->mknod(dir, &dentry, mode, dev))
 		return NULL;
 
-	return inode;
+	return dentry.d_inode;
 }
