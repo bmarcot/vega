@@ -82,7 +82,6 @@ static struct inode *
 alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 {
 	struct inode *inode;
-	static int ino = 600;
 
 	switch (be32_to_cpu(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
 	case ROMFS_FILETYPE_DIR:
@@ -97,7 +96,6 @@ alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 		pr_err("File type not supported");
 		return NULL;
 	}
-	inode->i_ino = ino++;
 	inode->i_size = be32_to_cpu(ri->size);
 	inode->i_sb = sb;
 
