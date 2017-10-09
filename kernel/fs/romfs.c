@@ -11,6 +11,7 @@
 
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
+#include <kernel/fs/tmpfs.h>
 #include <kernel/kernel.h>
 #include <kernel/mm.h>
 #include <kernel/stat.h>
@@ -193,11 +194,10 @@ int romfs_delete(struct dentry *dentry)
 	return 0;
 }
 
-int tmpfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, int);
-
 const struct inode_operations romfs_iops = {
 	.lookup = romfs_lookup,
 	.create = tmpfs_create,
+	.mkdir = tmpfs_mkdir,
 };
 
 const struct file_operations romfs_fops = {

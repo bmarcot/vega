@@ -131,10 +131,13 @@ int tmpfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 
 int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	struct inode *inode = __tmpfs_mkdir(dir, dentry, mode | S_IFDIR);
+	struct inode *inode;
 
+	inode = __tmpfs_mkdir(dir, dentry, mode | S_IFDIR);
+	dentry->d_inode = inode;
 	if (!inode)
 		return -1;
+
 	return 0;
 }
 
@@ -268,15 +271,13 @@ struct inode *creat_file(struct inode *dir, const char *filename)
 
 struct inode *make_dir(struct inode *dir, const char *filename)
 {
-	struct inode *inode;
 	struct dentry dentry;
 
 	strncpy(dentry.d_name, filename, NAME_MAX);
-	inode = __tmpfs_mkdir(dir, &dentry, S_IFDIR);
-	if (!inode)
+	if (dir->i_op->mkdir(dir, &dentry, 0))
 		return NULL;
 
-	return inode;
+	return dentry.d_inode;
 }
 
 struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
