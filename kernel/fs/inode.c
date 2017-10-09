@@ -21,7 +21,7 @@ void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev)
 	}
 }
 
-ino_t alloc_inode(void)
+ino_t alloc_inode_ino(void)
 {
 	static ino_t ino = 10000;
 

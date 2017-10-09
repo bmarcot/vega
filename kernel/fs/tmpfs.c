@@ -73,7 +73,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode(), mode);
+	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 	init_dirent(inode, dir, dentry);
@@ -85,7 +85,7 @@ struct inode *__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode(), mode);
+	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 	init_dirent(inode, dir, dentry);
@@ -104,7 +104,7 @@ struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode(), mode);
+	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 	init_dirent(inode, dir, dentry);
