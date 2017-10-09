@@ -193,7 +193,7 @@ off_t       do_file_lseek(struct file *file, off_t offset, int whence);
 int         do_file_close(struct file *file);
 
 /*
- * Helper functions
+ * Filesystem helper functions
  */
 
 struct inode *creat_file(struct inode *dir, const char *filename);
@@ -201,6 +201,11 @@ struct inode *make_dir(struct inode *dir, const char *filename);
 struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
 		dev_t dev);
 
+/*
+ * Inode helper functions
+ */
+
 void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev);
+ino_t alloc_inode(void);
 
 #endif /* !_KERNEL_FS_H */
