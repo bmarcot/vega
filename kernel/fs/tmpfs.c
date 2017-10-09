@@ -249,16 +249,6 @@ struct dentry *root_dentry(void)
 	return &dentry;
 }
 
-struct inode *init_tmpfs_inode(struct inode *inode)
-{
-	static ino_t ino = 11000;
-
-	inode->i_ino = ino++;
-	inode->i_op = &tmpfs_iops;
-
-	return inode;
-}
-
 /*
  * Filesystem helper functions
  */
