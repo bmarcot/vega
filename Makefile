@@ -21,6 +21,7 @@ CFLAGS += \
 	-DCONFIG_KERNEL_STACK_CHECKING		\
 	-DCONFIG_THREAD_INFO_IN_TASK		\
 	-Wno-main				\
+	-Wno-unused-parameter			\
 	-fdiagnostics-color			\
 	-ffunction-sections -fdata-sections -Os \
 	-I.					\
