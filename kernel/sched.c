@@ -20,10 +20,12 @@
 
 #include <uapi/kernel/sched.h>
 
+#define RUNQUEUE_MAX 32
+
 extern struct task_struct *idle_task;
 
 static unsigned long pri_bitmap;
-static struct list_head pri_runq[32];
+static struct list_head pri_runq[RUNQUEUE_MAX];
 
 /* pick up the highest-prio task */
 static struct task_struct *pick_next_task(void)
@@ -34,10 +36,7 @@ static struct task_struct *pick_next_task(void)
 	if (max_pri == 32)
 		return idle_task;
 
-	struct task_struct *next =
-		list_first_entry(&pri_runq[max_pri], struct task_struct, ti_q);
-
-	return next;
+	return list_first_entry(&pri_runq[max_pri], struct task_struct, ti_q);
 }
 
 int sched_enqueue(struct task_struct *task)
@@ -102,7 +101,7 @@ static __attribute__((noreturn)) int do_idle(__unused void *arg)
 int sched_init(void)
 {
 	/* initialize the runqueues */
-	for (int i = PRI_MAX; i <= PRI_MIN; i++)
+	for (int i = 0; i <= RUNQUEUE_MAX; i++)
 		INIT_LIST_HEAD(&pri_runq[i]);
 
 	/* idle_task is not added to the runqueue */
