@@ -35,6 +35,7 @@ extern char __heap_end__;
 extern char __heap_size__;
 
 int mtdchar_init(void);
+int idle_init(void);
 void __printk_init(void);
 int minishell(void *options);
 void memdev_init(void);
@@ -99,6 +100,7 @@ struct thread_info *start_kernel(void)
 	kmem_cache_init();
 
 	sched_init();
+	idle_init();
 
 	/* The main_thread is the user's entry-point to the system.  It is not
 	 * added to the runqueue because it has been implicitly "elected" when

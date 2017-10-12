@@ -4,9 +4,8 @@
  * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#include <sys/cdefs.h>
-
 #include <kernel/bitops.h>
+#include <kernel/idle.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/mm/page.h>
@@ -20,14 +19,12 @@
 
 #include <uapi/kernel/sched.h>
 
-#define RUNQUEUE_MAX 32
+#define RUNQUEUE_MAX	32
 
-extern struct task_struct *idle_task;
+static unsigned long	pri_bitmap;
+static struct list_head	pri_runq[RUNQUEUE_MAX];
 
-static unsigned long pri_bitmap;
-static struct list_head pri_runq[RUNQUEUE_MAX];
-
-/* pick up the highest-prio task */
+/* pick up the highest priority task */
 static struct task_struct *pick_next_task(void)
 {
 	int max_pri = find_first_bit(&pri_bitmap, 32);
@@ -68,13 +65,13 @@ int sched_dequeue(struct task_struct *task)
 int schedule(void)
 {
 	struct task_struct *next = pick_next_task();
+	struct task_struct *prev = current;
+
 	if (next != idle_task) {
 		list_del(&next->ti_q);
 		if (list_empty(&pri_runq[next->prio]))
 			bitmap_clear_bit(&pri_bitmap, next->prio);
 	}
-
-	struct task_struct *prev = get_current();
 
 	switch_to(prev, next, prev);
 
@@ -87,30 +84,11 @@ int schedule(void)
 	return 0;
 }
 
-static unsigned int idle_stack[32];
-struct task_struct *idle_task;
-
-void __do_idle(void);
-
-static __attribute__((noreturn)) int do_idle(__unused void *arg)
-{
-	for (;;)
-		__do_idle();
-}
-
 int sched_init(void)
 {
 	/* initialize the runqueues */
 	for (int i = 0; i <= RUNQUEUE_MAX; i++)
 		INIT_LIST_HEAD(&pri_runq[i]);
-
-	/* idle_task is not added to the runqueue */
-	idle_task = clone_task(do_idle, &idle_stack[32], 0, NULL);
-	if (idle_task == NULL) {
-		pr_err("Could not create the idle task");
-		return -1;
-	}
-	pr_info("Created idle_thread at <%p> with pid=%d", idle_task, idle_task->pid);
 
 	return 0;
 }
