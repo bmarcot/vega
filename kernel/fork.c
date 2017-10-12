@@ -5,6 +5,7 @@
  */
 
 #include <kernel/mm/page.h>
+#include <kernel/resource.h>
 #include <kernel/sched.h>
 #include <kernel/stddef.h>
 #include <kernel/syscalls.h>
@@ -14,14 +15,26 @@
 
 SYSCALL_DEFINE(fork, void)
 {
-	char *child_stack = alloc_pages(size_to_page_order(512));
+	struct task_struct *child;
+	char *child_stack;
+	struct rlimit stacklim;
+	unsigned int stackorder;
+
+	/* get process stack size */
+	do_getrlimit(RLIMIT_STACK, &stacklim);
+	stackorder = size_to_page_order(stacklim.rlim_cur);
+
+	/* allocate process stack */
+	child_stack = alloc_pages(stackorder);
 	if (!child_stack)
 		return -1;
 
-	void *fn = (void *)current->thread_info.user.ctx->ret_addr;
-	struct task_struct *child = clone_task(fn, child_stack + 504, 0, NULL);
-	if (child == NULL) {
-		free_pages((unsigned long)child_stack, size_to_page_order(512));
+	/* Clone the current task, entry of the new task points to the return
+	 * instruction of the syscall. */
+	child = clone_task((void *)current->thread_info.user.ctx->ret_addr,
+			child_stack + 504, 0, NULL);
+	if (!child) {
+		free_pages((unsigned long)child_stack, stackorder);
 		return -1;
 	}
 

@@ -4,26 +4,30 @@
  * Copyright (c) 2016-2017 Baruch Marcot
  */
 
+#include <kernel/resource.h>
 #include <kernel/sched.h>
 #include <kernel/syscalls.h>
 #include <kernel/types.h>
 
 #include <asm/current.h>
 
-#include <uapi/kernel/resource.h>
-
 static struct rlimit rlimits[] = {
-	{ .rlim_cur = 1024, .rlim_max = 1024 }  /* RLIMIT_STACK */
+	[RLIMIT_STACK] = { .rlim_cur = 512, .rlim_max = 1024 },
 };
 
-SYSCALL_DEFINE(getrlimit,
-	int		resource,
-	struct rlimit	*rlim)
+int do_getrlimit(int resource, struct rlimit *rlim)
 {
 	rlim->rlim_cur = rlimits[resource].rlim_cur;
 	rlim->rlim_max = rlimits[resource].rlim_max;
 
 	return 0;
+}
+
+SYSCALL_DEFINE(getrlimit,
+	int		resource,
+	struct rlimit	*rlim)
+{
+	return do_getrlimit(resource, rlim);
 }
 
 SYSCALL_DEFINE(setrlimit,
