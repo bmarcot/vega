@@ -25,9 +25,9 @@ int execve(const char *filename, char *const argv[], char *const envp[])
 			SYS_EXECVE);
 }
 
-pid_t fork(void)
+pid_t vfork(void)
 {
-	return do_syscall0(SYS_FORK);
+	return do_syscall0(SYS_VFORK);
 }
 
 void SYS_exit(int status)

@@ -8,7 +8,7 @@ xs = [
 
     # <unistd.h>
     'execve',
-    'fork',
+    'vfork',
 
     # <signal.h>
     'sigaction',

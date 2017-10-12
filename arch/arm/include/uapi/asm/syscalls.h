@@ -9,7 +9,7 @@
 #define SYS_TIMER_GETTIME 2
 #define SYS_NANOSLEEP 3
 #define SYS_EXECVE 4
-#define SYS_FORK 5
+#define SYS_VFORK 5
 #define SYS_SIGACTION 6
 #define SYS_KILL 7
 #define SYS_SIGQUEUE 8

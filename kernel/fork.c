@@ -13,7 +13,7 @@
 #include <asm/current.h>
 #include <asm/thread_info.h>
 
-SYSCALL_DEFINE(fork, void)
+SYSCALL_DEFINE(vfork, void)
 {
 	struct task_struct *child;
 	char *child_stack;
