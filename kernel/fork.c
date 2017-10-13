@@ -51,7 +51,7 @@ SYSCALL_DEFINE(vfork, void)
 	child->parent = current;
 	sched_enqueue(child);
 
-	return child->pid;
+	return child->tgid;
 }
 
 #define THREAD_SIZE 512
@@ -84,5 +84,5 @@ SYSCALL_DEFINE(clone,
 		return -1;
 	sched_enqueue(tsk);
 
-	return tsk->pid;
+	return tsk->tid;
 }

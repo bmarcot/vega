@@ -47,7 +47,7 @@ SYSCALL_DEFINE(getpriority,
 	if (which != PRIO_PROCESS)
 		return -1;
 
-	if (who == current->pid) {
+	if (who == current->tgid) {
 		return current->prio;
 	} else {
 		// find task by pid
@@ -64,7 +64,7 @@ SYSCALL_DEFINE(setpriority,
 	if (which != PRIO_PROCESS)
 		return -1;
 
-	if (who == current->pid) {
+	if (who == current->tgid) {
 		current->prio = prio;
 		return 0;
 	} else {

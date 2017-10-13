@@ -26,7 +26,7 @@ int idle_init(void)
 		pr_err("Could not create the idle task");
 		return -1;
 	}
-	pr_info("Created idle_thread at <%p> with pid=%d", idle_task, idle_task->pid);
+	pr_info("Created idle_thread at <%p> with pid=%d", idle_task, idle_task->tgid);
 
 	return 0;
 }

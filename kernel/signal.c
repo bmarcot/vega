@@ -88,7 +88,7 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 		__USER_STACK_ALLOCA(siginfo, 4);
 		siginfo->si_signo = sig;
 		siginfo->si_value = value;
-		siginfo->si_pid = current->pid;
+		siginfo->si_pid = current->tgid;
 	}
 
 	__USER_STACK_ALLOCA(sigctx, 8);

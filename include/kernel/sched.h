@@ -44,7 +44,10 @@ struct task_struct {
 	int                flags;
 	int                exit_code;
 	int                prio;
-	int                pid;
+
+	pid_t		tid;	/* thread id */
+	pid_t		tgid;	/* thread-group (process) id */
+
 	int                sig;
 	struct list_head   list;    /* global list of tasks */
 	struct task_struct *parent;

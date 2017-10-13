@@ -11,5 +11,5 @@
 
 SYSCALL_DEFINE(getpid, void)
 {
-	return current->pid;
+	return current->tgid;
 }
