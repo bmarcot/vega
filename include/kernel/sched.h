@@ -11,6 +11,8 @@
 
 #include <asm/thread_info.h>
 
+#include <uapi/kernel/sched.h>
+
 /* 0 <= PRI_MAX <= PRI_MIN */
 #define PRI_MAX    0
 #define PRI_MIN    31
@@ -68,7 +70,8 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 #endif
 }
 
-int init_task(struct task_struct *task);
+int init_task(struct task_struct *task, int flags);
+int release_task(struct task_struct *task);
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);
 

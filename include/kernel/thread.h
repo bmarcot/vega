@@ -24,4 +24,7 @@ struct thread_info;
 	({ (struct thread_info *)align((unsigned long)addr,	\
 					INTR_STACK_SIZE); })
 
+#define THREAD_GROUP_MAX	32
+#define THREAD_MAX		256
+
 #endif /* !_KERNEL_THREAD_H */

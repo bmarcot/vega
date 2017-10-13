@@ -14,6 +14,9 @@ SYSCALL_DEFINE(exit, int status)
 	/* current task becomes a zombie */
 	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
+
+	release_task(current);
+
 	schedule();
 
 	/*

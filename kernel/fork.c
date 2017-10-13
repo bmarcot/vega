@@ -64,8 +64,7 @@ struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 	tsk = alloc_pages(size_to_page_order(THREAD_SIZE));
 	if (!tsk)
 		return NULL;
-	init_task(tsk);
-	tsk->flags = flags;
+	init_task(tsk, flags);
 	arch_thread_setup(tsk, fn, arg, child_stack);
 
 	return tsk;
