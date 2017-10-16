@@ -40,6 +40,7 @@ xs = [
     'sigreturn',
     'nanosleep',
     'clock_gettime',
+    'exit_group',
 ]
 
 import datetime

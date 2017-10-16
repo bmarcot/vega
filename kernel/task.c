@@ -12,7 +12,7 @@
 
 #include <asm/current.h>
 
-static struct list_head tasks;
+struct list_head tasks;
 
 static unsigned long tgid_map[THREAD_GROUP_MAX / BITS_PER_LONG];
 static unsigned long tid_map[THREAD_MAX / BITS_PER_LONG];
