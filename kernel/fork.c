@@ -37,17 +37,7 @@ SYSCALL_DEFINE(vfork, void)
 		free_pages((unsigned long)child_stack, stackorder);
 		return -1;
 	}
-
-	child->thread_info.user.ctx->r4 = current->thread_info.user.ctx->r4;
-	child->thread_info.user.ctx->r5 = current->thread_info.user.ctx->r5;
-	child->thread_info.user.ctx->r6 = current->thread_info.user.ctx->r6;
-	child->thread_info.user.ctx->r7 = current->thread_info.user.ctx->r7;
-	child->thread_info.user.ctx->r8 = current->thread_info.user.ctx->r8;
-	child->thread_info.user.ctx->r9 = current->thread_info.user.ctx->r9;
-	child->thread_info.user.ctx->r10 = current->thread_info.user.ctx->r10;
-	child->thread_info.user.ctx->r11 = current->thread_info.user.ctx->r11;
 	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
-
 	child->parent = current;
 	sched_enqueue(child);
 
