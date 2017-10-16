@@ -25,19 +25,9 @@ int execve(const char *filename, char *const argv[], char *const envp[])
 			SYS_EXECVE);
 }
 
-pid_t vfork(void)
-{
-	return do_syscall0(SYS_VFORK);
-}
-
 void SYS_exit(int status)
 {
 	do_syscall1((void *)status, SYS_EXIT);
-}
-
-void SYS_exit_group(int status)
-{
-	do_syscall1((void *)status, SYS_EXIT_GROUP);
 }
 
 int sleep(int secs)
