@@ -17,8 +17,6 @@
 #include <asm/current.h>
 #include <asm/switch_to.h>
 
-#include <uapi/kernel/sched.h>
-
 #define RUNQUEUE_MAX	32
 
 static unsigned long	pri_bitmap;
@@ -75,7 +73,10 @@ int schedule(void)
 
 	switch_to(prev, next, prev);
 
-	if ((prev->state == EXIT_ZOMBIE) && (prev->flags == CLONE_THREAD)) {
+	//FIXME: We release prev's memory (mm_release()) if prev is a zombie
+	// task; this is wrong. We should mm_release() after user called the
+	// waitpid() syscall.
+	if (prev->state == EXIT_ZOMBIE) {
 		list_del(&prev->list);
 		free_pages((unsigned long)prev->stack,
 			size_to_page_order(THREAD_SIZE));

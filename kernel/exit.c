@@ -16,8 +16,7 @@ SYSCALL_DEFINE(exit, int status)
 	/* current task becomes a zombie */
 	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
-
-	release_task(current);
+	release_task_pids(current);
 
 	schedule();
 
@@ -40,23 +39,26 @@ SYSCALL_DEFINE(exit_group, int status)
 {
 	struct task_struct *task, *t;
 
-	/* exit all threads in the calling process's thread group */
-	//FIXME: Add a field to task_struct: struct list_head thread_group;
-	list_for_each_entry_safe(task, t, &tasks, list) {
-		if ((task != current) && (task->tgid == current->tgid)) {
-			if (task->state == TASK_RUNNING)
-				sched_dequeue(task);
-			list_del(&task->list);
-			free_pages((unsigned long)task->stack,
-				size_to_page_order(THREAD_SIZE));
-			release_task(task);
-		}
-	};
-
 	/* current task becomes a zombie */
 	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
-	release_task(current);
+
+	/* exit all threads in the calling process's thread group */
+	//FIXME: Add a field to task_struct: struct list_head thread_group;
+	list_for_each_entry_safe(task, t, &tasks, list) {
+		if (task->tgid == current->tgid) {
+			release_task_pids(task);
+			if (task->state == TASK_RUNNING)
+				sched_dequeue(task);
+			if (task != current) {
+				list_del(&task->list);
+				free_pages((unsigned long)task->stack,
+					size_to_page_order(THREAD_SIZE));
+			}
+			if (current->flags & CLONE_VFORK)
+				sched_enqueue(current->parent);
+		}
+	}
 
 	schedule();
 

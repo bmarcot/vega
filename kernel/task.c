@@ -12,7 +12,7 @@
 
 #include <asm/current.h>
 
-struct list_head tasks;
+LIST_HEAD(tasks);
 
 static unsigned long tgid_map[THREAD_GROUP_MAX / BITS_PER_LONG];
 static unsigned long tid_map[THREAD_MAX / BITS_PER_LONG];
@@ -74,7 +74,7 @@ int init_task(struct task_struct *task, int flags)
 	return 0;
 }
 
-int release_task(struct task_struct *task)
+int release_task_pids(struct task_struct *task)
 {
 	if (task->flags & CLONE_THREAD)
 		put_tid(task->tid);

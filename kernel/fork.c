@@ -32,14 +32,17 @@ SYSCALL_DEFINE(vfork, void)
 	/* Clone the current task, entry of the new task points to the return
 	 * instruction of the syscall. */
 	child = clone_task((void *)current->thread_info.user.ctx->ret_addr,
-			child_stack + 504, 0, NULL);
+			child_stack + 504, CLONE_VFORK, NULL);
 	if (!child) {
 		free_pages((unsigned long)child_stack, stackorder);
 		return -1;
 	}
 	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
 	child->parent = current;
+
+	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
+	schedule();
 
 	return child->tgid;
 }
