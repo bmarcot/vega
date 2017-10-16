@@ -24,12 +24,13 @@ int sched_enqueue(struct task_struct *task);
 int sched_dequeue(struct task_struct *task);
 int schedule(void);
 
-#define TASK_RUNNING         0
-#define TASK_INTERRUPTIBLE   0x1
-#define TASK_UNINTERRUPTIBLE 0x2
-#define TASK_NEW             0x4
-#define EXIT_ZOMBIE          0x8
-#define EXIT_DEAD            0x16
+#define TASK_RUNNING		0
+#define TASK_INTERRUPTIBLE	1
+#define TASK_UNINTERRUPTIBLE	2
+#define TASK_STOPPED		8
+#define EXIT_ZOMBIE		16
+#define EXIT_DEAD		32
+#define TASK_NEW		2048
 
 #define FILE_MAX 8
 
@@ -60,6 +61,11 @@ struct task_struct {
 	unsigned long    filemap;
 	struct file      *filetable[FILE_MAX];
 };
+
+#define set_current_state(state_value)			\
+	do {						\
+		current->state = (state_value);		\
+	} while (0)
 
 static inline struct thread_info *task_thread_info(struct task_struct *task)
 {
