@@ -65,6 +65,7 @@ int init_task(struct task_struct *task, int flags)
 	} else {
 		task->parent = NULL;
 		get_tgid(&task->tgid);
+		task->tid = task->tgid;
 	}
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
