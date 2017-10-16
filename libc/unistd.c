@@ -35,6 +35,11 @@ void SYS_exit(int status)
 	do_syscall1((void *)status, SYS_EXIT);
 }
 
+void SYS_exit_group(int status)
+{
+	do_syscall1((void *)status, SYS_EXIT_GROUP);
+}
+
 int sleep(int secs)
 {
 	const struct timespec ts = {
