@@ -37,7 +37,6 @@ SYSCALL_DEFINE(vfork, void)
 		free_pages((unsigned long)child_stack, stackorder);
 		return -1;
 	}
-	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
 	child->parent = current;
 
 	set_current_state(TASK_STOPPED);
