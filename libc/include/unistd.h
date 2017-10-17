@@ -12,4 +12,3 @@ pid_t getpid(void);
 int stat(const char *pathname, struct stat *buf);
 int sleep(int secs);
 int msleep(int msecs);
-int nanosleep(const struct timespec *req, struct timespec *rem);
