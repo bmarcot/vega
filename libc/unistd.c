@@ -9,6 +9,8 @@
 
 #include <uapi/kernel/time.h>
 
+#include "syscall-wrappers.h"
+
 int nanosleep(const struct timespec *req, struct timespec *rem)
 {
 	return do_syscall2((void *)req, (void *)rem, SYS_NANOSLEEP);
@@ -43,4 +45,9 @@ int msleep(int msecs)
 	};
 
 	return nanosleep(&ts, NULL);
+}
+
+void _exit(int status)
+{
+	SYS_exit_group(status);
 }

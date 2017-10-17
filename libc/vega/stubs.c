@@ -8,6 +8,7 @@
 #include <asm/syscalls.h>
 
 #include "syscalls.h"
+#include "syscall-wrappers.h"
 
 #define HANGS_ON() \
 	({ printk("error: Newlib needs %s", __func__); for (;;); })
@@ -47,10 +48,5 @@ void _fini(void)
 
 int _getpid(void)
 {
-	return do_syscall0(SYS_GETPID);
-}
-
-void sigreturn(void)
-{
-	do_syscall0(SYS_SIGRETURN);
+	return SYS_getpid();
 }

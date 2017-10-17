@@ -7,7 +7,12 @@
 #include <asm/syscalls.h>
 #include "vega/syscalls.h"
 
-void sigreturn(void);
+#include "syscall-wrappers.h"
+
+void sigreturn(void)
+{
+	SYS_sigreturn();
+}
 
 int sigaction(int sig, const struct sigaction *restrict act,
 	struct sigaction *restrict oact)
@@ -23,7 +28,7 @@ int sigaction(int sig, const struct sigaction *restrict act,
 
 int _kill(pid_t pid, int sig)
 {
-	return do_syscall2((void *)pid, (void *)sig, SYS_KILL);
+	return SYS_kill(pid, sig);
 }
 
 int sigqueue(pid_t pid, int sig, const union sigval value)

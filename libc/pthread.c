@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <sched.h>
 #include <sys/mman.h>
 #include <sys/pthread_types.h>
 
@@ -10,9 +11,7 @@
 
 #include <kernel/errno-base.h> //XXX: no kernel here, move to uapi, or to lib errno
 
-//#include <sched.h> // the libc sched.h, with clone
-int clone(int (*fn)(void *), void *child_stack,
-	int flags, void *arg);
+#include "syscall-wrappers.h"
 
 #define __STACK_ALLOCA(sp, off, ptr) ({			  \
 	unsigned long __sp = (unsigned long)(sp) + (off); \
@@ -127,21 +126,12 @@ static void release_pthread(struct pthread *pthread)
 	list_del(&pthread->list);
 }
 
-// syscall wrapper
-
-#include <kernel/syscalls.h>
-#include "vega/syscalls.h"
-
-int SYS_futex(int *uaddr, int futex_op, int val)
-{
-	return do_syscall3((void *)uaddr, (void *)futex_op, (void *)val,
-			SYS_FUTEX);
-}
-
-// !syscall wrapper
-
 #include <uapi/kernel/futex.h>
-#include "syscall-wrappers.h"
+
+static inline int futex(int *uaddr, int futex_op, int val)
+{
+	return SYS_futex(uaddr, futex_op, val);
+}
 
 void __pthread_exit(void *retval, struct pthread *pthread)
 {
@@ -156,7 +146,7 @@ void __pthread_exit(void *retval, struct pthread *pthread)
 		pthread->flags |= PF_EXITING;
 		pthread->retval = retval;
 		if (pthread->joiner)
-			SYS_futex((int *)&pthread->lock, FUTEX_WAKE, 1);
+			futex((int *)&pthread->lock, FUTEX_WAKE, 1);
 	}
 	_exit_thread((int)retval);
 	/* if (list_is_singular(&threads)) */
@@ -184,7 +174,7 @@ int pthread_join(pthread_t thread, void **retval)
 
 	if (!IS_EXITING(other)) {
 		other->joiner = __pthread_self();
-		SYS_futex((int *)&other->lock, FUTEX_WAIT, 0);
+		futex((int *)&other->lock, FUTEX_WAIT, 0);
 	}
 	*retval = other->retval;
 	release_pthread(other);
@@ -201,21 +191,10 @@ int pthread_detach(pthread_t thread)
 	return 0;
 }
 
-// yield() syscall wrapper
-
-int SYS_sched_yield(void)
+int pthread_yield(void)
 {
-	return do_syscall0(SYS_SCHED_YIELD);
+	return sched_yield();
 }
-
-// !syscall wrapper
-
-int sched_yield(void)
-{
-	return SYS_sched_yield();
-}
-
-int pthread_yield(void) __attribute__ ((alias ("sched_yield")));
 
 int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
 {
@@ -265,7 +244,7 @@ int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 	int futex_val = cond->__futex;
 	cond->__nwaiters++;
 	__pthread_mutex_unlock(&cond->__lock);
-	SYS_futex(&cond->__futex, FUTEX_WAIT, futex_val);
+	futex(&cond->__futex, FUTEX_WAIT, futex_val);
 
 	return pthread_mutex_lock(mutex);
 }
@@ -276,7 +255,7 @@ int pthread_cond_signal(pthread_cond_t *cond)
 	if (cond->__nwaiters) {
 		cond->__nwaiters--;
 		cond->__futex++;
-		SYS_futex(&cond->__futex, FUTEX_WAKE, 1);
+		futex(&cond->__futex, FUTEX_WAKE, 1);
 	}
 	__pthread_mutex_unlock(&cond->__lock);
 
