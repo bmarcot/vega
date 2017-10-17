@@ -25,11 +25,6 @@ int execve(const char *filename, char *const argv[], char *const envp[])
 			SYS_EXECVE);
 }
 
-void SYS_exit(int status)
-{
-	do_syscall1((void *)status, SYS_EXIT);
-}
-
 int sleep(int secs)
 {
 	const struct timespec ts = {

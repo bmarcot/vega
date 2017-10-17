@@ -1,5 +1,4 @@
 #include <pthread.h>
-#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/pthread_types.h>
 
@@ -142,8 +141,7 @@ int SYS_futex(int *uaddr, int futex_op, int val)
 // !syscall wrapper
 
 #include <uapi/kernel/futex.h>
-
-void SYS_exit(int status);
+#include "syscall-wrappers.h"
 
 void __pthread_exit(void *retval, struct pthread *pthread)
 {
@@ -160,7 +158,7 @@ void __pthread_exit(void *retval, struct pthread *pthread)
 		if (pthread->joiner)
 			SYS_futex((int *)&pthread->lock, FUTEX_WAKE, 1);
 	}
-	SYS_exit((int)retval);
+	_exit_thread((int)retval);
 	/* if (list_is_singular(&threads)) */
 	/* 	do_syscall1((void *)retval, SYS_EXIT); */
 	/* else */

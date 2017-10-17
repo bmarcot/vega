@@ -33,11 +33,6 @@ void *_sbrk(__unused int incr)
 	return NULL;
 }
 
-void _exit(__unused int status)
-{
-	HANGS_ON();
-}
-
 clock_t _times()
 {
 	HANGS_ON();
