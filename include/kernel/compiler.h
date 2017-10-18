@@ -1,7 +1,7 @@
 /*
  * include/kernel/compiler.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
 #ifndef _KERNEL_COMPILER_H
@@ -15,5 +15,8 @@
 #ifndef offsetof
 #  define offsetof(type, member) __builtin_offsetof(type, member)
 #endif
+
+#define likely(x)	__builtin_expect(!!(x), 1)
+#define unlikely(x)	__builtin_expect(!!(x), 0)
 
 #endif /* !_KERNEL_COMPILER_H */
