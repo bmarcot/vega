@@ -59,10 +59,12 @@ int init_task(struct task_struct *task, int flags)
 	task->filemap = 0;
 	task->flags = flags;
 	if (flags & CLONE_THREAD) {
-		task->parent = current;
+		task->exit_signal = -1;
+		task->parent = current; // current->parent
 		task->tgid = current->tgid;
 		get_tid(task->tgid, &task->tid);
 	} else {
+		task->exit_signal = 0;
 		task->parent = NULL;
 		get_tgid(&task->tgid);
 		task->tid = task->tgid;

@@ -13,10 +13,14 @@
 
 SYSCALL_DEFINE(exit, int status)
 {
-	/* current task becomes a zombie */
-	current->state = EXIT_ZOMBIE;
-	current->exit_code = status;
 	release_task_pids(current);
+	current->exit_code = status;
+	if (current->exit_signal != -1) {
+		current->state = EXIT_ZOMBIE;
+		/* exit_notify(current); */
+	} else {
+		current->state = TASK_DEAD;
+	}
 
 	schedule();
 
@@ -39,9 +43,13 @@ SYSCALL_DEFINE(exit_group, int status)
 {
 	struct task_struct *task, *t;
 
-	/* current task becomes a zombie */
-	current->state = EXIT_ZOMBIE;
 	current->exit_code = status;
+	if (current->exit_signal != -1) {
+		current->state = EXIT_ZOMBIE;
+		/* exit_notify(current); */
+	} else {
+		current->state = TASK_DEAD;
+	}
 
 	/* exit all threads in the calling process's thread group */
 	//FIXME: Add a field to task_struct: struct list_head thread_group;
@@ -51,6 +59,7 @@ SYSCALL_DEFINE(exit_group, int status)
 			if (task->state == TASK_RUNNING)
 				sched_dequeue(task);
 			if (task != current) {
+				/* put_task_struct(prev); */
 				list_del(&task->list);
 				free_pages((unsigned long)task->stack,
 					size_to_page_order(THREAD_SIZE));

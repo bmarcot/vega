@@ -76,7 +76,8 @@ int schedule(void)
 	//FIXME: We release prev's memory (mm_release()) if prev is a zombie
 	// task; this is wrong. We should mm_release() after user called the
 	// waitpid() syscall.
-	if (prev->state == EXIT_ZOMBIE) {
+	if (unlikely(prev->state == TASK_DEAD)) {
+		/* put_task_struct(prev); */
 		list_del(&prev->list);
 		free_pages((unsigned long)prev->stack,
 			size_to_page_order(THREAD_SIZE));

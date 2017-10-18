@@ -28,8 +28,9 @@ int schedule(void);
 #define TASK_INTERRUPTIBLE	1
 #define TASK_UNINTERRUPTIBLE	2
 #define TASK_STOPPED		8
-#define EXIT_ZOMBIE		16
-#define EXIT_DEAD		32
+#define EXIT_DEAD		16
+#define EXIT_ZOMBIE		32
+#define TASK_DEAD		64
 #define TASK_NEW		2048
 
 #define FILE_MAX 8
@@ -45,11 +46,12 @@ struct task_struct {
 	void               *stack;
 	int                state;
 	int                flags;
-	int                exit_code;
 	int                prio;
 
-	pid_t		tid;	/* thread id */
-	pid_t		tgid;	/* thread-group (process) id */
+	int		exit_code;
+	int		exit_signal;
+	pid_t		tid;		/* thread id */
+	pid_t		tgid;		/* thread-group (process) id */
 
 	int                sig;
 	struct list_head   list;    /* global list of tasks */
