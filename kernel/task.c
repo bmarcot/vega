@@ -6,13 +6,14 @@
 
 #include <kernel/bitops.h>
 #include <kernel/list.h>
+#include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/stddef.h>
 #include <kernel/thread.h>
 
 #include <asm/current.h>
 
-LIST_HEAD(tasks);
+static LIST_HEAD(tasks);
 
 static unsigned long tgid_map[THREAD_GROUP_MAX / BITS_PER_LONG];
 static unsigned long tid_map[THREAD_MAX / BITS_PER_LONG];
@@ -84,4 +85,16 @@ int release_task_pids(struct task_struct *task)
 		put_tgid(task->tgid);
 
 	return 0;
+}
+
+void put_task_struct(struct task_struct *tsk)
+{
+	list_del(&tsk->list);
+	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
+}
+
+void release_task(struct task_struct *tsk)
+{
+	release_task_pids(tsk);
+	put_task_struct(tsk);
 }

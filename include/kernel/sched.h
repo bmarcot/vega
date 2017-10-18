@@ -80,10 +80,17 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 
 int init_task(struct task_struct *task, int flags);
 int release_task_pids(struct task_struct *task);
+void put_task_struct(struct task_struct *tsk);
+void release_task(struct task_struct *tsk);
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);
 
 int arch_thread_setup(struct task_struct *task, void *start_routine,
 		void *arg, void *stack_start);
+
+static inline int thread_group_leader(struct task_struct *tsk)
+{
+	return tsk->exit_signal >= 0;
+}
 
 #endif /* !_KERNEL_SCHED_H */

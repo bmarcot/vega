@@ -4,72 +4,61 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
-#include <kernel/list.h>
-#include <kernel/mm/page.h>
+#include <kernel/kernel.h>
 #include <kernel/sched.h>
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
 
-SYSCALL_DEFINE(exit, int status)
+static void exit_notify(struct task_struct *tsk)
 {
-	release_task_pids(current);
-	current->exit_code = status;
-	if (current->exit_signal != -1) {
-		current->state = EXIT_ZOMBIE;
-		/* exit_notify(current); */
+	int autoreap;
+
+	if (thread_group_leader(tsk)) {
+		//autoreap = do_notify_parent(tsk, tsk->exit_signal); // send_signal...
 	} else {
-		current->state = TASK_DEAD;
+		autoreap = 1;
 	}
 
+	tsk->state = autoreap ? EXIT_DEAD : EXIT_ZOMBIE;
+
+	/* If the process is dead, release it - nobody will wait for it */
+	if (autoreap)
+		release_task(tsk);
+}
+
+static void do_exit(int status)
+{
+	struct task_struct *tsk = current;
+
+	if (tsk->flags & CLONE_VFORK)
+		sched_enqueue(tsk->parent); // send signal? do_notify_parent()...
+
+	// mm_release();
+	tsk->exit_code = status;
+	exit_notify(tsk);
+	tsk->state = TASK_DEAD;
+	release_task_pids(tsk);
+
 	schedule();
+}
 
-	/*
-	 * exit() does not return. Task's resources are kept, just in case the
-	 * parent thread needs to read child's stack, or the tasks's exit value.
-	 * Releasing child task's resources can be done by any other task.
-	 */
-
-	//XXX: We should send a kernel signal to task's parent, and the
-	// parent would release system resources (when? on its next scheduling?
-	// Not great if the parent is blocked forever...)
+SYSCALL_DEFINE(exit, int status)
+{
+	do_exit(status);
 
 	return 0; /* never reached */
 }
 
-extern struct list_head tasks;
-
 SYSCALL_DEFINE(exit_group, int status)
 {
-	struct task_struct *task, *t;
-
-	current->exit_code = status;
-	if (current->exit_signal != -1) {
-		current->state = EXIT_ZOMBIE;
-		/* exit_notify(current); */
-	} else {
-		current->state = TASK_DEAD;
+	if (!thread_group_leader(current)) {
+		pr_err("Unsupported for other threads than leader");
+		for (;;)
+			;
 	}
 
-	/* exit all threads in the calling process's thread group */
-	//FIXME: Add a field to task_struct: struct list_head thread_group;
-	list_for_each_entry_safe(task, t, &tasks, list) {
-		if (task->tgid == current->tgid) {
-			release_task_pids(task);
-			if (task->state == TASK_RUNNING)
-				sched_dequeue(task);
-			if (task != current) {
-				/* put_task_struct(prev); */
-				list_del(&task->list);
-				free_pages((unsigned long)task->stack,
-					size_to_page_order(THREAD_SIZE));
-			}
-			if (current->flags & CLONE_VFORK)
-				sched_enqueue(current->parent);
-		}
-	}
-
-	schedule();
+	do_exit(status);
 
 	return 0; /* never reached */
 }
