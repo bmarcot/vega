@@ -45,6 +45,16 @@ SYSCALL_DEFINE(vfork, void)
 	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
 	child->parent = current;
 
+	/*
+	 * vfork() allocates the process stack. This stack must be reclaimed
+	 * when the process exits. We store the process stack info in the task
+	 * struct; but that stack is just like any other segment of memory
+	 * belonging to the task, and should be released in the same way during
+	 * mm_release().
+	 */
+	child->user_stackptr = child_stack;
+	child->user_stackorder = stackorder;
+
 	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
 

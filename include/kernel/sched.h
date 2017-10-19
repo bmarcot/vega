@@ -53,6 +53,10 @@ struct task_struct {
 	pid_t		tid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
+	//FIXME: Will die...
+	void *user_stackptr;
+	int user_stackorder;
+
 	int                sig;
 	struct list_head   list;    /* global list of tasks */
 	struct task_struct *parent;

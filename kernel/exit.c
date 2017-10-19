@@ -5,6 +5,7 @@
  */
 
 #include <kernel/kernel.h>
+#include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/syscalls.h>
 
@@ -38,6 +39,9 @@ static void do_exit(int status)
 	// mm_release();
 	tsk->exit_code = status;
 	exit_notify(tsk);
+	//FIXME: This should happen in mm_release()
+	if (tsk->flags & CLONE_VFORK)
+		free_pages((unsigned long)tsk->user_stackptr, tsk->user_stackorder);
 	tsk->state = TASK_DEAD;
 
 	schedule();
