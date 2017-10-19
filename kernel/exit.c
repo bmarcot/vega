@@ -16,6 +16,7 @@ static void exit_notify(struct task_struct *tsk)
 
 	if (thread_group_leader(tsk)) {
 		//autoreap = do_notify_parent(tsk, tsk->exit_signal); // send_signal...
+		autoreap = 1;
 	} else {
 		autoreap = 1;
 	}
@@ -38,7 +39,6 @@ static void do_exit(int status)
 	tsk->exit_code = status;
 	exit_notify(tsk);
 	tsk->state = TASK_DEAD;
-	release_task_pids(tsk);
 
 	schedule();
 }

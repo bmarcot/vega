@@ -96,5 +96,4 @@ void put_task_struct(struct task_struct *tsk)
 void release_task(struct task_struct *tsk)
 {
 	release_task_pids(tsk);
-	put_task_struct(tsk);
 }
