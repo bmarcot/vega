@@ -50,3 +50,8 @@ int _getpid(void)
 {
 	return SYS_getpid();
 }
+
+int vfork(void)
+{
+	return SYS_vfork();
+}
