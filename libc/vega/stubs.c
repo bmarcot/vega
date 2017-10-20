@@ -51,7 +51,12 @@ int _getpid(void)
 	return SYS_getpid();
 }
 
-int vfork(void)
+pid_t vfork(void)
 {
-	return SYS_vfork();
+	return (pid_t)SYS_vfork();
+}
+
+pid_t waitpid(pid_t pid, int *status, int options)
+{
+	return (pid_t)SYS_waitpid(pid, status, options);
 }
