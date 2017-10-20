@@ -17,7 +17,7 @@ static void exit_notify(struct task_struct *tsk)
 
 	if (thread_group_leader(tsk)) {
 		//autoreap = do_notify_parent(tsk, tsk->exit_signal); // send_signal...
-		autoreap = 1;
+		autoreap = 0;
 	} else {
 		autoreap = 1;
 	}
@@ -42,7 +42,9 @@ static void do_exit(int status)
 	//FIXME: This should happen in mm_release()
 	if (tsk->flags & CLONE_VFORK)
 		free_pages((unsigned long)tsk->user_stackptr, tsk->user_stackorder);
-	tsk->state = TASK_DEAD;
+
+	if (tsk->state == EXIT_DEAD)
+		tsk->state = TASK_DEAD;
 
 	schedule();
 }
@@ -65,4 +67,22 @@ SYSCALL_DEFINE(exit_group, int status)
 	do_exit(status);
 
 	return 0; /* never reached */
+}
+
+SYSCALL_DEFINE(waitpid,
+	pid_t		pid,
+	int		*status,
+	int		options)
+{
+	struct task_struct *tsk;
+
+	tsk = get_task_by_pid(pid);
+	if (!tsk)
+		return -1;
+	if (status)
+		*status = tsk->exit_code; //FIXME: Check user pointer
+	release_task(tsk);
+	put_task_struct(tsk);
+
+	return pid;
 }
