@@ -41,6 +41,7 @@ xs = [
     'nanosleep',
     'clock_gettime',
     'exit_group',
+    'waitpid',
 ]
 
 import datetime
