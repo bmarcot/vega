@@ -97,3 +97,15 @@ void release_task(struct task_struct *tsk)
 {
 	release_task_pids(tsk);
 }
+
+struct task_struct *get_task_by_pid(pid_t pid)
+{
+	struct task_struct *tsk;
+
+	list_for_each_entry(tsk, &tasks, list) {
+		if (tsk->tid == pid)
+			return tsk;
+	}
+
+	return NULL;
+}

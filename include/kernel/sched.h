@@ -82,10 +82,14 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 #endif
 }
 
+/* task.c */
 int init_task(struct task_struct *task, int flags);
 int release_task_pids(struct task_struct *task);
 void put_task_struct(struct task_struct *tsk);
 void release_task(struct task_struct *tsk);
+struct task_struct *get_task_by_pid(pid_t pid);
+
+/* fork.c */
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);
 
