@@ -92,5 +92,5 @@ SYSCALL_DEFINE(clone,
 		return -1;
 	sched_enqueue(tsk);
 
-	return tsk->tid;
+	return tsk->pid;
 }

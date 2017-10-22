@@ -63,12 +63,12 @@ int init_task(struct task_struct *task, int flags)
 		task->exit_signal = -1;
 		task->parent = current; // current->parent
 		task->tgid = current->tgid;
-		get_tid(task->tgid, &task->tid);
+		get_tid(task->tgid, &task->pid);
 	} else {
 		task->exit_signal = 0;
 		task->parent = NULL;
 		get_tgid(&task->tgid);
-		task->tid = task->tgid;
+		task->pid = task->tgid;
 	}
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
@@ -80,7 +80,7 @@ int init_task(struct task_struct *task, int flags)
 int release_task_pids(struct task_struct *task)
 {
 	if (task->flags & CLONE_THREAD)
-		put_tid(task->tid);
+		put_tid(task->pid);
 	else
 		put_tgid(task->tgid);
 
@@ -103,7 +103,7 @@ struct task_struct *get_task_by_pid(pid_t pid)
 	struct task_struct *tsk;
 
 	list_for_each_entry(tsk, &tasks, list) {
-		if (tsk->tid == pid)
+		if (tsk->pid == pid)
 			return tsk;
 	}
 

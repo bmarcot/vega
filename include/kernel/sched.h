@@ -50,7 +50,7 @@ struct task_struct {
 
 	int		exit_code;
 	int		exit_signal;
-	pid_t		tid;		/* thread id */
+	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
 	//FIXME: Will die...
