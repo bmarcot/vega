@@ -4,6 +4,10 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
+#include <string.h>
+
+#include <kernel/kernel.h>
+#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/resource.h>
 #include <kernel/sched.h>
@@ -13,57 +17,59 @@
 #include <asm/current.h>
 #include <asm/thread_info.h>
 
-#include <kernel/kernel.h>
+#define THREAD_SIZE 512
+
+static struct task_struct *copy_process(int flags, void *arg)
+{
+	struct task_struct *tsk;
+
+	tsk = alloc_pages(size_to_page_order(THREAD_SIZE));
+	if (!tsk)
+		return NULL;
+	init_task(tsk, flags);
+	init_thread(tsk);
+
+	return tsk;
+}
 
 SYSCALL_DEFINE(vfork, void)
 {
 	struct task_struct *child;
-	char *child_stack;
-	struct rlimit stacklim;
-	unsigned int stackorder;
+	//FIXME: Alloc saved context on stack; if stack too small, then use malloc
+	struct cpu_user_context *saved_ctx;
+	u32 saved_sp;
 
-	/* get process stack size */
-	do_getrlimit(RLIMIT_STACK, &stacklim);
-	stackorder = size_to_page_order(stacklim.rlim_cur);
-
-	/* allocate process stack */
-	child_stack = alloc_pages(stackorder);
-	if (!child_stack) {
-		pr_err("Cannot allocate child stack");
-		return -1;
-	}
-
-	/* Clone the current task, entry of the new task points to the return
-	 * instruction of the syscall. */
-	child = clone_task((void *)current->thread_info.user.ctx->ret_addr,
-			child_stack + 504, CLONE_VFORK, NULL);
+	child = copy_process(CLONE_VFORK, NULL);
 	if (!child) {
 		pr_err("Cannot create child process");
-		free_pages((unsigned long)child_stack, stackorder);
 		return -1;
 	}
-	child->thread_info.user.ctx->lr = current->thread_info.user.ctx->lr;
 	child->parent = current;
-
-	/*
-	 * vfork() allocates the process stack. This stack must be reclaimed
-	 * when the process exits. We store the process stack info in the task
-	 * struct; but that stack is just like any other segment of memory
-	 * belonging to the task, and should be released in the same way during
-	 * mm_release().
-	 */
-	child->user_stackptr = child_stack;
-	child->user_stackorder = stackorder;
-
 	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
 
+	/* save current process context */
+	saved_ctx = kmalloc(sizeof(*saved_ctx));
+	if (!saved_ctx) {
+		pr_err("Cannot save cpu context");
+		return -1;
+	}
+	memcpy(saved_ctx, current->thread_info.user.ctx, sizeof(*saved_ctx));
+	saved_sp = current->thread_info.user.psp;
+
+	/* child thread points to parent's process */
+	child->thread_info.user.psp = saved_sp;
+	child->thread_info.user.ctx->r0 = 0;
+
 	schedule();
+
+	/* restore current process context */
+	current->thread_info.user.psp = saved_sp;
+	memcpy(current->thread_info.user.ctx, saved_ctx, sizeof(*saved_ctx));
+	kfree(saved_ctx);
 
 	return child->tgid;
 }
-
-#define THREAD_SIZE 512
 
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg)

@@ -67,6 +67,18 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 	return 0;
 }
 
+int init_thread(struct task_struct *tsk)
+{
+	struct thread_info *thread = task_thread_info(tsk);
+
+	thread->kernel.msp = (u32)thread + THREAD_SIZE
+		- sizeof(struct cpu_kernel_context) - 8;
+	thread->kernel.ctx->lr = (u32)v7m_task_start_trampoline;
+	thread->priv = V7M_UNPRIVILEGED;
+
+	return 0;
+}
+
 void update_syscall_ret_val(u32 retval)
 {
 	struct thread_info *thread = current_thread_info();

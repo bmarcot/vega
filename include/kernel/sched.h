@@ -53,10 +53,6 @@ struct task_struct {
 	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
-	//FIXME: Will die...
-	void *user_stackptr;
-	int user_stackorder;
-
 	int                sig;
 	struct list_head   list;    /* global list of tasks */
 	struct task_struct *parent;
@@ -95,6 +91,7 @@ struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 
 int arch_thread_setup(struct task_struct *task, void *start_routine,
 		void *arg, void *stack_start);
+int init_thread(struct task_struct *tsk);
 
 static inline int thread_group_leader(struct task_struct *tsk)
 {
