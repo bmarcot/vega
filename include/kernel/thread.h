@@ -7,6 +7,8 @@
 #ifndef _KERNEL_THREAD_H
 #define _KERNEL_THREAD_H
 
+#include <asm/thread_info.h>
+
 #define THREAD_GROUP_MAX	32
 #define THREAD_MAX		256
 

@@ -10,14 +10,12 @@
 #include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/resource.h>
+#include <kernel/thread.h>
 #include <kernel/sched.h>
 #include <kernel/stddef.h>
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
-#include <asm/thread_info.h>
-
-#define THREAD_SIZE 512
 
 static struct task_struct *copy_process(int flags, void *arg)
 {

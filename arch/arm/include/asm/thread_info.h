@@ -10,6 +10,8 @@
 #include <kernel/log2.h>
 #include <kernel/types.h>
 
+#define THREAD_SIZE	512
+
 struct cpu_kernel_context {
 	u32 r4;  /* zero-filled */
 	u32 r5;
@@ -62,8 +64,6 @@ struct thread_info {
 	struct task_struct *task;
 #endif
 };
-
-#define THREAD_SIZE 512
 
 static inline struct thread_info *current_thread_info(void)
 {
