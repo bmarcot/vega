@@ -61,12 +61,12 @@ int init_task(struct task_struct *task, int flags)
 	task->flags = flags;
 	if (flags & CLONE_THREAD) {
 		task->exit_signal = -1;
-		task->parent = current; // current->parent
+		task->parent = current->parent;
 		task->tgid = current->tgid;
 		get_tid(task->tgid, &task->pid);
 	} else {
 		task->exit_signal = 0;
-		task->parent = NULL;
+		task->parent = current;
 		get_tgid(&task->tgid);
 		task->pid = task->tgid;
 	}

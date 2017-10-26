@@ -17,7 +17,7 @@
 
 #include <asm/current.h>
 
-static struct task_struct *copy_process(int flags, void *arg)
+static struct task_struct *copy_process(int flags)
 {
 	struct task_struct *tsk;
 
@@ -37,12 +37,11 @@ SYSCALL_DEFINE(vfork, void)
 	struct cpu_user_context *saved_ctx;
 	u32 saved_sp;
 
-	child = copy_process(CLONE_VFORK, NULL);
+	child = copy_process(CLONE_VFORK);
 	if (!child) {
 		pr_err("Cannot create child process");
 		return -1;
 	}
-	child->parent = current;
 	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
 
