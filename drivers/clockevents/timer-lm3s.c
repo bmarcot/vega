@@ -5,6 +5,7 @@
  */
 
 #include <kernel/kernel.h>
+#include <kernel/irq.h>
 #include <kernel/time/clockevents.h>
 
 #include "platform.h"
