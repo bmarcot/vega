@@ -6,10 +6,11 @@
 
 #include <kernel/fs.h>
 #include "vega/syscalls.h"
+#include "syscall-wrappers.h"
 
 int _open(const char *pathname, int flags)
 {
-	return do_syscall2((void *)pathname, (void *)flags, SYS_OPEN);
+	return SYS_open(pathname, flags);
 }
 
 int _close(int fd)
@@ -33,9 +34,9 @@ off_t _lseek(int fd, off_t offset, int whence)
 				SYS_LSEEK);
 }
 
-int stat(const char *pathname, struct stat *buf)
+int _stat(const char *pathname, struct stat *buf)
 {
-	return do_syscall2((void *)pathname, (void *)buf, SYS_STAT);
+	return SYS_stat(pathname, buf);
 }
 
 int mount(const char *source, const char *target, const char *filesystemtype,
@@ -47,7 +48,7 @@ int mount(const char *source, const char *target, const char *filesystemtype,
 
 DIR *opendir(const char *name)
 {
-	return (DIR *)do_syscall2((void *)name, (void *)O_DIRECTORY, SYS_OPEN);
+	return (DIR *)SYS_open(name, O_DIRECTORY);
 }
 
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
