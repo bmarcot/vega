@@ -8,21 +8,12 @@
 #define _KERNEL_SCHED_H
 
 #include <kernel/types.h>
-
 #include <asm/thread_info.h>
-
 #include <uapi/kernel/sched.h>
 
 /* 0 <= PRI_MAX <= PRI_MIN */
 #define PRI_MAX    0
 #define PRI_MIN    31
-
-struct task_struct;
-
-int sched_init(void);
-int sched_enqueue(struct task_struct *task);
-int sched_dequeue(struct task_struct *task);
-int schedule(void);
 
 #define TASK_RUNNING		0
 #define TASK_INTERRUPTIBLE	1
@@ -77,6 +68,11 @@ static inline struct thread_info *task_thread_info(struct task_struct *task)
 	return task->thread_info;
 #endif
 }
+
+int sched_init(void);
+int sched_enqueue(struct task_struct *task);
+int sched_dequeue(struct task_struct *task);
+int schedule(void);
 
 /* task.c */
 int init_task(struct task_struct *task, int flags);
