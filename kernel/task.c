@@ -70,9 +70,14 @@ int init_task(struct task_struct *task, int flags)
 		get_tgid(&task->tgid);
 		task->pid = task->tgid;
 	}
+
+	/* files */
 	for (int i = 0; i < FILE_MAX; i++)
 		task->filetable[i] = NULL;
 	list_add(&task->list, &tasks);
+
+	/* signals */
+	task->sighand = NULL;
 
 	return 0;
 }

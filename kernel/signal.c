@@ -11,6 +11,7 @@
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
@@ -19,26 +20,14 @@
 #include <asm/thread_info.h>
 #include <asm/v7m-helper.h>
 
-//FIXME: this is part of the task_struct->signal_struct
-static LIST_HEAD(ksignals); /* list of installed handlers */
-
-static struct ksignal *get_ksignal(int sig)
-{
-	struct ksignal *ks;
-
-	list_for_each_entry(ks, &ksignals, list) {
-		if (ks->sig == sig)
-			return ks;
-	}
-
-	return NULL;
-}
-
 SYSCALL_DEFINE(sigaction,
 	int			signum,
 	const struct sigaction	*act,
 	struct sigaction	*oldact)
 {
+	struct sighand_struct *sighand;
+	struct sigaction *k_act;
+
 	if ((signum == SIGKILL) || (signum == SIGSTOP)) {
 		errno = EINVAL;
 		return -1;
@@ -50,24 +39,21 @@ SYSCALL_DEFINE(sigaction,
 		return -1;
 	}
 
-	/* lookup fo a previous installed handler */
-	struct ksignal *ks = get_ksignal(signum);
-
-	//FIXME: is user-supplied address valid?
-	if (ks && oldact)
-		memcpy(oldact, ks, sizeof(struct sigaction));
-
-	if (!ks) {
-		ks = malloc(sizeof(struct ksignal));
-		if (!ks) {
-			errno = ENOMEM;
+	/* alloc or get the signal handler table */
+	if (!current->sighand) {
+		sighand = kzalloc(sizeof(*sighand));
+		if (!sighand)
 			return -1;
-		}
+		current->sighand = sighand;
+	} else {
+		sighand = current->sighand;
 	}
 
-	ks->sig = signum;
-	memcpy(&ks->sa, act, sizeof(struct sigaction));
-	list_add(&ks->list, &ksignals);
+	/* save and install a new handler */
+	k_act = &sighand->action[signum];
+	if (oldact)
+		memcpy(oldact, k_act, sizeof(*k_act));
+	memcpy(k_act, act, sizeof(*k_act));
 
 	return 0;
 }
@@ -106,12 +92,20 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 
 static int send_signal(__unused pid_t pid, int sig, union sigval value)
 {
-	struct ksignal *ks = get_ksignal(sig);
-	if (!ks)
+	struct sigaction *act;
+
+	/* no handlers have been installed */
+	if (!current->sighand)
 		return -EINVAL;
 
-	current->sig = sig;
-	__send_signal(sig, &ks->sa, value);
+	act = &current->sighand->action[sig];
+
+	/* no handler for that signal */
+	if (!act->sa_handler)
+		return -EINVAL;
+
+	current->sigpending = sig;
+	__send_signal(sig, act, value);
 
 	return sig;
 }
@@ -133,15 +127,23 @@ SYSCALL_DEFINE(kill,
 
 SYSCALL_DEFINE(sigreturn, void)
 {
-	struct ksignal *ks = get_ksignal(current->sig);
+	struct sigaction *act;
+	int off;
 
-	int off = sizeof(struct cpu_user_context);
-	if (ks->sa.sa_flags & SA_SIGINFO)
+	if (current->sigpending == -1) {
+		pr_warn("Wants to return from signal, but no signal raised");
+		return 0;
+	}
+
+	act = &current->sighand->action[current->sigpending];
+	off = sizeof(struct cpu_user_context);
+	if (act->sa_flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
 	current_thread_info()->user.psp += off;
-	current->sig = -1;
+	current->sigpending = -1;
 
 	/* this is the actual return value to the kill() syscall */
+	//FIXME: If sending signal to self
 	return 0;
 }
 

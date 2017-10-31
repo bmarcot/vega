@@ -26,7 +26,8 @@
 
 #define FILE_MAX 8
 
-struct file;
+struct file; //XXX: Change to file_struct
+struct sighand_struct;
 
 struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
@@ -44,7 +45,9 @@ struct task_struct {
 	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
-	int                sig;
+	int		sigpending;	//XXX: List of pending signals
+	struct sighand_struct *sighand;
+
 	struct list_head   list;    /* global list of tasks */
 	struct task_struct *parent;
 

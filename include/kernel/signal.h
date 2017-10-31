@@ -16,6 +16,10 @@ struct ksignal {
 	struct list_head list;
 };
 
+struct sighand_struct {
+	struct sigaction action[_NSIG];
+};
+
 void do_sigevent(struct task_struct *task, struct sigevent *sigevent);
 
 #endif /* !_KERNEL_SIGNAL_H */
