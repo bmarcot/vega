@@ -40,6 +40,8 @@ struct task_struct {
 	int                flags;
 	int                prio;
 
+	struct task_struct *group_leader;
+
 	int		exit_code;
 	int		exit_signal;
 	pid_t		pid;		/* thread id */

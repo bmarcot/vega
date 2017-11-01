@@ -15,60 +15,48 @@
 
 static LIST_HEAD(tasks);
 
-static unsigned long tgid_map[THREAD_GROUP_MAX / BITS_PER_LONG];
-static unsigned long tid_map[THREAD_MAX / BITS_PER_LONG];
+static unsigned long pidmap[THREAD_MAX / BITS_PER_LONG];
 
-static inline int get_tgid(pid_t *pid)
+static inline pid_t get_pid(void)
 {
-	unsigned long bit = find_first_zero_bit(tgid_map, 32);
-
-	if (bit == 32)
-		return -1;
-	bitmap_set_bit(tgid_map, bit);
-	*pid = bit << 8;
-
-	return 0;
-}
-
-static inline void put_tgid(pid_t pid)
-{
-	bitmap_clear_bit(tgid_map, pid >> 8);
-}
-
-static inline int get_tid(pid_t tgid, pid_t *pid)
-{
-	unsigned long bit = find_first_zero_bit(tid_map, 256);
+	unsigned long bit = find_first_zero_bit(pidmap, 256);
 
 	if (bit == 256)
 		return -1;
-	bitmap_set_bit(tid_map, bit);
-	*pid = tgid | bit;
+	bitmap_set_bit(pidmap, bit);
 
-	return 0;
+	return (pid_t)bit;
 }
 
-static inline void put_tid(pid_t pid)
+static inline void put_pid(pid_t pid)
 {
-	bitmap_clear_bit(tid_map, pid & 0xff);
+	bitmap_clear_bit(pidmap, pid);
 }
 
 int init_task(struct task_struct *task, int flags)
 {
+	pid_t pid;
+
+	pid = get_pid();
+	if (pid == -1)
+		return -1;
 	task->prio = PRI_MIN;
 	task->state = TASK_NEW;
 	task->stack = &task->thread_info;
 	task->filemap = 0;
 	task->flags = flags;
 	if (flags & CLONE_THREAD) {
+		task->group_leader = current->group_leader;
 		task->exit_signal = -1;
 		task->parent = current->parent;
-		task->tgid = current->tgid;
-		get_tid(task->tgid, &task->pid);
+		task->pid = pid;
+		task->tgid = current->group_leader->tgid;
 	} else {
+		task->group_leader = task; /* self */
 		task->exit_signal = 0;
 		task->parent = current;
-		get_tgid(&task->tgid);
-		task->pid = task->tgid;
+		task->pid = pid;
+		task->tgid = pid;
 	}
 
 	/* files */
@@ -84,10 +72,7 @@ int init_task(struct task_struct *task, int flags)
 
 int release_task_pids(struct task_struct *task)
 {
-	if (task->flags & CLONE_THREAD)
-		put_tid(task->pid);
-	else
-		put_tgid(task->tgid);
+	put_pid(task->pid);
 
 	return 0;
 }
