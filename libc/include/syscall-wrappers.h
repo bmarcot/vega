@@ -34,6 +34,7 @@ int do_syscall6();
 
 /* unistd.h */
 #define SYS_getpid(...)		do_syscall0(SYS_GETPID)
+#define SYS_getppid(...)	do_syscall0(SYS_GETPPID)
 #define SYS_stat(...)		do_syscall2(__VA_ARGS__, SYS_STAT);
 #define SYS_vfork(...)		do_syscall0(SYS_VFORK)
 

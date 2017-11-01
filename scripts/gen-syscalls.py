@@ -43,6 +43,7 @@ xs = [
     'exit_group',
     'waitpid',
     'gettid',
+    'getppid',
 ]
 
 import datetime

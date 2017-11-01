@@ -65,3 +65,8 @@ pid_t gettid(void)
 {
 	return (pid_t)SYS_gettid();
 }
+
+pid_t getppid(void)
+{
+	return (pid_t)SYS_getppid();
+}

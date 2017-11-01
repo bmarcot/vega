@@ -35,5 +35,6 @@
 #define SYS_EXIT_GROUP 28
 #define SYS_WAITPID 29
 #define SYS_GETTID 30
+#define SYS_GETPPID 31
 
 #endif /* !_ASM_SYSCALLS_H */
