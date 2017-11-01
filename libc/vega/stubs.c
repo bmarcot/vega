@@ -60,3 +60,8 @@ pid_t waitpid(pid_t pid, int *status, int options)
 {
 	return (pid_t)SYS_waitpid(pid, status, options);
 }
+
+pid_t gettid(void)
+{
+	return (pid_t)SYS_gettid();
+}

@@ -13,3 +13,8 @@ SYSCALL_DEFINE(getpid, void)
 {
 	return current->tgid;
 }
+
+SYSCALL_DEFINE(gettid, void)
+{
+	return current->pid;
+}

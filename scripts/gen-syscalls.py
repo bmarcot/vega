@@ -42,6 +42,7 @@ xs = [
     'clock_gettime',
     'exit_group',
     'waitpid',
+    'gettid',
 ]
 
 import datetime
