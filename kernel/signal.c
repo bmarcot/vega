@@ -58,12 +58,17 @@ SYSCALL_DEFINE(sigaction,
 	return 0;
 }
 
-#define __USER_STACK_ALLOCA(__ptr, __align) ({		\
-	u32 __sp = current_thread_info()->user.psp;	\
-	__sp -= sizeof(__typeof__(*(__ptr)));		\
-	__sp = align(__sp, __align);			\
-	current_thread_info()->user.psp = __sp;		\
-	__ptr = (__typeof__(__ptr))__sp; })
+//FIXME: Move alloca macros to arch/arm/kernel/signal.c
+
+#define __process_alloca_with_align(__tsk, __ptr, __align) ({  \
+       struct thread_info *__thrd = task_thread_info(__tsk);   \
+       u32 __sp = __thrd->user.psp;                            \
+       __sp -= sizeof(__typeof__(*(__ptr)));                   \
+       __sp = align(__sp, __align);                            \
+       __thrd->user.psp = __sp;                                \
+       __ptr = (__typeof__(__ptr))__sp; })
+
+#define __process_alloca(__tsk, __ptr) __process_alloca_with_align(__tsk, __ptr, 1)
 
 static void __send_signal(struct task_struct *tsk, int sig,
 			struct sigaction *sa, union sigval value)
@@ -72,13 +77,13 @@ static void __send_signal(struct task_struct *tsk, int sig,
 	struct cpu_user_context *sigctx;
 
 	if (sa->sa_flags & SA_SIGINFO) {
-		__USER_STACK_ALLOCA(siginfo, 4);
+		__process_alloca(tsk, siginfo);
 		siginfo->si_signo = sig;
 		siginfo->si_value = value;
 		siginfo->si_pid = current->tgid;
 	}
 
-	__USER_STACK_ALLOCA(sigctx, 8);
+	__process_alloca_with_align(tsk, sigctx, 8);
 	sigctx->r0 = sig;          /* signum */
 	sigctx->r1 = (u32)siginfo; /* siginfo_t or nil */
 	sigctx->r2 = 0;            /* ucontext_t *, but commonly unused */
