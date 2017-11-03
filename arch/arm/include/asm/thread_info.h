@@ -59,6 +59,7 @@ struct thread_info {
 		struct cpu_user_context *ctx;
 	} user;
 	u32 priv;
+	u32 bypass_update_r0:1;
 
 #ifndef CONFIG_THREAD_INFO_IN_TASK
 	struct task_struct *task;
