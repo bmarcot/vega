@@ -65,7 +65,8 @@ SYSCALL_DEFINE(sigaction,
 	current_thread_info()->user.psp = __sp;		\
 	__ptr = (__typeof__(__ptr))__sp; })
 
-static void __send_signal(int sig, struct sigaction *sa, union sigval value)
+static void __send_signal(struct task_struct *tsk, int sig,
+			struct sigaction *sa, union sigval value)
 {
 	siginfo_t *siginfo = NULL;
 	struct cpu_user_context *sigctx;
@@ -78,6 +79,7 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 	}
 
 	__USER_STACK_ALLOCA(sigctx, 8);
+	sigctx->r0 = sig;          /* signum */
 	sigctx->r1 = (u32)siginfo; /* siginfo_t or nil */
 	sigctx->r2 = 0;            /* ucontext_t *, but commonly unused */
 	sigctx->r3 = 0;
@@ -88,26 +90,37 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 		sigctx->lr = 0;
 	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
 	sigctx->xpsr = xPSR_T_Msk;
+
+	if (tsk == current)
+		current_thread_info()->bypass_update_r0 = 1;
 }
 
-static int send_signal(__unused pid_t pid, int sig, union sigval value)
+static int send_signal(struct task_struct *tsk, int sig, union sigval value)
 {
 	struct sigaction *act;
 
-	/* no handlers have been installed */
-	if (!current->sighand)
-		return -EINVAL;
-
-	act = &current->sighand->action[sig];
-
-	/* no handler for that signal */
+	if (!tsk->sighand)
+		return 0;
+	act = &tsk->sighand->action[sig];
 	if (!act->sa_handler)
-		return -EINVAL;
+		return 0;
+	tsk->sigpending = sig;
+	__send_signal(tsk, sig, act, value);
 
-	current->sigpending = sig;
-	__send_signal(sig, act, value);
+	return 0;
+}
 
-	return sig;
+static int do_kill(int pid, int sig, union sigval value)
+{
+	struct task_struct *tsk;
+
+	tsk = get_task_by_pid(pid);
+	if (!tsk) {
+		//errno = ESRCH;
+		return -1;
+	}
+
+	return send_signal(tsk, sig, value);
 }
 
 SYSCALL_DEFINE(sigqueue,
@@ -115,14 +128,14 @@ SYSCALL_DEFINE(sigqueue,
 	int		sig,
 	union sigval	value)
 {
-	return send_signal(pid, sig, value);
+	return do_kill(pid, sig, value);
 }
 
 SYSCALL_DEFINE(kill,
 	pid_t		pid,
 	int		sig)
 {
-	return send_signal(pid, sig, (union sigval){0});
+	return do_kill(pid, sig, (union sigval){0});
 }
 
 SYSCALL_DEFINE(sigreturn, void)
@@ -142,16 +155,12 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 	current->sigpending = -1;
 
-	/* this is the actual return value to the kill() syscall */
-	//FIXME: If sending signal to self
 	return 0;
 }
 
-void do_sigevent(struct task_struct *tsk, struct sigevent *sigevent)
+void do_sigevent(struct task_struct *tsk, struct sigevent *sigev)
 {
-	(void)tsk;
-
-	if (sigevent->sigev_notify != SIGEV_SIGNAL)
+	if (sigev->sigev_notify != SIGEV_SIGNAL)
 		return;
-	send_signal(0, sigevent->sigev_signo, sigevent->sigev_value);
+	send_signal(tsk, sigev->sigev_signo, sigev->sigev_value);
 }

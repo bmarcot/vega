@@ -20,6 +20,6 @@ struct sighand_struct {
 	struct sigaction action[_NSIG];
 };
 
-void do_sigevent(struct task_struct *task, struct sigevent *sigevent);
+void do_sigevent(struct task_struct *tsk, struct sigevent *sigev);
 
 #endif /* !_KERNEL_SIGNAL_H */
