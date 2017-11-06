@@ -70,7 +70,7 @@ SYSCALL_DEFINE(sigaction,
 
 #define __process_alloca(__ptr) __process_alloca_with_align(__ptr, 1)
 
-static void __send_signal(int sig, struct sigaction *sa, union sigval value)
+static void __send_signal(int sig, struct sigaction *sa, int value)
 {
 	siginfo_t *siginfo = NULL;
 	struct cpu_user_context *sigctx;
@@ -78,7 +78,7 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 	if (sa->sa_flags & SA_SIGINFO) {
 		__process_alloca(siginfo);
 		siginfo->si_signo = sig;
-		siginfo->si_value = value;
+		siginfo->si_value.sival_int = value;
 		siginfo->si_pid = current->tgid;
 	}
 
@@ -98,7 +98,7 @@ static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 	current_thread_info()->bypass_update_r0 = 1;
 }
 
-int send_signal(int sig, union sigval value)
+int send_signal(int sig, int value)
 {
 	struct sigaction *act;
 
@@ -113,9 +113,9 @@ int send_signal(int sig, union sigval value)
 	return 0;
 }
 
-int notify_signal(struct task_struct *tsk, int sig, union sigval value)
+int notify_signal(struct task_struct *tsk, int sig, int value)
 {
-	tsk->sigval = value.sival_int;
+	tsk->sigval = value;
 	tsk->sigpending = sig;
 
 	return 0;
@@ -132,9 +132,9 @@ static int do_kill(int pid, int sig, union sigval value)
 	}
 
 	if (tsk == current)
-		send_signal(sig, value);
+		send_signal(sig, value.sival_int);
 	else
-		notify_signal(tsk, sig, value);
+		notify_signal(tsk, sig, value.sival_int);
 
 	return 0;
 }
@@ -176,11 +176,12 @@ SYSCALL_DEFINE(sigreturn, void)
 
 void signal_event(struct task_struct *tsk, struct sigevent *sigev)
 {
+	int value = sigev->sigev_value.sival_int;
+
 	if (sigev->sigev_notify != SIGEV_SIGNAL)
 		return;
-
 	if (tsk == current)
-		send_signal(sigev->sigev_signo, sigev->sigev_value);
+		send_signal(sigev->sigev_signo, value);
 	else
-		notify_signal(tsk, sigev->sigev_signo, sigev->sigev_value);
+		notify_signal(tsk, sigev->sigev_signo, value);
 }
