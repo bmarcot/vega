@@ -54,7 +54,7 @@ static void timer_callback(void *context)
 
 	if (timer->type == ONESHOT_TIMER)
 		timer->disarmed = 1;
-	do_sigevent(timer->owner, &timer->sigev);
+	signal_event(timer->owner, &timer->sigev);
 }
 
 static void timer_callback_and_link(void *context)
@@ -63,7 +63,7 @@ static void timer_callback_and_link(void *context)
 
 	hrtimer_set_expires(&timer->hrtimer,
 			timespec_to_ktime(timer->value.it_interval));
-	do_sigevent(timer->owner, &timer->sigev);
+	signal_event(timer->owner, &timer->sigev);
 }
 
 SYSCALL_DEFINE(timer_create,

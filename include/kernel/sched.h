@@ -47,7 +47,8 @@ struct task_struct {
 	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
-	int		sigpending;	//XXX: List of pending signals
+	int		sigpending; //XXX: Will die, replace with list of pending signals
+	int		sigval;     //XXX: "
 	struct sighand_struct *sighand;
 
 	struct list_head   list;    /* global list of tasks */

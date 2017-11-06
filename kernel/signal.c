@@ -60,30 +60,29 @@ SYSCALL_DEFINE(sigaction,
 
 //FIXME: Move alloca macros to arch/arm/kernel/signal.c
 
-#define __process_alloca_with_align(__tsk, __ptr, __align) ({  \
-       struct thread_info *__thrd = task_thread_info(__tsk);   \
-       u32 __sp = __thrd->user.psp;                            \
-       __sp -= sizeof(__typeof__(*(__ptr)));                   \
-       __sp = align(__sp, __align);                            \
-       __thrd->user.psp = __sp;                                \
-       __ptr = (__typeof__(__ptr))__sp; })
+#define __process_alloca_with_align(__ptr, __align) ({		\
+	struct thread_info *__thrd = current_thread_info();	\
+	u32 __sp = __thrd->user.psp;				\
+	__sp -= sizeof(__typeof__(*(__ptr)));			\
+	__sp = align(__sp, __align);				\
+	__thrd->user.psp = __sp;				\
+	__ptr = (__typeof__(__ptr))__sp; })
 
-#define __process_alloca(__tsk, __ptr) __process_alloca_with_align(__tsk, __ptr, 1)
+#define __process_alloca(__ptr) __process_alloca_with_align(__ptr, 1)
 
-static void __send_signal(struct task_struct *tsk, int sig,
-			struct sigaction *sa, union sigval value)
+static void __send_signal(int sig, struct sigaction *sa, union sigval value)
 {
 	siginfo_t *siginfo = NULL;
 	struct cpu_user_context *sigctx;
 
 	if (sa->sa_flags & SA_SIGINFO) {
-		__process_alloca(tsk, siginfo);
+		__process_alloca(siginfo);
 		siginfo->si_signo = sig;
 		siginfo->si_value = value;
 		siginfo->si_pid = current->tgid;
 	}
 
-	__process_alloca_with_align(tsk, sigctx, 8);
+	__process_alloca_with_align(sigctx, 8);
 	sigctx->r0 = sig;          /* signum */
 	sigctx->r1 = (u32)siginfo; /* siginfo_t or nil */
 	sigctx->r2 = 0;            /* ucontext_t *, but commonly unused */
@@ -96,21 +95,28 @@ static void __send_signal(struct task_struct *tsk, int sig,
 	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
 	sigctx->xpsr = xPSR_T_Msk;
 
-	if (tsk == current)
-		current_thread_info()->bypass_update_r0 = 1;
+	current_thread_info()->bypass_update_r0 = 1;
 }
 
-static int send_signal(struct task_struct *tsk, int sig, union sigval value)
+int send_signal(int sig, union sigval value)
 {
 	struct sigaction *act;
 
-	if (!tsk->sighand)
+	if (!current->sighand)
 		return 0;
-	act = &tsk->sighand->action[sig];
+	act = &current->sighand->action[sig];
 	if (!act->sa_handler)
 		return 0;
+	current->sigpending = sig;
+	__send_signal(sig, act, value);
+
+	return 0;
+}
+
+int notify_signal(struct task_struct *tsk, int sig, union sigval value)
+{
+	tsk->sigval = value.sival_int;
 	tsk->sigpending = sig;
-	__send_signal(tsk, sig, act, value);
 
 	return 0;
 }
@@ -125,7 +131,12 @@ static int do_kill(int pid, int sig, union sigval value)
 		return -1;
 	}
 
-	return send_signal(tsk, sig, value);
+	if (tsk == current)
+		send_signal(sig, value);
+	else
+		notify_signal(tsk, sig, value);
+
+	return 0;
 }
 
 SYSCALL_DEFINE(sigqueue,
@@ -163,9 +174,13 @@ SYSCALL_DEFINE(sigreturn, void)
 	return 0;
 }
 
-void do_sigevent(struct task_struct *tsk, struct sigevent *sigev)
+void signal_event(struct task_struct *tsk, struct sigevent *sigev)
 {
 	if (sigev->sigev_notify != SIGEV_SIGNAL)
 		return;
-	send_signal(tsk, sigev->sigev_signo, sigev->sigev_value);
+
+	if (tsk == current)
+		send_signal(sigev->sigev_signo, sigev->sigev_value);
+	else
+		notify_signal(tsk, sigev->sigev_signo, sigev->sigev_value);
 }

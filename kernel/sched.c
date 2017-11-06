@@ -10,6 +10,7 @@
 #include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/thread.h>
 #include <kernel/types.h>
 #include <kernel/syscalls.h>
@@ -75,6 +76,8 @@ int schedule(void)
 
 	if (unlikely(prev->state == TASK_DEAD))
 		put_task_struct(prev);
+	else if (unlikely(current->sigpending != -1))
+		send_signal(current->sigpending, current->sigval);
 
 	return 0;
 }
