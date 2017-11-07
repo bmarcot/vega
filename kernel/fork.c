@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include <kernel/kernel.h>
-#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/resource.h>
 #include <kernel/thread.h>
@@ -30,40 +29,42 @@ static struct task_struct *copy_process(int flags)
 	return tsk;
 }
 
+#define __process_alloca_with_align(__tsk, __ptr, __align) ({	\
+	struct thread_info *__thrd = task_thread_info(__tsk);	\
+	u32 __sp = __thrd->user.psp;				\
+	__sp -= sizeof(__typeof__(*(__ptr)));			\
+	__sp = align(__sp, __align);				\
+	__thrd->user.psp = __sp;				\
+	__ptr = (__typeof__(__ptr))__sp; })
+
+#define __process_alloca(__tsk, __ptr) __process_alloca_with_align(__tsk, __ptr, 1)
+
 SYSCALL_DEFINE(vfork, void)
 {
 	struct task_struct *child;
-	//FIXME: Alloc saved context on stack; if stack too small, then use malloc
-	struct cpu_user_context *saved_ctx;
-	u32 saved_sp;
+	struct cpu_user_context *child_ctx;
 
 	child = copy_process(CLONE_VFORK);
 	if (!child) {
 		pr_err("Cannot create child process");
 		return -1;
 	}
+
+	/* child thread uses its parent's process stack */
+	child->thread_info.user.psp = current->thread_info.user.psp;
+
+	/* after taking an exception, stack is aligned on 8-bytes */
+	__process_alloca(child, child_ctx);
+
+	/* copy parent's user frame, but update the return value */
+	memcpy(child_ctx, current->thread_info.user.ctx, sizeof(*child_ctx));
+	child_ctx->r0 = 0;
+
+	/* parent is now stopped until child returns */
 	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
 
-	/* save current process context */
-	saved_ctx = kmalloc(sizeof(*saved_ctx));
-	if (!saved_ctx) {
-		pr_err("Cannot save cpu context");
-		return -1;
-	}
-	memcpy(saved_ctx, current->thread_info.user.ctx, sizeof(*saved_ctx));
-	saved_sp = current->thread_info.user.psp;
-
-	/* child thread points to parent's process */
-	child->thread_info.user.psp = saved_sp;
-	child->thread_info.user.ctx->r0 = 0;
-
 	schedule();
-
-	/* restore current process context */
-	current->thread_info.user.psp = saved_sp;
-	memcpy(current->thread_info.user.ctx, saved_ctx, sizeof(*saved_ctx));
-	kfree(saved_ctx);
 
 	return child->tgid;
 }
