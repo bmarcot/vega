@@ -20,17 +20,20 @@
 	.set	U_LAST_ARG,	    0x40
 	.set	U_LAST_ARG_UNALIGN, 0x44
 
+	.macro	thread_info, rd
+	mov	\rd, sp
+	bfc	\rd, #0, #9		//FIXME: ilog2(THREAD_SIZE)
+	.endm
+
 	.macro	enter_interrupt
-	mov	r0, sp			/* save psp value in thread_info struct */
-	bfc	r0, #0, #9		//FIXME: ilog2(THREAD_SIZE)
 	mrs	r1, psp
 	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
+	thread_info r0
 	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 	.endm
 
 	.macro	ret_from_interrupt
-	mov	r0, sp			/* restore psp */
-	bfc	r0, #0, #9
+	thread_info r0
 	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r0
