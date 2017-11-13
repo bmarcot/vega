@@ -59,7 +59,7 @@ struct thread_info {
 		struct cpu_user_context *ctx;
 	} user;
 	u32 priv;
-	u32 bypass_update_r0:1;
+	u32 flags;
 
 #ifndef CONFIG_THREAD_INFO_IN_TASK
 	struct task_struct *task;
@@ -79,5 +79,9 @@ static inline struct thread_info *current_thread_info(void)
 
 	return thread;
 }
+
+#define TIF_SIGPENDING	0	/* signal pending */
+
+#define _TIF_SIGPENDING	(1 << TIF_SIGPENDING)
 
 #endif /* !_ASM_THREAD_INFO_H */
