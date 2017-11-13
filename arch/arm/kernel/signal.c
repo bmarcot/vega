@@ -4,10 +4,14 @@
  * Copyright (c) 2017 Baruch Marcot
  */
 
+#include <kernel/kernel.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
+#include <kernel/stddef.h>
 
 #include <asm/current.h>
 #include <asm/thread_info.h>
+#include <asm/v7m-helper.h>
 
 #define __process_alloca_with_align(__ptr, __align) ({		\
 	struct thread_info *__thrd = current_thread_info();	\
@@ -58,12 +62,14 @@ static int do_signal(int sig, int value)
 	return 0;
 }
 
-void do_notify_resume(int syscall_retcode)
+void do_notify_resume(int syscall_retval)
 {
-	/* save the syscall return value into the syscall frame */
-	update_retval(syscall_retcode);
+	struct thread_info *ti = current_thread_info();
 
-	if (/* thread_info_flags */ current_thread_info()->flags & _TIF_SIGPENDING)
+	/* save the syscall return value into the syscall frame */
+	ti->user.ctx->r0 = syscall_retval;
+
+	if (/* thread_info_flags */ ti->flags & _TIF_SIGPENDING)
 		do_signal(current->sigpending, current->sigval);
 }
 

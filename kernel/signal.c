@@ -18,7 +18,6 @@
 
 #include <asm/current.h>
 #include <asm/thread_info.h>
-#include <asm/v7m-helper.h>
 
 SYSCALL_DEFINE(sigaction,
 	int			signum,

@@ -78,10 +78,3 @@ int init_thread(struct task_struct *tsk)
 
 	return 0;
 }
-
-void update_retval(u32 retval)
-{
-	struct thread_info *thread = current_thread_info();
-
-	thread->user.ctx->r0 = retval;
-}
