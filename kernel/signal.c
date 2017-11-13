@@ -70,7 +70,7 @@ SYSCALL_DEFINE(sigaction,
 
 #define __process_alloca(__ptr) __process_alloca_with_align(__ptr, 1)
 
-static void __send_signal(int sig, struct sigaction *sa, int value)
+static void setup_sigframe(int sig, struct sigaction *sa, int value)
 {
 	siginfo_t *siginfo = NULL;
 	struct cpu_user_context *sigctx;
@@ -95,20 +95,16 @@ static void __send_signal(int sig, struct sigaction *sa, int value)
 	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
 	sigctx->xpsr = xPSR_T_Msk;
 
-	current_thread_info()->bypass_update_r0 = 1;
+	/* unset the TIF_SIGPENDING flags */
+	current_thread_info()->flags = 0;
 }
 
-int send_signal(int sig, int value)
+int do_signal(int sig, int value)
 {
 	struct sigaction *act;
 
-	if (!current->sighand)
-		return 0;
 	act = &current->sighand->action[sig];
-	if (!act->sa_handler)
-		return 0;
-	current->sigpending = sig;
-	__send_signal(sig, act, value);
+	setup_sigframe(sig, act, value);
 
 	return 0;
 }
@@ -117,6 +113,7 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	tsk->sigval = value;
 	tsk->sigpending = sig;
+	task_thread_info(tsk)->flags |= _TIF_SIGPENDING;
 
 	return 0;
 }
@@ -131,10 +128,13 @@ static int do_kill(int pid, int sig, union sigval value)
 		return -1;
 	}
 
-	if (tsk == current)
-		send_signal(sig, value.sival_int);
-	else
-		notify_signal(tsk, sig, value.sival_int);
+	/* it's ok to have no handlers installed */
+	if (!tsk->sighand)
+		return 0;
+	if (!tsk->sighand->action[sig].sa_handler)
+		return 0;
+
+	notify_signal(tsk, sig, value.sival_int);
 
 	return 0;
 }
@@ -171,7 +171,11 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 	current->sigpending = -1;
 
-	return 0;
+	/* If the interrupted task was in a syscall, this restores the
+	 * syscall's return value. If it was interrupted because of an
+	 * external interrupt, this restores the r0 value at the time of
+	 * the interrupt. */
+	return current_thread_info()->user.ctx->r0;
 }
 
 void signal_event(struct task_struct *tsk, struct sigevent *sigev)
@@ -180,8 +184,5 @@ void signal_event(struct task_struct *tsk, struct sigevent *sigev)
 
 	if (sigev->sigev_notify != SIGEV_SIGNAL)
 		return;
-	if (tsk == current)
-		send_signal(sigev->sigev_signo, value);
-	else
-		notify_signal(tsk, sigev->sigev_signo, value);
+	notify_signal(tsk, sigev->sigev_signo, value);
 }

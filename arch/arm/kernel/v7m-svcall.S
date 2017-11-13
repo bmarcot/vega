@@ -114,7 +114,7 @@ ENTRY(svcall_entry)
 	blx	r5
 	add	sp, #8
 
-0:	bl	update_syscall_ret_val
+0:	bl	do_notify_resume
 	ret_from_interrupt
 ENDPROC(svcall_entry)
 
@@ -125,6 +125,7 @@ ENTRY(irq_entry)
 	sub	r0, #16
 	ldr.w	lr, [lr, r0, lsl #2]
 	blx	lr
+	bl	do_notify
 	ret_from_interrupt
 ENDPROC(irq_entry)
 

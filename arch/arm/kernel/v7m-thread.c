@@ -79,16 +79,9 @@ int init_thread(struct task_struct *tsk)
 	return 0;
 }
 
-/*
- * Returning from IRQ, and from self-serviced signals (i.e. signals triggered
- * with the raise() syscall) must not update the process's r0 register.
- */
-void update_syscall_ret_val(u32 retval)
+void update_retval(u32 retval)
 {
 	struct thread_info *thread = current_thread_info();
 
-	if (!thread->bypass_update_r0)
-		thread->user.ctx->r0 = retval;
-	else
-		thread->bypass_update_r0 = 0;
+	thread->user.ctx->r0 = retval;
 }
