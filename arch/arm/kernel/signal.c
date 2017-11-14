@@ -52,9 +52,14 @@ static void setup_sigframe(int sig, struct sigaction *sa, int value)
 	clear_thread_flag(TIF_SIGPENDING);
 }
 
+void do_exit(int status);
+
 static int do_signal(int sig, int value)
 {
 	struct sigaction *act;
+
+	if (sig == SIGKILL)
+		do_exit(0);
 
 	act = &current->sighand->action[sig];
 	setup_sigframe(sig, act, value);

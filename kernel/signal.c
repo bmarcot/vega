@@ -75,6 +75,9 @@ static int do_kill(int pid, int sig, union sigval value)
 		return -1;
 	}
 
+	if (sig == SIGKILL)
+		notify_signal(tsk, sig, 0);
+
 	/* it's ok to have no handlers installed */
 	if (!tsk->sighand)
 		return 0;

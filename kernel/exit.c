@@ -29,7 +29,7 @@ static void exit_notify(struct task_struct *tsk)
 		release_task(tsk);
 }
 
-static void do_exit(int status)
+void do_exit(int status)
 {
 	struct task_struct *tsk = current;
 
