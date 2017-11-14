@@ -20,7 +20,7 @@
 	.set	U_LAST_ARG,	    0x40
 	.set	U_LAST_ARG_UNALIGN, 0x44
 
-	.macro	thread_info, rd
+	.macro	current_thread_info, rd
 	mov	\rd, sp
 	bfc	\rd, #0, #9		//FIXME: ilog2(THREAD_SIZE)
 	.endm
@@ -28,12 +28,12 @@
 	.macro	enter_interrupt
 	mrs	r1, psp
 	stmdb	r1!, {r4-r11}		/* save non-scratch regs on user stack */
-	thread_info r0
+	current_thread_info r0
 	str	r1, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 	.endm
 
 	.macro	ret_from_interrupt
-	thread_info r0
+	current_thread_info r0
 	ldr	r0, [r0, #4]		//FIXME: offsetof thread_ctx->sp
 	ldmia	r0!, {r4-r11}		/* restore non-scratch regs */
 	msr	psp, r0
@@ -44,9 +44,8 @@
 ENTRY(svcall_entry)
 	mrs	lr, psp			/* save non-scratch regs on user stack */
 	stmdb	lr!, {r4-r11}
-	mov	r4, sp			/* save PSP in thread_info struct */
-	bfc	r4, #0, #9
-	str	lr, [r4, #4]
+	current_thread_info r4
+	str	lr, [r4, #4]		/* save PSP in thread_info struct */
 	ldr	r4, [lr, #U_RET_ADDR]	/* read memory at SVC call site */
 	ldrb	r4, [r4, #-2]
 	tbb	[pc, r4]
