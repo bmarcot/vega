@@ -1,11 +1,11 @@
 /*
  * include/kernel/bitops.h
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2017 Benoit Marcot
  */
 
-#ifndef KERNEL_BITOPS_H
-#define KERNEL_BITOPS_H
+#ifndef _KERNEL_BITOPS_H
+#define _KERNEL_BITOPS_H
 
 #define BITS_PER_CHAR  8
 #define BITS_PER_LONG  (BITS_PER_CHAR * sizeof(long))
@@ -23,6 +23,11 @@ static inline void clear_bit(unsigned long bit, unsigned long *word)
 static inline void set_bit(unsigned long bit, unsigned long *word)
 {
 	*word |= (1 << bit);
+}
+
+static inline int test_bit(unsigned long bit, const unsigned long *word)
+{
+	return *word & (1 << bit);
 }
 
 static inline void bitmap_set_bit(unsigned long *map, unsigned long bit)
@@ -43,4 +48,4 @@ static inline unsigned long bitmap_get_bit(unsigned long *map, unsigned long bit
 unsigned long find_first_bit(const unsigned long *addr, unsigned long size);
 unsigned long find_first_zero_bit(const unsigned long *addr, unsigned long size);
 
-#endif /* !KERNEL_BITOPS_H */
+#endif /* !_KERNEL_BITOPS_H */
