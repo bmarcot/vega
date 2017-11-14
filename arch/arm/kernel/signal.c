@@ -8,9 +8,9 @@
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/stddef.h>
+#include <kernel/thread_info.h>
 
 #include <asm/current.h>
-#include <asm/thread_info.h>
 #include <asm/v7m-helper.h>
 
 #define __process_alloca_with_align(__ptr, __align) ({		\
@@ -49,7 +49,7 @@ static void setup_sigframe(int sig, struct sigaction *sa, int value)
 	sigctx->xpsr = xPSR_T_Msk;
 
 	/* unset the TIF_SIGPENDING flags */
-	current_thread_info()->flags = 0;
+	clear_thread_flag(TIF_SIGPENDING);
 }
 
 static int do_signal(int sig, int value)
@@ -69,12 +69,12 @@ void do_notify_resume(int syscall_retval)
 	/* save the syscall return value into the syscall frame */
 	ti->user.ctx->r0 = syscall_retval;
 
-	if (/* thread_info_flags */ ti->flags & _TIF_SIGPENDING)
+	if (test_thread_flag(TIF_SIGPENDING))
 		do_signal(current->sigpending, current->sigval);
 }
 
 void do_notify(void)
 {
-	if (current_thread_info()->flags & _TIF_SIGPENDING)
+	if (test_thread_flag(TIF_SIGPENDING))
 		do_signal(current->sigpending, current->sigval);
 }

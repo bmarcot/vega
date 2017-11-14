@@ -5,7 +5,6 @@
  */
 
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <kernel/bitops.h>
@@ -15,9 +14,9 @@
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
+#include <kernel/thread_info.h>
 
 #include <asm/current.h>
-#include <asm/thread_info.h>
 
 SYSCALL_DEFINE(sigaction,
 	int			signum,
@@ -61,7 +60,7 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	tsk->sigval = value;
 	tsk->sigpending = sig;
-	task_thread_info(tsk)->flags |= _TIF_SIGPENDING;
+	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 
 	return 0;
 }
