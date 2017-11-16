@@ -18,6 +18,27 @@
 
 #include <asm/current.h>
 
+static struct sighand_struct *task_sighand_struct(struct task_struct *tsk)
+{
+	if (tsk->sighand)
+		return tsk->sighand;
+
+	return tsk->group_leader->sighand;
+}
+
+static struct sighand_struct *set_alloc_sighand_struct(struct task_struct *tsk)
+{
+	struct sighand_struct *sighand;
+
+	sighand = kzalloc(sizeof(*sighand));
+	if (!sighand)
+		return NULL;
+	current->sighand = sighand;
+	current->group_leader->sighand = sighand;
+
+	return sighand;
+}
+
 SYSCALL_DEFINE(sigaction,
 	int			signum,
 	const struct sigaction	*act,
@@ -38,13 +59,11 @@ SYSCALL_DEFINE(sigaction,
 	}
 
 	/* alloc or get the signal handler table */
-	if (!current->sighand) {
-		sighand = kzalloc(sizeof(*sighand));
+	sighand = task_sighand_struct(current);
+	if (!sighand) {
+		sighand = set_alloc_sighand_struct(current);
 		if (!sighand)
 			return -1;
-		current->sighand = sighand;
-	} else {
-		sighand = current->sighand;
 	}
 
 	/* save and install a new handler */
