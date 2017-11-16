@@ -36,5 +36,6 @@
 #define SYS_WAITPID 29
 #define SYS_GETTID 30
 #define SYS_GETPPID 31
+#define SYS_TGKILL 32
 
 #endif /* !_ASM_SYSCALLS_H */

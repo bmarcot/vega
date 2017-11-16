@@ -125,6 +125,15 @@ SYSCALL_DEFINE(kill,
 	return do_kill(pid, sig, (union sigval){0});
 }
 
+SYSCALL_DEFINE(tgkill,
+	int		tgid,
+	int		tid,
+	int		sig)
+{
+	/* a TID is system-wide unique */
+	return do_kill(tid, sig, (union sigval){0});
+}
+
 SYSCALL_DEFINE(sigreturn, void)
 {
 	struct sigaction *act;

@@ -44,6 +44,7 @@ xs = [
     'waitpid',
     'gettid',
     'getppid',
+    'tgkill',
 ]
 
 import datetime
