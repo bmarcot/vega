@@ -66,7 +66,10 @@ int init_task(struct task_struct *task, int flags)
 
 	/* signals */
 	task->sigpending = -1;
-	task->sighand = NULL;
+	if (flags & CLONE_THREAD)
+		task->sighand = current->group_leader->sighand;
+	else
+		task->sighand = NULL;
 
 	return 0;
 }
