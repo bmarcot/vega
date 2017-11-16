@@ -4,6 +4,9 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
+#include <string.h>
+
+#include <kernel/errno-base.h>
 #include <kernel/ktime.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
@@ -100,7 +103,9 @@ static void nanosleep_callback(void *task)
 	schedule();
 }
 
-static int hrtimer_nanosleep(const struct timespec *req)
+SYSCALL_DEFINE(nanosleep,
+	const struct timespec	*req,
+	struct timespec		*rem)
 {
 	struct hrtimer timer;
 
@@ -110,17 +115,17 @@ static int hrtimer_nanosleep(const struct timespec *req)
 	timer.context = current;
 	if (hrtimer_set_expires(&timer, timespec_to_ktime(*req)))
 		return -1;
-	current->state = TASK_UNINTERRUPTIBLE;
+	current->state = TASK_INTERRUPTIBLE;
+
 	schedule();
 
+	if (current->sigpending != -1) {
+		ktime_t curr = clock_monotonic_read();
+		*rem = ktime_to_timespec(timer.expires - curr);
+		return -EINTR;
+	}
+
+	memset(rem, 0, sizeof(*rem));
+
 	return 0;
-}
-
-SYSCALL_DEFINE(nanosleep,
-	const struct timespec	*req,
-	struct timespec		*rem)
-{
-	(void)rem;
-
-	return hrtimer_nanosleep(req);
 }
