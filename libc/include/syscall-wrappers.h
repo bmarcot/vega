@@ -48,3 +48,4 @@ int do_syscall6();
 #define _exit_thread(...)	(void)do_syscall1(__VA_ARGS__, SYS_EXIT)
 #define SYS_sigreturn(...)	do_syscall0(SYS_SIGRETURN)
 #define SYS_gettid(...)		do_syscall0(SYS_GETTID)
+#define SYS_tgkill(...)		do_syscall3(__VA_ARGS__, SYS_TGKILL)

@@ -70,3 +70,8 @@ pid_t getppid(void)
 {
 	return (pid_t)SYS_getppid();
 }
+
+int tgkill(int tgid, int tid, int sig)
+{
+	return SYS_tgkill(tgid, tid, sig);
+}
