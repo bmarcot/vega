@@ -61,6 +61,8 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 	tsk->sigval = value;
 	tsk->sigpending = sig;
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
+	if (tsk->state != TASK_RUNNING) //FIXME: Handle uninterruptible tasks
+		sched_enqueue(tsk);
 
 	return 0;
 }
