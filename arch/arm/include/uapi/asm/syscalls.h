@@ -37,5 +37,6 @@
 #define SYS_GETTID 30
 #define SYS_GETPPID 31
 #define SYS_TGKILL 32
+#define SYS_PAUSE 33
 
 #endif /* !_ASM_SYSCALLS_H */

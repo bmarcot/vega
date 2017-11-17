@@ -178,3 +178,14 @@ void signal_event(struct task_struct *tsk, struct sigevent *sigev)
 		return;
 	notify_signal(tsk, sigev->sigev_signo, value);
 }
+
+SYSCALL_DEFINE(pause, void)
+{
+	set_current_state(TASK_INTERRUPTIBLE);
+
+	schedule();
+
+	//FIXME: Only signals can wake-up this task
+
+	return -EINTR;
+}
