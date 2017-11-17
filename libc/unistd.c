@@ -39,3 +39,8 @@ void _exit(int status)
 {
 	SYS_exit_group(status);
 }
+
+int pause(void)
+{
+	return SYS_pause();
+}

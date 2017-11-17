@@ -37,6 +37,7 @@ int do_syscall6();
 #define SYS_getppid(...)	do_syscall0(SYS_GETPPID)
 #define SYS_stat(...)		do_syscall2(__VA_ARGS__, SYS_STAT);
 #define SYS_vfork(...)		do_syscall0(SYS_VFORK)
+#define SYS_pause(...)		do_syscall0(SYS_PAUSE)
 
 /* sys/wait.h */
 #define SYS_waitpid(...)	do_syscall3(__VA_ARGS__, SYS_WAITPID)
