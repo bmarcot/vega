@@ -20,7 +20,7 @@
 
 #define RUNQUEUE_MAX	32
 
-static unsigned long	pri_bitmap;
+unsigned long		pri_bitmap;
 static struct list_head	pri_runq[RUNQUEUE_MAX];
 
 /* pick up the highest priority task */
