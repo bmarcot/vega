@@ -9,13 +9,12 @@
 
 struct thread_info;
 
-extern struct task_struct *__switch_to(struct thread_info *next,
-				struct thread_info *prev,
-				int do_saving);
+extern struct task_struct *resume(struct thread_info *next,
+				struct thread_info *prev, int save_prev);
 
 #define switch_to(prev, next, last)					\
 	do {								\
-		last = __switch_to(task_thread_info(next),		\
+		(last) = resume(task_thread_info(next),			\
 				task_thread_info(prev),			\
 				prev->state < EXIT_ZOMBIE);		\
 	} while (0);

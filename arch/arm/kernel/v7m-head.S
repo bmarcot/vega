@@ -51,7 +51,7 @@ ENTRY(reset_entry)
 	itttt	ne
 	movne	r1, #0
 	movne	r2, #0
-	ldrne	lr, =__switch_to
+	ldrne	lr, =resume
 	bxne	lr
 0:	b	0b
 ENDPROC(reset_entry)

@@ -10,26 +10,24 @@
 	.syntax unified
 	.thumb
 
-	@ do the thread-context switch
+	@ resume -- do the actual context-switch
 	@
 	@ r0: struct thread_info *next
-	@ r1: struct thread_info *prev (i.e. the current thread)
-	@ r2: do saving if not zero
-ENTRY(__switch_to)
-	/* save previous thread context */
-	tst	r2, r2
+	@ r1: struct thread_info *prev
+	@ r2: int save_prev
+ENTRY(resume)
+	tst	r2, r2			/* save previous thread if not zero */
 	ittt	ne
 	pushne	{r4-r12, lr}
 	movne	r2, sp
 	strne	r2, [r1]
 
-	/* restore next task context */
-	ldm	r0!, {r2, r3, r12}
-	mov	sp, r2
-	msr	control, r12		@ write to SPSEL is ignored in Handler_Mode
+	ldr	sp, [r0]		/* restore next thread */
+	ldr	r2, [r0, #8]
+	msr	control, r2		/* write to SPSEL is ignored in Handler_Mode */
 	mov	r0, r1
 	pop	{r4-r12, pc}
-ENDPROC(__switch_to)
+ENDPROC(resume)
 
 	.macro	emulate_iret
 	ldrd	r0, r1, [sp, #24]	/* r0 = ret_addr, r1 = xpsr */
