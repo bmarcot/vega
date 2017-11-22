@@ -50,10 +50,6 @@ int sched_enqueue(struct task_struct *task)
 
 int sched_dequeue(struct task_struct *task)
 {
-	/* active task is not in the runqueue */
-	if (task == current)
-		return 0;
-
 	list_del(&task->ti_q);
 	if (list_empty(&pri_runq[task->prio]))
 		bitmap_clear_bit(&pri_bitmap, task->prio);
@@ -65,12 +61,6 @@ int schedule(void)
 {
 	struct task_struct *next = pick_next_task();
 	struct task_struct *prev = current;
-
-	if (next != idle_task) {
-		list_del(&next->ti_q);
-		if (list_empty(&pri_runq[next->prio]))
-			bitmap_clear_bit(&pri_bitmap, next->prio);
-	}
 
 	switch_to(prev, next, prev);
 
@@ -91,7 +81,11 @@ int sched_init(void)
 
 SYSCALL_DEFINE(sched_yield, void)
 {
-	sched_enqueue(current);
+	if (!list_is_singular(&pri_runq[current->prio])) {
+		list_del(&current->ti_q);
+		list_add_tail(&current->ti_q, &pri_runq[current->prio]);
+	}
+
 	schedule();
 
 	return 0;
@@ -107,8 +101,6 @@ int wake_up_process(struct task_struct *tsk)
 	if (!pri_bitmap)
 		need_resched = 1;
 	sched_enqueue(tsk);
-	if (current != tsk)
-		sched_enqueue(current);
 	if (need_resched)
 		return schedule();
 

@@ -25,7 +25,11 @@ int futex_wait(int *uaddr, int val)
 			.task = current,
 		};
 		list_add(&futex.list, &futexes);
+
+		sched_dequeue(current);
+		//FIXME: Interrupting is possible; return EINTR
 		current->state = TASK_UNINTERRUPTIBLE;
+
 		schedule();
 	}
 

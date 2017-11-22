@@ -169,6 +169,7 @@ void signal_event(struct task_struct *tsk, struct sigevent *sigev)
 
 SYSCALL_DEFINE(pause, void)
 {
+	sched_dequeue(current);
 	set_current_state(TASK_INTERRUPTIBLE);
 
 	schedule();

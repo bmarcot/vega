@@ -131,5 +131,7 @@ struct thread_info *start_kernel(void)
 
 	printk("Kernel bootstrap done.\n--\n");
 
+	sched_enqueue(init_task);
+
 	return task_thread_info(init_task);
 }

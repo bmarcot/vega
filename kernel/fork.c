@@ -61,6 +61,7 @@ SYSCALL_DEFINE(vfork, void)
 	child_ctx->r0 = 0;
 
 	/* parent is now stopped until child returns */
+	sched_dequeue(current);
 	set_current_state(TASK_STOPPED);
 	sched_enqueue(child);
 

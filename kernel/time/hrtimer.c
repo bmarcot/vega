@@ -99,7 +99,6 @@ struct hrtimer *hrtimer_alloc(void)
 static void nanosleep_callback(void *task)
 {
 	sched_enqueue(task);
-	sched_enqueue(current);
 	schedule();
 }
 
@@ -115,6 +114,8 @@ SYSCALL_DEFINE(nanosleep,
 	timer.context = current;
 	if (hrtimer_set_expires(&timer, timespec_to_ktime(*req)))
 		return -1;
+
+	sched_dequeue(current);
 	current->state = TASK_INTERRUPTIBLE;
 
 	schedule();

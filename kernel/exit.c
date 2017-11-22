@@ -33,6 +33,7 @@ void do_exit(int status)
 {
 	struct task_struct *tsk = current;
 
+	sched_dequeue(current);
 	if (tsk->flags & CLONE_VFORK)
 		sched_enqueue(tsk->parent); // send signal? do_notify_parent()...
 
