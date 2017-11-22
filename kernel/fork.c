@@ -62,7 +62,7 @@ SYSCALL_DEFINE(vfork, void)
 
 	/* parent is now stopped until child returns */
 	sched_dequeue(current);
-	set_current_state(TASK_STOPPED);
+	set_current_state(TASK_UNINTERRUPTIBLE);
 	sched_enqueue(child);
 
 	schedule();
