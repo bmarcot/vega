@@ -96,3 +96,21 @@ SYSCALL_DEFINE(sched_yield, void)
 
 	return 0;
 }
+
+int wake_up_process(struct task_struct *tsk)
+{
+	int need_resched = 0;
+
+	if (tsk->state == TASK_UNINTERRUPTIBLE)
+		return -1;
+
+	if (!pri_bitmap)
+		need_resched = 1;
+	sched_enqueue(tsk);
+	if (current != tsk)
+		sched_enqueue(current);
+	if (need_resched)
+		return schedule();
+
+	return 0;
+}

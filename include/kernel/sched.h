@@ -79,6 +79,7 @@ int sched_init(void);
 int sched_enqueue(struct task_struct *task);
 int sched_dequeue(struct task_struct *task);
 int schedule(void);
+int wake_up_process(struct task_struct *tsk);
 
 /* task.c */
 int init_task(struct task_struct *task, int flags);

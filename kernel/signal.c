@@ -75,25 +75,13 @@ SYSCALL_DEFINE(sigaction,
 	return 0;
 }
 
-extern unsigned long pri_bitmap;
-
 int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	tsk->sigval = value;
 	tsk->sigpending = sig;
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
-
-	//FIXME: Handle uninterruptible tasks
-	if (tsk->state != TASK_RUNNING) {
-		int need_resched = 0;
-		if (!pri_bitmap)
-			need_resched = 1;
-		sched_enqueue(tsk);
-		if (current != tsk)
-			sched_enqueue(current);
-		if (need_resched)
-			schedule();
-	}
+	if (tsk->state != TASK_RUNNING)
+		return wake_up_process(tsk);
 
 	return 0;
 }
