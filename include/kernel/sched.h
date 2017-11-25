@@ -7,7 +7,9 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
+#include <kernel/signal.h>
 #include <kernel/types.h>
+
 #include <asm/thread_info.h>
 #include <uapi/kernel/sched.h>
 
@@ -27,6 +29,7 @@
 #define FILE_MAX 8
 
 struct file; //XXX: Change to file_struct
+struct sigpending;
 struct sighand_struct;
 
 struct task_struct {
@@ -47,9 +50,8 @@ struct task_struct {
 	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
-	int		sigpending; //XXX: Will die, replace with list of pending signals
-	int		sigval;     //XXX: "
-	struct sighand_struct *sighand;
+	struct sigpending	pending;
+	struct sighand_struct	*sighand;
 
 	struct list_head   list;    /* global list of tasks */
 	struct task_struct *parent;

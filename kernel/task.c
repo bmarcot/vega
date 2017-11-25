@@ -65,7 +65,7 @@ int init_task(struct task_struct *task, int flags)
 	list_add(&task->list, &tasks);
 
 	/* signals */
-	task->sigpending = -1;
+	init_sigpending(&task->pending);
 	if (flags & CLONE_THREAD)
 		task->sighand = current->group_leader->sighand;
 	else
