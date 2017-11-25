@@ -54,32 +54,33 @@ static void setup_sigframe(int sig, struct sigaction *sa, int value)
 
 void do_exit(int status);
 
-static int do_signal(int sig, int value)
+static int do_signal(void)
 {
 	struct sigaction *act;
+	struct sigqueue *sig = list_first_entry(&current->pending.list,
+						struct sigqueue, list);
+	int signo = sig->info.si_signo;
 
-	if (sig == SIGKILL)
+	if (signo == SIGKILL)
 		do_exit(0);
 
-	act = &current->sighand->action[sig];
-	setup_sigframe(sig, act, value);
+	act = &current->sighand->action[signo];
+	setup_sigframe(signo, act, sig->info.si_value.sival_int);
 
 	return 0;
 }
 
 void do_notify_resume(int syscall_retval)
 {
-	struct thread_info *ti = current_thread_info();
-
 	/* save the syscall return value into the syscall frame */
-	ti->user.ctx->r0 = syscall_retval;
+	current_thread_info()->user.ctx->r0 = syscall_retval;
 
 	if (test_thread_flag(TIF_SIGPENDING))
-		do_signal(current->sigpending, current->sigval);
+		do_signal();
 }
 
 void do_notify(void)
 {
 	if (test_thread_flag(TIF_SIGPENDING))
-		do_signal(current->sigpending, current->sigval);
+		do_signal();
 }

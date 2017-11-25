@@ -18,6 +18,12 @@
 
 #include <asm/current.h>
 
+int signal_pending(struct task_struct *tsk)
+{
+	return tsk->pending.signal != 0;
+}
+
+//FIXME: Rename to task_sighand()
 static struct sighand_struct *task_sighand_struct(struct task_struct *tsk)
 {
 	if (tsk->sighand)
@@ -75,10 +81,19 @@ SYSCALL_DEFINE(sigaction,
 	return 0;
 }
 
-int notify_signal(struct task_struct *tsk, int sig, int value)
+int notify_signal(struct task_struct *tsk, int signo, int value)
 {
-	tsk->sigval = value;
-	tsk->sigpending = sig;
+	struct sigqueue *sig;
+
+	sig = kmalloc(sizeof(*sig));
+	if (!sig)
+		return -1;
+	sig->info.si_signo = signo;
+	sig->info.si_value.sival_int = value;
+	sig->info.si_pid = current->pid;
+	list_add_tail(&sig->list, &tsk->pending.list);
+	tsk->pending.signal |= (1 << signo);
+
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 	if (tsk->state != TASK_RUNNING)
 		return wake_up_process(tsk);
@@ -139,17 +154,23 @@ SYSCALL_DEFINE(sigreturn, void)
 	struct sigaction *act;
 	int off;
 
-	if (current->sigpending == -1) {
+	if (!signal_pending(current)) {
 		pr_warn("Wants to return from signal, but no signal raised");
 		return 0;
+
 	}
 
-	act = &current->sighand->action[current->sigpending];
+	struct sigqueue *sig = list_first_entry(&current->pending.list,
+						struct sigqueue, list);
+	act = &current->sighand->action[sig->info.si_signo];
 	off = sizeof(struct cpu_user_context);
-	if (act->sa_flags & SA_SIGINFO)
+	if (act->sa_flags & SA_SIGINFO) // not act, sig->flags instead
 		off += align_next(sizeof(siginfo_t), 8);
 	current_thread_info()->user.psp += off;
-	current->sigpending = -1;
+
+	list_del(&sig->list);
+	sig->info.si_signo = 0;//clear_bit(sig->info.si_signo);
+	kfree(sig);
 
 	/* If the interrupted task was in a syscall, this restores the
 	 * syscall's return value. If it was interrupted because of an

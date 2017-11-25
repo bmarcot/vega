@@ -11,6 +11,7 @@
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/syscalls.h>
 #include <kernel/time.h>
 #include <kernel/time/clockevents.h>
@@ -120,7 +121,7 @@ SYSCALL_DEFINE(nanosleep,
 
 	schedule();
 
-	if (current->sigpending != -1) {
+	if (signal_pending(current)) {
 		ktime_t curr = clock_monotonic_read();
 		*rem = ktime_to_timespec(timer.expires - curr);
 		return -EINTR;
