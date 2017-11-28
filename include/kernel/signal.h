@@ -58,7 +58,6 @@ static inline void sigemptyset(sigset_t *set)
 }
 
 struct sigqueue {
-	int			flags;
 	siginfo_t		info;
 	struct list_head	list;
 };

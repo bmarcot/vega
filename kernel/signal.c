@@ -89,16 +89,13 @@ SYSCALL_DEFINE(sigaction,
 int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	struct sigqueue *q;
-	struct sigaction *act = task_sigaction(tsk, sig);
 
 	q = kmalloc(sizeof(*q));
 	if (!q)
 		return -1;
-
 	q->info.si_signo = sig;
 	q->info.si_value.sival_int = value;
 	q->info.si_pid = current->pid;
-	q->flags = act->sa_flags;
 
 	list_add_tail(&q->list, &tsk->pending.list);
 	sigaddset(&tsk->pending.signal, sig);
@@ -171,7 +168,8 @@ SYSCALL_DEFINE(sigreturn, void)
 
 	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
 	off = sizeof(struct cpu_user_context);
-	if (sig->flags & SA_SIGINFO)
+	struct sigaction *act = task_sigaction(current, sig->info.si_signo);
+	if (act->sa_flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
 	current_thread_info()->user.psp += off;
 
