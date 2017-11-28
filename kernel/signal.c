@@ -20,7 +20,7 @@
 
 int signal_pending(struct task_struct *tsk)
 {
-	return tsk->pending.signal != 0;
+	return !sigisemptyset(&tsk->pending.signal);
 }
 
 //FIXME: Rename to task_sighand()
@@ -101,7 +101,7 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 	q->flags = act->sa_flags;
 
 	list_add_tail(&q->list, &tsk->pending.list);
-	tsk->pending.signal |= (1 << sig);
+	sigaddset(&tsk->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 	if (tsk->state != TASK_RUNNING)
@@ -176,7 +176,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 
 	list_del(&sig->list);
-	sig->info.si_signo = 0;//clear_bit(sig->info.si_signo);
+	sigdelset(&current->pending.signal, sig->info.si_signo);
 	kfree(sig);
 
 	/* If the interrupted task was in a syscall, this restores the
