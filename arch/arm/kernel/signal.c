@@ -30,7 +30,7 @@ static void setup_sigframe(struct sigqueue *q, struct sigaction *sa)
 	siginfo_t *siginfo = NULL;
 	struct cpu_user_context *sigctx;
 
-	if (sa->sa_flags & SA_SIGINFO) {
+	if (q->flags & SA_SIGINFO) {
 		__process_alloca(siginfo);
 		memcpy(siginfo, &q->info, sizeof(*siginfo));
 	}
@@ -39,7 +39,7 @@ static void setup_sigframe(struct sigqueue *q, struct sigaction *sa)
 	sigctx->r0 = q->info.si_signo;  /* signum */
 	sigctx->r1 = (u32)siginfo;      /* siginfo_t or null */
 	sigctx->r2 = 0;                 /* ucontext_t *, commonly unused */
-	if (sa->sa_flags & SA_RESTORER)
+	if (q->flags & SA_RESTORER)
 		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
 	else
 		sigctx->lr = 0;

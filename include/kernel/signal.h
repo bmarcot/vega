@@ -11,6 +11,7 @@
 #include <uapi/kernel/signal.h>
 
 struct sigqueue {
+	int			flags;
 	siginfo_t		info;
 	struct list_head	list;
 };

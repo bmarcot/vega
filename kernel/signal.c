@@ -32,6 +32,11 @@ static struct sighand_struct *task_sighand_struct(struct task_struct *tsk)
 	return tsk->group_leader->sighand;
 }
 
+static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
+{
+	return &tsk->sighand->action[sig];
+}
+
 static struct sighand_struct *set_alloc_sighand_struct(struct task_struct *tsk)
 {
 	struct sighand_struct *sighand;
@@ -81,18 +86,22 @@ SYSCALL_DEFINE(sigaction,
 	return 0;
 }
 
-int notify_signal(struct task_struct *tsk, int signo, int value)
+int notify_signal(struct task_struct *tsk, int sig, int value)
 {
-	struct sigqueue *sig;
+	struct sigqueue *q;
+	struct sigaction *act = task_sigaction(tsk, sig);
 
-	sig = kmalloc(sizeof(*sig));
-	if (!sig)
+	q = kmalloc(sizeof(*q));
+	if (!q)
 		return -1;
-	sig->info.si_signo = signo;
-	sig->info.si_value.sival_int = value;
-	sig->info.si_pid = current->pid;
-	list_add_tail(&sig->list, &tsk->pending.list);
-	tsk->pending.signal |= (1 << signo);
+
+	q->info.si_signo = sig;
+	q->info.si_value.sival_int = value;
+	q->info.si_pid = current->pid;
+	q->flags = act->sa_flags;
+
+	list_add_tail(&q->list, &tsk->pending.list);
+	tsk->pending.signal |= (1 << sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 	if (tsk->state != TASK_RUNNING)
@@ -101,7 +110,7 @@ int notify_signal(struct task_struct *tsk, int signo, int value)
 	return 0;
 }
 
-static int do_kill(int pid, int sig, union sigval value)
+static int do_kill(int pid, int sig, int value)
 {
 	struct task_struct *tsk;
 
@@ -120,7 +129,7 @@ static int do_kill(int pid, int sig, union sigval value)
 	if (!tsk->sighand->action[sig].sa_handler)
 		return 0;
 
-	notify_signal(tsk, sig, value.sival_int);
+	notify_signal(tsk, sig, value);
 
 	return 0;
 }
@@ -130,14 +139,14 @@ SYSCALL_DEFINE(sigqueue,
 	int		sig,
 	union sigval	value)
 {
-	return do_kill(pid, sig, value);
+	return do_kill(pid, sig, value.sival_int);
 }
 
 SYSCALL_DEFINE(kill,
 	pid_t		pid,
 	int		sig)
 {
-	return do_kill(pid, sig, (union sigval){0});
+	return do_kill(pid, sig, 0);
 }
 
 SYSCALL_DEFINE(tgkill,
@@ -145,13 +154,13 @@ SYSCALL_DEFINE(tgkill,
 	int		tid,
 	int		sig)
 {
-	/* a TID is system-wide unique */
-	return do_kill(tid, sig, (union sigval){0});
+	/* a thread-id (tid) is system-wide unique */
+	return do_kill(tid, sig, 0);
 }
 
 SYSCALL_DEFINE(sigreturn, void)
 {
-	struct sigaction *act;
+	struct sigqueue *sig;
 	int off;
 
 	if (!signal_pending(current)) {
@@ -160,11 +169,9 @@ SYSCALL_DEFINE(sigreturn, void)
 
 	}
 
-	struct sigqueue *sig = list_first_entry(&current->pending.list,
-						struct sigqueue, list);
-	act = &current->sighand->action[sig->info.si_signo];
+	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
 	off = sizeof(struct cpu_user_context);
-	if (act->sa_flags & SA_SIGINFO) // not act, sig->flags instead
+	if (sig->flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
 	current_thread_info()->user.psp += off;
 
