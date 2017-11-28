@@ -8,6 +8,7 @@
 #ifndef _UAPI_KERNEL_SIGNAL_H
 #define _UAPI_KERNEL_SIGNAL_H
 
+#include <asm/bitsperlong.h>
 #include <asm/posix_types.h>
 
 #define SIGHUP		1
@@ -50,10 +51,12 @@ union sigval {
 	void *sival_ptr;
 };
 
-#define _NSIG 32
+#define _NSIG		32
+#define _NSIG_BPW	__BITS_PER_LONG
+#define _NSIG_WORDS	(_NSIG / _NSIG_BPW)
 
 typedef struct {
-	unsigned long sig[_NSIG / 32];
+	unsigned long	sig[_NSIG_WORDS];
 } sigset_t;
 
 typedef struct {
