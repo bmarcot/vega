@@ -10,7 +10,8 @@
 #include <string.h>
 
 #include <kernel/list.h>
-#include <uapi/kernel/signal.h>
+#include <kernel/sched.h>
+#include <kernel/signal_types.h>
 
 static inline void sigaddset(sigset_t *set, int sig)
 {
@@ -56,22 +57,6 @@ static inline void sigemptyset(sigset_t *set)
 		memset(set, 0, sizeof(sigset_t));
 	}
 }
-
-struct sigqueue {
-	siginfo_t		info;
-	struct list_head	list;
-};
-
-struct sigpending {
-	sigset_t		signal;
-	struct list_head	list;
-};
-
-struct sighand_struct {
-	struct sigaction	action[_NSIG];
-};
-
-struct task_struct;
 
 int signal_pending(struct task_struct *tsk);
 int send_signal(int sig, int value);
