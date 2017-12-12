@@ -83,4 +83,9 @@ static inline void init_sigpending(struct sigpending *sig)
 	INIT_LIST_HEAD(&sig->list);
 }
 
+static inline struct sighand_struct *task_sighand(struct task_struct *tsk)
+{
+	return tsk->sighand ? tsk->sighand : tsk->group_leader->sighand;
+}
+
 #endif /* !_KERNEL_SIGNAL_H */

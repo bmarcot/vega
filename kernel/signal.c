@@ -23,15 +23,6 @@ int signal_pending(struct task_struct *tsk)
 	return !sigisemptyset(&tsk->pending.signal);
 }
 
-//FIXME: Rename to task_sighand()
-static struct sighand_struct *task_sighand_struct(struct task_struct *tsk)
-{
-	if (tsk->sighand)
-		return tsk->sighand;
-
-	return tsk->group_leader->sighand;
-}
-
 static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 {
 	return &tsk->sighand->action[sig];
@@ -39,13 +30,13 @@ static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 
 static struct sighand_struct *set_alloc_sighand_struct(struct task_struct *tsk)
 {
-	struct sighand_struct *sighand;
+	struct sighand_struct *sighand = kzalloc(sizeof(*sighand));
 
-	sighand = kzalloc(sizeof(*sighand));
 	if (!sighand)
 		return NULL;
-	current->sighand = sighand;
-	current->group_leader->sighand = sighand;
+	tsk->sighand = sighand;
+	if (!thread_group_leader(tsk))
+		tsk->group_leader->sighand = sighand;
 
 	return sighand;
 }
@@ -70,7 +61,7 @@ SYSCALL_DEFINE(sigaction,
 	}
 
 	/* alloc or get the signal handler table */
-	sighand = task_sighand_struct(current);
+	sighand = task_sighand(current);
 	if (!sighand) {
 		sighand = set_alloc_sighand_struct(current);
 		if (!sighand)
