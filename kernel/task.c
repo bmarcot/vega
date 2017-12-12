@@ -8,6 +8,7 @@
 #include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/stddef.h>
 #include <kernel/thread.h>
 

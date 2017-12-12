@@ -7,7 +7,7 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <kernel/signal.h>
+#include <kernel/signal_types.h>
 #include <kernel/types.h>
 
 #include <asm/thread_info.h>
