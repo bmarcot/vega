@@ -1,5 +1,5 @@
 /*
- * include/kernel/signal.h
+ * include/kernel/signal_types.h
  *
  * Copyright (c) 2016-2017 Benoit Marcot
  */
