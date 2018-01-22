@@ -77,6 +77,8 @@ SYSCALL_DEFINE(waitpid,
 	tsk = get_task_by_pid(pid);
 	if (!tsk)
 		return -1;
+	if (tsk->state != EXIT_ZOMBIE)
+		return -1;
 	if (status)
 		*status = tsk->exit_code; //FIXME: Check user pointer
 	release_task(tsk);
