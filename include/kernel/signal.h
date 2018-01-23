@@ -59,7 +59,7 @@ static inline void sigemptyset(sigset_t *set)
 }
 
 int signal_pending(struct task_struct *tsk);
-int send_signal(int sig, int value);
+int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk);
 void signal_event(struct task_struct *tsk, struct sigevent *sigev);
 
 static inline void init_sigpending(struct sigpending *sig)

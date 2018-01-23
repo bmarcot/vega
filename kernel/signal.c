@@ -34,7 +34,12 @@ static struct sighand_struct *set_alloc_sighand_struct(struct task_struct *tsk)
 
 	if (!sighand)
 		return NULL;
+
 	tsk->sighand = sighand;
+
+	/* Lazy allocation of the process' signal handler array: the array is
+	 * allocated on call to a signal()-family function. This can happen in
+	 * a child, and array must be hooked to the thread leader. */
 	if (!thread_group_leader(tsk))
 		tsk->group_leader->sighand = sighand;
 
@@ -77,28 +82,32 @@ SYSCALL_DEFINE(sigaction,
 	return 0;
 }
 
-int notify_signal(struct task_struct *tsk, int sig, int value)
+int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 {
-	struct sigqueue *q;
-
-	if (sig == SIGCHLD)
-		goto wakeup;
-
-	q = kmalloc(sizeof(*q));
-	if (!q)
-		return -1;
-	q->info.si_signo = sig;
-	q->info.si_value.sival_int = value;
-	q->info.si_pid = current->pid;
-
-	list_add_tail(&q->list, &tsk->pending.list);
+	list_add_tail(&info->list, &tsk->pending.list);
 	sigaddset(&tsk->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 
-wakeup:
 	if (tsk->state != TASK_RUNNING)
 		return wake_up_process(tsk);
+
+	return 0;
+}
+
+int notify_signal(struct task_struct *tsk, int sig, int value)
+{
+	struct sigqueue *q;
+
+	q = kmalloc(sizeof(*q));
+	if (!q)
+		return -1;
+
+	q->info.si_signo = sig;
+	q->info.si_value.sival_int = value;
+	q->info.si_pid = current->pid;
+
+	send_signal_info(sig, q, tsk);
 
 	return 0;
 }
