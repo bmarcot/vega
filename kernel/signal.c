@@ -81,6 +81,9 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	struct sigqueue *q;
 
+	if (sig == SIGCHLD)
+		goto wakeup;
+
 	q = kmalloc(sizeof(*q));
 	if (!q)
 		return -1;
@@ -92,6 +95,8 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 	sigaddset(&tsk->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
+
+wakeup:
 	if (tsk->state != TASK_RUNNING)
 		return wake_up_process(tsk);
 

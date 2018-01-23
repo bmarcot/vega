@@ -11,17 +11,21 @@
 
 #include <asm/current.h>
 
+static int do_notify_parent(struct task_struct *tsk, int sig)
+{
+	if (!thread_group_leader(tsk))
+		return -1;
+	sched_enqueue(tsk->parent);
+	notify_signal(tsk->parent, sig, 0);
+
+	return 0;
+}
+
 static void exit_notify(struct task_struct *tsk)
 {
 	int autoreap;
 
-	if (thread_group_leader(tsk)) {
-		//autoreap = do_notify_parent(tsk, tsk->exit_signal); // send_signal...
-		autoreap = 0;
-	} else {
-		autoreap = 1;
-	}
-
+	autoreap = do_notify_parent(tsk, tsk->exit_signal);
 	tsk->state = autoreap ? EXIT_DEAD : EXIT_ZOMBIE;
 
 	/* If the process is dead, release it - nobody will wait for it */
@@ -33,10 +37,7 @@ void do_exit(int status)
 {
 	struct task_struct *tsk = current;
 
-	sched_dequeue(current);
-	if (tsk->flags & CLONE_VFORK)
-		sched_enqueue(tsk->parent); // send signal? do_notify_parent()...
-
+	sched_dequeue(tsk);
 	// mm_release();
 	tsk->exit_code = status;
 	exit_notify(tsk);

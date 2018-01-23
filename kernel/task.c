@@ -54,7 +54,7 @@ int init_task(struct task_struct *task, int flags)
 		task->tgid = current->group_leader->tgid;
 	} else {
 		task->group_leader = task; /* self */
-		task->exit_signal = 0;
+		task->exit_signal = SIGCHLD;
 		task->parent = current;
 		task->pid = pid;
 		task->tgid = pid;
