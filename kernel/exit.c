@@ -7,16 +7,29 @@
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
 
 static int do_notify_parent(struct task_struct *tsk, int sig)
 {
+	/* task is not the task leader - nobody will wait for it */
 	if (!thread_group_leader(tsk))
-		return -1;
-	sched_enqueue(tsk->parent);
-	notify_signal(tsk->parent, sig, 0);
+		return 1;
+
+	/* This is valid because we only support vfork(), and parent is not
+	 * running while child is running. */
+	sched_enqueue(tsk->parent); // ???  wake_up_process...
+
+	struct sighand_struct *sighand = tsk->parent->sighand;
+
+	if (sighand && (sighand->action[SIGCHLD].sa_handler != 0/* SIG_IGN */)) {
+		struct sigqueue q;
+		q.info.si_signo = sig;
+		q.info.si_pid = current->pid;
+		send_signal_info(sig, &q, tsk->parent);
+	}
 
 	return 0;
 }
