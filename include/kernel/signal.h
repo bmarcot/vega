@@ -1,7 +1,7 @@
 /*
  * include/kernel/signal.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_SIGNAL_H
@@ -29,6 +29,15 @@ static inline void sigdelset(sigset_t *set, int sig)
 		set->sig[0] &= ~(1ul << sig);
 	else
 		set->sig[sig / _NSIG_BPW] &= ~(1UL << (sig % _NSIG_BPW));
+}
+
+static inline int sigismember(sigset_t *set, int sig)
+{
+	sig--;
+	if (_NSIG_WORDS == 1)
+		return 1ul & (set->sig[0] >> sig);
+	else
+		return 1ul & (set->sig[sig / _NSIG_BPW] >> (sig % _NSIG_BPW));
 }
 
 static inline int sigisemptyset(sigset_t *set)
