@@ -1,7 +1,7 @@
 /*
  * include/uapi/kernel/signal.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Ben Marcot
  *
  */
 
@@ -43,13 +43,13 @@
 #define SIGIO		29
 #define SIGPOLL		SIGIO
 
-#define SA_SIGINFO  0x1
-#define SA_RESTORER 0x2
+#define SA_SIGINFO	0x1
+#define SA_RESTORER	0x2
 
-union sigval {
-	int  sival_int;
-	void *sival_ptr;
-};
+typedef union sigval {
+	int		sival_int;
+	void		*sival_ptr;
+} sigval_t;
 
 #define _NSIG		32
 #define _NSIG_BPW	__BITS_PER_LONG
@@ -59,29 +59,42 @@ typedef struct {
 	unsigned long	sig[_NSIG_WORDS];
 } sigset_t;
 
-typedef struct {
-	int          si_signo;
-	union sigval si_value;
-	pid_t        si_pid;
+typedef struct siginfo {
+	int	si_signo;
+	int	si_errno;
+	int	si_code;
+
+	union {
+		/* SIGCHLD */
+		struct {
+			pid_t	si_pid;
+			int	si_status;
+		};
+
+		/* POSIX.1b timers */
+		struct {
+			sigval_t si_value;
+		};
+	};
 } siginfo_t;
 
 struct sigaction {
 	union {
-		void  (*sa_handler)(int);
-		void  (*sa_sigaction)(int, siginfo_t *, void *);
+		void	(*sa_handler)(int);
+		void	(*sa_sigaction)(int, siginfo_t *, void *);
 	};
-	sigset_t      sa_mask;
-	unsigned long sa_flags;
-	void          (*sa_restorer)(void);
+	sigset_t	sa_mask;
+	unsigned long	sa_flags;
+	void		(*sa_restorer)(void);
 };
 
-#define SIGEV_NONE   0
-#define SIGEV_SIGNAL 1
+#define SIGEV_NONE	0
+#define SIGEV_SIGNAL	1
 
 struct sigevent {
-	int          sigev_notify;
-	int          sigev_signo;
-	union sigval sigev_value;
+	int		sigev_notify;
+	int		sigev_signo;
+	union sigval	sigev_value;
 };
 
 #endif /* !_UAPI_KERNEL_SIGNAL_H */

@@ -1,7 +1,7 @@
 /*
  * kernel/signal.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Ben Marcot
  */
 
 #include <errno.h>
@@ -84,7 +84,8 @@ SYSCALL_DEFINE(sigaction,
 
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 {
-	list_add_tail(&info->list, &tsk->pending.list);
+	if (info)
+		list_add_tail(&info->list, &tsk->pending.list);
 	sigaddset(&tsk->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
@@ -104,8 +105,10 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 		return -1;
 
 	q->info.si_signo = sig;
-	q->info.si_value.sival_int = value;
-	q->info.si_pid = current->pid;
+	if (sig == SIGCHLD)
+		q->info.si_pid = current->pid;
+	else
+		q->info.si_value.sival_int = value;
 
 	send_signal_info(sig, q, tsk);
 
