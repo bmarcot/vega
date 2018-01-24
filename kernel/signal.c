@@ -96,6 +96,27 @@ int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 	return 0;
 }
 
+int send_signal_value(int sig, int value, struct task_struct *tsk)
+{
+	struct sigqueue *q;
+
+	q = kmalloc(sizeof(*q));
+	if (!q)
+		return -1;
+	q->info.si_signo = sig;
+	q->info.si_value.sival_int = value;
+	send_signal_info(sig, q, tsk);
+
+	return 0;
+}
+
+int send_signal(int sig, struct task_struct *tsk)
+{
+	send_signal_info(sig, NULL, tsk);
+
+	return 0;
+}
+
 int notify_signal(struct task_struct *tsk, int sig, int value)
 {
 	struct sigqueue *q;
@@ -103,13 +124,8 @@ int notify_signal(struct task_struct *tsk, int sig, int value)
 	q = kmalloc(sizeof(*q));
 	if (!q)
 		return -1;
-
 	q->info.si_signo = sig;
-	if (sig == SIGCHLD)
-		q->info.si_pid = current->pid;
-	else
-		q->info.si_value.sival_int = value;
-
+	q->info.si_value.sival_int = value;
 	send_signal_info(sig, q, tsk);
 
 	return 0;
@@ -126,7 +142,7 @@ static int do_kill(int pid, int sig, int value)
 	}
 
 	if (sig == SIGKILL)
-		notify_signal(tsk, sig, 0);
+		send_signal(sig, tsk);
 
 	/* it's ok to have no handlers installed */
 	if (!tsk->sighand)

@@ -54,13 +54,13 @@ void do_exit(int status);
 
 static int do_signal(void)
 {
+	//FIXME: Revisit handling of signals that are barely a bit in the set
+	if (sigismember(&current->pending.signal, SIGKILL))
+		do_exit(0);
+
 	struct sigqueue *sig = list_first_entry(&current->pending.list,
 						struct sigqueue, list);
 	int signo = sig->info.si_signo;
-
-	if (signo == SIGKILL)
-		do_exit(0);
-
 	setup_sigframe(sig, &current->sighand->action[signo]);
 
 	return 0;
