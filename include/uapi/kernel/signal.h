@@ -69,12 +69,18 @@ typedef struct siginfo {
 		struct {
 			pid_t	si_pid;
 			int	si_status;
-		};
+		} _sigchld;
 
 		/* POSIX.1b timers */
 		struct {
 			sigval_t si_value;
-		};
+		} _timer;
+
+		/* POSIX.1b signals, sigqueue() */
+		struct {
+			pid_t	si_pid;
+			sigval_t si_value;
+		} _rt;
 	};
 } siginfo_t;
 

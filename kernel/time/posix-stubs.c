@@ -54,7 +54,12 @@ static void timer_callback(void *context)
 
 	if (timer->type == ONESHOT_TIMER)
 		timer->disarmed = 1;
-	signal_event(timer->owner, &timer->sigev);
+
+	//XXX: SIGEV_THREAD unsupported
+	if (timer->sigev.sigev_notify != SIGEV_SIGNAL)
+		return;
+	send_timer_signal(timer->sigev.sigev_signo,
+			timer->sigev.sigev_value.sival_int, timer->owner);
 }
 
 static void timer_callback_and_link(void *context)
@@ -63,7 +68,13 @@ static void timer_callback_and_link(void *context)
 
 	hrtimer_set_expires(&timer->hrtimer,
 			timespec_to_ktime(timer->value.it_interval));
-	signal_event(timer->owner, &timer->sigev);
+
+	//XXX: SIGEV_THREAD unsupported
+	if (timer->sigev.sigev_notify != SIGEV_SIGNAL)
+		return;
+	send_timer_signal(timer->sigev.sigev_signo,
+			timer->sigev.sigev_value.sival_int, timer->owner);
+
 }
 
 SYSCALL_DEFINE(timer_create,

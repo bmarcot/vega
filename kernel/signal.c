@@ -96,7 +96,7 @@ int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 	return 0;
 }
 
-int send_signal_value(int sig, int value, struct task_struct *tsk)
+int send_timer_signal(int sig, int value, struct task_struct *tsk)
 {
 	struct sigqueue *q;
 
@@ -104,7 +104,22 @@ int send_signal_value(int sig, int value, struct task_struct *tsk)
 	if (!q)
 		return -1;
 	q->info.si_signo = sig;
-	q->info.si_value.sival_int = value;
+	q->info._timer.si_value.sival_int = value;
+	send_signal_info(sig, q, tsk);
+
+	return 0;
+}
+
+int send_rt_signal(struct task_struct *tsk, int sig, int value)
+{
+	struct sigqueue *q;
+
+	q = kmalloc(sizeof(*q));
+	if (!q)
+		return -1;
+	q->info.si_signo = sig;
+	q->info._rt.si_pid = current->pid;
+	q->info._rt.si_value.sival_int = value;
 	send_signal_info(sig, q, tsk);
 
 	return 0;
@@ -113,20 +128,6 @@ int send_signal_value(int sig, int value, struct task_struct *tsk)
 int send_signal(int sig, struct task_struct *tsk)
 {
 	send_signal_info(sig, NULL, tsk);
-
-	return 0;
-}
-
-int notify_signal(struct task_struct *tsk, int sig, int value)
-{
-	struct sigqueue *q;
-
-	q = kmalloc(sizeof(*q));
-	if (!q)
-		return -1;
-	q->info.si_signo = sig;
-	q->info.si_value.sival_int = value;
-	send_signal_info(sig, q, tsk);
 
 	return 0;
 }
@@ -150,7 +151,7 @@ static int do_kill(int pid, int sig, int value)
 	if (!tsk->sighand->action[sig].sa_handler)
 		return 0;
 
-	notify_signal(tsk, sig, value);
+	send_rt_signal(tsk, sig, value);
 
 	return 0;
 }
@@ -206,15 +207,6 @@ SYSCALL_DEFINE(sigreturn, void)
 	 * external interrupt, this restores the r0 value at the time of
 	 * the interrupt. */
 	return current_thread_info()->user.ctx->r0;
-}
-
-void signal_event(struct task_struct *tsk, struct sigevent *sigev)
-{
-	int value = sigev->sigev_value.sival_int;
-
-	if (sigev->sigev_notify != SIGEV_SIGNAL)
-		return;
-	notify_signal(tsk, sigev->sigev_signo, value);
 }
 
 SYSCALL_DEFINE(pause, void)
