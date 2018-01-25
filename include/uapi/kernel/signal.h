@@ -103,4 +103,15 @@ struct sigevent {
 	union sigval	sigev_value;
 };
 
+/*
+ * SIGCHLD si_codes
+ */
+#define CLD_EXITED	1	/* child has exited */
+#define CLD_KILLED	2	/* child was killed */
+#define CLD_DUMPED	3	/* child terminated abnormally */
+#define CLD_TRAPPED	4	/* traced child has trapped */
+#define CLD_STOPPED	5	/* child has stopped */
+#define CLD_CONTINUED	6	/* stopped child has continued */
+#define NSIGCHLD	6
+
 #endif /* !_UAPI_KERNEL_SIGNAL_H */
