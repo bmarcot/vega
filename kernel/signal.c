@@ -96,20 +96,6 @@ int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 	return 0;
 }
 
-int send_timer_signal(int sig, int value, struct task_struct *tsk)
-{
-	struct sigqueue *q;
-
-	q = kmalloc(sizeof(*q));
-	if (!q)
-		return -1;
-	q->info.si_signo = sig;
-	q->info._timer.si_value.sival_int = value;
-	send_signal_info(sig, q, tsk);
-
-	return 0;
-}
-
 int send_rt_signal(struct task_struct *tsk, int sig, int value)
 {
 	struct sigqueue *q;

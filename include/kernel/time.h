@@ -1,7 +1,7 @@
 /*
  * include/kernel/time.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_TIME_H
@@ -26,7 +26,7 @@ struct posix_timer {
 
 	struct task_struct	*owner;
 	struct itimerspec	value;
-	struct sigevent		sigev;
+	struct sigqueue		sigqueue;
 	struct list_head	list;
 	struct hrtimer		hrtimer;
 };

@@ -1,7 +1,7 @@
 /*
  * kernel/time/posix-stubs.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #include <string.h>
@@ -55,11 +55,10 @@ static void timer_callback(void *context)
 	if (timer->type == ONESHOT_TIMER)
 		timer->disarmed = 1;
 
-	//XXX: SIGEV_THREAD unsupported
-	if (timer->sigev.sigev_notify != SIGEV_SIGNAL)
-		return;
-	send_timer_signal(timer->sigev.sigev_signo,
-			timer->sigev.sigev_value.sival_int, timer->owner);
+	struct sigqueue *sigqueue = &timer->sigqueue;
+	if (!sigqueue->info.si_signo)
+		return; //XXX: SIGEV_THREAD unsupported
+	send_signal_info(sigqueue->info.si_signo, sigqueue, timer->owner);
 }
 
 static void timer_callback_and_link(void *context)
@@ -69,12 +68,10 @@ static void timer_callback_and_link(void *context)
 	hrtimer_set_expires(&timer->hrtimer,
 			timespec_to_ktime(timer->value.it_interval));
 
-	//XXX: SIGEV_THREAD unsupported
-	if (timer->sigev.sigev_notify != SIGEV_SIGNAL)
-		return;
-	send_timer_signal(timer->sigev.sigev_signo,
-			timer->sigev.sigev_value.sival_int, timer->owner);
-
+	struct sigqueue *sigqueue = &timer->sigqueue;
+	if (!sigqueue->info.si_signo)
+		return; //XXX: SIGEV_THREAD unsupported
+	send_signal_info(sigqueue->info.si_signo, sigqueue, timer->owner);
 }
 
 SYSCALL_DEFINE(timer_create,
@@ -82,9 +79,10 @@ SYSCALL_DEFINE(timer_create,
 	struct sigevent		*sevp,
 	timer_t			*timerid)
 {
-	(void)clockid;
+	struct posix_timer *pt;
+	siginfo_t *info;
 
-	struct posix_timer *pt = kzalloc(sizeof(*pt));
+	pt = kzalloc(sizeof(*pt));
 	if (!pt)
 		return -1;
 
@@ -98,7 +96,9 @@ SYSCALL_DEFINE(timer_create,
 
 	*timerid = pt->id;
 	pt->disarmed = 1;
-	memcpy(&pt->sigev, sevp, sizeof(struct sigevent));
+	info = &pt->sigqueue.info;
+	info->si_signo = sevp->sigev_signo;
+	info->_timer.si_value.sival_int = sevp->sigev_value.sival_int;
 	list_add(&pt->list, &posix_timers);
 
 	return 0;
