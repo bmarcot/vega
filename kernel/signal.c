@@ -9,6 +9,7 @@
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
+#include <kernel/exit.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/sched.h>
@@ -122,7 +123,7 @@ void do_signal(void)
 {
 	//FIXME: Revisit handling of signals that are barely a bit in the set
 	if (sigismember(&current->pending.signal, SIGKILL))
-		do_exit();
+		do_exit(EXIT_FATAL + SIGKILL);
 
 	struct sigqueue *sig = list_first_entry(&current->pending.list,
 						struct sigqueue, list);
