@@ -118,6 +118,18 @@ int send_signal(int sig, struct task_struct *tsk)
 	return 0;
 }
 
+void do_signal(void)
+{
+	//FIXME: Revisit handling of signals that are barely a bit in the set
+	if (sigismember(&current->pending.signal, SIGKILL))
+		do_exit();
+
+	struct sigqueue *sig = list_first_entry(&current->pending.list,
+						struct sigqueue, list);
+	int signo = sig->info.si_signo;
+	__do_signal(signo, sig /* or NULL */);
+}
+
 static int do_kill(int pid, int sig, int value)
 {
 	struct task_struct *tsk;
