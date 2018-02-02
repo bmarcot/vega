@@ -1,7 +1,7 @@
 /*
  * kernel/signal.c
  *
- * Copyright (c) 2016-2018 Ben Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #include <errno.h>
@@ -112,13 +112,6 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 	return 0;
 }
 
-int send_signal(int sig, struct task_struct *tsk)
-{
-	send_signal_info(sig, NULL, tsk);
-
-	return 0;
-}
-
 void do_signal(void)
 {
 	//FIXME: Revisit handling of signals that are barely a bit in the set
@@ -141,8 +134,13 @@ static int do_kill(int pid, int sig, int value)
 		return -1;
 	}
 
-	if (sig == SIGKILL)
-		send_signal(sig, tsk);
+	/* process SIGKILL early */
+	if (sig == SIGKILL) {
+		if (pid == tsk->pid)
+			do_exit(EXIT_FATAL + SIGKILL);
+		else
+			goto sendsig;
+	}
 
 	/* it's ok to have no handlers installed */
 	if (!tsk->sighand)
@@ -150,6 +148,7 @@ static int do_kill(int pid, int sig, int value)
 	if (!tsk->sighand->action[sig].sa_handler)
 		return 0;
 
+sendsig:
 	send_rt_signal(tsk, sig, value);
 
 	return 0;
