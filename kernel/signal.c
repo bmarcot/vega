@@ -5,7 +5,6 @@
  */
 
 #include <errno.h>
-#include <string.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
@@ -14,6 +13,7 @@
 #include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
+#include <kernel/string.h>
 #include <kernel/syscalls.h>
 #include <kernel/thread_info.h>
 
