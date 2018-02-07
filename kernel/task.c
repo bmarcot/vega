@@ -1,8 +1,10 @@
 /*
  * kernel/task.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
+
+#include <stdlib.h>
 
 #include <kernel/bitops.h>
 #include <kernel/list.h>
@@ -82,8 +84,24 @@ int release_task_pids(struct task_struct *task)
 	return 0;
 }
 
+void put_sighand_struct(struct task_struct *tsk)
+{
+	struct sigqueue *sig, *tmp;
+
+	if (tsk->sighand) {
+		list_for_each_entry_safe(sig, tmp, &tsk->pending.list, list) {
+			list_del(&sig->list);
+			if (!(sig->flags & SIGQUEUE_PREALLOC))
+				free(sig);
+		}
+		free(tsk->sighand);
+	}
+}
+
 void put_task_struct(struct task_struct *tsk)
 {
+	if (thread_group_leader(tsk))
+		put_sighand_struct(tsk);
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
 }
