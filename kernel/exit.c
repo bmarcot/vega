@@ -27,6 +27,7 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 
 	if (sighand && (sighand->action[SIGCHLD].sa_handler != 0/* SIG_IGN */)) {
 		struct sigqueue q;
+		q.flags = SIGQUEUE_PREALLOC;
 		q.info.si_signo = sig;
 		q.info.si_code = tsk->exit_code & EXIT_FATAL ? CLD_KILLED : CLD_EXITED;
 		q.info._sigchld.si_pid = current->pid;

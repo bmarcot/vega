@@ -1,7 +1,7 @@
 /*
  * include/kernel/signal_types.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_SIGNAL_TYPES_H
@@ -13,9 +13,12 @@
 #include <uapi/kernel/signal.h>
 
 struct sigqueue {
-	siginfo_t		info;
 	struct list_head	list;
+	int			flags;
+	siginfo_t		info;
 };
+
+#define SIGQUEUE_PREALLOC	1
 
 struct sigpending {
 	sigset_t		signal;

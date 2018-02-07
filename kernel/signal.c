@@ -104,6 +104,7 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 	q = kmalloc(sizeof(*q));
 	if (!q)
 		return -1;
+	q->flags = 0;
 	q->info.si_signo = sig;
 	q->info._rt.si_pid = current->pid;
 	q->info._rt.si_value.sival_int = value;
