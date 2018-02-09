@@ -15,6 +15,9 @@
 
 static int do_notify_parent(struct task_struct *tsk, int sig)
 {
+	struct sighand_struct *sighand;
+	struct sigqueue q;
+
 	/* task is not the task leader - nobody will wait for it */
 	if (!thread_group_leader(tsk))
 		return 1;
@@ -23,10 +26,8 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 	 * running while child is running. */
 	sched_enqueue(tsk->parent); // ???  wake_up_process...
 
-	struct sighand_struct *sighand = tsk->parent->sighand;
-
+	sighand = tsk->parent->sighand;
 	if (sighand && (sighand->action[SIGCHLD].sa_handler != 0/* SIG_IGN */)) {
-		struct sigqueue q;
 		q.flags = SIGQUEUE_PREALLOC;
 		q.info.si_signo = sig;
 		q.info.si_code = tsk->exit_code & EXIT_FATAL ? CLD_KILLED : CLD_EXITED;

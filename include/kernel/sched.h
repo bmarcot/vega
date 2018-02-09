@@ -34,13 +34,12 @@ struct file; //XXX: Change to file_struct
 struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	struct thread_info thread_info;
-#else
-	struct thread_info *thread_info;
 #endif
-	void               *stack;
-	int                state;
-	int                flags;
-	int                prio;
+
+	void		*stack;
+	int		state;
+	int		flags;
+	int		prio;
 
 	struct task_struct *group_leader;
 
@@ -68,14 +67,14 @@ struct task_struct {
 		current->state = (state_value);		\
 	} while (0)
 
-static inline struct thread_info *task_thread_info(struct task_struct *task)
-{
 #ifdef CONFIG_THREAD_INFO_IN_TASK
-	return &task->thread_info;
-#else
-	return task->thread_info;
-#endif
+static inline struct thread_info *task_thread_info(struct task_struct *tsk)
+{
+	return &tsk->thread_info;
 }
+#else
+#define task_thread_info(tsk) ((struct thread_info *)(tsk)->stack)
+#endif
 
 int sched_init(void);
 int sched_enqueue(struct task_struct *task);
