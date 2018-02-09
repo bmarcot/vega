@@ -7,11 +7,11 @@
 #ifndef _KERNEL_SIGNAL_H
 #define _KERNEL_SIGNAL_H
 
-#include <string.h>
-
 #include <kernel/list.h>
 #include <kernel/sched.h>
+#include <kernel/sched/signal.h>
 #include <kernel/signal_types.h>
+#include <kernel/string.h>
 
 static inline void sigaddset(sigset_t *set, int sig)
 {
@@ -67,6 +67,9 @@ static inline void sigemptyset(sigset_t *set)
 	}
 }
 
+struct signal_struct *alloc_signal_struct(struct task_struct *tsk);
+struct sighand_struct *alloc_sighand_struct(struct task_struct *tsk);
+
 int signal_pending(struct task_struct *tsk);
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk);
 int send_rt_signal(struct task_struct *tsk, int sig, int value);
@@ -82,7 +85,7 @@ static inline void init_sigpending(struct sigpending *sig)
 
 static inline struct sighand_struct *task_sighand(struct task_struct *tsk)
 {
-	return tsk->sighand ? tsk->sighand : tsk->group_leader->sighand;
+	return tsk->sighand;
 }
 
 #endif /* !_KERNEL_SIGNAL_H */

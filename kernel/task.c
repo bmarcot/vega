@@ -36,43 +36,46 @@ static inline void put_pid(pid_t pid)
 	bitmap_clear_bit(pidmap, pid);
 }
 
-int init_task(struct task_struct *task, int flags)
+int init_task(struct task_struct *tsk, int flags)
 {
 	pid_t pid;
 
 	pid = get_pid();
 	if (pid == -1)
 		return -1;
-	task->prio = PRI_MIN;
-	task->state = TASK_NEW;
-	task->stack = &task->thread_info;
-	task->filemap = 0;
-	task->flags = flags;
+	tsk->prio = PRI_MIN;
+	tsk->state = TASK_NEW;
+	tsk->stack = &tsk->thread_info;
+	tsk->filemap = 0;
+	tsk->flags = flags;
 	if (flags & CLONE_THREAD) {
-		task->group_leader = current->group_leader;
-		task->exit_signal = -1;
-		task->parent = current->parent;
-		task->pid = pid;
-		task->tgid = current->group_leader->tgid;
+		tsk->group_leader = current->group_leader;
+		tsk->exit_signal = -1;
+		tsk->parent = current->parent;
+		tsk->pid = pid;
+		tsk->tgid = current->group_leader->tgid;
 	} else {
-		task->group_leader = task; /* self */
-		task->exit_signal = SIGCHLD;
-		task->parent = current;
-		task->pid = pid;
-		task->tgid = pid;
+		tsk->group_leader = tsk; /* self */
+		tsk->exit_signal = SIGCHLD;
+		tsk->parent = current;
+		tsk->pid = pid;
+		tsk->tgid = pid;
 	}
 
 	/* files */
 	for (int i = 0; i < FILE_MAX; i++)
-		task->filetable[i] = NULL;
-	list_add(&task->list, &tasks);
+		tsk->filetable[i] = NULL;
+	list_add(&tsk->list, &tasks);
 
 	/* signals */
-	init_sigpending(&task->pending);
-	if (flags & CLONE_THREAD)
-		task->sighand = current->group_leader->sighand;
-	else
-		task->sighand = NULL;
+	if (flags & CLONE_THREAD) {
+		tsk->signal = current->group_leader->signal;
+		tsk->sighand = current->group_leader->sighand;
+	} else {
+		tsk->signal = alloc_signal_struct(tsk);
+		tsk->sighand = alloc_sighand_struct(tsk);
+	}
+	init_sigpending(&tsk->signal->pending);
 
 	return 0;
 }
@@ -88,12 +91,13 @@ void put_sighand_struct(struct task_struct *tsk)
 {
 	struct sigqueue *sig, *tmp;
 
-	if (tsk->sighand) {
-		list_for_each_entry_safe(sig, tmp, &tsk->pending.list, list) {
+	if (tsk->signal) {
+		list_for_each_entry_safe(sig, tmp, &tsk->signal->pending.list, list) {
 			list_del(&sig->list);
 			if (!(sig->flags & SIGQUEUE_PREALLOC))
 				free(sig);
 		}
+		free(tsk->signal);
 		free(tsk->sighand);
 	}
 }

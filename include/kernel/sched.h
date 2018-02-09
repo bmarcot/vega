@@ -1,16 +1,17 @@
 /*
  * include/kernel/sched.h
  *
- * Copyright (c) 2016-2017 Baruch Marcot
+ * Copyright (c) 2016-2018 Baruch Marcot
  */
 
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <kernel/signal_types.h>
+#include <kernel/sched/signal.h>
 #include <kernel/types.h>
 
 #include <asm/thread_info.h>
+
 #include <uapi/kernel/sched.h>
 
 /* 0 <= PRI_MAX <= PRI_MIN */
@@ -29,8 +30,6 @@
 #define FILE_MAX 8
 
 struct file; //XXX: Change to file_struct
-struct sigpending;
-struct sighand_struct;
 
 struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
@@ -50,7 +49,8 @@ struct task_struct {
 	pid_t		pid;		/* thread id */
 	pid_t		tgid;		/* thread-group (process) id */
 
-	struct sigpending	pending;
+	/* signal handlers */
+	struct signal_struct	*signal;
 	struct sighand_struct	*sighand;
 
 	struct list_head   list;    /* global list of tasks */

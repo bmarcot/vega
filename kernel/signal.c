@@ -21,7 +21,7 @@
 
 int signal_pending(struct task_struct *tsk)
 {
-	return !sigisemptyset(&tsk->pending.signal);
+	return !sigisemptyset(&tsk->signal->pending.signal);
 }
 
 static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
@@ -29,20 +29,24 @@ static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 	return &tsk->sighand->action[sig];
 }
 
-static struct sighand_struct *set_alloc_sighand_struct(struct task_struct *tsk)
+struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
 {
-	struct sighand_struct *sighand = kzalloc(sizeof(*sighand));
+	struct signal_struct *signal;
 
-	if (!sighand)
+	signal = kzalloc(sizeof(*signal));
+	if (!signal)
 		return NULL;
 
-	tsk->sighand = sighand;
+	return signal;
+}
 
-	/* Lazy allocation of the process' signal handler array: the array is
-	 * allocated on call to a signal()-family function. This can happen in
-	 * a child, and array must be hooked to the thread leader. */
-	if (!thread_group_leader(tsk))
-		tsk->group_leader->sighand = sighand;
+struct sighand_struct *alloc_sighand_struct(struct task_struct *tsk)
+{
+	struct sighand_struct *sighand;
+
+	sighand = kzalloc(sizeof(*sighand));
+	if (!sighand)
+		return NULL;
 
 	return sighand;
 }
@@ -66,15 +70,8 @@ SYSCALL_DEFINE(sigaction,
 		return -1;
 	}
 
-	/* alloc or get the signal handler table */
-	sighand = task_sighand(current);
-	if (!sighand) {
-		sighand = set_alloc_sighand_struct(current);
-		if (!sighand)
-			return -1;
-	}
-
 	/* save and install a new handler */
+	sighand = task_sighand(current);
 	k_act = &sighand->action[signum];
 	if (oldact)
 		memcpy(oldact, k_act, sizeof(*k_act));
@@ -86,8 +83,8 @@ SYSCALL_DEFINE(sigaction,
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 {
 	if (info)
-		list_add_tail(&info->list, &tsk->pending.list);
-	sigaddset(&tsk->pending.signal, sig);
+		list_add_tail(&info->list, &tsk->signal->pending.list);
+	sigaddset(&tsk->signal->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 
@@ -116,10 +113,10 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 void do_signal(void)
 {
 	//FIXME: Revisit handling of signals that are barely a bit in the set
-	if (sigismember(&current->pending.signal, SIGKILL))
+	if (sigismember(&current->signal->pending.signal, SIGKILL))
 		do_exit(EXIT_FATAL + SIGKILL);
 
-	struct sigqueue *sig = list_first_entry(&current->pending.list,
+	struct sigqueue *sig = list_first_entry(&current->signal->pending.list,
 						struct sigqueue, list);
 	int signo = sig->info.si_signo;
 	__do_signal(signo, sig /* or NULL */);
@@ -190,7 +187,7 @@ SYSCALL_DEFINE(sigreturn, void)
 
 	}
 
-	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
+	sig = list_first_entry(&current->signal->pending.list, struct sigqueue, list);
 	off = sizeof(struct cpu_user_context);
 	struct sigaction *act = task_sigaction(current, sig->info.si_signo);
 	if (act->sa_flags & SA_SIGINFO)
@@ -198,7 +195,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 
 	list_del(&sig->list);
-	sigdelset(&current->pending.signal, sig->info.si_signo);
+	sigdelset(&current->signal->pending.signal, sig->info.si_signo);
 	kfree(sig);
 
 	/* If the interrupted task was in a syscall, this restores the
