@@ -29,6 +29,18 @@ static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 	return &tsk->sighand->action[sig];
 }
 
+struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
+{
+	struct signal_struct *signal;
+
+	signal = kzalloc(sizeof(*signal));
+	if (!signal)
+		return NULL;
+	INIT_LIST_HEAD(&signal->thread_head);
+
+	return signal;
+}
+
 struct sighand_struct *alloc_sighand_struct(struct task_struct *tsk)
 {
 	struct sighand_struct *sighand;
@@ -111,6 +123,8 @@ void do_signal(void)
 	__do_signal(signo, sig /* or NULL */);
 }
 
+void zap_all_threads(struct task_struct *tsk);
+
 static int do_kill(int pid, int sig, int value)
 {
 	struct task_struct *tsk;
@@ -123,10 +137,10 @@ static int do_kill(int pid, int sig, int value)
 
 	/* process SIGKILL early */
 	if (sig == SIGKILL) {
-		if (pid == tsk->pid)
-			do_exit(EXIT_FATAL + SIGKILL);
-		else
-			goto sendsig;
+		tsk->signal->group_exit_code = EXIT_FATAL + SIGKILL;
+		tsk->signal->flags = SIGNAL_GROUP_EXIT;
+		zap_all_threads(tsk);
+		return 0;
 	}
 
 	/* it's ok to have no handlers installed */
@@ -135,7 +149,6 @@ static int do_kill(int pid, int sig, int value)
 	if (!tsk->sighand->action[sig].sa_handler)
 		return 0;
 
-sendsig:
 	send_rt_signal(tsk, sig, value);
 
 	return 0;

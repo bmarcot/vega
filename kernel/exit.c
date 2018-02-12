@@ -14,16 +14,14 @@
 
 #include <asm/current.h>
 
-int terminate_thread_group(struct task_struct *tsk)
+void zap_all_threads(struct task_struct *tsk)
 {
 	struct task_struct *t, *n;
 
-	list_for_each_entry_safe(t, n, get_all_tasks(), list) {
-		if ((t != tsk) && (t->tgid == tsk->tgid))
-			send_signal_info(SIGKILL, NULL, t);
+	list_for_each_entry_safe(t, n, &tsk->signal->thread_head, thread_group) {
+		pr_info("zap PID=%d", t->pid);
+		send_signal_info(SIGKILL, NULL, t);
 	}
-
-	return 0;
 }
 
 static int do_notify_parent(struct task_struct *tsk, int sig)
@@ -64,14 +62,14 @@ static void exit_notify(struct task_struct *tsk)
 		release_task(tsk);
 }
 
-void do_exit(int status)
+void do_exit(int exit_code)
 {
-	if (thread_group_leader(current))
-		terminate_thread_group(current);
-
 	sched_dequeue(current);
 	// mm_release();
-	current->exit_code = status;
+	if (signal_group_exit(current->signal))
+		current->exit_code = current->signal->group_exit_code;
+	else
+		current->exit_code = exit_code;
 	exit_notify(current);
 	if (current->state == EXIT_DEAD)
 		current->state = TASK_DEAD;
@@ -79,25 +77,24 @@ void do_exit(int status)
 	schedule();
 }
 
-SYSCALL_DEFINE(exit, int status)
+SYSCALL_DEFINE(exit, int exit_code)
 {
-	do_exit(status);
+	do_exit(exit_code);
 
-	return 0; /* never reached */
+	/* never reached */
+	return 0;
 }
 
-SYSCALL_DEFINE(exit_group, int status)
+SYSCALL_DEFINE(exit_group, int exit_code)
 {
-	if (!thread_group_leader(current)) {
-		pr_err("Unsupported for other threads than leader");
-		for (;;)
-			;
-	}
+	struct signal_struct *sig = current->signal;
 
-	terminate_thread_group(current);
-	do_exit(status);
+	sig->group_exit_code = exit_code;
+	sig->flags = SIGNAL_GROUP_EXIT;
+	zap_all_threads(current);
 
-	return 0; /* never reached */
+	/* never reached */
+	return 0;
 }
 
 SYSCALL_DEFINE(waitpid,
