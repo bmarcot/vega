@@ -52,6 +52,7 @@ struct task_struct {
 	struct task_struct	*parent;
 
 	/* signal handlers */
+	struct signal_struct	*signal;
 	struct sighand_struct	*sighand;
 	struct sigpending	pending;
 

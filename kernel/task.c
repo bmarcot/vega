@@ -68,10 +68,14 @@ int init_task(struct task_struct *tsk, int flags)
 	list_add(&tsk->list, &tasks);
 
 	/* signals */
-	if (flags & CLONE_THREAD)
-		tsk->sighand = current->group_leader->sighand;
-	else
+	if (flags & CLONE_THREAD) {
+		tsk->signal = current->signal;
+		tsk->sighand = current->sighand;
+	} else {
+		tsk->signal = alloc_signal_struct(tsk);
 		tsk->sighand = alloc_sighand_struct(tsk);
+	}
+	list_add(&tsk->thread_group, &tsk->signal->thread_head);
 	init_sigpending(&tsk->pending);
 
 	return 0;
@@ -82,6 +86,13 @@ int release_task_pids(struct task_struct *task)
 	put_pid(task->pid);
 
 	return 0;
+}
+
+void put_signal_struct(struct task_struct *tsk)
+{
+	//XXX: group_leader of group_exit_task??
+	if (thread_group_leader(tsk))
+		free(tsk->signal);
 }
 
 void put_sighand_struct(struct task_struct *tsk)
@@ -102,6 +113,7 @@ void put_task_struct(struct task_struct *tsk)
 		if (!(q->flags & SIGQUEUE_PREALLOC))
 			free(q);
 	}
+	put_signal_struct(tsk);
 	put_sighand_struct(tsk);
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
