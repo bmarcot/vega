@@ -21,23 +21,12 @@
 
 int signal_pending(struct task_struct *tsk)
 {
-	return !sigisemptyset(&tsk->signal->pending.signal);
+	return !sigisemptyset(&tsk->pending.signal);
 }
 
 static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 {
 	return &tsk->sighand->action[sig];
-}
-
-struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
-{
-	struct signal_struct *signal;
-
-	signal = kzalloc(sizeof(*signal));
-	if (!signal)
-		return NULL;
-
-	return signal;
 }
 
 struct sighand_struct *alloc_sighand_struct(struct task_struct *tsk)
@@ -83,8 +72,8 @@ SYSCALL_DEFINE(sigaction,
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 {
 	if (info)
-		list_add_tail(&info->list, &tsk->signal->pending.list);
-	sigaddset(&tsk->signal->pending.signal, sig);
+		list_add_tail(&info->list, &tsk->pending.list);
+	sigaddset(&tsk->pending.signal, sig);
 
 	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
 
@@ -113,10 +102,10 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 void do_signal(void)
 {
 	//FIXME: Revisit handling of signals that are barely a bit in the set
-	if (sigismember(&current->signal->pending.signal, SIGKILL))
+	if (sigismember(&current->pending.signal, SIGKILL))
 		do_exit(EXIT_FATAL + SIGKILL);
 
-	struct sigqueue *sig = list_first_entry(&current->signal->pending.list,
+	struct sigqueue *sig = list_first_entry(&current->pending.list,
 						struct sigqueue, list);
 	int signo = sig->info.si_signo;
 	__do_signal(signo, sig /* or NULL */);
@@ -187,7 +176,7 @@ SYSCALL_DEFINE(sigreturn, void)
 
 	}
 
-	sig = list_first_entry(&current->signal->pending.list, struct sigqueue, list);
+	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
 	off = sizeof(struct cpu_user_context);
 	struct sigaction *act = task_sigaction(current, sig->info.si_signo);
 	if (act->sa_flags & SA_SIGINFO)
@@ -195,7 +184,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 
 	list_del(&sig->list);
-	sigdelset(&current->signal->pending.signal, sig->info.si_signo);
+	sigdelset(&current->pending.signal, sig->info.si_signo);
 	kfree(sig);
 
 	/* If the interrupted task was in a syscall, this restores the

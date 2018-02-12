@@ -1,13 +1,13 @@
 /*
  * include/kernel/sched.h
  *
- * Copyright (c) 2016-2018 Baruch Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <kernel/sched/signal.h>
+#include <kernel/signal_types.h>
 #include <kernel/types.h>
 
 #include <asm/thread_info.h>
@@ -33,31 +33,30 @@ struct file; //XXX: Change to file_struct
 
 struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
-	struct thread_info thread_info;
+	struct thread_info	thread_info;
 #endif
+	void			*stack;
+	int			state;
+	int			flags;
+	int			prio;
 
-	void		*stack;
-	int		state;
-	int		flags;
-	int		prio;
+	struct list_head	thread_group;
+	struct task_struct	*group_leader;
 
-	struct task_struct *group_leader;
+	int			exit_code;
+	int			exit_signal;
+	pid_t			pid;		/* thread id */
+	pid_t			tgid;		/* thread-group (process) id */
 
-	int		exit_code;
-	int		exit_signal;
-	pid_t		pid;		/* thread id */
-	pid_t		tgid;		/* thread-group (process) id */
+	struct list_head	list;		/* global list of tasks -- remove? */
+	struct task_struct	*parent;
 
 	/* signal handlers */
-	struct signal_struct	*signal;
 	struct sighand_struct	*sighand;
+	struct sigpending	pending;
 
-	struct list_head   list;    /* global list of tasks */
-	struct task_struct *parent;
-
+	//XXX: old task_info structs
 	struct list_head   ti_q;    /* sched runqueue */
-
-	/* old task_info struct */
 	unsigned long    filemap;
 	struct file      *filetable[FILE_MAX];
 };
@@ -88,6 +87,7 @@ int release_task_pids(struct task_struct *task);
 void put_task_struct(struct task_struct *tsk);
 void release_task(struct task_struct *tsk);
 struct task_struct *get_task_by_pid(pid_t pid);
+struct list_head *get_all_tasks(void); /* will die.. */
 
 /* fork.c */
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,

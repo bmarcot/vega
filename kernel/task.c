@@ -68,14 +68,11 @@ int init_task(struct task_struct *tsk, int flags)
 	list_add(&tsk->list, &tasks);
 
 	/* signals */
-	if (flags & CLONE_THREAD) {
-		tsk->signal = current->group_leader->signal;
+	if (flags & CLONE_THREAD)
 		tsk->sighand = current->group_leader->sighand;
-	} else {
-		tsk->signal = alloc_signal_struct(tsk);
+	else
 		tsk->sighand = alloc_sighand_struct(tsk);
-	}
-	init_sigpending(&tsk->signal->pending);
+	init_sigpending(&tsk->pending);
 
 	return 0;
 }
@@ -85,20 +82,6 @@ int release_task_pids(struct task_struct *task)
 	put_pid(task->pid);
 
 	return 0;
-}
-
-void put_signal_struct(struct task_struct *tsk)
-{
-	struct sigqueue *sig, *tmp;
-
-	if (thread_group_leader(tsk) || (tsk->signal != tsk->group_leader->signal)) {
-		list_for_each_entry_safe(sig, tmp, &tsk->signal->pending.list, list) {
-			list_del(&sig->list);
-			if (!(sig->flags & SIGQUEUE_PREALLOC))
-				free(sig);
-		}
-		free(tsk->signal);
-	}
 }
 
 void put_sighand_struct(struct task_struct *tsk)
@@ -112,10 +95,14 @@ void put_sighand_struct(struct task_struct *tsk)
 
 void put_task_struct(struct task_struct *tsk)
 {
-	if (thread_group_leader(tsk)) {
-		put_signal_struct(tsk);
-		put_sighand_struct(tsk);
+	struct sigqueue *q, *n;
+
+	list_for_each_entry_safe(q, n, &tsk->pending.list, list) {
+		list_del(&q->list);
+		if (!(q->flags & SIGQUEUE_PREALLOC))
+			free(q);
 	}
+	put_sighand_struct(tsk);
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
 }
@@ -135,4 +122,9 @@ struct task_struct *get_task_by_pid(pid_t pid)
 	}
 
 	return NULL;
+}
+
+struct list_head *get_all_tasks(void)
+{
+	return &tasks;
 }

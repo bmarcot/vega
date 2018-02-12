@@ -6,12 +6,25 @@
 
 #include <kernel/exit.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
+
+int terminate_thread_group(struct task_struct *tsk)
+{
+	struct task_struct *t, *n;
+
+	list_for_each_entry_safe(t, n, get_all_tasks(), list) {
+		if ((t != tsk) && (t->tgid == tsk->tgid))
+			send_signal_info(SIGKILL, NULL, t);
+	}
+
+	return 0;
+}
 
 static int do_notify_parent(struct task_struct *tsk, int sig)
 {
@@ -53,15 +66,15 @@ static void exit_notify(struct task_struct *tsk)
 
 void do_exit(int status)
 {
-	struct task_struct *tsk = current;
+	if (thread_group_leader(current))
+		terminate_thread_group(current);
 
-	sched_dequeue(tsk);
+	sched_dequeue(current);
 	// mm_release();
-	tsk->exit_code = status;
-	exit_notify(tsk);
-
-	if (tsk->state == EXIT_DEAD)
-		tsk->state = TASK_DEAD;
+	current->exit_code = status;
+	exit_notify(current);
+	if (current->state == EXIT_DEAD)
+		current->state = TASK_DEAD;
 
 	schedule();
 }
@@ -81,6 +94,7 @@ SYSCALL_DEFINE(exit_group, int status)
 			;
 	}
 
+	terminate_thread_group(current);
 	do_exit(status);
 
 	return 0; /* never reached */
