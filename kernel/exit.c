@@ -19,7 +19,6 @@ void zap_all_threads(struct task_struct *tsk)
 	struct task_struct *t, *n;
 
 	list_for_each_entry_safe(t, n, &tsk->signal->thread_head, thread_group) {
-		pr_info("zap PID=%d", t->pid);
 		send_signal_info(SIGKILL, NULL, t);
 	}
 }
