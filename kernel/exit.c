@@ -42,7 +42,7 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 		q.info.si_signo = sig;
 		q.info.si_code = tsk->exit_code & EXIT_FATAL ? CLD_KILLED : CLD_EXITED;
 		q.info._sigchld.si_pid = current->pid;
-		q.info._sigchld.si_status = tsk->exit_code & EXIT_CODE_MASK;
+		q.info._sigchld.si_status = (tsk->exit_code >> 8) & 0x7f;
 		send_signal_info(sig, &q, tsk->parent);
 	}
 
@@ -74,13 +74,15 @@ void do_exit(int exit_code)
 		current->state = TASK_DEAD;
 
 	schedule();
+
+	/* not reached */
 }
 
 SYSCALL_DEFINE(exit, int exit_code)
 {
 	do_exit(exit_code);
 
-	/* never reached */
+	/* not reached */
 	return 0;
 }
 
@@ -88,11 +90,18 @@ SYSCALL_DEFINE(exit_group, int exit_code)
 {
 	struct signal_struct *sig = current->signal;
 
+	/* WEXITSTATUS are bits 15..8 and WTERMSIG are bits 7..0 */
+	exit_code = (exit_code & 0x7f) << 8;
 	sig->group_exit_code = exit_code;
 	sig->flags = SIGNAL_GROUP_EXIT;
+
+	/* Send SIGKILL to all threads in the current thread-group. */
+	//FIXME: No need to send signal to current thread
 	zap_all_threads(current);
 
-	/* never reached */
+	do_exit(exit_code);
+
+	/* not reached */
 	return 0;
 }
 
