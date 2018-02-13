@@ -8,6 +8,7 @@
 
 #include <kernel/bitops.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
@@ -92,7 +93,7 @@ void put_signal_struct(struct task_struct *tsk)
 {
 	//XXX: group_leader of group_exit_task??
 	if (thread_group_leader(tsk))
-		free(tsk->signal);
+		kfree(tsk->signal);
 }
 
 void put_sighand_struct(struct task_struct *tsk)
@@ -101,7 +102,7 @@ void put_sighand_struct(struct task_struct *tsk)
 	// processes. Use less memory when tasks don't use signal, apart from
 	// the default signals: SIGTERM, SIGCHLD...
 	if (thread_group_leader(tsk))
-		free(tsk->sighand);
+		kfree(tsk->sighand);
 }
 
 void put_task_struct(struct task_struct *tsk)
@@ -111,7 +112,7 @@ void put_task_struct(struct task_struct *tsk)
 	list_for_each_entry_safe(q, n, &tsk->pending.list, list) {
 		list_del(&q->list);
 		if (!(q->flags & SIGQUEUE_PREALLOC))
-			free(q);
+			kfree(q);
 	}
 	put_signal_struct(tsk);
 	put_sighand_struct(tsk);
