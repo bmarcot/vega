@@ -4,12 +4,15 @@
  * Copyright (c) 2017-2018 Benoit Marcot
  */
 
+#include <kernel/errno-base.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
+
+#include <uapi/kernel/wait.h>
 
 #include <asm/current.h>
 
@@ -114,10 +117,18 @@ SYSCALL_DEFINE(waitpid,
 	tsk = get_task_by_pid(pid);
 	if (!tsk)
 		return -1;
-	if (tsk->state != EXIT_ZOMBIE)
-		return -1;
+
+	if (tsk->state != EXIT_ZOMBIE) {
+		if (options & WNOHANG)
+			return 0;
+		schedule();
+		if (signal_pending(current))
+			return -EINTR;
+	}
+
 	if (status)
 		*status = tsk->exit_code; //FIXME: Check user pointer
+
 	release_task(tsk);
 	put_task_struct(tsk);
 
