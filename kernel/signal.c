@@ -119,6 +119,7 @@ void do_signal(void)
 	struct sigqueue *sig = list_first_entry(&current->pending.list,
 						struct sigqueue, list);
 	int signo = sig->info.si_signo;
+	sigdelset(&current->pending.signal, signo);
 	__do_signal(signo, sig /* or NULL */);
 }
 
@@ -182,11 +183,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	struct sigqueue *sig;
 	int off;
 
-	if (!signal_pending(current)) {
-		pr_warn("Wants to return from signal, but no signal raised");
-		return 0;
-
-	}
+	//FIXME: Check if we are actually returning from a signal handler
 
 	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
 	off = sizeof(struct cpu_user_context);
@@ -196,8 +193,8 @@ SYSCALL_DEFINE(sigreturn, void)
 	current_thread_info()->user.psp += off;
 
 	list_del(&sig->list);
-	sigdelset(&current->pending.signal, sig->info.si_signo);
-	kfree(sig);
+	if (!(sig->flags & SIGQUEUE_PREALLOC))
+		kfree(sig);
 
 	/* If the interrupted task was in a syscall, this restores the
 	 * syscall's return value. If it was interrupted because of an
