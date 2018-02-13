@@ -98,6 +98,9 @@ int arch_thread_setup(struct task_struct *task, void *start_routine,
 		void *arg, void *stack_start);
 int init_thread(struct task_struct *tsk);
 
+/* exit.c */
+void do_exit(int exit_code);
+
 static inline int thread_group_leader(struct task_struct *tsk)
 {
 	return tsk->exit_signal >= 0;
