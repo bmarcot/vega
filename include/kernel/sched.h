@@ -89,17 +89,25 @@ void put_task_struct(struct task_struct *tsk);
 void release_task(struct task_struct *tsk);
 struct task_struct *get_task_by_pid(pid_t pid);
 struct list_head *get_all_tasks(void); /* will die.. */
+void add_task(struct task_struct *tsk); /* will die.. */
+void reserve_pid(pid_t pid); /* will die.. */
 
 /* fork.c */
 struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);
 
+/* asm/thread.c */
 int arch_thread_setup(struct task_struct *task, void *start_routine,
 		void *arg, void *stack_start);
 int init_thread(struct task_struct *tsk);
+void __thread_setup(struct task_struct *tsk, void *start_routine, void *arg,
+		void *stack, unsigned long stacksize);
 
 /* exit.c */
 void do_exit(int exit_code);
+
+/* init.c */
+struct task_struct *alloc_init_task(void);
 
 static inline int thread_group_leader(struct task_struct *tsk)
 {

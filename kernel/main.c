@@ -82,8 +82,6 @@ void print_linker_sections(void)
 		&__pgmem_end__, &__pgmem_end__ - &__pgmem_start__);
 }
 
-static unsigned int init_stack[256];
-
 struct thread_info *start_kernel(void)
 {
 	setup_arch();
@@ -102,15 +100,7 @@ struct thread_info *start_kernel(void)
 	sched_init();
 	idle_init();
 
-	/* The main_thread is the user's entry-point to the system.  It is not
-	 * added to the runqueue because it has been implicitly "elected" when
-	 * start_kernel() returns.    */
-	struct task_struct *init_task = clone_task(main, &init_stack[256], 0,
-						NULL);
-	if (init_task == NULL) {
-		printk("[!] Could not create user main thread.\n");
-		return NULL;
-	}
+	struct task_struct *init_task = alloc_init_task();
 	pr_info("Created init_task at <%p> with priority=%d", init_task,
 		init_task->prio);
 
@@ -130,8 +120,6 @@ struct thread_info *start_kernel(void)
 	__platform_init();
 
 	printk("Kernel bootstrap done.\n--\n");
-
-	sched_enqueue(init_task);
 
 	return task_thread_info(init_task);
 }
