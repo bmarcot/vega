@@ -92,6 +92,10 @@ SYSCALL_DEFINE(clone,
 {
 	struct task_struct *tsk;
 
+	/* flags must also include CLONE_SIGHAND if CLONE_THREAD is specified */
+	if ((flags & CLONE_THREAD) && !(flags & CLONE_SIGHAND))
+		return -1;
+
 	tsk = clone_task(fn, child_stack, flags, arg);
 	if (!tsk)
 		return -1;
