@@ -1,12 +1,13 @@
 /*
  * include/kernel/kernel.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_KERNEL_H
 #define _KERNEL_KERNEL_H
 
+#include <kernel/compiler.h>
 #include <kernel/stddef.h>
 
 /* round-down to a power of 2 */
@@ -53,5 +54,27 @@ int printk(const char *fmt, ...);
 #define pr_err(fmt, ...) pr_fmt(make_fmt("error", fmt), ##__VA_ARGS__)
 #define pr_warn(fmt, ...) pr_fmt(make_fmt("warning", fmt), ##__VA_ARGS__)
 #define pr_info(fmt, ...) pr_fmt(make_fmt("info", fmt), ##__VA_ARGS__)
+
+/*
+ * Bug!
+ */
+
+static inline __attribute__((noreturn)) void panic(const char *fmt, ...)
+{
+	printk(fmt);
+	for (;;)
+		;
+}
+
+#define BUG()								\
+	do {								\
+		printk("BUG: failure at %s:%d/%s()!\n", __FILE__, __LINE__, __func__); \
+		panic("BUG!");						\
+	} while (0)
+
+#define BUG_ON(condition)					\
+	do {							\
+		if (unlikely(condition)) BUG();			\
+	} while(0)
 
 #endif /* !_KERNEL_KERNEL_H */
