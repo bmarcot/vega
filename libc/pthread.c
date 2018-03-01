@@ -75,7 +75,9 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	pr_info("thread@%p", pthread);
 #endif
 
-	if (clone(__pthread_trampoline, pthread, CLONE_THREAD, pthread) < 0) {
+	int r = clone(__pthread_trampoline, pthread,
+		CLONE_THREAD | CLONE_SIGHAND, pthread);
+	if (r < 0) {
 		if (flags & PF_STACKALLOC)
 			munmap(stack, stacksize);
 		return EAGAIN;
