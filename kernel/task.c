@@ -37,6 +37,11 @@ static inline void put_pid(pid_t pid)
 	bitmap_clear_bit(pidmap, pid);
 }
 
+void reserve_pid(pid_t pid)
+{
+	bitmap_set_bit(pidmap, pid);
+}
+
 int init_task(struct task_struct *tsk, int flags)
 {
 	pid_t pid;
@@ -74,7 +79,10 @@ int init_task(struct task_struct *tsk, int flags)
 		tsk->sighand = current->sighand;
 	} else {
 		tsk->signal = alloc_signal_struct(tsk);
-		tsk->sighand = alloc_sighand_struct(tsk);
+		if (flags & CLONE_SIGHAND)
+			tsk->sighand = current->sighand;
+		else
+			tsk->sighand = copy_sighand_struct(current); //XXX: copy-on-write?
 	}
 	list_add(&tsk->thread_group, &tsk->signal->thread_head);
 	init_sigpending(&tsk->pending);
@@ -140,4 +148,9 @@ struct task_struct *get_task_by_pid(pid_t pid)
 struct list_head *get_all_tasks(void)
 {
 	return &tasks;
+}
+
+void add_task(struct task_struct *tsk)
+{
+	list_add(&tsk->list, &tasks);
 }
