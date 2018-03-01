@@ -40,13 +40,14 @@ struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
 	return signal;
 }
 
-struct sighand_struct *alloc_sighand_struct(struct task_struct *tsk)
+struct sighand_struct *copy_sighand_struct(struct task_struct *tsk)
 {
 	struct sighand_struct *sighand;
 
-	sighand = kzalloc(sizeof(*sighand));
+	sighand = kmalloc(sizeof(*sighand));
 	if (!sighand)
 		return NULL;
+	memcpy(sighand, tsk->sighand, sizeof(*sighand));
 
 	return sighand;
 }
