@@ -87,10 +87,11 @@ int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk)
 		list_add_tail(&info->list, &tsk->pending.list);
 	sigaddset(&tsk->pending.signal, sig);
 
-	set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
-
-	if (tsk->state != TASK_RUNNING)
-		return wake_up_process(tsk);
+	if (!sigismember(&tsk->blocked, sig)) {
+		set_ti_thread_flag(task_thread_info(tsk), TIF_SIGPENDING);
+		if (tsk->state != TASK_RUNNING)
+			return wake_up_process(tsk);
+	}
 
 	return 0;
 }
