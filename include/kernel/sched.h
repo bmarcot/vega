@@ -54,6 +54,7 @@ struct task_struct {
 	/* signal handlers */
 	struct signal_struct	*signal;
 	struct sighand_struct	*sighand;
+	sigset_t		blocked;
 	struct sigpending	pending;
 
 	//XXX: old task_info structs

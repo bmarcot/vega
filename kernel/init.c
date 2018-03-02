@@ -44,6 +44,8 @@ struct task_struct *alloc_init_task(void)
 	/* signals */
 	init->signal = &signal;
 	init->sighand = &sighand;
+	// conflicting with signal unit tests, because they run as init process
+	sigemptyset(&init->blocked); //sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
 
 	__thread_setup(init, main, NULL, stack,	CONFIG_INIT_STACK_SIZE);

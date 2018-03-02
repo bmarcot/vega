@@ -85,6 +85,7 @@ int init_task(struct task_struct *tsk, int flags)
 			tsk->sighand = copy_sighand_struct(current); //XXX: copy-on-write?
 	}
 	list_add(&tsk->thread_group, &tsk->signal->thread_head);
+	sigemptyset(&tsk->blocked);
 	init_sigpending(&tsk->pending);
 
 	return 0;
