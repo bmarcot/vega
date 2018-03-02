@@ -67,6 +67,17 @@ static inline void sigemptyset(sigset_t *set)
 	}
 }
 
+static inline void sigfillset(sigset_t *set)
+{
+	switch (_NSIG_WORDS) {
+	case 2: set->sig[1] = -1;
+	case 1: set->sig[0] = -1;
+		break;
+	default:
+		memset(set, -1, sizeof(sigset_t));
+	}
+}
+
 struct signal_struct *alloc_signal_struct(struct task_struct *tsk);
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk);
 int signal_pending(struct task_struct *tsk);
