@@ -7,11 +7,18 @@
 #ifndef _KERNEL_SIGNAL_H
 #define _KERNEL_SIGNAL_H
 
+#include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/sched/signal.h>
 #include <kernel/signal_types.h>
 #include <kernel/string.h>
+
+#include <uapi/kernel/signal.h>
+
+/*
+ * define some primitives to manipulate sigset_t
+ */
 
 static inline void sigaddset(sigset_t *set, int sig)
 {
@@ -77,6 +84,38 @@ static inline void sigfillset(sigset_t *set)
 		memset(set, -1, sizeof(sigset_t));
 	}
 }
+
+#define _SIG_SET_BINOP(name, op)					\
+static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
+{									\
+	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
+									\
+	switch (_NSIG_WORDS) {						\
+	case 4:								\
+		a3 = a->sig[3]; a2 = a->sig[2];				\
+		b3 = b->sig[3]; b2 = b->sig[2];				\
+		r->sig[3] = op(a3, b3);					\
+		r->sig[2] = op(a2, b2);					\
+	case 2:								\
+		a1 = a->sig[1]; b1 = b->sig[1];				\
+		r->sig[1] = op(a1, b1);					\
+	case 1:								\
+		a0 = a->sig[0]; b0 = b->sig[0];				\
+		r->sig[0] = op(a0, b0);					\
+		break;							\
+	default:							\
+		BUILD_BUG();						\
+	}								\
+}
+
+#define _sig_or(x,y)((x) | (y))
+_SIG_SET_BINOP(sigorsets, _sig_or)
+
+#define _sig_and(x,y)((x) & (y))
+_SIG_SET_BINOP(sigandsets, _sig_and)
+
+#define _sig_andn(x,y)((x) & ~(y))
+_SIG_SET_BINOP(sigandnsets, _sig_andn)
 
 struct signal_struct *alloc_signal_struct(struct task_struct *tsk);
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk);
