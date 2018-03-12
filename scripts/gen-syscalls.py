@@ -14,6 +14,7 @@ xs = [
     'sigaction',
     'kill',
     'sigqueue',
+    'sigprocmask',
 
     # <fcntl.h>, <unistd.h>, <sys/mount.h>...
     'open',

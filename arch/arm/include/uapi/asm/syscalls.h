@@ -7,12 +7,12 @@
 #define SYS_TIMER_CREATE 0
 #define SYS_TIMER_SETTIME 1
 #define SYS_TIMER_GETTIME 2
-#define SYS_NANOSLEEP 3
-#define SYS_EXECVE 4
-#define SYS_VFORK 5
-#define SYS_SIGACTION 6
-#define SYS_KILL 7
-#define SYS_SIGQUEUE 8
+#define SYS_EXECVE 3
+#define SYS_VFORK 4
+#define SYS_SIGACTION 5
+#define SYS_KILL 6
+#define SYS_SIGQUEUE 7
+#define SYS_SIGPROCMASK 8
 #define SYS_OPEN 9
 #define SYS_CLOSE 10
 #define SYS_READ 11
@@ -31,12 +31,13 @@
 #define SYS_GETPRIORITY 24
 #define SYS_SETPRIORITY 25
 #define SYS_SIGRETURN 26
-#define SYS_CLOCK_GETTIME 27
-#define SYS_EXIT_GROUP 28
-#define SYS_WAITPID 29
-#define SYS_GETTID 30
-#define SYS_GETPPID 31
-#define SYS_TGKILL 32
-#define SYS_PAUSE 33
+#define SYS_NANOSLEEP 27
+#define SYS_CLOCK_GETTIME 28
+#define SYS_EXIT_GROUP 29
+#define SYS_WAITPID 30
+#define SYS_GETTID 31
+#define SYS_GETPPID 32
+#define SYS_TGKILL 33
+#define SYS_PAUSE 34
 
 #endif /* !_ASM_SYSCALLS_H */
