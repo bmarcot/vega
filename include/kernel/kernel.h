@@ -77,4 +77,8 @@ static inline __attribute__((noreturn)) void panic(const char *fmt, ...)
 		if (unlikely(condition)) BUG();			\
 	} while(0)
 
+#define BUILD_BUG_ON(condition) do { _Static_assert(condition, "BUILD BUG"); } while (1);
+
+#define BUILD_BUG() BUILD_BUG_ON(1)
+
 #endif /* !_KERNEL_KERNEL_H */
