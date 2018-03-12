@@ -21,8 +21,8 @@ struct sigqueue {
 #define SIGQUEUE_PREALLOC	1
 
 struct sigpending {
-	sigset_t		signal;
 	struct list_head	list;
+	sigset_t		signal;
 };
 
 struct sighand_struct {

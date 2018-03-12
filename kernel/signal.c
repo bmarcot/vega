@@ -205,6 +205,34 @@ SYSCALL_DEFINE(sigreturn, void)
 	return current_thread_info()->user.ctx->r0;
 }
 
+SYSCALL_DEFINE(sigprocmask,
+	int		how,
+	const sigset_t	*set,
+	sigset_t	*oldset)
+{
+	sigset_t tmpset;
+
+	if (oldset)
+		memcpy(oldset, &current->blocked, sizeof(*oldset));
+
+	switch (how) {
+	case SIG_BLOCK:
+		sigorsets(&current->blocked, &current->blocked, set);
+		break;
+	case SIG_UNBLOCK:
+		sigandsets(&tmpset, &current->pending.signal, set);
+		if (!sigisemptyset(&tmpset))
+			set_ti_thread_flag(current_thread_info(), TIF_SIGPENDING);
+		sigandnsets(&current->blocked, &current->blocked, set);
+		break;
+	default:
+		/* errno = EINVAL; */
+		return -1;
+	}
+
+	return 0;
+}
+
 SYSCALL_DEFINE(pause, void)
 {
 	sched_dequeue(current);

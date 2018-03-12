@@ -36,3 +36,9 @@ int sigqueue(pid_t pid, int sig, const union sigval value)
 	return do_syscall3((void *)pid, (void *)sig, value.sival_ptr,
 			SYS_SIGQUEUE);
 }
+
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
+{
+	return do_syscall3((void *)how, (void *)set, (void *)oldset,
+			SYS_SIGPROCMASK);
+}

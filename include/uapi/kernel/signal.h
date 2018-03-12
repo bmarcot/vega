@@ -1,7 +1,7 @@
 /*
  * include/uapi/kernel/signal.h
  *
- * Copyright (c) 2017-2018 Ben Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  *
  */
 
@@ -45,6 +45,10 @@
 
 #define SA_SIGINFO	0x1
 #define SA_RESTORER	0x2
+
+#define SIG_BLOCK	1	/* for blocking signals */
+#define SIG_UNBLOCK	2	/* for unblocking signals */
+#define SIG_SETMASK	3	/* for setting the signal mask */
 
 typedef union sigval {
 	int		sival_int;
