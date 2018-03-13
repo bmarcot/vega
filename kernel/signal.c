@@ -210,20 +210,28 @@ SYSCALL_DEFINE(sigprocmask,
 	const sigset_t	*set,
 	sigset_t	*oldset)
 {
-	sigset_t tmpset;
+	sigset_t _set, tmpset;
 
 	if (oldset)
 		memcpy(oldset, &current->blocked, sizeof(*oldset));
 
+	/* Attempts to block SIGKILL or SIGSTOP are silently ignored */
+	memcpy(&_set, set, sizeof(_set));
+	sigdelset(&_set, SIGKILL);
+	sigdelset(&_set, SIGSTOP);
+
 	switch (how) {
 	case SIG_BLOCK:
-		sigorsets(&current->blocked, &current->blocked, set);
+		sigorsets(&current->blocked, &current->blocked, &_set);
 		break;
 	case SIG_UNBLOCK:
-		sigandsets(&tmpset, &current->pending.signal, set);
+		sigandsets(&tmpset, &current->pending.signal, &_set);
 		if (!sigisemptyset(&tmpset))
 			set_ti_thread_flag(current_thread_info(), TIF_SIGPENDING);
-		sigandnsets(&current->blocked, &current->blocked, set);
+		sigandnsets(&current->blocked, &current->blocked, &_set);
+		break;
+	case SIG_SETMASK:
+		memcpy(&current->blocked, &_set, sizeof(_set));
 		break;
 	default:
 		/* errno = EINVAL; */
