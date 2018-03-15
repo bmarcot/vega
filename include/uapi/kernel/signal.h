@@ -11,37 +11,41 @@
 #include <asm/bitsperlong.h>
 #include <asm/posix_types.h>
 
-#define SIGHUP		1
-#define SIGINT		2
-#define SIGQUIT		3
-#define SIGILL		4
-#define SIGTRAP		5
-#define SIGABRT		6
-#define SIGIOT		6
-#define SIGBUS		7
-#define SIGFPE		8
-#define SIGKILL		9
-#define SIGUSR1		10
-#define SIGSEGV		11
-#define SIGUSR2		12
-#define SIGPIPE		13
-#define SIGALRM		14
-#define SIGTERM		15
-#define SIGSTKFLT	16
-#define SIGCHLD		17
-#define SIGCONT		18
-#define SIGSTOP		19
-#define SIGTSTP		20
-#define SIGTTIN		21
-#define SIGTTOU		22
-#define SIGURG		23
-#define SIGXCPU		24
-#define SIGXFSZ		25
-#define SIGVTALRM	26
-#define SIGPROF		27
-#define SIGWINCH	28
-#define SIGIO		29
-#define SIGPOLL		SIGIO
+#define _NSIG		32
+#define _NSIG_BPW	__BITS_PER_LONG
+#define _NSIG_WORDS	(_NSIG / _NSIG_BPW)
+
+#define SIGABRT		1	/* Core - Process abort signal. */
+#define SIGALRM		2	/* Term - Alarm clock. */
+#define SIGBUS		3	/* Core - Access to an undefined portion of a memory object. */
+#define SIGCHLD		4	/* Ign  - Child process terminated, stopped, or continued. */
+#define SIGCONT		5	/* Cont - Continue executing, if stopped. */
+#define SIGFPE		6	/* Core - Erroneous arithmetic operation. */
+#define SIGHUP		7	/* Term - Hangup. */
+#define SIGILL		8	/* Core - Illegal instruction. */
+#define SIGINT		9	/* Term - Terminal interrupt signal. */
+#define SIGKILL		10	/* Term - Kill (cannot be caught or ignored). */
+#define SIGPIPE		11	/* Term - Write on a pipe with no one to read it. */
+#define SIGQUIT		12	/* Core - Terminal quit signal. */
+#define SIGSEGV		13	/* Core - Invalid memory reference. */
+#define SIGSTOP		14	/* Stop - Stop executing (cannot be caught or ignored). */
+#define SIGTERM		15	/* Term - Termination signal. */
+#define SIGTSTP		16	/* Stop - Terminal stop signal. */
+#define SIGTTIN		17	/* Stop - Background process attempting read. */
+#define SIGTTOU		18	/* Stop - Background process attempting write. */
+#define SIGUSR1		19	/* Term - User-defined signal 1. */
+#define SIGUSR2		20	/* Term - User-defined signal 2. */
+#define SIGPOLL		21	/* Term - Pollable event. */
+#define SIGPROF		22	/* Term - Profiling timer expired. */
+#define SIGSYS		23	/* Core - Bad system call. */
+#define SIGTRAP		24	/* Core - Trace/breakpoint trap. */
+#define SIGURG		25	/* Ign  - High bandwidth data is available at a socket. */
+#define SIGVTALRM	26	/* Term - Virtual timer expired. */
+#define SIGXCPU		27	/* Core - CPU time limit exceeded. */
+#define SIGXFSZ		28	/* Core - File size limit exceeded. */
+
+#define SIGRTMIN	29
+#define SIGRTMAX	_NSIG
 
 #define SA_SIGINFO	0x1
 #define SA_RESTORER	0x2
@@ -54,10 +58,6 @@ typedef union sigval {
 	int		sival_int;
 	void		*sival_ptr;
 } sigval_t;
-
-#define _NSIG		32
-#define _NSIG_BPW	__BITS_PER_LONG
-#define _NSIG_WORDS	(_NSIG / _NSIG_BPW)
 
 typedef struct {
 	unsigned long	sig[_NSIG_WORDS];
