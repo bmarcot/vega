@@ -60,7 +60,7 @@ SYSCALL_DEFINE(sigaction,
 	struct sighand_struct *sighand;
 	struct sigaction *k_act;
 
-	if ((signum == SIGKILL) || (signum == SIGSTOP)) {
+	if (sig_kernel_only(signum)) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -114,7 +114,10 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 
 void do_signal(void)
 {
-	//FIXME: Revisit handling of signals that are barely a bit in the set
+	/* si_signo, si_errno and si_code are defined for all signals, as part
+	 * of the siginfo_t struct. Although, there will be no siginfo_t struct
+	 * for SIKILL and SIGSTOP, since they cannot be caught, ignored, or
+	 * blocked. */
 	if (sigismember(&current->pending.signal, SIGKILL))
 		do_exit(SIGKILL);
 
@@ -122,7 +125,7 @@ void do_signal(void)
 						struct sigqueue, list);
 	int signo = sig->info.si_signo;
 	sigdelset(&current->pending.signal, signo);
-	__do_signal(signo, sig /* or NULL */);
+	__do_signal(signo, sig);
 }
 
 void zap_all_threads(struct task_struct *tsk);
@@ -137,12 +140,19 @@ static int do_kill(int pid, int sig, int value)
 		return -1;
 	}
 
-	/* process SIGKILL early */
-	if (sig == SIGKILL) {
-		tsk->signal->group_exit_code = SIGKILL;
-		tsk->signal->flags = SIGNAL_GROUP_EXIT;
-		zap_all_threads(tsk);
-		return 0;
+	if (sig_kernel_only(sig)) {
+		switch (sig) {
+		case SIGKILL:
+			/* process SIGKILL early */
+			tsk->signal->group_exit_code = SIGKILL;
+			tsk->signal->flags = SIGNAL_GROUP_EXIT;
+			zap_all_threads(tsk);
+			return 0;
+		case SIGSTOP:
+		default:
+			/* unhandled! */
+			BUG();
+		}
 	}
 
 	/* it's ok to have no handlers installed */
