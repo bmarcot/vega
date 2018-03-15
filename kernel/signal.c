@@ -25,7 +25,7 @@ int signal_pending(struct task_struct *tsk)
 
 static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 {
-	return &tsk->sighand->action[sig];
+	return &tsk->sighand->action[sig - 1];
 }
 
 struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
@@ -73,7 +73,7 @@ SYSCALL_DEFINE(sigaction,
 
 	/* save and install a new handler */
 	sighand = task_sighand(current);
-	k_act = &sighand->action[signum];
+	k_act = &sighand->action[signum - 1];
 	if (oldact)
 		memcpy(oldact, k_act, sizeof(*k_act));
 	memcpy(k_act, act, sizeof(*k_act));
@@ -114,6 +114,9 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 
 void do_signal(void)
 {
+	int sig;
+	struct sigqueue *q;
+
 	/* si_signo, si_errno and si_code are defined for all signals, as part
 	 * of the siginfo_t struct. Although, there will be no siginfo_t struct
 	 * for SIKILL and SIGSTOP, since they cannot be caught, ignored, or
@@ -121,11 +124,11 @@ void do_signal(void)
 	if (sigismember(&current->pending.signal, SIGKILL))
 		do_exit(SIGKILL);
 
-	struct sigqueue *sig = list_first_entry(&current->pending.list,
-						struct sigqueue, list);
-	int signo = sig->info.si_signo;
-	sigdelset(&current->pending.signal, signo);
-	__do_signal(signo, sig);
+	q = list_first_entry(&current->pending.list, struct sigqueue, list);
+	sig = q->info.si_signo;
+	sigdelset(&current->pending.signal, sig);
+	if (!sig_ignore(current, sig))
+		__do_signal(sig, q);
 }
 
 void zap_all_threads(struct task_struct *tsk);
@@ -158,7 +161,7 @@ static int do_kill(int pid, int sig, int value)
 	/* it's ok to have no handlers installed */
 	if (!tsk->sighand)
 		return 0;
-	if (!tsk->sighand->action[sig].sa_handler)
+	if (!tsk->sighand->action[sig - 1].sa_handler)
 		return 0;
 
 	send_rt_signal(tsk, sig, value);

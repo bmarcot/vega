@@ -27,7 +27,6 @@ void zap_all_threads(struct task_struct *tsk)
 
 static int do_notify_parent(struct task_struct *tsk, int sig)
 {
-	struct sighand_struct *sighand;
 	struct sigqueue q;
 
 	/* task is not the task leader - nobody will wait for it */
@@ -38,8 +37,7 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 	 * running while child is running. */
 	sched_enqueue(tsk->parent); // ???  wake_up_process...
 
-	sighand = tsk->parent->sighand;
-	if (sighand && (sighand->action[SIGCHLD].sa_handler != 0/* SIG_IGN */)) {
+	if (!sig_ignore(current, sig)) {
 		q.flags = SIGQUEUE_PREALLOC;
 		q.info.si_signo = sig;
 		q.info.si_code = tsk->exit_code & 0x7f ? CLD_KILLED : CLD_EXITED;

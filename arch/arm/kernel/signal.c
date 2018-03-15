@@ -52,7 +52,7 @@ static void setup_sigframe(struct sigqueue *q, struct sigaction *sa)
 
 void __do_signal(int signo, struct sigqueue *sig)
 {
-	setup_sigframe(sig, &current->sighand->action[signo]);
+	setup_sigframe(sig, &current->sighand->action[signo - 1]);
 }
 
 void do_notify_resume(int syscall_retval)

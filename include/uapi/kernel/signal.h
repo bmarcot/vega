@@ -54,6 +54,12 @@
 #define SIG_UNBLOCK	2	/* for unblocking signals */
 #define SIG_SETMASK	3	/* for setting the signal mask */
 
+typedef void (*__signalfn_t)(int);
+
+#define SIG_DFL		((__signalfn_t)0)	/* default signal handling */
+#define SIG_IGN		((__signalfn_t)1)	/* ignore signal */
+#define SIG_ERR		((__signalfn_t)-1)	/* error return from signal */
+
 typedef union sigval {
 	int		sival_int;
 	void		*sival_ptr;

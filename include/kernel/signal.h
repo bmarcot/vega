@@ -178,4 +178,9 @@ static inline struct sighand_struct *task_sighand(struct task_struct *tsk)
 	return tsk->sighand;
 }
 
+#define sig_ignore(t, signr)						\
+	(((t)->sighand->action[(signr) - 1].sa_handler == SIG_IGN) ||	\
+	 (siginmask(signr, SIG_KERNEL_IGNORE_MASK) &&			\
+	  (t)->sighand->action[(signr) - 1].sa_handler == SIG_DFL))
+
 #endif /* !_KERNEL_SIGNAL_H */
