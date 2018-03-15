@@ -16,6 +16,8 @@
 
 #include <uapi/kernel/signal.h>
 
+#include <asm/bitsperlong.h>
+
 /*
  * define some primitives to manipulate sigset_t
  */
@@ -116,6 +118,45 @@ _SIG_SET_BINOP(sigandsets, _sig_and)
 
 #define _sig_andn(x,y)((x) & ~(y))
 _SIG_SET_BINOP(sigandnsets, _sig_andn)
+
+#if SIGRTMIN > __BITS_PER_LONG
+#define rt_sigmask(sig)	(1ull << ((sig) - 1))
+#else
+#define rt_sigmask(sig)	(1ul << ((sig) - 1))
+#endif
+
+#define siginmask(sig, mask) \
+	((sig) < SIGRTMIN && (rt_sigmask(sig) & (mask)))
+
+#define SIG_KERNEL_ONLY_MASK (\
+	rt_sigmask(SIGKILL)   |  rt_sigmask(SIGSTOP))
+
+#define SIG_KERNEL_STOP_MASK (\
+	rt_sigmask(SIGSTOP)   |  rt_sigmask(SIGTSTP)   | \
+	rt_sigmask(SIGTTIN)   |  rt_sigmask(SIGTTOU)   )
+
+#define SIG_KERNEL_COREDUMP_MASK (\
+	rt_sigmask(SIGQUIT)   |  rt_sigmask(SIGILL)    | \
+	rt_sigmask(SIGTRAP)   |  rt_sigmask(SIGABRT)   | \
+	rt_sigmask(SIGFPE)    |  rt_sigmask(SIGSEGV)   | \
+	rt_sigmask(SIGBUS)    |  rt_sigmask(SIGSYS)    | \
+	rt_sigmask(SIGXCPU)   |  rt_sigmask(SIGXFSZ)   )
+
+#define SIG_KERNEL_IGNORE_MASK (\
+	rt_sigmask(SIGCONT)   |  rt_sigmask(SIGCHLD)   | \
+	rt_sigmask(SIGURG)    )
+
+#define SIG_SPECIFIC_SICODES_MASK (\
+	rt_sigmask(SIGILL)    |  rt_sigmask(SIGFPE)    | \
+	rt_sigmask(SIGSEGV)   |  rt_sigmask(SIGBUS)    | \
+	rt_sigmask(SIGTRAP)   |  rt_sigmask(SIGCHLD)   | \
+	rt_sigmask(SIGPOLL)   |  rt_sigmask(SIGSYS)    )
+
+#define sig_kernel_only(sig)		siginmask(sig, SIG_KERNEL_ONLY_MASK)
+#define sig_kernel_coredump(sig)	siginmask(sig, SIG_KERNEL_COREDUMP_MASK)
+#define sig_kernel_ignore(sig)		siginmask(sig, SIG_KERNEL_IGNORE_MASK)
+#define sig_kernel_stop(sig)		siginmask(sig, SIG_KERNEL_STOP_MASK)
+#define sig_specific_sicodes(sig)	siginmask(sig, SIG_SPECIFIC_SICODES_MASK)
 
 struct signal_struct *alloc_signal_struct(struct task_struct *tsk);
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk);
