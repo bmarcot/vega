@@ -5,6 +5,9 @@
 *.map
 *.lds
 *.hex
+*.img
+
+initrd
 kernel/fs/version
 
 # CMSIS is managed as an external dependency

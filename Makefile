@@ -67,9 +67,11 @@ CSRC += $(wildcard kernel/*.c)		\
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
 OBJS := $(sort $(OBJS))
 
+.PHONY: all clean distclean
+
 all: $(NAME).lds $(NAME).hex
 
-$(NAME).elf: $(OBJS) kernel/fs/version.o libvega/libvega.a libsemi/libsemi.a
+$(NAME).elf: $(OBJS) kernel/fs/version.o libvega/libvega.a libsemi/libsemi.a initrd.o
 	$(VECHO) "LD\t$@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
@@ -105,6 +107,9 @@ libvega/libvega.a:
 libsemi/libsemi.a:
 	$(MAKE) -C libsemi
 
+initrd.o:
+	$(MAKE) -C init
+
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OBJCOPY) -O ihex $< $@
@@ -113,6 +118,7 @@ clean::
 	find . -name "*.o" -type f -delete
 	rm -f $(NAME).map $(NAME).lds
 	rm -f kernel/fs/version
+	$(MAKE) -C init clean
 	$(MAKE) -C libvega clean
 	$(MAKE) -C libsemi clean
 
