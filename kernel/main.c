@@ -1,7 +1,7 @@
 /*
  * kernel/main.c
  *
- * Copyright (c) 2015-2017 Baruch Marcot
+ * Copyright (c) 2015-2018 Benoit Marcot
  */
 
 #include <stdlib.h>
@@ -33,6 +33,8 @@ extern char __pgmem_size__;
 extern char __heap_start__;
 extern char __heap_end__;
 extern char __heap_size__;
+
+extern char _binary_initrd_img_start;
 
 int mtdchar_init(void);
 int idle_init(void);
@@ -97,9 +99,24 @@ struct thread_info *start_kernel(void)
 	show_page_bitmap(); // init_pages();
 	kmem_cache_init();
 
+	/*
+	 * Initialize file-systems
+	 */
+
+	procfs_init();
+	devfs_init();
+	memdev_init();
+	mtdchar_init();
+
+	pr_info("Mount /init filesystem");
+	do_filesystem_mount(NULL, "/init", "initfs", 0, &_binary_initrd_img_start);
+
+	/*
+	 * Initialize scheduler and `init` process
+	 */
+
 	sched_init();
 	idle_init();
-
 	struct task_struct *init_task = alloc_init_task();
 	pr_info("Created init_task at <%p> with priority=%d", init_task,
 		init_task->prio);
@@ -110,11 +127,6 @@ struct thread_info *start_kernel(void)
 		&__early_stack_start__ - &__early_stack_end__,
 		size_to_page_order(2048));
 	free_pages((unsigned long)&__early_stack_end__, size_to_page_order(2048));
-
-	procfs_init();
-	devfs_init();
-	memdev_init();
-	mtdchar_init();
 
 	/* do the platform-specific inits */
 	__platform_init();
