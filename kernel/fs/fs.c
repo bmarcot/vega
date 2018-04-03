@@ -1,19 +1,20 @@
 /*
  * kernel/fs/fs.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #include <errno.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/fs.h>
+#include <kernel/fs/initfs.h>
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/sched.h>
+#include <kernel/string.h>
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
@@ -275,6 +276,20 @@ SYSCALL_DEFINE(stat,
 	return 0;
 }
 
+int do_filesystem_mount(const char *source, const char *target,
+			const char *filesystemtype,
+			unsigned long mountflags, const void *data)
+{
+	int retval = -1;
+
+	if (!strcmp("romfs", filesystemtype))
+		retval = romfs_mount(source, target, filesystemtype, mountflags, data);
+	if (!strcmp("initfs", filesystemtype))
+		retval = initfs_mount(source, target, filesystemtype, mountflags, data);
+
+	return retval;
+}
+
 SYSCALL_DEFINE(mount,
 	const char	*source,
 	const char	*target,
@@ -282,9 +297,5 @@ SYSCALL_DEFINE(mount,
 	unsigned long	mountflags,
 	const void	*data)
 {
-	if (!strcmp("romfs", filesystemtype))
-		return romfs_mount(source, target, filesystemtype, mountflags,
-				data);
-
-	return -1;
+	return do_filesystem_mount(source, target, filesystemtype, mountflags, data);
 }

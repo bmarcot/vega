@@ -186,11 +186,14 @@ int devfs_init(void);
  * Kernel common file-manipulation functions
  */
 
-struct file *do_file_open(const char *pathname, int flags);
-ssize_t     do_file_read(struct file *file, void *buf, size_t count);
-ssize_t     do_file_write(struct file *file, void *buf, size_t count);
-off_t       do_file_lseek(struct file *file, off_t offset, int whence);
-int         do_file_close(struct file *file);
+struct file	*do_file_open(const char *pathname, int flags);
+ssize_t		do_file_read(struct file *file, void *buf, size_t count);
+ssize_t		do_file_write(struct file *file, void *buf, size_t count);
+off_t		do_file_lseek(struct file *file, off_t offset, int whence);
+int		do_file_close(struct file *file);
+int		do_filesystem_mount(const char *source, const char *target,
+			const char *filesystemtype,
+			unsigned long mountflags, const void *data);
 
 /*
  * Filesystem helper functions
