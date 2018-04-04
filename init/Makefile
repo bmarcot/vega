@@ -1,19 +1,25 @@
 SRC	= $(wildcard *.c)
-CROSS   = arm-none-eabi-
-CC      = $(CROSS)gcc
+CROSS	= arm-none-eabi-
+CC	= $(CROSS)gcc
 OBJCOPY = $(CROSS)objcopy
+STRIP	= $(CROSS)strip
 PYTHON	= python3
+
+.PHONY: all clean
 
 all: ../initrd.o
 
 init.d/init: $(SRC)
-	mkdir -p init.d; $(CC) -o $@ -mcpu=cortex-m3 -mthumb -pie -Wl,-z,max-page-size=0 -nostdlib -nostartfiles $^
+	$(CC) -o $@ -mcpu=cortex-m3 -mthumb -pie -Wl,-z,max-page-size=0 -nostdlib -nostartfiles $^ \
+		-L../libsemi -L../libvega -lsemi -lvega
+	$(STRIP) --remove-section=.comment $@
 
-initrd.img:
-	$(PYTHON) geninitfs.py --dir init.d --output $@ --bfdarch arm --verbose
+initrd.img: init.d/init
+	$(PYTHON) geninitfs.py --dir init.d --output $@ --bfdarch arm
 
 ../initrd.o: initrd.img
-	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.rodata $^ $@
+	$(OBJCOPY) --input-target=binary --output-target=elf32-littlearm --binary-architecture=arm \
+		--rename-section .data=.rodata $^ $@
 
 clean:
 	rm -f init.d/init ../initrd.o initrd.img
