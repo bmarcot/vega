@@ -1,7 +1,7 @@
 /*
  * kernel/fork.c
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <string.h>
@@ -15,6 +15,7 @@
 #include <kernel/syscalls.h>
 
 #include <asm/current.h>
+#include <asm/ptrace.h>
 
 static struct task_struct *copy_process(int flags)
 {
@@ -42,7 +43,7 @@ static struct task_struct *copy_process(int flags)
 SYSCALL_DEFINE(vfork, void)
 {
 	struct task_struct *child;
-	struct cpu_user_context *child_ctx;
+	struct pt_regs *child_ctx;
 
 	child = copy_process(CLONE_VFORK);
 	if (!child) {
@@ -57,7 +58,7 @@ SYSCALL_DEFINE(vfork, void)
 	__process_alloca(child, child_ctx);
 
 	/* copy parent's user frame, but update the return value */
-	memcpy(child_ctx, current->thread_info.user.ctx, sizeof(*child_ctx));
+	memcpy(child_ctx, current->thread_info.user.regs, sizeof(*child_ctx));
 	child_ctx->r0 = 0;
 
 	/* parent is now stopped until child returns */
@@ -79,7 +80,26 @@ struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 	if (!tsk)
 		return NULL;
 	init_task(tsk, flags);
-	arch_thread_setup(tsk, fn, arg, child_stack);
+
+	struct pt_regs regs = {
+		.r0 = (u32)arg,
+		.pc = (u32)fn,
+	};
+	arch_thread_setup(tsk, flags, child_stack, &regs);
+
+	return tsk;
+}
+
+struct task_struct *
+do_clone(unsigned long flags, void *child_stack, struct pt_regs *regs)
+{
+	struct task_struct *tsk;
+
+	tsk = alloc_pages(size_to_page_order(THREAD_SIZE));
+	if (!tsk)
+		return NULL;
+	init_task(tsk, flags);
+	arch_thread_setup(tsk, flags, child_stack, regs);
 
 	return tsk;
 }
