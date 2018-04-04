@@ -24,24 +24,24 @@ def main():
             print("Adding %s" % f)
         pathname = os.path.join(opts.dirpath, f)
         if stat(pathname).st_mode:
-            # write filesize
             with open(opts.outfile, 'ab') as of:
+                # write filesize
                 of.write(os.path.getsize(pathname).to_bytes(2, byteorder=bfdendian[opts.bfdarch]))
-            with open(opts.outfile, 'a') as of:
                 # write filename
-                of.write("%s\0" % f)
+                of.write(f.encode('utf-8'))
+                of.write(b'\0')
                 # align to next 4-byte boundary
                 if of.tell() % 4:
                     for i in range(of.tell() % 4, 4):
-                        of.write('\0')
+                        of.write(b'\0')
                 # concat input file
-                with open(pathname) as infile:
+                with open(pathname, 'rb') as infile:
                     for line in infile:
                         of.write(line)
                 # align to next 4-byte boundary
                 if of.tell() % 4:
                     for i in range(of.tell() % 4, 4):
-                        of.write('\0')
+                        of.write(b'\0')
         elif opts.verbose:
             print('Skipping %s' % pathname)
 
