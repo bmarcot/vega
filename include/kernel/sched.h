@@ -98,11 +98,9 @@ struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
 			int flags, void *arg);
 
 /* asm/thread.c */
-int arch_thread_setup(struct task_struct *task, void *start_routine,
-		void *arg, void *stack_start);
+void arch_thread_setup(struct task_struct *tsk, unsigned long flags,
+		void *child_stack, struct pt_regs *regs);
 int init_thread(struct task_struct *tsk);
-void __thread_setup(struct task_struct *tsk, void *start_routine, void *arg,
-		void *stack, unsigned long stacksize);
 
 /* exit.c */
 void do_exit(int exit_code);

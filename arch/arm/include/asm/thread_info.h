@@ -1,7 +1,7 @@
 /*
  * arch/arm/include/asm/thread_info.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #ifndef _ASM_THREAD_INFO_H
@@ -9,6 +9,8 @@
 
 #include <kernel/log2.h>
 #include <kernel/types.h>
+
+#include <asm/ptrace.h>
 
 #define THREAD_SIZE	512
 
@@ -25,29 +27,10 @@ struct cpu_kernel_context {
 	u32 lr;  /* loaded with EXC_RETURN value */
 };
 
-struct cpu_user_context {
-	/* preserved registers on interrupt entry */
-	u32 r4;
-	u32 r5;
-	u32 r6;
-	u32 r7;
-	u32 r8;
-	u32 r9;
-	u32 r10;
-	u32 r11;
-
-	/* cpu-saved registers */
-	u32 r0;
-	u32 r1;
-	u32 r2;
-	u32 r3;
-	u32 r12;
-	u32 lr;
-	u32 ret_addr;
-	u32 xpsr;
-};
-
+//XXX: Will die..
+#ifndef CONFIG_THREAD_INFO_IN_TASK
 struct task_struct;
+#endif
 
 struct thread_info {
 	union {
@@ -55,14 +38,14 @@ struct thread_info {
 		struct cpu_kernel_context *ctx;
 	} kernel;
 	union {
-		u32 psp;
-		struct cpu_user_context *ctx;
+		u32		psp;
+		struct pt_regs	*regs;
 	} user;
-	u32 priv;
-	u32 flags;
+	u32			priv;
+	u32			flags;
 
 #ifndef CONFIG_THREAD_INFO_IN_TASK
-	struct task_struct *task;
+	struct task_struct	*task;
 #endif
 };
 
