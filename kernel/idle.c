@@ -21,7 +21,8 @@ static __attribute__((noreturn)) int do_idle(void *arg)
 int idle_init(void)
 {
 	/* idle_task is not added to the runqueue */
-	idle_task = clone_task(do_idle, &idle_stack[32], 0, NULL);
+	struct pt_regs regs = { .pc = (u32)do_idle, };
+	idle_task = do_clone(0, &idle_stack[32], &regs);
 	if (!idle_task) {
 		pr_err("Could not create the idle task");
 		return -1;

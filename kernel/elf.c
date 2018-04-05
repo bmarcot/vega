@@ -199,9 +199,8 @@ out:
 
 	/* Create a new task. */
 	char *stack = alloc_pages(size_to_page_order(512));
-	struct task_struct *main;
-	main = clone_task((start_routine)ehdr.e_entry, stack + 512,
-			0, NULL);
+	struct pt_regs regs = { .pc = ehdr.e_entry, };
+	struct task_struct *main = do_clone(0, stack + 512, &regs);
 	sched_enqueue(main);
 
 	return 0;

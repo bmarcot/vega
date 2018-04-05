@@ -94,8 +94,8 @@ void add_task(struct task_struct *tsk); /* will die.. */
 void reserve_pid(pid_t pid); /* will die.. */
 
 /* fork.c */
-struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
-			int flags, void *arg);
+struct task_struct *
+do_clone(unsigned long flags, void *child_stack, struct pt_regs *regs);
 
 /* asm/thread.c */
 void arch_thread_setup(struct task_struct *tsk, unsigned long flags,

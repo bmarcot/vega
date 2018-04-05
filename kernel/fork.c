@@ -71,25 +71,6 @@ SYSCALL_DEFINE(vfork, void)
 	return child->tgid;
 }
 
-struct task_struct *clone_task(int (*fn)(void *), void *child_stack,
-			int flags, void *arg)
-{
-	struct task_struct *tsk;
-
-	tsk = alloc_pages(size_to_page_order(THREAD_SIZE));
-	if (!tsk)
-		return NULL;
-	init_task(tsk, flags);
-
-	struct pt_regs regs = {
-		.r0 = (u32)arg,
-		.pc = (u32)fn,
-	};
-	arch_thread_setup(tsk, flags, child_stack, &regs);
-
-	return tsk;
-}
-
 struct task_struct *
 do_clone(unsigned long flags, void *child_stack, struct pt_regs *regs)
 {
@@ -105,10 +86,9 @@ do_clone(unsigned long flags, void *child_stack, struct pt_regs *regs)
 }
 
 SYSCALL_DEFINE(clone,
-	int		(*fn)(void *),
+	unsigned long	flags,
 	void		*child_stack,
-	int		flags,
-	void		*arg)
+	struct pt_regs	*regs)
 {
 	struct task_struct *tsk;
 
@@ -116,7 +96,7 @@ SYSCALL_DEFINE(clone,
 	if ((flags & CLONE_THREAD) && !(flags & CLONE_SIGHAND))
 		return -1;
 
-	tsk = clone_task(fn, child_stack, flags, arg);
+	tsk = do_clone(flags, child_stack, regs);
 	if (!tsk)
 		return -1;
 	sched_enqueue(tsk);
