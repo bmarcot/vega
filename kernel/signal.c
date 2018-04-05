@@ -17,6 +17,7 @@
 #include <kernel/thread_info.h>
 
 #include <asm/current.h>
+#include <asm/ptrace.h>
 
 int signal_pending(struct task_struct *tsk)
 {
@@ -201,7 +202,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	//FIXME: Check if we are actually returning from a signal handler
 
 	sig = list_first_entry(&current->pending.list, struct sigqueue, list);
-	off = sizeof(struct cpu_user_context);
+	off = sizeof(struct pt_regs);
 	struct sigaction *act = task_sigaction(current, sig->info.si_signo);
 	if (act->sa_flags & SA_SIGINFO)
 		off += align_next(sizeof(siginfo_t), 8);
@@ -215,7 +216,7 @@ SYSCALL_DEFINE(sigreturn, void)
 	 * syscall's return value. If it was interrupted because of an
 	 * external interrupt, this restores the r0 value at the time of
 	 * the interrupt. */
-	return current_thread_info()->user.ctx->r0;
+	return current_thread_info()->user.regs->r0;
 }
 
 SYSCALL_DEFINE(sigprocmask,

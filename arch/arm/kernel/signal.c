@@ -1,7 +1,7 @@
 /*
  * arch/arm/kernel/signal.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <string.h>
@@ -28,23 +28,23 @@
 static void setup_sigframe(struct sigqueue *q, struct sigaction *sa)
 {
 	siginfo_t *siginfo = NULL;
-	struct cpu_user_context *sigctx;
+	struct pt_regs *regs;
 
 	if (sa->sa_flags & SA_SIGINFO) {
 		__process_alloca(siginfo);
 		memcpy(siginfo, &q->info, sizeof(*siginfo));
 	}
 
-	__process_alloca_with_align(sigctx, 8);
-	sigctx->r0 = q->info.si_signo;  /* signum */
-	sigctx->r1 = (u32)siginfo;      /* siginfo_t or null */
-	sigctx->r2 = 0;                 /* ucontext_t *, commonly unused */
+	__process_alloca_with_align(regs, 8);
+	regs->r0 = q->info.si_signo;	/* signum */
+	regs->r1 = (u32)siginfo;	/* siginfo_t or null */
+	regs->r2 = 0;			/* ucontext_t *, commonly unused */
 	if (sa->sa_flags & SA_RESTORER)
-		sigctx->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
+		regs->lr = (u32)v7m_set_thumb_bit(sa->sa_restorer);
 	else
-		sigctx->lr = 0;
-	sigctx->ret_addr = (u32)v7m_clear_thumb_bit(sa->sa_handler);
-	sigctx->xpsr = xPSR_T_Msk;
+		regs->lr = 0;
+	regs->pc = (u32)v7m_clear_thumb_bit(sa->sa_handler);
+	regs->status = xPSR_T_Msk;
 
 	/* unset the TIF_SIGPENDING flags */
 	clear_thread_flag(TIF_SIGPENDING);
@@ -58,7 +58,7 @@ void __do_signal(int signo, struct sigqueue *sig)
 void do_notify_resume(int syscall_retval)
 {
 	/* save the return value that will be restored by sigreturn() */
-	current_thread_info()->user.ctx->r0 = syscall_retval;
+	current_thread_info()->user.regs->r0 = syscall_retval;
 
 	if (test_thread_flag(TIF_SIGPENDING))
 		do_signal();
