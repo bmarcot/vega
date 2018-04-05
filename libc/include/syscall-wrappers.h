@@ -12,7 +12,7 @@ int do_syscall5();
 int do_syscall6();
 
 /* sched.h */
-#define SYS_clone(...)		do_syscall4(__VA_ARGS__, SYS_CLONE)
+#define SYS_clone(...)		do_syscall3(__VA_ARGS__, SYS_CLONE)
 #define SYS_execve(...)		do_syscall3(__VA_ARGS__, SYS_EXECVE)
 
 /* linux/unistd.h */

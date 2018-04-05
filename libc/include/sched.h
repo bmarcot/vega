@@ -1,11 +1,13 @@
 #pragma once
 
+#include <asm/ptrace.h>
+
 #include "syscall-wrappers.h"
 
 static inline __attribute__((always_inline)) int
-clone(int (*fn)(void *), void *child_stack, int flags, void *arg)
+clone(unsigned long flags, void *child_stack, struct pt_regs *regs)
 {
-	return SYS_clone(fn, child_stack, flags, arg);
+	return SYS_clone(flags, child_stack, regs);
 }
 
 static inline __attribute__((always_inline)) int

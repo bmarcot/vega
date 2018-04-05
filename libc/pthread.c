@@ -9,6 +9,8 @@
 
 #include <uapi/kernel/sched.h>
 
+#include <asm/ptrace.h>
+
 #include <kernel/errno-base.h> //XXX: no kernel here, move to uapi, or to lib errno
 
 #include "syscall-wrappers.h"
@@ -75,8 +77,11 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	pr_info("thread@%p", pthread);
 #endif
 
-	int r = clone(__pthread_trampoline, pthread,
-		CLONE_THREAD | CLONE_SIGHAND, pthread);
+	struct pt_regs regs = {
+		.r0 = (u32)pthread,
+		.pc = (u32)__pthread_trampoline,
+	};
+	int r = clone(CLONE_THREAD | CLONE_SIGHAND, pthread, &regs);
 	if (r < 0) {
 		if (flags & PF_STACKALLOC)
 			munmap(stack, stacksize);
