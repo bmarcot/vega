@@ -53,7 +53,9 @@ struct task_struct *alloc_init_task(void)
 	sigemptyset(&init->blocked); //sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
 
-	__thread_setup(init, main, NULL, stack,	CONFIG_INIT_STACK_SIZE);
+	struct pt_regs regs = {	.pc = (u32)main, };
+	arch_thread_setup(init, 0, stack + CONFIG_INIT_STACK_SIZE, &regs);
+
 	add_task(init);
 	sched_enqueue(init);
 
