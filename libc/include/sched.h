@@ -2,16 +2,17 @@
 
 #include <asm/ptrace.h>
 
-#include "syscall-wrappers.h"
+#include <asm/syscalls.h>
+#include <libvega/syscalls.h>
 
 static inline __attribute__((always_inline)) int
 clone(unsigned long flags, void *child_stack, struct pt_regs *regs)
 {
-	return SYS_clone(flags, child_stack, regs);
+	return syscall(3, flags, child_stack, regs, SYS_CLONE);
 }
 
 static inline __attribute__((always_inline)) int
 sched_yield(void)
 {
-	return SYS_sched_yield();
+	return syscall(0, SYS_SCHED_YIELD);
 }

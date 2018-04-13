@@ -1,18 +1,19 @@
 /* syscall wrappers */
 
 #include <stddef.h>
-#include <time.h>
-
-#include <asm/syscalls.h>
-#include "vega/syscalls.h"
-
 #include <sys/types.h>
 
-#include "syscall-wrappers.h"
+#include <asm/syscalls.h>
+#include <libvega/syscalls.h>
+
+int nanosleep(const struct timespec *req, struct timespec *rem)
+{
+	return syscall(2, req, rem, SYS_NANOSLEEP);
+}
 
 int execve(const char *filename, char *const argv[], char *const envp[])
 {
-	return SYS_execve(filename, argv, envp);
+	return syscall(3, filename, argv, envp, SYS_EXECVE);
 }
 
 int sleep(int secs)
@@ -37,10 +38,10 @@ int msleep(int msecs)
 
 void _exit(int status)
 {
-	SYS_exit_group(status);
+	syscall(1, status, SYS_EXIT_GROUP);
 }
 
 int pause(void)
 {
-	return SYS_pause();
+	return syscall(0, SYS_PAUSE);
 }

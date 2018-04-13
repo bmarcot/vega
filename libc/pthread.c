@@ -5,15 +5,13 @@
 
 #include <kernel/list.h>
 #include <asm/syscalls.h>
-#include "vega/syscalls.h"
+#include <libvega/syscalls.h>
 
 #include <uapi/kernel/sched.h>
 
 #include <asm/ptrace.h>
 
 #include <kernel/errno-base.h> //XXX: no kernel here, move to uapi, or to lib errno
-
-#include "syscall-wrappers.h"
 
 #define __STACK_ALLOCA(sp, off, ptr) ({			  \
 	unsigned long __sp = (unsigned long)(sp) + (off); \
@@ -137,7 +135,7 @@ static void release_pthread(struct pthread *pthread)
 
 static inline int futex(int *uaddr, int futex_op, int val)
 {
-	return SYS_futex(uaddr, futex_op, val);
+	return syscall(3, uaddr, futex_op, val, SYS_FUTEX);
 }
 
 void __pthread_exit(void *retval, struct pthread *pthread)
@@ -155,7 +153,8 @@ void __pthread_exit(void *retval, struct pthread *pthread)
 		if (pthread->joiner)
 			futex((int *)&pthread->lock, FUTEX_WAKE, 1);
 	}
-	_exit_thread((int)retval);
+	syscall(1, retval, SYS_EXIT);
+
 	/* if (list_is_singular(&threads)) */
 	/* 	do_syscall1((void *)retval, SYS_EXIT); */
 	/* else */

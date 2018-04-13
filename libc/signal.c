@@ -5,13 +5,11 @@
 #include <uapi/kernel/signal.h>
 
 #include <asm/syscalls.h>
-#include "vega/syscalls.h"
-
-#include "syscall-wrappers.h"
+#include <libvega/syscalls.h>
 
 void sigreturn(void)
 {
-	SYS_sigreturn();
+	syscall(0, SYS_SIGRETURN);
 }
 
 int sigaction(int sig, const struct sigaction *restrict act,
@@ -23,22 +21,20 @@ int sigaction(int sig, const struct sigaction *restrict act,
 	sa.sa_flags |= SA_RESTORER;
 	sa.sa_restorer = sigreturn;
 
-	return do_syscall3((void *)sig, &sa, (void *)oact, SYS_SIGACTION);
+	return syscall(3, sig, &sa, oact, SYS_SIGACTION);
 }
 
 int _kill(pid_t pid, int sig)
 {
-	return SYS_kill(pid, sig);
+	return syscall(2, pid, sig, SYS_KILL);
 }
 
 int sigqueue(pid_t pid, int sig, const union sigval value)
 {
-	return do_syscall3((void *)pid, (void *)sig, value.sival_ptr,
-			SYS_SIGQUEUE);
+	return syscall(3, pid, sig, value.sival_ptr, SYS_SIGQUEUE);
 }
 
 int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
 {
-	return do_syscall3((void *)how, (void *)set, (void *)oldset,
-			SYS_SIGPROCMASK);
+	return syscall(3, how, set, oldset, SYS_SIGPROCMASK);
 }

@@ -1,15 +1,13 @@
-#include <asm/syscalls.h>
-#include "vega/syscalls.h"
-
 #include <sys/types.h>
+#include <asm/syscalls.h>
+#include <libvega/syscalls.h>
 
 int getpriority(int which, id_t who)
 {
-	return do_syscall2((void *)which, (void *)who, SYS_GETPRIORITY);
+	return syscall(2, which, who, SYS_GETPRIORITY);
 }
 
 int setpriority(int which, id_t who, int prio)
 {
-	return do_syscall3((void *)which, (void *)who, (void *)prio,
-			SYS_SETPRIORITY);
+	return syscall(3, which, who, prio, SYS_SETPRIORITY);
 }

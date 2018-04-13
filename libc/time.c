@@ -5,31 +5,27 @@
 #include <uapi/kernel/time.h>
 
 #include <asm/syscalls.h>
-#include "vega/syscalls.h"
+#include <libvega/syscalls.h>
 
 int timer_create(clockid_t clockid, struct sigevent *sevp,
 		timer_t *timerid)
 {
-	return do_syscall3((void *)clockid, (void *)sevp, (void *)timerid,
-			SYS_TIMER_CREATE);
+	return syscall(3, clockid, sevp, timerid, SYS_TIMER_CREATE);
 }
 
 int timer_settime(timer_t timerid, int flags,
 		const struct itimerspec *new_value,
 		struct itimerspec *old_value)
 {
-	return do_syscall4((void *)timerid, (void *)flags, (void *)new_value,
-			 (void *)old_value, SYS_TIMER_SETTIME);
-
+	return syscall(4, timerid, flags, new_value, old_value, SYS_TIMER_SETTIME);
 }
 
 int timer_gettime(timer_t timerid, struct itimerspec *curr_value)
 {
-	return do_syscall2((void *)timerid, (void *)curr_value,
-			SYS_TIMER_GETTIME);
+	return syscall(2, timerid, curr_value, SYS_TIMER_GETTIME);
 }
 
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
-	return do_syscall2((void *)clk_id, (void *)tp, SYS_CLOCK_GETTIME);
+	return syscall(2, clk_id, tp, SYS_CLOCK_GETTIME);
 }
