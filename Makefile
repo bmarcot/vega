@@ -69,7 +69,7 @@ OBJS := $(sort $(OBJS))
 
 all: $(NAME).lds $(NAME).hex
 
-$(NAME).elf: $(OBJS) kernel/fs/version.o
+$(NAME).elf: $(OBJS) kernel/fs/version.o libvega/libvega.a
 	$(VECHO) "LD\t$@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
@@ -99,6 +99,9 @@ kernel/fs/version.o: kernel/fs/version
         --redefine-sym _binary_$(subst /,_,$<)_size=_version_len	\
 	$< $@
 
+libvega/libvega.a:
+	$(MAKE) -C libvega
+
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OBJCOPY) -O ihex $< $@
@@ -107,6 +110,7 @@ clean::
 	find . -name "*.o" -type f -delete
 	rm -f $(NAME).map $(NAME).lds
 	rm -f kernel/fs/version
+	$(MAKE) -C libvega clean
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
