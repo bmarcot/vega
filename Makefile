@@ -69,7 +69,7 @@ OBJS := $(sort $(OBJS))
 
 all: $(NAME).lds $(NAME).hex
 
-$(NAME).elf: $(OBJS) kernel/fs/version.o libvega/libvega.a
+$(NAME).elf: $(OBJS) kernel/fs/version.o libvega/libvega.a libsemi/libsemi.a
 	$(VECHO) "LD\t$@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
@@ -102,6 +102,9 @@ kernel/fs/version.o: kernel/fs/version
 libvega/libvega.a:
 	$(MAKE) -C libvega
 
+libsemi/libsemi.a:
+	$(MAKE) -C libsemi
+
 %.hex: %.elf
 	$(VECHO) "OBJCOPY\t$@"
 	$(Q)$(OBJCOPY) -O ihex $< $@
@@ -111,6 +114,7 @@ clean::
 	rm -f $(NAME).map $(NAME).lds
 	rm -f kernel/fs/version
 	$(MAKE) -C libvega clean
+	$(MAKE) -C libsemi clean
 
 distclean: clean
 	rm -f $(NAME).elf $(NAME).hex
