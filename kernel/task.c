@@ -49,7 +49,7 @@ int init_task(struct task_struct *tsk, int flags)
 	pid = get_pid();
 	if (pid == -1)
 		return -1;
-	tsk->prio = PRI_MIN;
+	tsk->prio = PRI_MIN - 1; /* lowest prio is reserved for init process */
 	tsk->state = TASK_NEW;
 	tsk->stack = &tsk->thread_info;
 	tsk->filemap = 0;
