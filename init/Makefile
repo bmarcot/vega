@@ -10,7 +10,8 @@ PYTHON	= python3
 all: ../initrd.o
 
 init.d/init: $(SRC)
-	$(CC) -o $@ -mcpu=cortex-m3 -mthumb -pie -Wl,-z,max-page-size=0 -nostdlib -nostartfiles $^ \
+	$(CC) -o $@ -mcpu=cortex-m3 -mthumb -pie -Wl,-z,max-page-size=0 -nostdlib -nostartfiles \
+		-I../include -I../arch/arm/include/uapi $^ \
 		-L../libsemi -L../libvega -lsemi -lvega
 	$(STRIP) --remove-section=.comment $@
 

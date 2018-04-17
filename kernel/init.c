@@ -4,6 +4,7 @@
  * Copyright (c) 2018 Benoit Marcot
  */
 
+#include <kernel/elf.h>
 #include <kernel/kernel.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
@@ -53,8 +54,11 @@ struct task_struct *alloc_init_task(void)
 	sigemptyset(&init->blocked); //sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
 
-	struct pt_regs regs = {	.pc = (u32)main, };
+	struct pt_regs regs; //FIXME: could pass NULL to arch_thread_setup()
 	arch_thread_setup(init, 0, stack + CONFIG_INIT_STACK_SIZE, &regs);
+	pr_info("Load init process: /init/init");
+	BUG_ON(elf_load_binary("/init/init", init));
+	task_thread_info(init)->user.regs->r0 = (u32)main;
 
 	add_task(init);
 	sched_enqueue(init);
