@@ -1,17 +1,18 @@
 /*
  * kernel/elf.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <stdlib.h>
-#include <string.h>
 
 #include <kernel/array.h>
 #include <kernel/errno-base.h> //FIXME: <uapi/...>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/mm/page.h>
 #include <kernel/sched.h>
+#include <kernel/string.h>
 #include <kernel/thread.h>
 
 #include <uapi/elf32.h>
@@ -168,12 +169,7 @@ static int copy_load_segments(struct file *file, Elf32_Ehdr *ehdr)
 	return 0;
 }
 
-#include <kernel/mm/page.h>
-#include <kernel/sched.h>
-
-typedef int (*start_routine)(void *);
-
-int elf_load_binary(const char *pathname)
+int elf_load_binary(const char *pathname, struct task_struct *tsk)
 {
 	Elf32_Ehdr ehdr;
 	struct file *file;
@@ -181,7 +177,7 @@ int elf_load_binary(const char *pathname)
 
 	file = do_file_open(pathname, 0);
 	if (file == NULL) {
-		pr_err("error: Failed to open %s", pathname);
+		pr_err("Cannot open %s", pathname);
 		return -1;
 	}
 
@@ -197,11 +193,28 @@ out:
 	if (err)
 		return err;
 
-	/* Create a new task. */
-	char *stack = alloc_pages(size_to_page_order(512));
-	struct pt_regs regs = { .pc = ehdr.e_entry, };
-	struct task_struct *main = do_clone(0, stack + 512, &regs);
-	sched_enqueue(main);
+	/* task_set_regs(tsk, &regs); */
+	//XXX: this belongs to arch
+	task_thread_info(tsk)->user.regs->pc = ehdr.e_entry;
 
 	return 0;
+}
+
+int elf_exec_binary(const char *pathname)
+{
+	char *stack;
+	struct pt_regs regs;
+	struct task_struct *tsk;
+
+	stack = alloc_pages(size_to_page_order(512));
+	if (!stack)
+		return -1;
+
+	tsk = do_clone(0, stack + 512, &regs);
+	if (!tsk) {
+		free_pages((unsigned long)stack, size_to_page_order(512));
+		return -1;
+	}
+
+	return elf_load_binary(pathname, tsk);
 }

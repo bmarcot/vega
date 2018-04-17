@@ -1,7 +1,7 @@
 /*
  * kernel/exec.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <kernel/elf.h>
@@ -12,8 +12,7 @@ SYSCALL_DEFINE(execve,
 	char		*const argv[],
 	char		*const envp[])
 {
-	(void)argv, (void)envp;
-	elf_load_binary(filename);
+	elf_exec_binary(filename);
 
 	return 0;
 }
