@@ -56,3 +56,11 @@ char *itoa_base(int value, char *buf, int base)
 
 	return strrev(buf);
 }
+
+/* this is the GNU version of the function */
+char *basename(char *path)
+{
+	char *p = strrchr(path, '/');
+
+	return p ? p + 1 : path;
+}
