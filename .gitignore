@@ -7,7 +7,7 @@
 *.hex
 *.img
 
-initrd
+init/init.d/init
 kernel/fs/version
 
 # CMSIS is managed as an external dependency
