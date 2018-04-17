@@ -1,13 +1,13 @@
 /*
  * kernel/fs/romfs.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 /* https://www.kernel.org/doc/Documentation/filesystems/romfs.txt */
 
+#include <libgen.h> /* for basename() */
 #include <stdlib.h>
-#include <string.h>
 
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
@@ -15,19 +15,13 @@
 #include <kernel/kernel.h>
 #include <kernel/mm.h>
 #include <kernel/stat.h>
+#include <kernel/string.h>
 
 #include <drivers/mtd/mtd.h>
 
 const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;
-
-static char *basename(const char *filename)
-{
-	char *p = strrchr(filename, '/');
-
-	return p ? p + 1 : (char *)filename;
-}
 
 static off_t offsetof_device_inode(struct romfs_inode *rinode,
 				struct romfs_superblock *super)
@@ -55,7 +49,7 @@ int romfs_mount(const char *source, const char *target,
 		return -1;
 
 	/* link mounted-over inode to parent directory */
-	struct inode *target_in = make_dir(dev_inode(), basename(target));
+	struct inode *target_in = make_dir(dev_inode(), basename((char *)target));
 	if (!target_in)
 		return -1;
 	target_in->i_op = &romfs_iops;

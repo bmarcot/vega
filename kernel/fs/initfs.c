@@ -4,6 +4,8 @@
  * Copyright (c) 2018 Benoit Marcot
  */
 
+#include <libgen.h> /* for basename() */
+
 #include <kernel/fs.h>
 #include <kernel/fs/initfs.h>
 #include <kernel/fs/tmpfs.h>
@@ -75,7 +77,7 @@ int initfs_mount(const char *source, const char *target,
 {
 	struct inode *in;
 
-	in = make_dir(root_inode(), "init" /* basename(target) */);
+	in = make_dir(root_inode(), basename((char *)target));
 	if (!in)
 		return -1;
 	in->i_op = &initfs_iops;
