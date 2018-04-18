@@ -202,15 +202,14 @@ out:
 
 int elf_exec_binary(const char *pathname)
 {
-	char *stack;
-	struct pt_regs regs;
-	struct task_struct *tsk;
+	struct pt_regs regs = {0};
 
-	stack = alloc_pages(size_to_page_order(512));
+	//FIXME: Get stack size from system variable
+	char *stack = alloc_pages(size_to_page_order(512));
 	if (!stack)
 		return -1;
 
-	tsk = do_clone(0, stack + 512, &regs);
+	struct task_struct *tsk = do_clone(0, stack + 512, &regs);
 	if (!tsk) {
 		free_pages((unsigned long)stack, size_to_page_order(512));
 		return -1;

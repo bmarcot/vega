@@ -52,7 +52,7 @@ struct task_struct *alloc_init_task(void)
 	sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
 
-	struct pt_regs regs; //FIXME: could pass NULL to arch_thread_setup()
+	struct pt_regs regs = {0};
 	arch_thread_setup(init, 0, stack + CONFIG_INIT_STACK_SIZE, &regs);
 	pr_info("Load init process: /init/init");
 	BUG_ON(elf_load_binary("/init/init", init));
