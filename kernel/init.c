@@ -49,9 +49,7 @@ struct task_struct *alloc_init_task(void)
 	INIT_LIST_HEAD(&signal.thread_head);
 	init->signal = &signal;
 	init->sighand = &sighand;
-	//FIXME: Conflicting with unit tests, because they run as init process.
-	// Unit tests should run as new process instead (started by exec()).
-	sigemptyset(&init->blocked); //sigfillset(&init->blocked);
+	sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
 
 	struct pt_regs regs; //FIXME: could pass NULL to arch_thread_setup()
