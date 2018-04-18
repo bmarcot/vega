@@ -100,7 +100,6 @@ do_clone(unsigned long flags, void *child_stack, struct pt_regs *regs);
 /* asm/thread.c */
 void arch_thread_setup(struct task_struct *tsk, unsigned long flags,
 		void *child_stack, struct pt_regs *regs);
-int init_thread(struct task_struct *tsk);
 
 /* exit.c */
 void do_exit(int exit_code);
