@@ -6,6 +6,7 @@
 
 #include <kernel/elf.h>
 #include <kernel/kernel.h>
+#include <kernel/mm_types.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/sched/signal.h>
@@ -21,6 +22,7 @@ static char stack[CONFIG_INIT_STACK_SIZE] __attribute__((aligned(8)));
 
 static struct signal_struct signal;
 static struct sighand_struct sighand;
+static struct mm_struct mm;
 
 struct task_struct *alloc_init_task(void)
 {
@@ -51,6 +53,11 @@ struct task_struct *alloc_init_task(void)
 	init->sighand = &sighand;
 	sigfillset(&init->blocked);
 	init_sigpending(&init->pending);
+
+	/* mm */
+	INIT_LIST_HEAD(&mm.region_head);
+	mm.refcount = 1;
+	init->mm = &mm;
 
 	struct pt_regs regs = {0};
 	arch_thread_setup(init, 0, stack + CONFIG_INIT_STACK_SIZE, &regs);

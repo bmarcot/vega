@@ -1,19 +1,23 @@
 /*
  * kernel/mm/mm.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <errno.h>
-#include <string.h>
 #include <sys/cdefs.h>
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/mm.h>
 #include <kernel/mm/page.h>
+#include <kernel/sched.h>
 #include <kernel/stat.h>
+#include <kernel/string.h>
 #include <kernel/syscalls.h>
 #include <kernel/types.h>
+
+#include <asm/current.h>
 
 #include <uapi/kernel/mman.h>
 
@@ -76,6 +80,8 @@ void *do_mmap(void *addr, size_t length, int prot, int flags, int fd,
 	return addr;
 }
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 SYSCALL_DEFINE(mmap,
 	void		*addr,
 	size_t		length,
@@ -84,15 +90,88 @@ SYSCALL_DEFINE(mmap,
 	int		fd,
 	off_t		offset)
 {
-	return (int)do_mmap(addr, length, prot, flags, fd, offset);
+	addr = do_mmap(addr, length, prot, flags, fd, offset);
+
+	/* Record process allocations, such that any unreleased memory will be
+	 * freed by the kernel when process exits. */
+	if (addr) {
+		struct mm_struct *mm = current->mm;
+		struct mm_region *region = kmalloc(sizeof(*region));
+
+		if (!region) {
+			free_pages((unsigned long)addr,
+				size_to_page_order(length));
+			return (long)MAP_FAILED; //XXX: And set errno to ENOMEM
+		}
+
+		mm->size += length;
+		mm->max_size = max(mm->max_size, mm->size);
+
+		region->start = addr;
+		region->length = length;
+		region->flags = flags;
+		list_add(&region->list, &mm->region_head);
+	}
+
+	return (long)addr;
 }
 
 SYSCALL_DEFINE(munmap,
 	void		*addr,
 	size_t		length)
 {
+	struct mm_struct *mm = current->mm;
+	struct mm_region *region, *n;
+
+	//XXX: Walking the list is too slow, use a BST
+	list_for_each_entry_safe(region, n, &mm->region_head, list) {
+		if (region->start == addr) {
+			mm->size -= region->length;
+			list_del(&region->list);
+			kfree(region);
+		}
+	}
+
 	/* Closing the file descriptor does not unmap the region. */
 	free_pages((unsigned long)addr, size_to_page_order(length));
 
 	return 0;
+}
+
+void mm_release(void)
+{
+	struct mm_struct *mm = current->mm;
+	struct mm_region *region, *n;
+
+	if (!mm->size)
+		return;
+
+	if (--mm->refcount > 1)
+		return;
+
+	list_for_each_entry_safe(region, n, &mm->region_head, list) {
+		if (M_ISANON(region->flags))
+			free_pages((unsigned long)region->start,
+				size_to_page_order(region->length));
+		mm->size -= region->length;
+		list_del(&region->list);
+		kfree(region);
+	}
+
+	BUG_ON(mm->size);
+}
+
+struct mm_struct *alloc_mm_struct(void)
+{
+	struct mm_struct *mm;
+
+	mm = kmalloc(sizeof(*mm));
+	if (!mm)
+		return NULL;
+
+	mm->size = 0;
+	mm->max_size = 0;
+	INIT_LIST_HEAD(&mm->region_head);
+
+	return mm;
 }

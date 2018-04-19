@@ -1,7 +1,7 @@
 /*
  * include/kernel/mm.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_MM_H
@@ -14,5 +14,10 @@
 void *kmalloc(size_t size);
 void *kzalloc(size_t size);
 void kfree(void *ptr);
+
+struct mm_struct;
+
+void mm_release(void);
+struct mm_struct *alloc_mm_struct(void);
 
 #endif /* !_KERNEL_MM_H */

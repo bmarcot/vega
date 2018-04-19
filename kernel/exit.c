@@ -7,6 +7,7 @@
 #include <kernel/errno-base.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
@@ -64,7 +65,7 @@ static void exit_notify(struct task_struct *tsk)
 void do_exit(int exit_code)
 {
 	sched_dequeue(current);
-	// mm_release();
+	mm_release();
 	if (signal_group_exit(current->signal))
 		current->exit_code = current->signal->group_exit_code;
 	else

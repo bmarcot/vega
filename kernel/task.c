@@ -88,6 +88,19 @@ int init_task(struct task_struct *tsk, int flags)
 	sigemptyset(&tsk->blocked);
 	init_sigpending(&tsk->pending);
 
+	/* mm */
+	struct mm_struct *mm;
+	if (flags & (CLONE_THREAD /* | CLONE_VM */)) {
+		mm = current->mm;
+		mm->refcount++;
+	} else {
+		mm = alloc_mm_struct();
+		if (!mm)
+			return -1;
+		mm->refcount = 1;
+	}
+	tsk->mm = mm;
+
 	return 0;
 }
 
@@ -114,6 +127,14 @@ void put_sighand_struct(struct task_struct *tsk)
 		kfree(tsk->sighand);
 }
 
+void put_mm_struct(struct task_struct *tsk)
+{
+	struct mm_struct *mm = tsk->mm;
+
+	if (thread_group_leader(tsk) && !mm->refcount)
+		kfree(mm);
+}
+
 void put_task_struct(struct task_struct *tsk)
 {
 	struct sigqueue *q, *n;
@@ -125,6 +146,7 @@ void put_task_struct(struct task_struct *tsk)
 	}
 	put_signal_struct(tsk);
 	put_sighand_struct(tsk);
+	put_mm_struct(tsk);
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
 }
