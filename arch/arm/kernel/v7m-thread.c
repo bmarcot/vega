@@ -38,4 +38,5 @@ void arch_thread_setup(struct task_struct *tsk, unsigned long flags,
 	/* 	thread->priv = THREAD_PRIV_SUPERVISOR; */
 	/* else */
 	thrd->priv = V7M_UNPRIVILEGED;
+	thrd->flags = 0;
 }
