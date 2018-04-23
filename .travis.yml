@@ -4,7 +4,6 @@ services:
   - docker
 
 before_install:
-  - svn export --force https://github.com/bmarcot/vega-test/trunk test
   - docker pull bmarcot/vega-test
 
 script:
