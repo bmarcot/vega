@@ -10,6 +10,7 @@
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/mm/page.h>
+#include <kernel/ptrace.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/stddef.h>
@@ -176,4 +177,35 @@ struct list_head *get_all_tasks(void)
 void add_task(struct task_struct *tsk)
 {
 	list_add(&tsk->list, &tasks);
+}
+
+void dump_task_context(struct task_struct *tsk)
+{
+	printk("\n--\n");
+	printk("Sched:\n");
+	printk("    PID: %d, TGID: %d\n", tsk->pid, tsk->tgid);
+	printk("    Group leader PID: %d\n", tsk->group_leader->pid);
+	printk("    State: %d\n", tsk->state);
+	printk("    Flags: %08x\n", tsk->flags);
+	printk("    Priority: %d\n", tsk->prio);
+
+	printk("Signals:\n");
+	printk("    Blocked: %08x\n", tsk->blocked);
+	printk("    Pending: %08x\n", tsk->pending.signal);
+
+	printk("Memory:\n");
+	printk("    Size: %d bytes\n", tsk->mm->size);
+	printk("    Max size: %d bytes\n", tsk->mm->max_size);
+
+	struct mm_region *region;
+	int i = 0;
+	list_for_each_entry(region, &tsk->mm->region_head, list) {
+		printk("      [region #%02d] range: %p--%p, length: %d bytes\n", i++,
+			region->start, (u32)region->start + region->length - 1,
+			region->length);
+	}
+
+	printk("CPU:\n");
+	dump_arch_context(tsk);
+	printk("--\n");
 }
