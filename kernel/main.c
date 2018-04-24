@@ -10,6 +10,7 @@
 #include <kernel/fs.h>
 #include <kernel/init.h>
 #include <kernel/kernel.h>
+#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
@@ -98,6 +99,7 @@ struct thread_info *start_kernel(void)
 	/* initialize the physical memory allocator */
 	show_page_bitmap(); // init_pages();
 	kmem_cache_init();
+	mm_init();
 
 	/*
 	 * Initialize file-systems

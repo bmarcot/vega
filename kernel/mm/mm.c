@@ -11,6 +11,7 @@
 #include <kernel/kernel.h>
 #include <kernel/mm.h>
 #include <kernel/mm/page.h>
+#include <kernel/mm/slab.h>
 #include <kernel/sched.h>
 #include <kernel/stat.h>
 #include <kernel/string.h>
@@ -20,6 +21,8 @@
 #include <asm/current.h>
 
 #include <uapi/kernel/mman.h>
+
+static struct kmem_cache *mm_region_cache;
 
 #define M_ISANON(f)     (((f) & MAP_ANONYMOUS)     == MAP_ANONYMOUS)
 #define M_ISUNINIT(f)   (((f) & MAP_UNINITIALIZED) == MAP_UNINITIALIZED)
@@ -95,18 +98,17 @@ SYSCALL_DEFINE(mmap,
 	/* Record process allocations, such that any unreleased memory will be
 	 * freed by the kernel when process exits. */
 	if (addr) {
-		struct mm_struct *mm = current->mm;
-		struct mm_region *region = kmalloc(sizeof(*region));
-
+		struct mm_region *region = kmem_cache_alloc(mm_region_cache,
+			CACHE_OPT_NONE);
 		if (!region) {
 			free_pages((unsigned long)addr,
 				size_to_page_order(length));
 			return (long)MAP_FAILED; //XXX: And set errno to ENOMEM
 		}
 
+		struct mm_struct *mm = current->mm;
 		mm->size += length;
 		mm->max_size = max(mm->max_size, mm->size);
-
 		region->start = addr;
 		region->length = length;
 		region->flags = flags;
@@ -123,12 +125,14 @@ SYSCALL_DEFINE(munmap,
 	struct mm_struct *mm = current->mm;
 	struct mm_region *region, *n;
 
-	//XXX: Walking the list is too slow, use a BST
+	//XXX: Walking the list is too slow if many uncontiguous
+	//     allocations, use a BST instead
 	list_for_each_entry_safe(region, n, &mm->region_head, list) {
 		if (region->start == addr) {
 			mm->size -= region->length;
 			list_del(&region->list);
-			kfree(region);
+			kmem_cache_free(mm_region_cache, region);
+			break;
 		}
 	}
 
@@ -155,7 +159,7 @@ void mm_release(void)
 				size_to_page_order(region->length));
 		mm->size -= region->length;
 		list_del(&region->list);
-		kfree(region);
+		kmem_cache_free(mm_region_cache, region);
 	}
 
 	BUG_ON(mm->size);
@@ -174,4 +178,12 @@ struct mm_struct *alloc_mm_struct(void)
 	INIT_LIST_HEAD(&mm->region_head);
 
 	return mm;
+}
+
+int mm_init(void)
+{
+	mm_region_cache = KMEM_CACHE(mm_region);
+	BUG_ON(!mm_region_cache);
+
+	return 0;
 }
