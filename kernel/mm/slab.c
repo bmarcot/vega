@@ -1,17 +1,15 @@
 /*
  * kernel/mm/slab.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
-
-#include <string.h>
-#include <sys/cdefs.h>
 
 #include <kernel/bitops.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
+#include <kernel/string.h>
 
 #define OBJECTS_PER_SLAB(objsize) \
 	((CACHE_PAGE_SIZE - sizeof(struct slab)) / (objsize))
@@ -42,9 +40,8 @@ static inline int obj_index_in_slab(void *obj, struct kmem_cache *cache)
 }
 
 struct kmem_cache *kmem_cache_create(const char *name, size_t size,
-				__unused size_t align,
-				__unused unsigned long flags,
-				__unused void (*ctor)(void *))
+				size_t align, unsigned long flags,
+				void (*ctor)(void *))
 {
 	struct kmem_cache *cache;
 
@@ -89,7 +86,7 @@ static struct slab *kmem_cache_grow(struct kmem_cache *cache)
 	return slab;
 }
 
-void *kmem_cache_alloc(struct kmem_cache *cache, __unused unsigned long flags)
+void *kmem_cache_alloc(struct kmem_cache *cache, unsigned long flags)
 {
 	struct slab *slab = NULL;
 	void *mem;
@@ -122,7 +119,7 @@ void *kmem_cache_alloc(struct kmem_cache *cache, __unused unsigned long flags)
 	return mem;
 }
 
-static int slab_destroy(__unused struct kmem_cache *cache, struct slab *slab)
+static int slab_destroy(struct kmem_cache *cache, struct slab *slab)
 {
 	list_del(&slab->list);
 	free_pages((unsigned long)slab, 0);
