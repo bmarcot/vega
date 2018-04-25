@@ -79,7 +79,7 @@ int init_task(struct task_struct *tsk, int flags)
 		tsk->signal = current->signal;
 		tsk->sighand = current->sighand;
 	} else {
-		tsk->signal = alloc_signal_struct(tsk);
+		tsk->signal = alloc_signal_struct();
 		if (flags & CLONE_SIGHAND)
 			tsk->sighand = current->sighand;
 		else
@@ -112,13 +112,6 @@ int release_task_pids(struct task_struct *task)
 	return 0;
 }
 
-void put_signal_struct(struct task_struct *tsk)
-{
-	//XXX: group_leader of group_exit_task??
-	if (thread_group_leader(tsk))
-		kfree(tsk->signal);
-}
-
 void put_sighand_struct(struct task_struct *tsk)
 {
 	//FIXME: Implement with a reference counter, sighand can be shared by
@@ -137,7 +130,8 @@ void put_task_struct(struct task_struct *tsk)
 		if (!(q->flags & SIGQUEUE_PREALLOC))
 			kfree(q);
 	}
-	put_signal_struct(tsk);
+	if (thread_group_leader(tsk))
+		put_signal_struct(tsk->signal);
 	put_sighand_struct(tsk);
 	if (thread_group_leader(tsk) && !tsk->mm->refcount)
 		put_mm_struct(tsk->mm);

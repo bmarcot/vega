@@ -158,12 +158,14 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
 #define sig_kernel_stop(sig)		siginmask(sig, SIG_KERNEL_STOP_MASK)
 #define sig_specific_sicodes(sig)	siginmask(sig, SIG_SPECIFIC_SICODES_MASK)
 
-struct signal_struct *alloc_signal_struct(struct task_struct *tsk);
+struct signal_struct *alloc_signal_struct(void);
+void put_signal_struct(struct signal_struct *sig);
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk);
 int signal_pending(struct task_struct *tsk);
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk);
 int send_rt_signal(struct task_struct *tsk, int sig, int value);
 void do_signal(void);
+int signal_init(void);
 
 extern void __do_signal(int signo, struct sigqueue *sig);
 

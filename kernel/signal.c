@@ -10,6 +10,7 @@
 #include <kernel/errno-base.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
+#include <kernel/mm/slab.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/string.h>
@@ -18,6 +19,8 @@
 
 #include <asm/current.h>
 #include <asm/ptrace.h>
+
+static struct kmem_cache *signal_struct_cache;
 
 int signal_pending(struct task_struct *tsk)
 {
@@ -29,16 +32,22 @@ static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 	return &tsk->sighand->action[sig - 1];
 }
 
-struct signal_struct *alloc_signal_struct(struct task_struct *tsk)
+struct signal_struct *alloc_signal_struct(void)
 {
-	struct signal_struct *signal;
+	struct signal_struct *sig;
 
-	signal = kzalloc(sizeof(*signal));
-	if (!signal)
+	sig = kmem_cache_alloc(signal_struct_cache, CACHE_OPT_NONE);
+	if (!sig)
 		return NULL;
-	INIT_LIST_HEAD(&signal->thread_head);
+	memset(sig, 0, sizeof(*sig));
+	INIT_LIST_HEAD(&sig->thread_head);
 
-	return signal;
+	return sig;
+}
+
+void put_signal_struct(struct signal_struct *sig)
+{
+	kmem_cache_free(signal_struct_cache, sig);
 }
 
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk)
@@ -265,4 +274,12 @@ SYSCALL_DEFINE(pause, void)
 	//FIXME: Only signals can wake-up this task
 
 	return -EINTR;
+}
+
+int signal_init(void)
+{
+	signal_struct_cache = KMEM_CACHE(signal_struct);
+	BUG_ON(!signal_struct_cache);
+
+	return 0;
 }

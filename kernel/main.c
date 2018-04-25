@@ -14,6 +14,7 @@
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/thread.h>
 
 #include "platform.h"
@@ -100,6 +101,7 @@ struct thread_info *start_kernel(void)
 	show_page_bitmap(); // init_pages();
 	kmem_cache_init();
 	mm_init();
+	signal_init();
 
 	/*
 	 * Initialize file-systems
