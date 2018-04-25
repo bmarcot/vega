@@ -128,14 +128,6 @@ void put_sighand_struct(struct task_struct *tsk)
 		kfree(tsk->sighand);
 }
 
-void put_mm_struct(struct task_struct *tsk)
-{
-	struct mm_struct *mm = tsk->mm;
-
-	if (thread_group_leader(tsk) && !mm->refcount)
-		kfree(mm);
-}
-
 void put_task_struct(struct task_struct *tsk)
 {
 	struct sigqueue *q, *n;
@@ -147,7 +139,8 @@ void put_task_struct(struct task_struct *tsk)
 	}
 	put_signal_struct(tsk);
 	put_sighand_struct(tsk);
-	put_mm_struct(tsk);
+	if (thread_group_leader(tsk) && !tsk->mm->refcount)
+		put_mm_struct(tsk->mm);
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
 }

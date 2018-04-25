@@ -19,6 +19,7 @@ struct mm_struct;
 
 void mm_release(void);
 struct mm_struct *alloc_mm_struct(void);
+void put_mm_struct(struct mm_struct *mm);
 int mm_init(void);
 
 #endif /* !_KERNEL_MM_H */

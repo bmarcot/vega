@@ -22,6 +22,7 @@
 
 #include <uapi/kernel/mman.h>
 
+static struct kmem_cache *mm_struct_cache;
 static struct kmem_cache *mm_region_cache;
 
 #define M_ISANON(f)     (((f) & MAP_ANONYMOUS)     == MAP_ANONYMOUS)
@@ -169,7 +170,7 @@ struct mm_struct *alloc_mm_struct(void)
 {
 	struct mm_struct *mm;
 
-	mm = kmalloc(sizeof(*mm));
+	mm = kmem_cache_alloc(mm_struct_cache, CACHE_OPT_NONE);
 	if (!mm)
 		return NULL;
 
@@ -180,8 +181,16 @@ struct mm_struct *alloc_mm_struct(void)
 	return mm;
 }
 
+void put_mm_struct(struct mm_struct *mm)
+{
+	kmem_cache_free(mm_region_cache, mm);
+}
+
 int mm_init(void)
 {
+	mm_struct_cache = KMEM_CACHE(mm_struct);
+	BUG_ON(!mm_struct_cache);
+
 	mm_region_cache = KMEM_CACHE(mm_region);
 	BUG_ON(!mm_region_cache);
 
