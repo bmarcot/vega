@@ -145,10 +145,13 @@ int tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 int tmpfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode,
 		dev_t dev)
 {
-	struct inode *inode = __tmpfs_mknod(dir, dentry, mode, dev);
+	struct inode *inode;
 
+	inode = __tmpfs_mknod(dir, dentry, mode, dev);
+	dentry->d_inode = inode;
 	if (!inode)
 		return -1;
+
 	return 0;
 }
 
