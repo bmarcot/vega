@@ -73,7 +73,7 @@ int schedule(void)
 int sched_init(void)
 {
 	/* initialize the runqueues */
-	for (int i = 0; i <= RUNQUEUE_MAX; i++)
+	for (int i = 0; i < RUNQUEUE_MAX; i++)
 		INIT_LIST_HEAD(&pri_runq[i]);
 
 	return 0;
