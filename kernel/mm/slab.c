@@ -45,7 +45,8 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size,
 {
 	struct kmem_cache *cache;
 
-	/* printk("kmem_cache_create: allocate a cache from a cache slab [ %s ]\n", name); */
+	pr_info("New object cache [ struct %s ], object size = %d bytes",
+		name, size);
 
 	if (size < 8) {
 		printk("error: Use cache for objects with size >= 8 bytes\n");
