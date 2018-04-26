@@ -55,7 +55,7 @@ SECTIONS
     /* heap for the kernel's malloc */
     .heap BLOCK(32) : {
         PROVIDE(__heap_start__ = .);
-        . += 6k;
+        . += 4k;
         PROVIDE(__heap_end__ = .);
     } > ram
 
