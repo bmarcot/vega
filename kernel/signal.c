@@ -22,6 +22,7 @@
 #include <asm/ptrace.h>
 
 static struct kmem_cache *signal_struct_cache;
+static struct kmem_cache *sigqueue_cache;
 
 int signal_pending(struct task_struct *tsk)
 {
@@ -121,7 +122,7 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 {
 	struct sigqueue *q;
 
-	q = kmalloc(sizeof(*q));
+	q = kmem_cache_alloc(sigqueue_cache, CACHE_OPT_NONE);
 	if (!q)
 		return -1;
 	q->flags = 0;
@@ -131,6 +132,17 @@ int send_rt_signal(struct task_struct *tsk, int sig, int value)
 	send_signal_info(sig, q, tsk);
 
 	return 0;
+}
+
+void purge_pending_signals(struct task_struct *tsk)
+{
+	struct sigqueue *q, *n;
+
+	list_for_each_entry_safe(q, n, &tsk->pending.list, list) {
+		list_del(&q->list);
+		if (!(q->flags & SIGQUEUE_PREALLOC))
+			kmem_cache_free(sigqueue_cache, q);
+	}
 }
 
 void do_signal(void)
@@ -230,7 +242,7 @@ SYSCALL_DEFINE(sigreturn, void)
 
 	list_del(&sig->list);
 	if (!(sig->flags & SIGQUEUE_PREALLOC))
-		kfree(sig);
+		kmem_cache_free(sigqueue_cache, sig);
 
 	/* If the interrupted task was in a syscall, this restores the
 	 * syscall's return value. If it was interrupted because of an
@@ -291,6 +303,9 @@ int signal_init(void)
 {
 	signal_struct_cache = KMEM_CACHE(signal_struct);
 	BUG_ON(!signal_struct_cache);
+
+	sigqueue_cache = KMEM_CACHE(sigqueue);
+	BUG_ON(!sigqueue_cache);
 
 	return 0;
 }

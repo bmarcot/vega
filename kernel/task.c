@@ -114,14 +114,7 @@ int release_task_pids(struct task_struct *task)
 
 void put_task_struct(struct task_struct *tsk)
 {
-	struct sigqueue *q, *n;
-
-	/* purge pending signals */
-	list_for_each_entry_safe(q, n, &tsk->pending.list, list) {
-		list_del(&q->list);
-		if (!(q->flags & SIGQUEUE_PREALLOC))
-			kfree(q);
-	}
+	purge_pending_signals(tsk);
 
 	//FIXME: Implement with a reference counter, sighand can be shared by
 	// processes. Use less memory when tasks don't use signal, apart from
