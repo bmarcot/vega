@@ -112,29 +112,27 @@ int release_task_pids(struct task_struct *task)
 	return 0;
 }
 
-void put_sighand_struct(struct task_struct *tsk)
-{
-	//FIXME: Implement with a reference counter, sighand can be shared by
-	// processes. Use less memory when tasks don't use signal, apart from
-	// the default signals: SIGTERM, SIGCHLD...
-	if (thread_group_leader(tsk))
-		kfree(tsk->sighand);
-}
-
 void put_task_struct(struct task_struct *tsk)
 {
 	struct sigqueue *q, *n;
 
+	/* purge pending signals */
 	list_for_each_entry_safe(q, n, &tsk->pending.list, list) {
 		list_del(&q->list);
 		if (!(q->flags & SIGQUEUE_PREALLOC))
 			kfree(q);
 	}
-	if (thread_group_leader(tsk))
+
+	//FIXME: Implement with a reference counter, sighand can be shared by
+	// processes. Use less memory when tasks don't use signal, apart from
+	// the default signals: SIGTERM, SIGCHLD...
+	if (thread_group_leader(tsk)) {
 		put_signal_struct(tsk->signal);
-	put_sighand_struct(tsk);
-	if (thread_group_leader(tsk) && !tsk->mm->refcount)
-		put_mm_struct(tsk->mm);
+		put_sighand_struct(tsk->sighand);
+		if (!tsk->mm->refcount)
+			put_mm_struct(tsk->mm);
+	}
+
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));
 }

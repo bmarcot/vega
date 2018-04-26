@@ -161,6 +161,7 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
 struct signal_struct *alloc_signal_struct(void);
 void put_signal_struct(struct signal_struct *sig);
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk);
+void put_sighand_struct(struct sighand_struct *sig);
 int signal_pending(struct task_struct *tsk);
 int send_signal_info(int sig, struct sigqueue *info, struct task_struct *tsk);
 int send_rt_signal(struct task_struct *tsk, int sig, int value);

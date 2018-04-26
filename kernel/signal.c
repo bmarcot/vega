@@ -10,6 +10,7 @@
 #include <kernel/errno-base.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
+#include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
@@ -52,14 +53,24 @@ void put_signal_struct(struct signal_struct *sig)
 
 struct sighand_struct *copy_sighand_struct(struct task_struct *tsk)
 {
-	struct sighand_struct *sighand;
+	struct sighand_struct *sig;
 
-	sighand = kmalloc(sizeof(*sighand));
-	if (!sighand)
+	/* sighand_struct size must be a power of 2, so we allocate pages */
+	_Static_assert((sizeof(struct sighand_struct) &
+				(sizeof(struct sighand_struct) - 1)) == 0,
+		"sighand_struct size must be a power of 2");
+
+	sig = alloc_pages(size_to_page_order(sizeof(*sig)));
+	if (!sig)
 		return NULL;
-	memcpy(sighand, tsk->sighand, sizeof(*sighand));
+	memcpy(sig, tsk->sighand, sizeof(*sig));
 
-	return sighand;
+	return sig;
+}
+
+void put_sighand_struct(struct sighand_struct *sig)
+{
+	free_pages((unsigned long)sig, size_to_page_order(sizeof(*sig)));
 }
 
 SYSCALL_DEFINE(sigaction,
