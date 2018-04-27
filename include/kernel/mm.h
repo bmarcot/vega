@@ -7,6 +7,7 @@
 #ifndef _KERNEL_MM_H
 #define _KERNEL_MM_H
 
+#include <kernel/mm_types.h>
 #include <kernel/types.h>
 
 #define KMALLOC_MIN_SIZE 4
@@ -14,8 +15,6 @@
 void *kmalloc(size_t size);
 void *kzalloc(size_t size);
 void kfree(void *ptr);
-
-struct mm_struct;
 
 void mm_release(void);
 struct mm_struct *alloc_mm_struct(void);

@@ -7,6 +7,7 @@
 #ifndef _KERNEL_MM_SLAB_H
 #define _KERNEL_MM_SLAB_H
 
+#include <kernel/stddef.h>
 #include <kernel/types.h>
 
 #define CACHE_PAGE_SIZE	256
