@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include <kernel/bitops.h>
+#include <kernel/fdtable.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/mm/page.h>
@@ -53,7 +54,6 @@ int init_task(struct task_struct *tsk, int flags)
 	tsk->prio = PRI_MIN - 1; /* lowest prio is reserved for init process */
 	tsk->state = TASK_NEW;
 	tsk->stack = &tsk->thread_info;
-	tsk->filemap = 0;
 	tsk->flags = flags;
 	if (flags & CLONE_THREAD) {
 		tsk->group_leader = current->group_leader;
@@ -68,11 +68,13 @@ int init_task(struct task_struct *tsk, int flags)
 		tsk->pid = pid;
 		tsk->tgid = pid;
 	}
+	list_add(&tsk->list, &tasks);
 
 	/* files */
-	for (int i = 0; i < FILE_MAX; i++)
-		tsk->filetable[i] = NULL;
-	list_add(&tsk->list, &tasks);
+	if (flags & CLONE_FILES)
+		tsk->files = current->files;
+	else
+		tsk->files = alloc_files_struct();
 
 	/* signals */
 	if (flags & CLONE_THREAD) {
@@ -125,6 +127,7 @@ void put_task_struct(struct task_struct *tsk)
 		if (!tsk->mm->refcount)
 			put_mm_struct(tsk->mm);
 	}
+	put_files_struct(tsk->files);
 
 	list_del(&tsk->list);
 	free_pages((unsigned long)tsk->stack, size_to_page_order(THREAD_SIZE));

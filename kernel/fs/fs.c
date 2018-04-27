@@ -9,6 +9,7 @@
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
+#include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/fs/initfs.h>
 #include <kernel/fs/path.h>
@@ -21,15 +22,15 @@
 
 struct file *fget(unsigned int fd)
 {
-	return get_current()->filetable[fd];
+	return current->files->fd_array[fd];
 }
 
 static struct file *fput(unsigned int fd, struct file *file)
 {
 	struct file *old_file;
 
-	old_file = current->filetable[fd];
-	current->filetable[fd] = file;
+	old_file = current->files->fd_array[fd];
+	current->files->fd_array[fd] = file;
 
 	return old_file;
 }
@@ -38,17 +39,17 @@ static int alloc_fd(void)
 {
 	int fd;
 
-	fd = find_first_zero_bit(&current->filemap, FILE_MAX);
+	fd = find_first_zero_bit(&current->files->fdtab, FILE_MAX);
 	if (fd == FILE_MAX)
 		return -1;
-	bitmap_set_bit(&current->filemap, fd);
+	bitmap_set_bit(&current->files->fdtab, fd);
 
 	return fd;
 }
 
 static void release_fd(int fd)
 {
-	bitmap_clear_bit(&current->filemap, fd);
+	bitmap_clear_bit(&current->files->fdtab, fd);
 }
 
 int validate_fd(unsigned int fd)

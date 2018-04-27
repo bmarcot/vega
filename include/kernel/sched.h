@@ -7,7 +7,6 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
-#include <kernel/mm_types.h>
 #include <kernel/signal_types.h>
 #include <kernel/types.h>
 
@@ -30,7 +29,7 @@
 
 #define FILE_MAX 8
 
-struct file; //XXX: Change to file_struct
+struct files_struct;
 struct mm_struct;
 
 struct task_struct {
@@ -62,10 +61,11 @@ struct task_struct {
 	/* memory mappings */
 	struct mm_struct	*mm;
 
+	/* open file information */
+	struct files_struct	*files;
+
 	//XXX: old task_info structs
 	struct list_head   ti_q;    /* sched runqueue */
-	unsigned long    filemap;
-	struct file      *filetable[FILE_MAX];
 };
 
 #define set_current_state(state_value)			\

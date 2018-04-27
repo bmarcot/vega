@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
+#include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/init.h>
 #include <kernel/kernel.h>
@@ -102,6 +103,7 @@ struct thread_info *start_kernel(void)
 	kmem_cache_init();
 	mm_init();
 	signal_init();
+	fd_init();
 
 	/*
 	 * Initialize file-systems
