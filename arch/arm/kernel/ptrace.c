@@ -4,6 +4,7 @@
  * Copyright (c) 2018 Benoit Marcot
  */
 
+#include <kernel/kernel.h>
 #include <kernel/sched.h>
 
 #include <asm/ptrace.h>
