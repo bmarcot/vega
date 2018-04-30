@@ -96,6 +96,7 @@ SYSCALL_DEFINE(timer_create,
 
 	*timerid = pt->id;
 	pt->disarmed = 1;
+	pt->sigqueue.flags = SIGQUEUE_PREALLOC;
 	info = &pt->sigqueue.info;
 	info->si_signo = sevp->sigev_signo;
 	info->_timer.si_value.sival_int = sevp->sigev_value.sival_int;
