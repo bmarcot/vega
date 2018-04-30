@@ -1,16 +1,16 @@
 /*
  * kernel/fs/tmpfs.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
-#include <string.h>
-
+#include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/stat.h>
+#include <kernel/string.h>
 #include <kernel/types.h>
 
 const struct inode_operations tmpfs_iops;
@@ -205,7 +205,7 @@ struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 
 int tmpfs_delete(struct dentry *dentry)
 {
-	kfree(dentry);
+	put_dentry(dentry);
 
 	return 0;
 }

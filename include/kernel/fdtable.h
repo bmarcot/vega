@@ -20,6 +20,8 @@ struct files_struct *alloc_files_struct(void);
 void put_files_struct(struct files_struct *files);
 struct file *alloc_file(void);
 void put_file(struct file *file);
+struct dentry *alloc_dentry(void);
+void put_dentry(struct dentry *dentry);
 int fd_init(void);
 
 #endif /* !_KERNEL_FDTABLE_H */

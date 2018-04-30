@@ -7,8 +7,8 @@
 /* https://www.kernel.org/doc/Documentation/filesystems/romfs.txt */
 
 #include <libgen.h> /* for basename() */
-#include <stdlib.h>
 
+#include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/fs/tmpfs.h>
@@ -181,7 +181,7 @@ int romfs_delete(struct dentry *dentry)
 	 * by i_sb->s_op->unmount() */
 	if (dentry->d_inode != dentry->d_inode->i_sb->s_iroot)
 		kfree(dentry->d_inode);
-	kfree(dentry);
+	put_dentry(dentry);
 
 	return 0;
 }

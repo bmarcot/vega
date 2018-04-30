@@ -5,7 +5,6 @@
  */
 
 #include <errno.h>
-#include <stdlib.h>
 
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
@@ -109,15 +108,15 @@ struct file *do_file_open(const char *pathname, int flags)
 	pathname++;
 
 	for (size_t i = 0; i < strlen(pathname);) {
-		target = malloc(sizeof(struct dentry));
-		if (target == NULL)
+		target = alloc_dentry();
+		if (!target)
 			return NULL;
 		target->d_count = 1;
 		target->d_parent = parent;
 		i += path_head(target->d_name, &pathname[i]);
 
 		dentry = vfs_lookup(inode, target);
-		if (dentry == NULL) {
+		if (!dentry) {
 			release_dentries(target->d_parent);
 			return NULL;
 		}
