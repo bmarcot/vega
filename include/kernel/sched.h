@@ -40,6 +40,7 @@ struct task_struct {
 	int			state;
 	int			flags;
 	int			prio;
+	struct list_head	rq;		/* runqueue */
 
 	struct list_head	thread_group;
 	struct task_struct	*group_leader;
@@ -63,9 +64,6 @@ struct task_struct {
 
 	/* open file information */
 	struct files_struct	*files;
-
-	//XXX: old task_info structs
-	struct list_head   ti_q;    /* sched runqueue */
 };
 
 #define set_current_state(state_value)			\

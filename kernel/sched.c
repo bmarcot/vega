@@ -1,7 +1,7 @@
 /*
  * kernel/sched.c
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #include <kernel/bitops.h>
@@ -32,7 +32,7 @@ static struct task_struct *pick_next_task(void)
 	if (max_pri == 32)
 		return idle_task;
 
-	return list_first_entry(&pri_runq[max_pri], struct task_struct, ti_q);
+	return list_first_entry(&pri_runq[max_pri], struct task_struct, rq);
 }
 
 int sched_enqueue(struct task_struct *task)
@@ -42,7 +42,7 @@ int sched_enqueue(struct task_struct *task)
 		return 0;
 
 	task->state = TASK_RUNNING;
-	list_add_tail(&task->ti_q, &pri_runq[task->prio]);
+	list_add_tail(&task->rq, &pri_runq[task->prio]);
 	bitmap_set_bit(&pri_bitmap, task->prio);
 
 	return 0;
@@ -50,7 +50,7 @@ int sched_enqueue(struct task_struct *task)
 
 int sched_dequeue(struct task_struct *task)
 {
-	list_del(&task->ti_q);
+	list_del(&task->rq);
 	if (list_empty(&pri_runq[task->prio]))
 		bitmap_clear_bit(&pri_bitmap, task->prio);
 
@@ -82,8 +82,8 @@ int sched_init(void)
 SYSCALL_DEFINE(sched_yield, void)
 {
 	if (!list_is_singular(&pri_runq[current->prio])) {
-		list_del(&current->ti_q);
-		list_add_tail(&current->ti_q, &pri_runq[current->prio]);
+		list_del(&current->rq);
+		list_add_tail(&current->rq, &pri_runq[current->prio]);
 	}
 
 	schedule();
