@@ -131,7 +131,7 @@ struct file *do_file_open(const char *pathname, int flags)
 		return NULL;
 	}
 
-	struct file *file = malloc(sizeof(struct file));
+	struct file *file = alloc_file();
 	if (file == NULL) {
 		errno = ENOMEM;
 		return NULL;
@@ -241,7 +241,7 @@ SYSCALL_DEFINE(lseek,
 int do_file_close(struct file *file)
 {
 	release_dentries(file->f_dentry);
-	free(file);
+	put_file(file);
 
 	return 0;
 }
