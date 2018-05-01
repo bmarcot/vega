@@ -17,7 +17,7 @@ LIST_HEAD(clock_event_devs);
 
 int clockevents_register_device(struct clock_event_device *dev)
 {
-	list_add(&dev->list, &clock_event_devs);
+	list_add_tail(&dev->list, &clock_event_devs);
 
 	return 0;
 }
