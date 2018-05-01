@@ -6,8 +6,7 @@ RAMSZ	= 64k
 
 CFLAGS	+= -Iplatform/nrf52
 
-CSRC	+= platform/nrf52/init.c \
-	   platform/nrf52/hwrng.c
+CSRC	+= platform/nrf52/init.c
 
 # CMSIS files
 CSRC	+= cmsis/nrf52/system_nrf52.c
