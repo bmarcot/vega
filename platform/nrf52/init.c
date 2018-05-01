@@ -8,21 +8,13 @@
 
 #include "platform.h"
 
-struct timer_operations;
-
-void config_timer_operations(struct timer_operations *tops);
 int nrf52_serial_init(void);
-int nrf52_hwrng_init(void);
-int nrf52_timer_init(void);
-
-extern struct timer_operations nrf52_tops;
+int init_nrf52_timers(void);
 
 __weak_symbol void __platform_init(void)
 {
-	config_timer_operations(&nrf52_tops);
 	nrf52_serial_init();
-	nrf52_hwrng_init();
-	nrf52_timer_init();
+	init_nrf52_timers();
 }
 
 __weak_symbol void __platform_halt(void)

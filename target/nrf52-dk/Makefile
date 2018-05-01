@@ -20,3 +20,6 @@ CSRC	+= platform/nrf52/gpio.c
 # Platform drivers
 CSRC	+= platform/nrf52/spim.c
 CSRC	+= platform/nrf52/twim.c
+
+# Timer driver files
+CSRC	+= drivers/clockevents/timer-nrf52.c
