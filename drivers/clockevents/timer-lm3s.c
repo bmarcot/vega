@@ -1,12 +1,13 @@
 /*
  * drivers/clockevents/timer-lm3s.c
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
 #include <kernel/time/clockevents.h>
+#include <kernel/time/clocksource.h> // For QEMU
 
 #include "platform.h"
 
@@ -51,14 +52,29 @@ static int lm3s_clkevt_set_state_oneshot(struct clock_event_device *dev)
 	return 0;
 }
 
+static ktime_t lm3s_clkevt_read_elapsed(struct clock_event_device *dev)
+{
+#ifdef QEMU
+	/*
+	 * LM3S emulation in QEMU does not support reading timer value,
+	 * we use an alternate monotonic timesource to order timers.
+	 */
+	return clock_monotonic_read();
+#else
+	/* Missing implementation */
+#warning "LM3S: Read timer not implemented"
+#endif
+}
+
 /* use general purpose timer 0 as clock event device */
 static struct lm3s_clockevent lm3s_clockevent = {
 	.dev = {
-		.name = "lm3s-timer0",
 		.set_next_ktime = lm3s_clkevt_set_next_ktime,
-		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
+		.name = "lm3s-timer0",
 		.features = CLOCK_EVT_FEAT_ONESHOT,
 		.irq = Timer0A_IRQn,
+		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
+		.read_elapsed = lm3s_clkevt_read_elapsed,
 	},
 	.hw = TIMER0,
 };
