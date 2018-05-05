@@ -20,6 +20,7 @@ include target/$(TARGET)/Makefile
 CFLAGS += \
 	-DCONFIG_KERNEL_STACK_CHECKING		\
 	-DCONFIG_THREAD_INFO_IN_TASK		\
+	-DHRTIMER_DEVICE='"$(HRTIMER_DEVICE)"'	\
 	-Wno-main				\
 	-Wno-unused-parameter			\
 	-fdiagnostics-color			\

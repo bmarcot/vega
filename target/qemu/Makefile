@@ -4,7 +4,7 @@ ARCH	= armv7-m
 ROMSZ	= 256k
 RAMSZ	= 64k
 
-CFLAGS	+= -Iplatform/lm3s6965
+CFLAGS	+= -Iplatform/lm3s6965 -DQEMU
 
 CSRC	+=				\
 	target/qemu/halt.c		\
@@ -19,3 +19,5 @@ CSRC	+= drivers/clocksource/systick.c
 
 # Serial driver files
 CSRC	+= drivers/serial/lm3s6965.c
+
+HRTIMER_DEVICE=lm3s-timer0

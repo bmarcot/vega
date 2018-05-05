@@ -23,3 +23,5 @@ CSRC	+= platform/nrf52/twim.c
 
 # Timer driver files
 CSRC	+= drivers/clockevents/timer-nrf52.c
+
+HRTIMER_DEVICE=nrf52-timer0
