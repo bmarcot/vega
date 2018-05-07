@@ -100,7 +100,6 @@ int lm3s_timer_init(/* struct device_node *node */)
 	irq_attach(lm3s_clockevent.dev.irq, lm3s_timer_interrupt);
 	TIMER0->IMR |= 1 << GPTM_GPTMIMR_TATOIM_Pos;
 	NVIC_EnableIRQ(lm3s_clockevent.dev.irq);
-	lm3s_clkevt_set_state_oneshot(&lm3s_clockevent.dev);
 	if (clockevents_register_device(&lm3s_clockevent.dev))
 		return -1;
 
