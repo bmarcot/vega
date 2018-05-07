@@ -1,23 +1,25 @@
 /*
  * kernel/time/clockevents.c
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
-
-#include <string.h>
 
 #include <kernel/errno-base.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <kernel/string.h>
 #include <kernel/time/clockevents.h>
 
 #include <asm/ktime.h>
 
-LIST_HEAD(clock_event_devs);
+static LIST_HEAD(clockevent_devices);
 
 int clockevents_register_device(struct clock_event_device *dev)
 {
-	list_add_tail(&dev->list, &clock_event_devs);
+	/* Initialize state to DETACHED */
+	clockevent_set_state(dev, CLOCK_EVT_STATE_DETACHED);
+
+	list_add_tail(&dev->list, &clockevent_devices);
 
 	return 0;
 }
@@ -26,7 +28,7 @@ struct clock_event_device *clockevents_get_device(const char *name)
 {
 	struct clock_event_device *dev;
 
-	list_for_each_entry(dev, &clock_event_devs, list) {
+	list_for_each_entry(dev, &clockevent_devices, list) {
 		if (!strcmp(name, dev->name))
 			return dev;
 	}
@@ -38,7 +40,7 @@ void clockevents_list_devices(void)
 {
 	struct clock_event_device *dev;
 
-	list_for_each_entry(dev, &clock_event_devs, list) {
+	list_for_each_entry(dev, &clockevent_devices, list) {
 		printk("clock_event_device: %s\n", dev->name);
 	}
 }
