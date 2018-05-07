@@ -66,6 +66,15 @@ static int nrf52_clkevt_set_next_ktime(ktime_t expires,
 	return 0;
 }
 
+static int nrf52_clkevt_set_state_periodic(struct clock_event_device *dev)
+{
+	NRF_TIMER_Type *timer = container_of(dev, struct nrf52_clockevent, dev)->hw;
+
+	timer->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos;
+
+	return 0;
+}
+
 static int nrf52_clkevt_set_state_oneshot(struct clock_event_device *dev)
 {
 	NRF_TIMER_Type *timer = container_of(dev, struct nrf52_clockevent, dev)->hw;
@@ -84,22 +93,21 @@ static ktime_t nrf52_clkevt_read_elapsed(struct clock_event_device *dev)
 
 	timer->TASKS_CAPTURE[0] = 1;
 
-	pr_info("timer->CC[0] = %d", timer->CC[0]);
-
 	return (ktime_t)timer->CC[0] * clkevt->usec_per_tick * NSEC_PER_USEC;
 }
 
-#define NRF52_TIMER_DEFINE(id) {				\
-	.dev = {						\
-		.set_next_ktime = nrf52_clkevt_set_next_ktime,	\
-		.name = "nrf52-timer"#id,			\
+#define NRF52_TIMER_DEFINE(id) {					\
+	.dev = {							\
+		.set_next_ktime = nrf52_clkevt_set_next_ktime,		\
+		.name = "nrf52-timer"#id,				\
 		.features = CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC, \
-		.irq = TIMER##id##_IRQn,			\
-		.set_state_oneshot = nrf52_clkevt_set_state_oneshot, \
-		.read_elapsed = nrf52_clkevt_read_elapsed,	\
-	},							\
-	.hw = NRF_TIMER##id,					\
-	.interrupt = nrf52_timer##id##_interrupt,		\
+		.irq = TIMER##id##_IRQn,				\
+		.set_state_periodic = nrf52_clkevt_set_state_periodic,	\
+		.set_state_oneshot = nrf52_clkevt_set_state_oneshot,	\
+		.read_elapsed = nrf52_clkevt_read_elapsed,		\
+	},								\
+	.hw = NRF_TIMER##id,						\
+	.interrupt = nrf52_timer##id##_interrupt,			\
 }
 
 static struct nrf52_clockevent nrf52_clockevent[] = {
@@ -150,7 +158,6 @@ static int nrf52_timer_init(struct nrf52_clockevent *clkevt)
 	clkevt->hw->INTENSET = TIMER_INTENSET_COMPARE0_Set << TIMER_INTENSET_COMPARE0_Pos;
 	irq_attach(clkevt->dev.irq, clkevt->interrupt);
 	NVIC_EnableIRQ(clkevt->dev.irq);
-	nrf52_clkevt_set_state_oneshot(&clkevt->dev);
 	if (clockevents_register_device(&clkevt->dev))
 		return -1;
 
