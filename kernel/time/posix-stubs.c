@@ -4,15 +4,15 @@
  * Copyright (c) 2016-2018 Benoit Marcot
  */
 
-#include <string.h>
-
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
+#include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
+#include <kernel/string.h>
 #include <kernel/syscalls.h>
 #include <kernel/time.h>
 #include <kernel/time/clocksource.h>
@@ -27,6 +27,7 @@ static struct posix_timer *find_timer_by_id(timer_t timerid,
 					struct list_head *timer_list)
 {
 	struct posix_timer *pos;
+
 	list_for_each_entry(pos, timer_list, list) {
 		if (pos->id == timerid)
 			return pos;
@@ -48,30 +49,22 @@ static int reserve_timer_id(timer_t *timerid)
 	return 0;
 }
 
-static void timer_callback(void *context)
+static enum hrtimer_restart timer_callback(struct hrtimer *timer)
 {
-	struct posix_timer *timer = context;
+	struct posix_timer *pt =
+		container_of(timer, struct posix_timer, timer);
 
-	if (timer->type == ONESHOT_TIMER)
-		timer->disarmed = 1;
+	//XXX: SIGEV_THREAD unsupported
+	struct sigqueue *sig = &pt->sigqueue;
+	if (sig->info.si_signo)
+		send_signal_info(sig->info.si_signo, sig, pt->task); //XXX: task can be different from signal receiver
 
-	struct sigqueue *sigqueue = &timer->sigqueue;
-	if (!sigqueue->info.si_signo)
-		return; //XXX: SIGEV_THREAD unsupported
-	send_signal_info(sigqueue->info.si_signo, sigqueue, timer->owner);
-}
+	if (pt->value.it_interval.tv_sec || pt->value.it_interval.tv_nsec) {
+		pt->timer.expires = timespec_to_ktime(pt->value.it_interval);
+		return HRTIMER_RESTART;
+	}
 
-static void timer_callback_and_link(void *context)
-{
-	struct posix_timer *timer = context;
-
-	hrtimer_set_expires(&timer->hrtimer,
-			timespec_to_ktime(timer->value.it_interval));
-
-	struct sigqueue *sigqueue = &timer->sigqueue;
-	if (!sigqueue->info.si_signo)
-		return; //XXX: SIGEV_THREAD unsupported
-	send_signal_info(sigqueue->info.si_signo, sigqueue, timer->owner);
+	return HRTIMER_NORESTART;
 }
 
 SYSCALL_DEFINE(timer_create,
@@ -86,8 +79,9 @@ SYSCALL_DEFINE(timer_create,
 	if (!pt)
 		return -1;
 
-	hrtimer_init(&pt->hrtimer);
-	pt->hrtimer.context = pt;
+	/* Initialise the actual timer */
+	hrtimer_init(&pt->timer);
+	pt->timer.function = timer_callback;
 
 	if (reserve_timer_id(&pt->id)) {
 		kfree(pt);
@@ -95,7 +89,7 @@ SYSCALL_DEFINE(timer_create,
 	}
 
 	*timerid = pt->id;
-	pt->disarmed = 1;
+	pt->task = current;
 	pt->sigqueue.flags = SIGQUEUE_PREALLOC;
 	info = &pt->sigqueue.info;
 	info->si_signo = sevp->sigev_signo;
@@ -111,44 +105,20 @@ SYSCALL_DEFINE(timer_settime,
 	const struct itimerspec	*new_value,
 	struct itimerspec	*old_value)
 {
-	(void)flags;
+	struct posix_timer *pt = find_timer_by_id(timerid, &posix_timers);
 
-	struct posix_timer *timer = find_timer_by_id(timerid, &posix_timers);
-	ktime_t expires;
-
-	if (!timer)
+	/* timerid is invalid */
+	if (!pt)
 		return EINVAL;
+
 	if (old_value)
-		memcpy(old_value, &timer->value, sizeof(struct itimerspec));
-	memcpy(&timer->value, new_value, sizeof(struct itimerspec));
+		memcpy(old_value, &pt->value, sizeof(struct itimerspec));
+	memcpy(&pt->value, new_value, sizeof(struct itimerspec));
 
-	/* disarm timer */
-	if (!new_value->it_value.tv_sec && !new_value->it_value.tv_nsec)
-	{
-		if (!timer->disarmed) {
-			hrtimer_set_expires(&timer->hrtimer, 0);
-			timer->disarmed = 1;
-		}
-		return 0;
-	}
-
-	timer->owner = current;
-	timer->disarmed = 0;
-
-	if (new_value->it_interval.tv_sec || new_value->it_interval.tv_nsec) {
-		timer->type = INTERVAL_TIMER;
-		timer->hrtimer.callback = timer_callback_and_link;
-		if (new_value->it_value.tv_sec || new_value->it_value.tv_nsec)
-			expires = timespec_to_ktime(new_value->it_value);
-		else
-			expires = timespec_to_ktime(new_value->it_interval);
-		hrtimer_set_expires(&timer->hrtimer, expires);
-	} else {
-		timer->type = ONESHOT_TIMER;
-		timer->hrtimer.callback = timer_callback;
-		expires = timespec_to_ktime(new_value->it_value);
-		hrtimer_set_expires(&timer->hrtimer, expires);
-	}
+	if (new_value->it_value.tv_sec || new_value->it_value.tv_nsec)
+		hrtimer_start(&pt->timer, timespec_to_ktime(new_value->it_value));
+	else
+		hrtimer_cancel(&pt->timer);
 
 	return 0;
 }
@@ -158,12 +128,12 @@ SYSCALL_DEFINE(timer_gettime,
 	struct itimerspec	*curr_value)
 {
 	struct posix_timer *pt = find_timer_by_id(timerid, &posix_timers);
-	ktime_t expires = pt->hrtimer.expires;
+	ktime_t expires = pt->timer.expires;
 	ktime_t now = clock_monotonic_read();
 
 	if (!pt)
 		return EINVAL;
-	if (pt->disarmed || (now >= expires)) {
+	if ((pt->timer.state == HRTIMER_STATE_INACTIVE) || (now >= expires)) {
 		memset(&curr_value->it_value, 0, sizeof(struct timespec));
 	} else {
 		struct timespec ts = ktime_to_timespec(expires - now);

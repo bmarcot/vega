@@ -5,48 +5,126 @@
  */
 
 #include <kernel/errno-base.h>
+#include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
 #include <kernel/list.h>
-#include <kernel/mm.h>
-#include <kernel/sched.h>
-#include <kernel/signal.h>
-#include <kernel/string.h>
-#include <kernel/syscalls.h>
+#include <kernel/mm.h> //XXX: Will die.. Function unused from kernel..
 #include <kernel/time.h>
 #include <kernel/time/clockevents.h>
-#include <kernel/time/hrtimer.h>
 
-#include <asm/current.h>
 #include <asm/ktime.h>
 
 static LIST_HEAD(hrtimers);
 
-int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
+static ktime_t hrtimer_get_next_event(void) //XXX: Param should be `clockid`
 {
-	struct hrtimer *t;
+	struct hrtimer *timer = list_first_entry(&hrtimers, struct hrtimer, list);
+
+	return timer->expires;
+}
+
+static void hrtimer_reprogram(void)
+{
+	if (list_empty(&hrtimers))
+	{
+		pr_info("unique clock was removed, shuting down timer dev");
+		for (;;)
+			;
+		//clockevents_shutdown(timer->dev);
+		return;
+	}
+
+	ktime_t expires = hrtimer_get_next_event();
+
+	/* Program the clockevent device */
+	struct hrtimer *timer = list_first_entry(&hrtimers, struct hrtimer, list); //XXX: Will die with clockid implem.
+	clockevents_program_event(timer->dev, expires);
+}
+
+/*
+ * Adds the timer node to the timerqueue, sorted by the node's expires
+ * value. Returns true if the newly added timer is the first expiring timer
+ * in the queue.
+ */
+static bool enqueue_hrtimer(struct hrtimer *timer)
+{
+	timer->state = HRTIMER_STATE_ENQUEUED;
+
+	/* Timer queue is empty */
+	if (list_empty(&hrtimers)) {
+		list_add(&timer->list, &hrtimers);
+
+		return true;
+	}
+
+	/* Timer queue is not empty, and timer expires first */
+	struct hrtimer *ht = list_first_entry(&hrtimers, struct hrtimer, list);
+	if (timer->expires < ht->expires) {
+		list_add(&timer->list, &hrtimers);
+
+		return true;
+	}
+
+	/* Insert new timer in the middle of the timer queue */
+	list_for_each_entry(ht, &hrtimers, list) {
+		if (timer->expires < ht->expires) {
+			list_add_tail(&timer->list, &ht->list);
+
+			return false;
+		}
+	}
+
+	/* Timer will expire last */
+	list_add_tail(&timer->list, &hrtimers);
+
+	return false;
+}
+
+static bool remove_hrtimer(struct hrtimer *timer)
+{
+	bool reprogram = false;
+
+	timer->state = HRTIMER_STATE_INACTIVE;
+	if (list_first_entry(&hrtimers, struct hrtimer, list) == timer)
+		reprogram = true;
+	list_del(&timer->list);
+
+	return reprogram;
+}
+
+
+int hrtimer_start(struct hrtimer *timer, ktime_t expires /* , const enum hrtimer_mode mode */)
+{
+	//XXX: pause clockevent device during insertion?
 
 	/* cancel timer */
 	if (!expires) {
-		list_del(&timer->list);
-		return clockevents_program_event(timer->dev, 0);
-	}
-
-	timer->expires = expires + clockevents_read_elapsed(timer->dev);
-
-	/* timer list is empty or timer is the new head */
-	t = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (!t || (t->expires > timer->expires)) {
-		list_add(&timer->list, &hrtimers);
-		return clockevents_program_event(timer->dev, expires);
-	}
-
-	list_for_each_entry(t, &hrtimers, list) {
-		if (t->expires > timer->expires) {
-			list_add_tail(&timer->list, &t->list);
-			return 0;
+		if (timer->state == HRTIMER_STATE_ENQUEUED) {
+			list_del(&timer->list);
+			timer->state = HRTIMER_STATE_INACTIVE;
 		}
+		/* return */ clockevents_program_event(timer->dev, 0);
+		// return clockevents_shutdown();
+
+		// and reprogram next event??
+		return 0;
 	}
-	list_add_tail(&timer->list, &hrtimers);
+
+	ktime_t kt = expires + clockevents_read_elapsed(timer->dev);
+	timer->expires = kt;
+
+	if (enqueue_hrtimer(timer)) {
+		hrtimer_reprogram();
+		return 1;
+	}
+
+	return 0;
+}
+
+int hrtimer_cancel(struct hrtimer *timer)
+{
+	if (remove_hrtimer(timer))
+		hrtimer_reprogram();
 
 	return 0;
 }
@@ -54,77 +132,33 @@ int hrtimer_set_expires(struct hrtimer *timer, ktime_t expires)
 static void hrtimer_interrupt(struct clock_event_device *dev)
 {
 	struct hrtimer *timer;
-	struct hrtimer *next;
 
-	timer = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (!timer)
-		return; //XXX: Something went wrong
+	/* Timer queue cannot be empty */
+	timer = list_first_entry(&hrtimers, struct hrtimer, list);
+
 	list_del(&timer->list);
+	timer->state = HRTIMER_STATE_INACTIVE;
 
-	/* program next timer event */
-	next = list_first_entry_or_null(&hrtimers, struct hrtimer, list);
-	if (next) {
-		ktime_t expires = next->expires - timer->expires;
-		clockevents_program_event(next->dev, expires);
-	}
-
-	if (timer->callback)
-		timer->callback(timer->context);
+	if (timer->function
+		&& (timer->function(timer) == HRTIMER_RESTART)
+		&& enqueue_hrtimer(timer))
+			hrtimer_reprogram();
 }
 
-int hrtimer_init(struct hrtimer *timer)
+void hrtimer_init(struct hrtimer *timer)
 {
 	timer->state = HRTIMER_STATE_INACTIVE;
 	timer->dev = clockevents_get_device(HRTIMER_DEVICE);
-	if (!timer->dev)
-		return -1;
 	clockevent_set_event_handler(timer->dev, hrtimer_interrupt);
-	clockevents_switch_state(timer->dev, CLOCK_EVT_STATE_ONESHOT);
-
-	return 0;
 }
 
+//XXX: Will die.. Function unused from kernel..
 struct hrtimer *hrtimer_alloc(void)
 {
 	struct hrtimer *timer = kzalloc(sizeof(*timer));
 
-	if (timer && hrtimer_init(timer))
-		kfree(timer);
+	if (timer)
+		hrtimer_init(timer);
 
 	return timer;
-}
-
-static void nanosleep_callback(void *task)
-{
-	sched_enqueue(task);
-	schedule();
-}
-
-SYSCALL_DEFINE(nanosleep,
-	const struct timespec	*req,
-	struct timespec		*rem)
-{
-	struct hrtimer timer;
-
-	if (hrtimer_init(&timer))
-		return -1;
-	timer.callback = nanosleep_callback;
-	timer.context = current;
-	if (hrtimer_set_expires(&timer, timespec_to_ktime(*req)))
-		return -1;
-
-	sched_dequeue(current);
-	current->state = TASK_INTERRUPTIBLE;
-
-	schedule();
-
-	if (signal_pending(current)) {
-		ktime_t elapsed = clockevents_read_elapsed(timer.dev);
-		*rem = ktime_to_timespec(timer.expires - elapsed);
-		return -EINTR;
-	}
-
-	memset(rem, 0, sizeof(*rem));
-
-	return 0;
 }
