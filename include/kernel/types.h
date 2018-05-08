@@ -1,7 +1,7 @@
 /*
  * include/kernel/kernel.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_TYPES_H
@@ -51,11 +51,28 @@ typedef s16 __s16;
 typedef  u8 __u8;
 typedef  s8 __s8;
 
+/*
+ * Boolean
+ */
+
+#define false			0
+#define true			1
+
+typedef _Bool			bool;
+
+/*
+ * Integers
+ */
+
 typedef unsigned long long	u64;
 typedef signed long long	s64;
 
 typedef __u32          kdev_t;
 typedef unsigned short fmode_t;
+
+/*
+ * Linked list
+ */
 
 struct list_head {
     struct list_head *next, *prev;
