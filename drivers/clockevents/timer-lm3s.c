@@ -52,6 +52,16 @@ static int lm3s_clkevt_set_state_oneshot(struct clock_event_device *dev)
 	return 0;
 }
 
+static int lm3s_clkevt_set_state_shutdown(struct clock_event_device *dev)
+{
+	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
+
+	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+	hw->ICR |= GPTM_GPTMICR_TATOCINT_Msk;
+
+	return 0;
+}
+
 static ktime_t lm3s_clkevt_read_elapsed(struct clock_event_device *dev)
 {
 #ifdef QEMU
@@ -74,6 +84,7 @@ static struct lm3s_clockevent lm3s_clockevent = {
 		.features = CLOCK_EVT_FEAT_ONESHOT,
 		.irq = Timer0A_IRQn,
 		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
+		.set_state_shutdown = lm3s_clkevt_set_state_shutdown,
 		.read_elapsed = lm3s_clkevt_read_elapsed,
 	},
 	.hw = TIMER0,
