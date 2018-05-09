@@ -10,6 +10,7 @@
 #include <kernel/ktime.h>
 #include <kernel/list.h>
 #include <kernel/mm.h>
+#include <kernel/mm/slab.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/string.h>
@@ -22,6 +23,8 @@
 #include <asm/current.h>
 
 static LIST_HEAD(posix_timers);
+
+static struct kmem_cache *posix_timer_cache;
 
 static struct posix_timer *find_timer_by_id(timer_t timerid,
 					struct list_head *timer_list)
@@ -75,9 +78,9 @@ SYSCALL_DEFINE(timer_create,
 	struct posix_timer *pt;
 	siginfo_t *info;
 
-	pt = kzalloc(sizeof(*pt));
+	pt = kmem_cache_alloc(posix_timer_cache, CACHE_OPT_NONE);
 	if (!pt)
-		return -1;
+		return -ENOMEM;
 
 	/* Initialise the actual timer */
 	hrtimer_init(&pt->timer);
@@ -153,6 +156,14 @@ SYSCALL_DEFINE(clock_gettime,
 		ts = ktime_to_timespec(clock_monotonic_read());
 		memcpy(tp, &ts, sizeof(*tp));
 	}
+
+	return 0;
+}
+
+int time_init(void)
+{
+	posix_timer_cache = KMEM_CACHE(posix_timer);
+	BUG_ON(!posix_timer_cache);
 
 	return 0;
 }

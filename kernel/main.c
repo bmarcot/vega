@@ -17,6 +17,7 @@
 #include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/thread.h>
+#include <kernel/time.h>
 
 #include "platform.h"
 
@@ -104,6 +105,7 @@ struct thread_info *start_kernel(void)
 	mm_init();
 	signal_init();
 	fd_init();
+	time_init();
 
 	/*
 	 * Initialize file-systems

@@ -27,4 +27,6 @@ struct posix_timer {
 	struct hrtimer		timer;
 };
 
+int time_init(void);
+
 #endif /* !_KERNEL_TIME_H */
