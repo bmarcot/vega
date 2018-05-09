@@ -104,5 +104,6 @@ void clockevents_list_devices(void);
 int clockevents_program_event(struct clock_event_device *dev, ktime_t expires);
 void clockevents_switch_state(struct clock_event_device *dev,
 			enum clock_event_state state);
+void clockevents_shutdown(struct clock_event_device *dev);
 
 #endif /* !_KERNEL_TIME_CLOCKEVENTS_H */
