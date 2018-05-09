@@ -41,7 +41,4 @@ int hrtimer_start(struct hrtimer *timer, ktime_t expires);
 int hrtimer_cancel(struct hrtimer *timer);
 void hrtimer_init(struct hrtimer *timer);
 
-//XXX: Will die.. Function unused from kernel..
-struct hrtimer *hrtimer_alloc(void);
-
 #endif /* !_KERNEL_HRTIMER_H */

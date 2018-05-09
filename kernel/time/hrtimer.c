@@ -9,7 +9,6 @@
 #include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
 #include <kernel/list.h>
-#include <kernel/mm.h> //XXX: Will die.. Function unused from kernel..
 #include <kernel/time.h>
 
 #include <asm/ktime.h>
@@ -136,15 +135,4 @@ void hrtimer_init(struct hrtimer *timer)
 	timer->state = HRTIMER_STATE_INACTIVE;
 	timer->dev = clockevents_get_device(HRTIMER_DEVICE);
 	clockevent_set_event_handler(timer->dev, hrtimer_interrupt);
-}
-
-//XXX: Will die.. Function unused from kernel..
-struct hrtimer *hrtimer_alloc(void)
-{
-	struct hrtimer *timer = kzalloc(sizeof(*timer));
-
-	if (timer)
-		hrtimer_init(timer);
-
-	return timer;
 }
