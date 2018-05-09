@@ -12,7 +12,7 @@
 #include <kernel/syscalls.h>
 #include <kernel/time.h>
 
-#include <kernel/time/clockevents.h> // see comment below
+#include <kernel/clockevents.h> // see comment below
 
 #include <asm/current.h>
 

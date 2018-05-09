@@ -4,11 +4,11 @@
  * Copyright (c) 2017-2018 Benoit Marcot
  */
 
+#include <kernel/clockevents.h>
 #include <kernel/errno-base.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 #include <kernel/string.h>
-#include <kernel/time/clockevents.h>
 
 #include <asm/ktime.h>
 

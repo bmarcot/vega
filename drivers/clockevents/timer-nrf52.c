@@ -4,9 +4,9 @@
  * Copyright (c) 2017-2018 Benoit Marcot
  */
 
+#include <kernel/clockevents.h>
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
-#include <kernel/time/clockevents.h>
 
 #include "platform.h"
 

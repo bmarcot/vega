@@ -4,13 +4,13 @@
  * Copyright (c) 2017-2018 Benoit Marcot
  */
 
+#include <kernel/clockevents.h>
 #include <kernel/errno-base.h>
 #include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
 #include <kernel/list.h>
 #include <kernel/mm.h> //XXX: Will die.. Function unused from kernel..
 #include <kernel/time.h>
-#include <kernel/time/clockevents.h>
 
 #include <asm/ktime.h>
 

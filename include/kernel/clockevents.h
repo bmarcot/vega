@@ -1,11 +1,11 @@
 /*
- * include/kernel/time/clockevents.h
+ * include/kernel/clockevents.h
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
-#ifndef _KERNEL_TIME_CLOCKEVENTS_H
-#define _KERNEL_TIME_CLOCKEVENTS_H
+#ifndef _KERNEL_CLOCKEVENTS_H
+#define _KERNEL_CLOCKEVENTS_H
 
 #include <kernel/types.h>
 
@@ -106,4 +106,4 @@ void clockevents_switch_state(struct clock_event_device *dev,
 			enum clock_event_state state);
 void clockevents_shutdown(struct clock_event_device *dev);
 
-#endif /* !_KERNEL_TIME_CLOCKEVENTS_H */
+#endif /* !_KERNEL_CLOCKEVENTS_H */
