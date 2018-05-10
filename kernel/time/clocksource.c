@@ -18,7 +18,8 @@ void clock_monotonic_resume(void)
 
 ktime_t clock_monotonic_read(void)
 {
-	return clocksource_read(monotonic_clk);
+	return clocksource_cyc2ns(clocksource_read(monotonic_clk),
+				monotonic_clk->mult, monotonic_clk->shift);
 }
 
 int clock_monotonic_register(struct clocksource *clksrc)

@@ -12,13 +12,20 @@
 
 void lm3s6965_init(void);
 void lm3s_timer_init(void);
-void init_systick(void);
+void clocksource_init_systick(struct clocksource *cs);
+
+static struct clocksource cs_systick = {
+	.mult = 125,
+	.shift = 1,
+	.name = "systick",
+};
 
 __weak void __platform_init(void)
 {
 	/* create /dev/ttyS0, serial interface for Qemu UART0 */
 	lm3s6965_init();
-	init_systick(); /* SysTick as clocksource */
+	clocksource_init_systick(&cs_systick);
+	clock_monotonic_register(&cs_systick);
 	clock_monotonic_resume();
 
 	/* initialize a clock event device (Timer0A) */

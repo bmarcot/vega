@@ -1,54 +1,49 @@
 /*
  * drivers/clocksource/systick.c
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <kernel/clocksource.h>
 #include <kernel/types.h>
 
-#include <asm/ktime.h>
-
 #include "platform.h"
 
-static u64 ticks;
+static u64 cycle_count;
 
+/*
+ * The SysTick interrupt handler
+ */
 void systick(void)
 {
-	ticks++;
+	cycle_count += (0xffffff + 1);
 }
 
-ktime_t systick_read(struct clocksource *cs)
+#include <kernel/kernel.h>
+static u64 systick_read(struct clocksource *cs)
 {
-#define NSEC_PER_SEC 1000000000l
-	return ticks * ((u64)NSEC_PER_SEC / (u64)cs->freq_hz);
+	// check COUNTFLAG
+//	pr_info("status=%x", SysTick->CTRL);
+	return cycle_count + 0xffffff - SysTick->VAL;
 }
 
-void systick_suspend(struct clocksource *cs)
+static void systick_suspend(struct clocksource *cs)
 {
-	(void)cs;
-
 	SysTick->CTRL = 0;
 }
 
-void systick_resume(struct clocksource *cs)
+static void systick_resume(struct clocksource *cs)
 {
-	SysTick->LOAD = (SystemFrequency / cs->freq_hz) - 1;
+	SysTick->LOAD = 0xffffff;
 	SysTick->VAL = 0;
 	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk
 		| SysTick_CTRL_TICKINT_Msk
 		| SysTick_CTRL_ENABLE_Msk;
 }
 
-static struct clocksource clocksource_systick = {
-	.read = systick_read,
-	.suspend = systick_suspend,
-	.resume = systick_resume,
-	.freq_hz = 1000,
-	.name = "systick-clock",
-};
-
-void init_systick(void)
+void clocksource_init_systick(struct clocksource *cs)
 {
-	clock_monotonic_register(&clocksource_systick);
+	cs->read = systick_read;
+	cs->suspend = systick_suspend;
+	cs->resume = systick_resume;
 }

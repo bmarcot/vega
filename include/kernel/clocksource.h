@@ -9,28 +9,36 @@
 
 #include <kernel/types.h>
 
-#include <asm/ktime.h>
-
 struct clocksource {
-	ktime_t	(*read) (struct clocksource *cs);
-	void	(*suspend) (struct clocksource *cs);
-	void	(*resume) (struct clocksource *cs);
+	u64	(*read) (struct clocksource *cs);
 
-	unsigned int		freq_hz;
+	u32			mult;
+	u32			shift;
 	const char		*name;
 	struct list_head	list;
+
+	int	(*enable) (struct clocksource *cs);
+	void	(*disable) (struct clocksource *cs);
+	void	(*suspend) (struct clocksource *cs);
+	void	(*resume) (struct clocksource *cs);
 };
 
-static inline ktime_t clocksource_read(struct clocksource *clksrc)
+static inline u64 clocksource_read(struct clocksource *cs)
 {
-	return clksrc->read(clksrc);
+	return cs->read(cs);
 }
 
-static inline void clocksource_resume(struct clocksource *clksrc)
+static inline void clocksource_resume(struct clocksource *cs)
 {
-	return clksrc->resume(clksrc);
+	return cs->resume(cs);
 }
 
+static inline u64 clocksource_cyc2ns(u64 cycles, u32 mult, u32 shift)
+{
+	return (cycles * mult) >> shift;
+}
+
+#include <asm/ktime.h>
 ktime_t clock_monotonic_read(void);
 void clock_monotonic_resume(void);
 int clock_monotonic_register(struct clocksource *clksrc);
