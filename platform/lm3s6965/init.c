@@ -4,9 +4,9 @@
  * Copyright (c) 2016 Benoit Marcot
  */
 
+#include <kernel/clocksource.h>
 #include <kernel/compiler.h>
 #include <kernel/kernel.h>
-#include <kernel/time/clocksource.h>
 
 #include "platform.h"
 

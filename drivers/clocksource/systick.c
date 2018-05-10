@@ -4,7 +4,7 @@
  * Copyright (c) 2017 Benoit Marcot
  */
 
-#include <kernel/time/clocksource.h>
+#include <kernel/clocksource.h>
 #include <kernel/types.h>
 
 #include <asm/ktime.h>

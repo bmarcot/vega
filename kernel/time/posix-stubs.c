@@ -5,6 +5,7 @@
  */
 
 #include <kernel/bitops.h>
+#include <kernel/clocksource.h>
 #include <kernel/errno-base.h>
 #include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
@@ -16,7 +17,6 @@
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
 #include <kernel/time.h>
-#include <kernel/time/clocksource.h>
 
 #include <uapi/kernel/time.h>
 

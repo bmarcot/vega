@@ -1,11 +1,11 @@
 /*
  * kernel/time/clocksource.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
+#include <kernel/clocksource.h>
 #include <kernel/list.h>
-#include <kernel/time/clocksource.h>
 
 static LIST_HEAD(clocks);
 

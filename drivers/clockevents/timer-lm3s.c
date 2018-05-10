@@ -5,9 +5,9 @@
  */
 
 #include <kernel/clockevents.h>
+#include <kernel/clocksource.h> // For QEMU
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
-#include <kernel/time/clocksource.h> // For QEMU
 
 #include "platform.h"
 

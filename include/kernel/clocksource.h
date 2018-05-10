@@ -1,11 +1,11 @@
 /*
- * include/kernel/time/clocksource.h
+ * include/kernel/clocksource.h
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
-#ifndef _KERNEL_TIME_CLOCKSOURCE_H
-#define _KERNEL_TIME_CLOCKSOURCE_H
+#ifndef _KERNEL_CLOCKSOURCE_H
+#define _KERNEL_CLOCKSOURCE_H
 
 #include <kernel/types.h>
 
@@ -35,4 +35,4 @@ ktime_t clock_monotonic_read(void);
 void clock_monotonic_resume(void);
 int clock_monotonic_register(struct clocksource *clksrc);
 
-#endif /* !_KERNEL_TIME_CLOCKSOURCE_H */
+#endif /* !_KERNEL_CLOCKSOURCE_H */
