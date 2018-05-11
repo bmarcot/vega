@@ -124,10 +124,11 @@ static void hrtimer_interrupt(struct clock_event_device *dev)
 	list_del(&timer->list);
 	timer->state = HRTIMER_STATE_INACTIVE;
 
-	if (timer->function
-		&& (timer->function(timer) == HRTIMER_RESTART)
-		&& enqueue_hrtimer(timer))
-			hrtimer_reprogram();
+	if (timer->function && (timer->function(timer) == HRTIMER_RESTART))
+		enqueue_hrtimer(timer);
+
+	if (!list_empty(&hrtimers))
+		hrtimer_reprogram();
 }
 
 void hrtimer_init(struct hrtimer *timer)
