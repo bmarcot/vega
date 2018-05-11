@@ -11,20 +11,32 @@
 
 static u64 cycle_count;
 
-/*
- * The SysTick interrupt handler
- */
-void systick(void)
+static inline void handle_wrap_around(void)
 {
 	cycle_count += (0xffffff + 1);
 }
 
-#include <kernel/kernel.h>
-static u64 systick_read(struct clocksource *cs)
+// void systick_handler(void)
+void systick(void)
 {
-	// check COUNTFLAG
-//	pr_info("status=%x", SysTick->CTRL);
-	return cycle_count + 0xffffff - SysTick->VAL;
+	handle_wrap_around();
+}
+
+u64 systick_read(struct clocksource *cs)
+{
+	u32 val;
+
+read_val:
+	val = SysTick->VAL;
+
+	/* Counter wrapped-around during syscall entry and now */
+	if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
+		handle_wrap_around();
+		SCB->SHCSR |= SCB_ICSR_PENDSTCLR_Msk;
+		goto read_val;
+	}
+
+	return cycle_count + 0xffffff - val;
 }
 
 static void systick_suspend(struct clocksource *cs)
