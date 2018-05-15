@@ -5,7 +5,6 @@
  */
 
 #include <kernel/clockevents.h>
-#include <kernel/clocksource.h> // For QEMU
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
 
@@ -20,11 +19,14 @@ struct lm3s_clockevent {
 };
 
 #ifdef QEMU
+
+#include <kernel/clocksource.h>
+
 u64 systick_read(struct clocksource *cs);
 
-static u64 ratio;
 static u64 set_next;
-#endif
+
+#endif /* QEMU */
 
 static int lm3s_clkevt_set_next_ktime(ktime_t expires,
 				struct clock_event_device *dev)
@@ -80,9 +82,8 @@ static ktime_t lm3s_clkevt_read_elapsed(struct clock_event_device *dev)
 	if (!set_next)
 		return 0;
 
-	u64 ticks = ((systick_read(NULL) - set_next) * 0x1000000ull) / ratio;
-
-	return clocksource_cyc2ns(ticks , 125, 1);
+	/* Timer0 and SysTick share the same internal clock source (XTALI) */
+	return clocksource_cyc2ns(systick_read(NULL) - set_next, 174762667, 21);
 #else
 #warning "Missing implementation"
 #endif
@@ -116,52 +117,8 @@ void lm3s_timer_interrupt(void)
 		lm3s_clockevent.dev.event_handler(&lm3s_clockevent.dev);
 }
 
-#ifdef QEMU
-static void emulate_timer_read(void)
-{
-	pr_info("Compare Timer0 to SysTick tick...");
-
-	//clock_monotonic_suspend(); // disable()
-
-	TIMER0->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
-	TIMER0->CFG = 0;
-	TIMER0->TAMR = GPTM_GPTMTAMR_TAMR_OneShot << GPTM_GPTMTAMR_TAMR_Pos;
-	TIMER0->TAILR = 0xfffff; /* Pick a random value, SysTick must not wrap-around */
-
-	pr_info("SysTick->LOAD = %08x (max)", 0xffffff);
-	pr_info("TIMER0->TAILR = %08x", TIMER0->TAILR);
-
-	SysTick->CTRL = 0;
-	SysTick->LOAD = 0xffffff;
-	SysTick->VAL = 0;
-
-	/* Start SysTick and Timer0 ``almost'' simultaneously */
-	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk
-		| SysTick_CTRL_ENABLE_Msk;
-	TIMER0->CTL |= (GPTM_GPTMCTL_TAEN_Enabled << GPTM_GPTMCTL_TAEN_Pos);
-
-	/* Active wait until timer reaches 0 */
-	while ((TIMER0->RIS & GPTM_GPTMRIS_TATORIS_Msk) == 0)
-		;
-
-	u32 val = SysTick->VAL;
-	if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
-		pr_err("SysTick must not wrap-around!");
-		BUG();
-	}
-	pr_info("SysTick->VAL  = %08x", val);
-	ratio = val;
-
-	clock_monotonic_resume(); // enable()
-}
-#endif
-
 int lm3s_timer_init(/* struct device_node *node */)
 {
-#ifdef QEMU
-	emulate_timer_read();
-#endif
-
 	/*
 	 * To use the general-purpose timers, the peripheral clock must
 	 * be enabled by setting the TIMER0, TIMER1, TIMER2, and TIMER3
