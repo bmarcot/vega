@@ -5,6 +5,7 @@
  */
 
 #include <kernel/bitops.h>
+#include <kernel/clockevents.h>
 #include <kernel/clocksource.h>
 #include <kernel/errno-base.h>
 #include <kernel/hrtimer.h>
@@ -132,14 +133,15 @@ SYSCALL_DEFINE(timer_gettime,
 {
 	struct posix_timer *pt = find_timer_by_id(timerid, &posix_timers);
 	ktime_t expires = pt->timer.expires;
-	ktime_t now = clock_monotonic_read();
+	ktime_t elapsed = clockevents_read_elapsed(pt->timer.dev);
 
 	if (!pt)
 		return EINVAL;
-	if ((pt->timer.state == HRTIMER_STATE_INACTIVE) || (now >= expires)) {
+
+	if ((pt->timer.state == HRTIMER_STATE_INACTIVE) || (elapsed >= expires)) {
 		memset(&curr_value->it_value, 0, sizeof(struct timespec));
 	} else {
-		struct timespec ts = ktime_to_timespec(expires - now);
+		struct timespec ts = ktime_to_timespec(expires - elapsed);
 		memcpy(&curr_value->it_value, &ts, sizeof(ts));
 	}
 
