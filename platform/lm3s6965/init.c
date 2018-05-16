@@ -1,12 +1,13 @@
 /*
  * platform/lm3s6965/init.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #include <kernel/clocksource.h>
 #include <kernel/compiler.h>
 #include <kernel/kernel.h>
+#include <kernel/sched_clock.h>
 
 #include "platform.h"
 
@@ -14,7 +15,7 @@ void lm3s6965_init(void);
 void lm3s_timer_init(void);
 void clocksource_init_systick(struct clocksource *cs);
 
-static struct clocksource cs_systick = {
+static struct clocksource clocksource_systick = {
 	.mult = 174762667,
 	.shift = 21,
 	.name = "systick",
@@ -24,9 +25,11 @@ __weak void __platform_init(void)
 {
 	/* create /dev/ttyS0, serial interface for Qemu UART0 */
 	lm3s6965_init();
-	clocksource_init_systick(&cs_systick);
-	clock_monotonic_register(&cs_systick);
-	clock_monotonic_resume();
+
+	/* Register SysTick as sched_clock source */
+	clocksource_init_systick(&clocksource_systick);
+	clocksource_enable(&clocksource_systick);
+	register_sched_clock(&clocksource_systick);
 
 	/* initialize a clock event device (Timer0A) */
 	lm3s_timer_init();

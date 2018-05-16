@@ -53,9 +53,4 @@ static inline u64 clocksource_cyc2ns(u64 cycles, u32 mult, u32 shift)
 	return (cycles * mult) >> shift;
 }
 
-#include <asm/ktime.h>
-ktime_t clock_monotonic_read(void);
-void clock_monotonic_resume(void);
-int clock_monotonic_register(struct clocksource *clksrc);
-
 #endif /* !_KERNEL_CLOCKSOURCE_H */

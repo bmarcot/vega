@@ -6,7 +6,6 @@
 
 #include <kernel/bitops.h>
 #include <kernel/clockevents.h>
-#include <kernel/clocksource.h>
 #include <kernel/errno-base.h>
 #include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
@@ -14,6 +13,7 @@
 #include <kernel/mm.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
+#include <kernel/sched_clock.h>
 #include <kernel/signal.h>
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
@@ -155,7 +155,7 @@ SYSCALL_DEFINE(clock_gettime,
 	struct timespec ts;
 
 	if (clk_id == CLOCK_MONOTONIC) {
-		ts = ktime_to_timespec(clock_monotonic_read());
+		ts = ktime_to_timespec(sched_clock());
 		memcpy(tp, &ts, sizeof(*tp));
 	}
 
