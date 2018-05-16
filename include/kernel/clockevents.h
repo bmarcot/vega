@@ -28,6 +28,8 @@ struct clock_event_device {
 
 	const char		*name;
 	ktime_t			next_event;
+	u32			mult;
+	u32			shift;
 	unsigned int		features;
 	enum clock_event_state	state_use_accessors;
 	int			irq;

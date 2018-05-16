@@ -15,8 +15,8 @@ void lm3s_timer_init(void);
 void clocksource_init_systick(struct clocksource *cs);
 
 static struct clocksource cs_systick = {
-	.mult = 125,
-	.shift = 1,
+	.mult = 174762667,
+	.shift = 21,
 	.name = "systick",
 };
 
