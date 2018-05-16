@@ -28,9 +28,24 @@ static inline u64 clocksource_read(struct clocksource *cs)
 	return cs->read(cs);
 }
 
+static inline int clocksource_enable(struct clocksource *cs)
+{
+	return cs->enable(cs);
+}
+
+static inline void clocksource_disable(struct clocksource *cs)
+{
+	cs->disable(cs);
+}
+
+static inline void clocksource_suspend(struct clocksource *cs)
+{
+	cs->suspend(cs);
+}
+
 static inline void clocksource_resume(struct clocksource *cs)
 {
-	return cs->resume(cs);
+	cs->resume(cs);
 }
 
 static inline u64 clocksource_cyc2ns(u64 cycles, u32 mult, u32 shift)
