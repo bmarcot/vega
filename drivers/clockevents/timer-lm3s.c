@@ -83,7 +83,8 @@ static ktime_t lm3s_clkevt_read_elapsed(struct clock_event_device *dev)
 		return 0;
 
 	/* Timer0 and SysTick share the same internal clock source (XTALI) */
-	return clocksource_cyc2ns(systick_read(NULL) - set_next, 174762667, 21);
+	return clocksource_cyc2ns(systick_read(NULL) - set_next, dev->mult,
+				dev->shift);
 #else
 #warning "Missing implementation"
 #endif
@@ -94,6 +95,8 @@ static struct lm3s_clockevent lm3s_clockevent = {
 	.dev = {
 		.set_next_ktime = lm3s_clkevt_set_next_ktime,
 		.name = "lm3s-timer0",
+		.mult = 174762667,
+		.shift = 21,
 		.features = CLOCK_EVT_FEAT_ONESHOT,
 		.irq = Timer0A_IRQn,
 		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
