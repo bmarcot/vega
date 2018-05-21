@@ -11,12 +11,16 @@
 static struct clocksource *sched_clocksource;
 static u64 epoch_cyc;
 
+int sched_clock_registered;
+
 void register_sched_clock(struct clocksource *cs)
 {
 	epoch_cyc = clocksource_read(cs);
 	sched_clocksource = cs;
 
-	pr_info("Registered %s as sched_clock source", cs->name);
+	sched_clock_registered = 1;
+
+	printk("Registered %s as sched_clock source\n", cs->name);
 }
 
 ktime_t sched_clock(void)
