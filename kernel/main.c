@@ -16,6 +16,7 @@
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
 #include <kernel/signal.h>
+#include <kernel/stdio.h>
 #include <kernel/thread.h>
 #include <kernel/time.h>
 
@@ -54,13 +55,13 @@ int close(int fd);
 
 void print_version(void)
 {
-	char buf[] = {0, 0};
+	char c;
 	int fd = open("/proc/version", 0);
 
-	while (read(fd, &buf, 1))
-		printk("%s", buf);
+	while (read(fd, &c, 1))
+		putchar(c);
 	close(fd);
-	printk("\n");
+	putchar('\n');
 }
 
 __weak_symbol int main(__unused void *arg)
@@ -90,9 +91,9 @@ void print_linker_sections(void)
 
 struct thread_info *start_kernel(void)
 {
-	setup_arch();
-
 	__printk_init();
+
+	setup_arch();
 
 	/* initialize the kernel's malloc */
 	kernel_heap_init(&__heap_start__, (size_t) &__heap_size__);
