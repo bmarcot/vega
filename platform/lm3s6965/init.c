@@ -53,3 +53,20 @@ void __printk_putchar(char c)
 		;
 	UART0->DR = c;
 }
+
+int putchar(int c)
+{
+	while (UART0->FR & (1 << 3))
+		;
+	UART0->DR = c;
+
+	return c;
+}
+
+int puts(const char *s)
+{
+	for (; *s != '\0'; s++)
+		putchar(*s);
+
+	return 0;
+}
