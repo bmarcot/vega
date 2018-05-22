@@ -23,11 +23,6 @@ __weak_symbol void __platform_halt(void)
 		;
 }
 
-void systick(void)
-{
-	/* do nothing */
-}
-
 void __printk_init(void)
 {
 	/* disable the module while (re)configuring */
