@@ -66,6 +66,7 @@ void print_version(void)
 
 __weak_symbol int main(__unused void *arg)
 {
+	puts("--\n");
 	print_version();
 	minishell(NULL);
 
@@ -101,7 +102,6 @@ struct thread_info *start_kernel(void)
 	print_linker_sections();
 
 	/* initialize the physical memory allocator */
-	show_page_bitmap(); // init_pages();
 	kmem_cache_init();
 	mm_init();
 	signal_init();
@@ -139,8 +139,6 @@ struct thread_info *start_kernel(void)
 
 	/* do the platform-specific inits */
 	__platform_init();
-
-	printk("Kernel bootstrap done.\n--\n");
 
 	return task_thread_info(init_task);
 }

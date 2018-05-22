@@ -116,17 +116,6 @@ void free_pages(unsigned long addr, unsigned long order)
 	bitmap_set_bit(page_bitmap[order], addr_to_page_idx(addr, order));
 }
 
-void show_page_bitmap(void)
-{
-	printk("Order  Bitmap\n");
-	for (int i = 0; i <= 3; i++) {
-		printk("    %d  ", i);
-		for (unsigned long j = 0; j < page_bitmap_sz[i]; j += BITS_PER_LONG)
-			printk("%08x  ", *(page_bitmap[i] + j / BITS_PER_LONG));
-		printk("\n");
-	}
-}
-
 /* Useful function to get a signature of memory fragmentation before and
  * after allocating/freeing memory. */
 unsigned long page_alloc_signature(void)

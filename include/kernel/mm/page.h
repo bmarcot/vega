@@ -12,7 +12,6 @@
 
 void *alloc_pages(unsigned long order);
 void free_pages(unsigned long addr, unsigned long order);
-void show_page_bitmap(void);
 long size_to_page_order(unsigned long size);
 unsigned long page_alloc_signature(void);
 
