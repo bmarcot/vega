@@ -57,3 +57,18 @@ void __printk_putchar(char c)
 	while (!NRF_UARTE0->EVENTS_TXSTOPPED)
 		;
 }
+
+int putchar(int c)
+{
+	__printk_putchar(c);
+
+	return c;
+}
+
+int puts(const char *s)
+{
+	for (; *s != '\0'; s++)
+		putchar(*s);
+
+	return 0;
+}
