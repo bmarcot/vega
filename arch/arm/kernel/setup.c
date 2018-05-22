@@ -18,18 +18,23 @@ static struct clocksource clocksource_systick = {
 
 void clocksource_init_systick(struct clocksource *cs);
 
-void setup_arch(void)
+void cpu_init(void)
 {
-	/* enable UsageFault, BusFault, MemManage */
+	/* Enable additional fault handlers */
 	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk;
 	SCB->SHCSR |= SCB_SHCSR_BUSFAULTENA_Msk;
 	SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
 
-	/* ensure 8-byte stack alignment */
+	/* Use 8-byte stack alignment on exception entry */
 	SCB->CCR |= SCB_CCR_STKALIGN_Msk;
 
-	/* architectural requirement */
+	/* Architecturally required */
 	__DSB();
+}
+
+void setup_arch(void)
+{
+	cpu_init();
 
 	/* Register SysTick as sched_clock source */
 	clocksource_init_systick(&clocksource_systick);
