@@ -24,11 +24,6 @@
 static struct kmem_cache *signal_struct_cache;
 static struct kmem_cache *sigqueue_cache;
 
-int signal_pending(struct task_struct *tsk)
-{
-	return !sigisemptyset(&tsk->pending.signal);
-}
-
 static struct sigaction *task_sigaction(struct task_struct *tsk, int sig)
 {
 	return &tsk->sighand->action[sig - 1];
@@ -289,12 +284,11 @@ SYSCALL_DEFINE(sigprocmask,
 
 SYSCALL_DEFINE(pause, void)
 {
-	sched_dequeue(current);
-	set_current_state(TASK_INTERRUPTIBLE);
-
-	schedule();
-
-	//FIXME: Only signals can wake-up this task
+	while (!signal_pending(current)) {
+		sched_dequeue(current);
+		set_current_state(TASK_INTERRUPTIBLE);
+		schedule();
+	}
 
 	return -EINTR;
 }

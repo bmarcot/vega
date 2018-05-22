@@ -8,9 +8,8 @@
 #define _KERNEL_SCHED_H
 
 #include <kernel/signal_types.h>
+#include <kernel/thread_info.h>
 #include <kernel/types.h>
-
-#include <asm/thread_info.h>
 
 #include <uapi/kernel/sched.h>
 
@@ -113,6 +112,11 @@ struct task_struct *alloc_init_task(void);
 static inline int thread_group_leader(struct task_struct *tsk)
 {
 	return tsk->exit_signal >= 0;
+}
+
+static inline int test_tsk_thread_flag(struct task_struct *tsk, int flag)
+{
+	return test_ti_thread_flag(task_thread_info(tsk), flag);
 }
 
 #endif /* !_KERNEL_SCHED_H */
