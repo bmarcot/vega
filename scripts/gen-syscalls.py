@@ -47,6 +47,9 @@ xs = [
     'getppid',
     'tgkill',
     'pause',
+
+    # Unsorted
+    'timer_delete',
 ]
 
 import datetime

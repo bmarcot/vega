@@ -79,10 +79,12 @@ static bool remove_hrtimer(struct hrtimer *timer)
 {
 	bool reprogram = false;
 
-	timer->state = HRTIMER_STATE_INACTIVE;
-	if (list_is_first(&timer->list, &hrtimers))
-		reprogram = true;
-	list_del(&timer->list);
+	if (timer->state == HRTIMER_STATE_ENQUEUED) {
+		timer->state = HRTIMER_STATE_INACTIVE;
+		if (list_is_first(&timer->list, &hrtimers))
+			reprogram = true;
+		list_del(&timer->list);
+	}
 
 	return reprogram;
 }
