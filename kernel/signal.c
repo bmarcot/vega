@@ -9,7 +9,6 @@
 #include <kernel/bitops.h>
 #include <kernel/errno-base.h>
 #include <kernel/list.h>
-#include <kernel/mm.h>
 #include <kernel/mm/page.h>
 #include <kernel/mm/slab.h>
 #include <kernel/sched.h>
@@ -293,6 +292,14 @@ SYSCALL_DEFINE(sigprocmask,
 		/* errno = EINVAL; */
 		return -1;
 	}
+
+	return 0;
+}
+
+SYSCALL_DEFINE(sigpending,
+	sigset_t		*set)
+{
+	*set = current->pending.signal;
 
 	return 0;
 }
