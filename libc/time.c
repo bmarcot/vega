@@ -13,6 +13,11 @@ int timer_create(clockid_t clockid, struct sigevent *sevp,
 	return syscall(3, clockid, sevp, timerid, SYS_TIMER_CREATE);
 }
 
+int timer_delete(timer_t timerid)
+{
+	return syscall(1, timerid, SYS_TIMER_DELETE);
+}
+
 int timer_settime(timer_t timerid, int flags,
 		const struct itimerspec *new_value,
 		struct itimerspec *old_value)
