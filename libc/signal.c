@@ -38,3 +38,8 @@ int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
 {
 	return syscall(3, how, set, oldset, SYS_SIGPROCMASK);
 }
+
+int sigpending(sigset_t *set)
+{
+	return syscall(1, set, SYS_SIGPENDING);
+}
