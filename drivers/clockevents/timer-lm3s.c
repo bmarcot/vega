@@ -34,6 +34,13 @@ static int lm3s_clkevt_set_next_ktime(ktime_t expires,
 	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
 	u32 ticks_per_usec = SystemFrequency / USEC_PER_SEC;
 
+	/* Ensure the timer is disabled before making any changes */
+	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+
+	/* Clear any pending interrupts */
+	hw->ICR |= GPTM_GPTMICR_TATOCINT_Msk;
+	NVIC_ClearPendingIRQ(dev->irq);
+
 	if (!expires) {
 		hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
 		hw->ICR |= GPTM_GPTMICR_TATOCINT_Msk;
@@ -44,12 +51,14 @@ static int lm3s_clkevt_set_next_ktime(ktime_t expires,
 	 * just noise. SystemFrequency must be in the MHz range.
 	 */
 	hw->TAILR = (expires / (u64)NSEC_PER_USEC) * ticks_per_usec;
-	hw->CTL |= (GPTM_GPTMCTL_TAEN_Enabled << GPTM_GPTMCTL_TAEN_Pos);
 
 #ifdef QEMU
 	/* Record the time when timer was started */
 	set_next = systick_read(NULL);
 #endif
+
+	/* Enable the timer and start counting */
+	hw->CTL |= (GPTM_GPTMCTL_TAEN_Enabled << GPTM_GPTMCTL_TAEN_Pos);
 
 	return 0;
 }
@@ -58,8 +67,9 @@ static int lm3s_clkevt_set_state_oneshot(struct clock_event_device *dev)
 {
 	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
 
-	/* disable Timer0 and reconfigure */
+	/* Ensure the timer is disabled before making any changes */
 	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+
 	hw->CFG = 0;
 	hw->TAMR = GPTM_GPTMTAMR_TAMR_OneShot << GPTM_GPTMTAMR_TAMR_Pos;
 
@@ -70,8 +80,12 @@ static int lm3s_clkevt_set_state_shutdown(struct clock_event_device *dev)
 {
 	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
 
+	/* Ensure the timer is disabled before making any changes */
 	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+
+	/* Clear any pending interrupts */
 	hw->ICR |= GPTM_GPTMICR_TATOCINT_Msk;
+	NVIC_ClearPendingIRQ(dev->irq);
 
 	return 0;
 }
