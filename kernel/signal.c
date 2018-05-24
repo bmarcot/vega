@@ -140,6 +140,21 @@ void purge_pending_signals(struct task_struct *tsk)
 	}
 }
 
+int remove_pending_signal(struct sigqueue *sig, struct task_struct *tsk)
+{
+	int signo = sig->info.si_signo;
+
+	if (!sigismember(&tsk->pending.signal, signo))
+		return -1;
+
+	sigdelset(&tsk->pending.signal, signo);
+	list_del(&sig->list);
+	if ((sig->flags & SIGQUEUE_PREALLOC) == 0)
+		kmem_cache_free(sigqueue_cache, sig);
+
+	return 0;
+}
+
 void do_signal(void)
 {
 	int sig;
