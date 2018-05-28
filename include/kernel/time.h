@@ -13,6 +13,13 @@
 
 #include <uapi/kernel/time.h>
 
+#define MSEC_PER_SEC	1000l
+#define USEC_PER_MSEC	1000l
+#define NSEC_PER_USEC	1000l
+#define NSEC_PER_MSEC	1000000l
+#define USEC_PER_SEC	1000000l
+#define NSEC_PER_SEC	1000000000l
+
 struct task_struct;
 
 struct posix_timer {

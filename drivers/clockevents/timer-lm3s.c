@@ -7,25 +7,19 @@
 #include <kernel/clockevents.h>
 #include <kernel/kernel.h>
 #include <kernel/irq.h>
+#include <kernel/time.h>
 
 #include "platform.h"
 
-#define USEC_PER_SEC  1000000l
-#define NSEC_PER_USEC 1000l
-
 struct lm3s_clockevent {
-	struct clock_event_device dev;
-	TIMER_Type *hw;
+	struct clock_event_device	dev;
+	TIMER_Type			*hw;
 };
 
 #ifdef QEMU
-
 #include <kernel/clocksource.h>
-
 u64 systick_read(struct clocksource *cs);
-
 static u64 set_next;
-
 #endif /* QEMU */
 
 static int lm3s_clkevt_set_next_ktime(ktime_t expires,
