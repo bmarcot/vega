@@ -10,7 +10,7 @@
 
 #include "platform.h"
 
-static struct clocksource clocksource_systick = {
+static struct clocksource cs_systick = {
 	.mult = 174762667,
 	.shift = 21,
 	.name = "systick",
@@ -32,12 +32,20 @@ void cpu_init(void)
 	__DSB();
 }
 
+static u64 systick_sched_clock(void)
+{
+	return clocksource_read(&cs_systick);
+}
+
 void setup_arch(void)
 {
 	cpu_init();
 
-	/* Register SysTick as sched_clock source */
-	clocksource_init_systick(&clocksource_systick);
-	clocksource_enable(&clocksource_systick);
-	register_sched_clock(&clocksource_systick);
+	/* Configure the architectural SysTick as a clocksource */
+	clocksource_init_systick(&cs_systick);
+	clocksource_enable(&cs_systick);
+
+	/* Register the SysTick as sched_clock() source */
+	sched_clock_register(systick_sched_clock, cs_systick.mult, cs_systick.shift);
+	printk("Registered %s as sched_clock source\n", cs_systick.name);
 }

@@ -5,28 +5,32 @@
  */
 
 #include <kernel/clocksource.h>
-#include <kernel/kernel.h>
 #include <kernel/ktime.h>
 
-static struct clocksource *sched_clocksource;
-static u64 epoch_cyc;
+struct clock_read_data {
+	u64	epoch_cyc;
+	u64	(*read_sched_clock) (void);
+	u32	mult;
+	u32	shift;
+};
+
+static struct clock_read_data crd;
 
 int sched_clock_registered;
 
-void register_sched_clock(struct clocksource *cs)
+void sched_clock_register(u64 (*read)(void), u32 mult, u32 shift)
 {
-	epoch_cyc = clocksource_read(cs);
-	sched_clocksource = cs;
+	crd.epoch_cyc = read();
+	crd.read_sched_clock = read;
+	crd.mult = mult;
+	crd.shift = shift;
 
 	sched_clock_registered = 1;
-
-	printk("Registered %s as sched_clock source\n", cs->name);
 }
 
 ktime_t sched_clock(void)
 {
-	u64 cyc = clocksource_read(sched_clocksource) - epoch_cyc;
+	u64 cyc = crd.read_sched_clock() - crd.epoch_cyc;
 
-	return clocksource_cyc2ns(cyc, sched_clocksource->mult,
-				sched_clocksource->shift);
+	return clocksource_cyc2ns(cyc, crd.mult, crd.shift);
 }
