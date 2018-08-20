@@ -11,8 +11,10 @@
 #include "platform.h"
 
 static struct clocksource cs_systick = {
-	.mult = 174762667,
-	.shift = 21,
+	/* from = 12000000, to = 1000000000, maxsec = 1 */
+	.mult = -1498764629,
+	.shift = 25,
+
 	.name = "systick",
 };
 
