@@ -11,7 +11,6 @@
 
 static struct kmem_cache *files_struct_cache;
 static struct kmem_cache *file_cache;
-static struct kmem_cache *dentry_cache;
 
 struct files_struct *alloc_files_struct(void)
 {
@@ -39,14 +38,9 @@ void put_file(struct file *file)
 	kmem_cache_free(file_cache, file);
 }
 
-struct dentry *alloc_dentry(void)
-{
-	return kmem_cache_alloc(dentry_cache, CACHE_OPT_NONE);
-}
-
 void put_dentry(struct dentry *dentry)
 {
-	kmem_cache_free(dentry_cache, dentry);
+	/* NOTHING */
 }
 
 int fd_init(void)
@@ -56,9 +50,6 @@ int fd_init(void)
 
 	file_cache = KMEM_CACHE(file);
 	BUG_ON(!file_cache);
-
-	dentry_cache = KMEM_CACHE(dentry);
-	BUG_ON(!dentry_cache);
 
 	return 0;
 }

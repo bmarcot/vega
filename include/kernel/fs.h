@@ -1,12 +1,13 @@
 /*
  * include/kernel/fs.h
  *
- * Copyright (c) 2016-2017 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
 #ifndef _KERNEL_FS_H
 #define _KERNEL_FS_H
 
+#include <kernel/dcache.h>
 #include <kernel/stat.h>
 #include <kernel/types.h>
 
@@ -48,7 +49,8 @@ struct inode {
 	const struct inode_operations *i_op;         /* inode ops table */
 	const struct file_operations  *i_fop;        /* default inode ops */
 	struct super_block            *i_sb;         /* associated superblock */
-	void                          *i_private;
+	struct dentry                 *i_dentry;     /* 1-to-1 relation between inode and dentry */
+	void                          *i_private;    /* fs or device private pointer */
 	char                          i_data[0];
 };
 
@@ -85,26 +87,6 @@ struct file_operations {
 	int     (*iterate) (struct file *file, struct dir_context *ctx);
 	int     (*mmap) (struct file *file, off_t offset, void **addr); /* struct vm_area_struct *area */
 	int     (*open) (struct inode *inode, struct file *file);
-};
-
-/*
- * dentry struct
- */
-
-struct dentry {
-	_Atomic int                    d_count;           /* usage count */
-	struct inode                   *d_inode;          /* associated inode */
-	const struct dentry_operations *d_op;             /* dentry operations table */
-	struct dentry                  *d_parent;         /* dentry object of parent */
-	char                           d_name[NAME_MAX];  /* short name */
-
-	//struct list_head d_child;       /* child of parent list */
-	//struct list_head d_subdirs;     /* our children */
-};
-
-struct dentry_operations {
-	int  (*delete) (struct dentry *dentry);
-	void (*release) (struct dentry *dentry);
 };
 
 /*
