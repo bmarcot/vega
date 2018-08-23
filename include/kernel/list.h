@@ -281,6 +281,32 @@ static inline int list_is_singular(const struct list_head *head)
 	     pos = list_next_entry(pos, member))
 
 /**
+ * list_for_each_entry_continue - continue iteration over list of given type
+ * @pos:the type * to use as a loop cursor.
+ * @head:the head for your list.
+ * @member:the name of the list_head within the struct.
+ *
+ * Continue to iterate over list of given type, continuing after
+ * the current position.
+ */
+#define list_for_each_entry_continue(pos, head, member)	\
+	for (pos = list_next_entry(pos, member);	\
+	     &pos->member != (head);			\
+	     pos = list_next_entry(pos, member))
+
+/**
+ * list_for_each_entry_from - iterate over list of given type from the current point
+ * @pos:the type * to use as a loop cursor.
+ * @head:the head for your list.
+ * @member:the name of the list_head within the struct.
+ *
+ * Iterate over list of given type, continuing from current position.
+ */
+#define list_for_each_entry_from(pos, head, member)	\
+	for (; &pos->member != (head);\
+	     pos = list_next_entry(pos, member))
+
+/**
  * list_for_each_entry_safe - iterate over list of given type safe against removal of list entry
  * @pos:	the type * to use as a loop cursor.
  * @n:		another type * to use as temporary storage
