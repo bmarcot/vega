@@ -1,13 +1,15 @@
 /*
- * kernel/fs/pathmanip.c
+ * kernel/fs/path.c
  *
- * Copyright (c) 2016 Benoit Marcot
+ * Copyright (c) 2016-2018 Benoit Marcot
  */
 
-#include <string.h>
-
-#include <kernel/fs.h>
+#include <kernel/fs.h> // For NAME_MAX definition
+#include <kernel/fs/path.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
+#include <kernel/mm.h>
+#include <kernel/string.h>
 
 int path_head(char *buf, const char *pathname)
 {
@@ -23,4 +25,25 @@ int path_head(char *buf, const char *pathname)
 	buf[i - i0] = '\0';
 
 	return i;
+}
+
+int path_split(struct list_head *head, char *pathname)
+{
+	char *component;
+	int count = 0;
+
+	/* Pass the initial slash in pathname (absolute path) */
+	pathname++;
+
+	do {
+		component = strsep(&pathname, "/");
+		if (component) {
+			struct pathcomp *pc = kmalloc(sizeof(struct pathcomp));
+			pc->name = component;
+			list_add_tail(&pc->list, head);
+			count++;
+		}
+	} while (component);
+
+	return count;
 }
