@@ -27,8 +27,10 @@ struct dentry;
 struct inode; //FIXME: delete me from here, using s_root dentry
 
 struct super_block {
-	dev_t        s_dev;      /* identifier */
-	struct inode *s_iroot;   //FIXME: just use s_root and dentry
+	struct list_head	s_list;		/* list of superblocks */
+	dev_t			s_dev;		/* identifier */
+	struct inode		*s_iroot;	//FIXME: Must use *s_root (pointer to dentry)
+	struct list_head	s_inodes;	/* all inodes */
 };
 
 /*
