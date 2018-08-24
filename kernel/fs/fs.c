@@ -7,12 +7,14 @@
 #include <errno.h>
 
 #include <kernel/bitops.h>
+#include <kernel/dcache.h>
 #include <kernel/errno-base.h>
 #include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/fs/initfs.h>
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
+#include <kernel/list.h>
 #include <kernel/sched.h>
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
@@ -77,55 +79,65 @@ int release_dentries(struct dentry *dentry)
 	return 0;
 }
 
-struct inode *inode_from_pathname(const char *pathname/* , struct dentry *from */)
+#define PATH_MAX 256
+
+struct dentry *__do_file_open(const char *pathname, int flags)
 {
-	struct inode *inode = root_inode();
-	struct dentry *dentry = root_dentry();
-	struct dentry target;
+	LIST_HEAD(path);
+	static char buf[PATH_MAX];
+	struct pathcomp *comp;
+	struct dentry *parent = root_dentry();
+	struct dentry *dentry = NULL;
 
-	/* remove the trailing slash, relative path is not supported */
-	pathname++;
+	strncpy(buf, pathname, PATH_MAX);
+	int components = path_split(&path, buf);
 
-	for (size_t i = 0; i < strlen(pathname);) {
-		i += path_head(target.d_name, &pathname[i]);
-		dentry = vfs_lookup(inode, &target);
-		if (dentry == NULL)
-			return NULL;
-		inode = dentry->d_inode;
+	list_for_each_entry(comp, &path, list) {
+		dentry = d_lookup(parent, comp->name);
+		if (dentry) {
+			//FIXME: Increase refcount?
+			parent = dentry;
+			components--;
+		} else {
+			/*
+			 * Not found in the dentry tree, do a VFS-lookup from
+			 * the last component found (a leaf of the dentry tree).
+			 */
+			break;
+		}
 	}
 
-	return inode;
+	if (components) {
+		list_for_each_entry_from(comp, &path, list) {
+			dentry = d_alloc(parent, comp->name);
+			vfs_lookup(parent->d_inode, dentry); // rename to do_lookup() ?
+			if (!dentry->d_inode) {
+				// File does not exist in fs!
+				//release_dentries(dentry->d_parent);
+				// release dentries from here toward root
+				//   d_put('/foo/bar/baz');
+				//   d_put('/foo/bar');     if d_count = 0
+				//   d_put('/foo');         if d_count = 0
+				return NULL;
+			}
+			parent = dentry;
+		}
+	}
+
+	return dentry;
 }
 
 struct file *do_file_open(const char *pathname, int flags)
 {
-	struct inode *inode = root_inode();
-	struct dentry *dentry = root_dentry();
-	struct dentry *parent = dentry;
-	struct dentry *target;
+	struct dentry *dentry;
 
-	/* remove the trailing slash, relative path is not supported */
-	pathname++;
-
-	for (size_t i = 0; i < strlen(pathname);) {
-		target = alloc_dentry();
-		if (!target)
-			return NULL;
-		target->d_count = 1;
-		target->d_parent = parent;
-		i += path_head(target->d_name, &pathname[i]);
-
-		dentry = vfs_lookup(inode, target);
-		if (!dentry) {
-			release_dentries(target->d_parent);
-			return NULL;
-		}
-		inode = dentry->d_inode;
-		parent = dentry;
+	dentry = __do_file_open(pathname, flags);
+	if (!dentry) {
+		/* FILENOTFOUND */
 	}
 
 	/* opendir() redirects to open() */
-	if ((flags & O_DIRECTORY) && !S_ISDIR(inode->i_mode)) {
+	if ((flags & O_DIRECTORY) && !S_ISDIR(D_INODE(dentry)->i_mode)) {
 		errno = ENOTDIR;
 		return NULL;
 	}
@@ -136,11 +148,11 @@ struct file *do_file_open(const char *pathname, int flags)
 		return NULL;
 	}
 	file->f_dentry = dentry;
-	file->f_op = dentry->d_inode->i_fop;
+	file->f_op = D_INODE(dentry)->i_fop;
 	file->f_pos = 0;
 
 	if (file->f_op->open)
-		file->f_op->open(inode, file);
+		file->f_op->open(D_INODE(dentry), file);
 
 	return file;
 }
@@ -259,7 +271,13 @@ SYSCALL_DEFINE(stat,
 	const char	*pathname,
 	struct stat	*buf)
 {
-	struct inode *inode = inode_from_pathname(pathname);
+	struct dentry *dentry = __do_file_open(pathname, 0);
+	if (!dentry) {
+		// FILENOTFOUND
+		// ENOENT
+	}
+
+	struct inode *inode = dentry->d_inode;
 
 	if (inode == NULL) {
 		errno = ENOENT;

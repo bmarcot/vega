@@ -112,6 +112,9 @@ struct thread_info *start_kernel(void)
 	 * Initialize file-systems
 	 */
 
+	inode_init();
+	dcache_init();
+	tmpfs_init();
 	procfs_init();
 	devfs_init();
 	memdev_init();

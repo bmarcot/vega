@@ -8,6 +8,7 @@
 
 #include <libgen.h> /* for basename() */
 
+#include <kernel/dcache.h>
 #include <kernel/fdtable.h>
 #include <kernel/fs.h>
 #include <kernel/fs/romfs.h>
@@ -42,9 +43,7 @@ int romfs_mount(const char *source, const char *target,
 		const char *filesystemtype,
 		unsigned long mountflags, const void *data)
 {
-	(void)filesystemtype, (void)mountflags, (void)data;
-
-	struct inode *source_in = inode_from_pathname(source);
+	struct inode *source_in = D_INODE(__do_file_open(source, 0));
 	if (!source_in)
 		return -1;
 

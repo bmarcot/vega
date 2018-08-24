@@ -158,7 +158,6 @@ struct inode *dev_inode(void);
 struct inode *proc_inode(void);
 struct dentry *root_dentry(void);
 struct file *fget(unsigned int fd);
-struct inode *inode_from_pathname(const char *pathname);
 struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry,
 			int mode);
 
@@ -171,6 +170,7 @@ int devfs_init(void);
  */
 
 struct file	*do_file_open(const char *pathname, int flags);
+struct dentry	*__do_file_open(const char *pathname, int flags);
 ssize_t		do_file_read(struct file *file, void *buf, size_t count);
 ssize_t		do_file_write(struct file *file, void *buf, size_t count);
 off_t		do_file_lseek(struct file *file, off_t offset, int whence);
