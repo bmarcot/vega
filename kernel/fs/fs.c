@@ -271,18 +271,16 @@ SYSCALL_DEFINE(stat,
 	const char	*pathname,
 	struct stat	*buf)
 {
-	struct dentry *dentry = __do_file_open(pathname, 0);
+	struct dentry *dentry;
+	struct inode *inode;
+
+	dentry = __do_file_open(pathname, 0);
 	if (!dentry) {
-		// FILENOTFOUND
-		// ENOENT
-	}
-
-	struct inode *inode = dentry->d_inode;
-
-	if (inode == NULL) {
 		errno = ENOENT;
 		return -1;
 	}
+
+	inode = dentry->d_inode;
 	buf->st_ino = inode->i_ino;
 	buf->st_mode = inode->i_mode;
 	buf->st_size = inode->i_size;

@@ -48,7 +48,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 
@@ -59,7 +59,7 @@ struct inode *__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 	inode->i_fop = &tmpfs_fops;
@@ -72,7 +72,7 @@ struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(NULL, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
 	if (!inode)
 		return NULL;
 	init_special_inode(inode, mode, dev);
@@ -167,6 +167,8 @@ int tmpfs_delete(struct dentry *dentry)
 	return 0;
 }
 
+const struct super_operations tmpfs_sops = {0};
+
 const struct inode_operations tmpfs_iops = {
 	.lookup = tmpfs_lookup,
 	.create = tmpfs_create,
@@ -185,13 +187,18 @@ const struct dentry_operations tmpfs_dops = {
 
 static LIST_HEAD(root_dirlist);
 
+static struct super_block super_root = {
+	.s_op = &tmpfs_sops,
+};
+
 static struct dentry de_root;
 
 static struct inode in_root = {
+	.i_mode    = S_IFDIR,
 	.i_ino     = 1,
 	.i_op      = &tmpfs_iops,
 	.i_fop     = &tmpfs_fops,
-	.i_mode    = S_IFDIR,
+	.i_sb      = &super_root,
 	.i_dentry  = &de_root,
 };
 
@@ -214,6 +221,7 @@ struct dentry *root_dentry(void)
 
 void tmpfs_init(void)
 {
+	INIT_LIST_HEAD(&super_root.s_inodes);
 	INIT_LIST_HEAD(&de_root.d_subdirs);
 }
 

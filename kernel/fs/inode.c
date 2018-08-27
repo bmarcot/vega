@@ -36,10 +36,10 @@ static struct inode *__alloc_inode(struct super_block *sb)
 {
 	struct inode *inode;
 
-	/* if (sb->s_op->alloc_inode) */
-	/* 	inode = sb->s_op->alloc_inode(sb); */
-	/* else */
-	inode = kmem_cache_alloc(inode_cache, CACHE_OPT_NONE);
+	if (sb->s_op->alloc_inode)
+		inode = sb->s_op->alloc_inode(sb);
+	else
+		inode = kmem_cache_alloc(inode_cache, CACHE_OPT_NONE);
 	if (inode) {
 		inode->i_mode = 0;
 		inode->i_ino = -1;

@@ -38,6 +38,8 @@ static off_t offsetof_first_device_inode(struct romfs_superblock *super)
 	return offsetof(struct romfs_superblock, volume_name) + len;
 }
 
+const struct super_operations romfs_sops = {0};
+
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
 int romfs_mount(const char *source, const char *target,
 		const char *filesystemtype,
@@ -60,6 +62,9 @@ int romfs_mount(const char *source, const char *target,
 		kfree(target_in);
 		return -1;
 	}
+	INIT_LIST_HEAD(&super_block->s_inodes);
+	super_block->s_op = &romfs_sops;
+
 	/* super_block is found at the begining of memory area on MTD dev */
 	super_block->s_dev = source_in->i_rdev;
 	super_block->s_iroot = target_in; //FIXME: super_block must point to dentry instead of inode
