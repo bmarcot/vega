@@ -200,6 +200,8 @@ struct inode *make_nod(struct inode *dir, const char *filename, umode_t mode,
  */
 
 void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev);
-ino_t alloc_inode_ino(void);
+struct inode *new_inode(struct super_block *sb);
+
+void inode_init(void);
 
 #endif /* !_KERNEL_FS_H */

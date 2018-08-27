@@ -24,14 +24,6 @@ void init_special_inode(struct inode *inode, umode_t mode, kdev_t rdev)
 	}
 }
 
-// add to new_inode(), and overwrite ino in struct if needed
-ino_t alloc_inode_ino(void)
-{
-	static ino_t ino = 10000;
-
-	return ino++;
-}
-
 static struct inode *__alloc_inode(struct super_block *sb)
 {
 	struct inode *inode;
@@ -63,12 +55,13 @@ void put_inode(struct inode *inode)
 struct inode *new_inode(struct super_block *sb)
 {
 	struct inode *inode;
+	static ino_t last_ino = 10000;
 
 	inode = __alloc_inode(sb);
 	if (inode) {
 		//list_add(&inode->i_list, &sb->s_inodes);
 
-		//	inode->i_ino = ++last_ino;
+		inode->i_ino = ++last_ino;
 		/* 	inode->i_state = 0; */
 	}
 

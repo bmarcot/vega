@@ -25,7 +25,7 @@ int tmpfs_link(struct dentry *old_dentry, struct inode *dir,
 	return -1;
 }
 
-struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
+struct inode *tmpfs_iget(struct super_block *sb, int mode)
 {
 	struct inode *inode;
 
@@ -33,13 +33,9 @@ struct inode *tmpfs_iget(struct super_block *sb, unsigned long ino, int mode)
 	if (!inode)
 		return NULL;
 
-	inode->i_ino = ino;
-	inode->i_size = 0;
 	inode->i_op = &tmpfs_iops;
 	inode->i_fop = &tmpfs_fops;
 	inode->i_mode = mode;
-	inode->i_sb = sb;
-	inode->i_dentry = NULL;
 
 	return inode;
 }
@@ -48,7 +44,7 @@ struct inode *__tmpfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, mode);
 	if (!inode)
 		return NULL;
 
@@ -59,7 +55,7 @@ struct inode *__tmpfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, mode);
 	if (!inode)
 		return NULL;
 	inode->i_fop = &tmpfs_fops;
@@ -72,7 +68,7 @@ struct inode *__tmpfs_mknod(struct inode *dir, struct dentry *dentry,
 {
 	struct inode *inode;
 
-	inode = tmpfs_iget(dir->i_sb, alloc_inode_ino(), mode);
+	inode = tmpfs_iget(dir->i_sb, mode);
 	if (!inode)
 		return NULL;
 	init_special_inode(inode, mode, dev);
