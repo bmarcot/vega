@@ -14,6 +14,7 @@
 #include <kernel/fs/romfs.h>
 #include <kernel/fs/tmpfs.h>
 #include <kernel/kernel.h>
+#include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/stat.h>
 #include <kernel/string.h>
@@ -96,6 +97,9 @@ alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 	}
 	inode->i_size = be32_to_cpu(ri->size);
 	inode->i_sb = sb;
+	//FIXME: inode has been added to super_block's list by calling to
+	// make_dir() and creat_file(). We should build the inode from scratch
+	// instead of calling those tmpfs functions.
 
 	/* We store the offset to the on-device inode rather than the logical
 	 * address of the on-device inode, because that does not work when the

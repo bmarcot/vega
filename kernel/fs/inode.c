@@ -59,10 +59,8 @@ struct inode *new_inode(struct super_block *sb)
 
 	inode = __alloc_inode(sb);
 	if (inode) {
-		//list_add(&inode->i_list, &sb->s_inodes);
-
+		list_add(&inode->i_list, &sb->s_inodes);
 		inode->i_ino = ++last_ino;
-		/* 	inode->i_state = 0; */
 	}
 
 	return inode;
