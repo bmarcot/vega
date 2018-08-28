@@ -124,6 +124,8 @@ struct dentry *__do_file_open(const char *pathname, int flags)
 		}
 	}
 
+	path_release(&path);
+
 	return dentry;
 }
 
