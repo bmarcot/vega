@@ -15,6 +15,7 @@
 #include <kernel/fs/path.h>
 #include <kernel/fs/romfs.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
@@ -61,22 +62,19 @@ int validate_fd(unsigned int fd)
 	return 0;
 }
 
-int release_dentries(struct dentry *dentry)
+static struct dentry *dentry_open(struct inode *dir, const char *name)
 {
-	struct dentry *parent;
+	struct dentry *dentry;
 
-	for (; dentry != root_dentry(); dentry = parent) {
-		if (!dentry->d_count)
-			return -1;
-		if (--dentry->d_count)
-			break;
-		parent = dentry->d_parent;
-		vfs_release(dentry);
-		if (!dentry->d_count)
-			vfs_delete(dentry);
+	dentry = d_lookup(dir->i_dentry, name);
+	if (!dentry) {
+		//FIXME: Could alloc the dentry on the stack, then call d_instantiate
+		dentry = d_alloc(dir->i_dentry, name);
+		vfs_lookup(dir, dentry);
 	}
+	d_get(dentry);
 
-	return 0;
+	return dentry;
 }
 
 #define PATH_MAX 256
@@ -84,47 +82,36 @@ int release_dentries(struct dentry *dentry)
 struct dentry *__do_file_open(const char *pathname, int flags)
 {
 	LIST_HEAD(path);
-	static char buf[PATH_MAX];
+	char *buf;
 	struct pathcomp *comp;
 	struct dentry *parent = root_dentry();
 	struct dentry *dentry = NULL;
+	size_t pathlen = strlen(pathname);
 
-	strncpy(buf, pathname, PATH_MAX);
-	int components = path_split(&path, buf);
+	if (pathlen > PATH_MAX)
+		return NULL;
 
+	/* Duplicate string */
+	buf = kmalloc(pathlen + 1);
+	if (!buf) {
+		BUG();
+		return NULL;
+	}
+	strcpy(buf, pathname);
+
+	strcpy(buf, pathname);
+	path_split(&path, buf);
 	list_for_each_entry(comp, &path, list) {
-		dentry = d_lookup(parent, comp->name);
+		dentry = dentry_open(parent->d_inode, comp->name);
 		if (dentry) {
-			//FIXME: Increase refcount?
 			parent = dentry;
-			components--;
 		} else {
-			/*
-			 * Not found in the dentry tree, do a VFS-lookup from
-			 * the last component found (a leaf of the dentry tree).
-			 */
+			d_put_from(parent);
 			break;
 		}
 	}
-
-	if (components) {
-		list_for_each_entry_from(comp, &path, list) {
-			dentry = d_alloc(parent, comp->name);
-			vfs_lookup(parent->d_inode, dentry); // rename to do_lookup() ?
-			if (!dentry->d_inode) {
-				// File does not exist in fs!
-				//release_dentries(dentry->d_parent);
-				// release dentries from here toward root
-				//   d_put('/foo/bar/baz');
-				//   d_put('/foo/bar');     if d_count = 0
-				//   d_put('/foo');         if d_count = 0
-				return NULL;
-			}
-			parent = dentry;
-		}
-	}
-
 	path_release(&path);
+	kfree(buf);
 
 	return dentry;
 }
@@ -253,7 +240,7 @@ SYSCALL_DEFINE(lseek,
 
 int do_file_close(struct file *file)
 {
-	release_dentries(file->f_dentry);
+	d_put_from(file->f_dentry);
 	put_file(file);
 
 	return 0;
