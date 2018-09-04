@@ -158,8 +158,6 @@ struct dentry *tmpfs_lookup(struct inode *dir, struct dentry *target)
 
 int tmpfs_delete(struct dentry *dentry)
 {
-	put_dentry(dentry);
-
 	return 0;
 }
 
@@ -199,6 +197,7 @@ static struct inode in_root = {
 };
 
 static struct dentry de_root = {
+	.d_count  = -1, /* sticky file */
 	.d_inode  = &in_root,
 	.d_op     = &tmpfs_dops,
 	.d_parent = &de_root,

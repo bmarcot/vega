@@ -82,6 +82,7 @@ int initfs_mount(const char *source, const char *target,
 		return -1;
 	in->i_op = &initfs_iops;
 	in->i_private = (void *)data;
+	in->i_dentry->d_count = -1; /* sticky file */
 
 	return 0;
 }

@@ -69,6 +69,7 @@ int chrdev_add(kdev_t dev, const char *name)
 			MINOR(dev));
 		return -1;
 	}
+	inode->i_dentry->d_count = -1; /* sticky file */
 
 	return 0;
 }
@@ -115,6 +116,7 @@ int devfs_init(void)
 	dev_i = make_dir(root_inode(), "dev");
 	if (!dev_i)
 		return -1;
+	dev_i->i_dentry->d_count = -1; /* sticky file */
 
 	return 0;
 }

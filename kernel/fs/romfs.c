@@ -55,6 +55,7 @@ int romfs_mount(const char *source, const char *target,
 	if (!target_in)
 		return -1;
 	target_in->i_op = &romfs_iops;
+	target_in->i_dentry->d_count = -1; /* sticky file */
 
 	/* Allocate a super_block struct. Unmounting the filesystem will release
 	 * the super_block. */
@@ -189,7 +190,6 @@ int romfs_delete(struct dentry *dentry)
 	 * by i_sb->s_op->unmount() */
 	if (dentry->d_inode != dentry->d_inode->i_sb->s_iroot)
 		kfree(dentry->d_inode);
-	put_dentry(dentry);
 
 	return 0;
 }
