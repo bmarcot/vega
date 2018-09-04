@@ -49,7 +49,10 @@ static struct inode *__alloc_inode(struct super_block *sb)
 
 void put_inode(struct inode *inode)
 {
-	kmem_cache_free(inode_cache, inode);
+	if (inode->i_sb->s_op->destroy_inode)
+		inode->i_sb->s_op->destroy_inode(inode);
+	else
+		kmem_cache_free(inode_cache, inode);
 }
 
 struct inode *new_inode(struct super_block *sb)

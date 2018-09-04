@@ -37,6 +37,7 @@ struct super_block {
 
 struct super_operations {
 	struct inode	*(*alloc_inode)(struct super_block *sb);
+	void		(*destroy_inode)(struct inode *sb);
 	void		(*put_super) (struct super_block *);
 };
 

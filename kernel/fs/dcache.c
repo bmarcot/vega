@@ -80,8 +80,10 @@ void d_put(struct dentry *dentry)
 		pr_warn("File is sticky");
 
 	dentry->d_count--;
-	if (!dentry->d_count)
+	if (!dentry->d_count) {
+		put_inode(dentry->d_inode);
 		d_free(dentry);
+	}
 }
 
 void d_instantiate(struct dentry *dentry, struct inode *inode)
