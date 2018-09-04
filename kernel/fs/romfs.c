@@ -79,17 +79,17 @@ int romfs_mount(const char *source, const char *target,
 }
 
 static struct inode *
-alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
+alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir, struct dentry *dentry)
 {
-	struct inode *inode;
+	struct inode *inode = new_inode(sb);
 
 	switch (be32_to_cpu(ri->next_filehdr) & ROMFS_FILETYPE_MASK) {
 	case ROMFS_FILETYPE_DIR:
-		inode = make_dir(dir, ri->file_name);
+		inode->i_mode = S_IFDIR;
 		inode->i_op = &romfs_iops;
 		break;
 	case ROMFS_FILETYPE_REG:
-		inode = creat_file(dir, ri->file_name);
+		inode->i_mode = S_IFREG;
 		inode->i_fop = &romfs_fops;
 		break;
 	default:
@@ -98,6 +98,7 @@ alloc_inode(struct romfs_inode *ri, struct super_block *sb, struct inode *dir)
 	}
 	inode->i_size = be32_to_cpu(ri->size);
 	inode->i_sb = sb;
+	d_instantiate(dentry, inode);
 	//FIXME: inode has been added to super_block's list by calling to
 	// make_dir() and creat_file(). We should build the inode from scratch
 	// instead of calling those tmpfs functions.
@@ -129,7 +130,7 @@ struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
 
 	for (int i = 0; next_filehdr < rs->full_size; i++) {
 		if (!strcmp(ri->file_name, target->d_name)) {
-			struct inode *inode = alloc_inode(ri, dir->i_sb, dir);
+			struct inode *inode = alloc_inode(ri, dir->i_sb, dir, target);
 			if (inode == NULL)
 				return NULL;
 			target->d_inode = inode;
