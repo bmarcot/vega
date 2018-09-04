@@ -38,11 +38,6 @@ void put_file(struct file *file)
 	kmem_cache_free(file_cache, file);
 }
 
-void put_dentry(struct dentry *dentry)
-{
-	/* NOTHING */
-}
-
 int fd_init(void)
 {
 	files_struct_cache = KMEM_CACHE(files_struct);

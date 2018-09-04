@@ -30,6 +30,8 @@ struct dentry_operations {
 
 struct dentry	*__d_alloc(struct dentry *parent, const char *name);
 struct dentry	*d_alloc(struct dentry *parent, const char *name);
+void		d_free(struct dentry *dentry);
+void		d_put_from(struct dentry *dentry);
 void		d_put(struct dentry *dentry);
 void		d_instantiate(struct dentry *dentry, struct inode *inode);
 struct dentry	*d_lookup(const struct dentry *parent, const char *name);
