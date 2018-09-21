@@ -172,17 +172,6 @@ int romfs_mmap(struct file *file, off_t offset, void **addr)
 			&retlen, addr);
 }
 
-int romfs_delete(struct dentry *dentry)
-{
-	/* release in-memory inode */
-	/* the root inode is deleted on unmount(), operation is pointed
-	 * by i_sb->s_op->unmount() */
-	if (dentry->d_inode != dentry->d_inode->i_sb->s_iroot)
-		kfree(dentry->d_inode);
-
-	return 0;
-}
-
 const struct inode_operations romfs_iops = {
 	.lookup = romfs_lookup,
 	.create = tmpfs_create,
@@ -194,6 +183,4 @@ const struct file_operations romfs_fops = {
 	.mmap = romfs_mmap,
 };
 
-const struct dentry_operations romfs_dops = {
-	.delete = romfs_delete,
-};
+const struct dentry_operations romfs_dops = {0};
