@@ -67,7 +67,7 @@ void d_free(struct dentry *dentry)
 void d_put_from(struct dentry *dentry)
 {
 	while ((dentry->d_count > 0) && (dentry->d_parent != dentry)) {
-		struct dentry *parent = dentry;
+		struct dentry *parent = dentry->d_parent;
 		d_put(dentry);
 		dentry = parent;
 		//FIXME: Delete inode when d_count and i_count are both 0
