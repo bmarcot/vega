@@ -44,6 +44,11 @@ int mount(const char *source, const char *target, const char *filesystemtype,
 	return syscall(5, source, target, filesystemtype, mountflags, data, SYS_MOUNT);
 }
 
+int umount(const char *target)
+{
+	return syscall(1, target, SYS_UMOUNT);
+}
+
 DIR *opendir(const char *name)
 {
 	return (DIR *)syscall(2, name, O_DIRECTORY, SYS_OPEN);
