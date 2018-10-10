@@ -24,6 +24,7 @@
 const struct inode_operations romfs_iops;
 const struct file_operations romfs_fops;
 const struct dentry_operations romfs_dops;
+const struct super_operations romfs_sops;
 
 static off_t offsetof_device_inode(struct romfs_inode *rinode,
 				struct romfs_superblock *super)
@@ -39,8 +40,6 @@ static off_t offsetof_first_device_inode(struct romfs_superblock *super)
 	return offsetof(struct romfs_superblock, volume_name) + len;
 }
 
-const struct super_operations romfs_sops = {0};
-
 // mount("/dev/mtd", "/media/flash", "romfs", 0, NULL);
 int romfs_mount(const char *source, const char *target,
 		const char *filesystemtype,
@@ -55,7 +54,7 @@ int romfs_mount(const char *source, const char *target,
 	if (!target_in)
 		return -1;
 	target_in->i_op = &romfs_iops;
-	target_in->i_dentry->d_count = -1; /* sticky file - released on unmount() */
+	target_in->i_dentry->d_count = -1; /* sticky file - released by unmount() */
 
 	/* Allocate a super_block struct. Unmounting the filesystem will release
 	 * the super_block. */
@@ -76,6 +75,25 @@ int romfs_mount(const char *source, const char *target,
 	target_in->i_private = (void *)offsetof_first_device_inode(ROMFS_SB(mtd));
 
 	return 0;
+}
+
+void romfs_put_super(struct super_block *sb)
+{
+	struct inode *inode, *n;
+
+	/* Walk the list of opened inodes and free them */
+	list_for_each_entry_safe(inode, n, &sb->s_inodes, i_list) {
+		//printk("delete inode %s\n", inode->i_dentry->d_name);
+		if (inode->i_dentry)
+			d_free(inode->i_dentry);
+		put_inode(inode);
+	}
+
+	/* There is no inode for tmpfs directories */
+	d_free(sb->s_iroot->i_dentry); //FIXME: d_free(sb->s_root);
+
+	list_del(&sb->s_list);
+	kfree(sb); //FIXME: kmem_cache_free(super_cache, sb);
 }
 
 struct dentry *romfs_lookup(struct inode *dir, struct dentry *target)
@@ -184,3 +202,7 @@ const struct file_operations romfs_fops = {
 };
 
 const struct dentry_operations romfs_dops = {0};
+
+const struct super_operations romfs_sops = {
+	.put_super = romfs_put_super,
+};
