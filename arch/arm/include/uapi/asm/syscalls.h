@@ -41,5 +41,6 @@
 #define SYS_PAUSE 34
 #define SYS_TIMER_DELETE 35
 #define SYS_SIGPENDING 36
+#define SYS_UMOUNT 37
 
 #endif /* !_ASM_SYSCALLS_H */

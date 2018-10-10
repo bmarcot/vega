@@ -304,3 +304,14 @@ SYSCALL_DEFINE(mount,
 {
 	return do_filesystem_mount(source, target, filesystemtype, mountflags, data);
 }
+
+SYSCALL_DEFINE(umount, const char *target)
+{
+	struct dentry *dentry = __do_file_open(target, 0);
+	struct super_block *sb;
+
+	sb = dentry->d_inode->i_sb;
+	sb->s_op->put_super(sb);
+
+	return 0;
+}

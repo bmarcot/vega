@@ -51,6 +51,7 @@ xs = [
     # Unsorted
     'timer_delete',
     'sigpending',
+    'umount',
 ]
 
 import datetime
