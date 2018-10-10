@@ -99,7 +99,6 @@ struct dentry *__do_file_open(const char *pathname, int flags)
 	}
 	strcpy(buf, pathname);
 
-	strcpy(buf, pathname);
 	path_split(&path, buf);
 	list_for_each_entry(comp, &path, list) {
 		dentry = dentry_open(parent->d_inode, comp->name);
