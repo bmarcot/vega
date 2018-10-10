@@ -76,8 +76,10 @@ void d_put_from(struct dentry *dentry)
 
 void d_put(struct dentry *dentry)
 {
-	if (dentry->d_count == -1)
+	if (dentry->d_count == -1) {
 		pr_warn("File is sticky");
+		return;
+	}
 
 	dentry->d_count--;
 	if (!dentry->d_count) {
