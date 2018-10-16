@@ -30,6 +30,11 @@ static u32 log_first_idx;
 static u64 log_next_seq;
 static u32 log_next_idx;
 
+/* the next printk record to write to the console */
+static u64 console_seq;
+static u32 console_idx;
+
+#define CONSOLE_LOGLEVEL_MIN 0
 #define LOG_LINE_MAX 80
 
 /* Record buffer */
@@ -39,8 +44,7 @@ static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
 static char *log_buf = __log_buf;
 static u32 log_buf_len = __LOG_BUF_LEN;
 
-//FIXME: Will die
-static int print_log_line(const struct printk_log *msg)
+static int console_print_log(struct printk_log *msg)
 {
 	static char buf[LOG_LINE_MAX + 14];
 	const char *str = log_text(msg);
@@ -48,10 +52,10 @@ static int print_log_line(const struct printk_log *msg)
 	struct timespec ts = ktime_to_timespec(msg->ts_nsec);
 	if (str[msg->text_len - 1] == '\n')
 		snprintf(buf, LOG_LINE_MAX + 14, "[% 4d.%06d] %s",
-			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, log_text(msg));
+			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, str);
 	else
 		snprintf(buf, LOG_LINE_MAX + 14, "[% 4d.%06d] %s\n",
-			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, log_text(msg));
+			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, str);
 	puts(buf);
 
 	return 0;
@@ -161,16 +165,25 @@ static int log_store(int level, enum log_flags flags, u64 ts_nsec,
 	log_next_idx += msg->len;
 	log_next_seq++;
 
-	//FIXME: Will die; handle printing to the console differently
-	print_log_line(msg);
-
 	return msg->text_len;
 }
 
 static int log_output(int level, enum log_flags flags, const char *text,
 		u16 text_len)
 {
-	return log_store(level, flags, 0, text, text_len);
+	int r;
+	struct printk_log *msg;
+
+	r = log_store(level, flags, 0, text, text_len);
+	while (console_seq != log_next_seq) {
+		msg = (struct printk_log *)(log_buf + console_idx);
+		if (msg->len && (msg->level >= CONSOLE_LOGLEVEL_MIN))
+			console_print_log(msg);
+		console_idx = log_next(console_idx);
+		console_seq++;
+	}
+
+	return r;
 }
 
 int vprintk(const char *format, va_list args)
