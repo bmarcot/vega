@@ -1,6 +1,7 @@
 /*
  * kernel/printk.c
  *
+ * Copyright (c) 1991, 1992 Linus Torvalds
  * Copyright (c) 2016-2018 Benoit Marcot
  */
 
@@ -13,11 +14,8 @@
 #include <kernel/string.h>
 #include <kernel/types.h>
 
-#define VSNPRINTF_BUF_SIZE 256
-
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 int snprintf(char *str, size_t size, const char *format, ...);
-/* int sprintf(char *str, const char *format, ...); */
 void __printk_putchar(char c);
 
 extern int sched_clock_registered;
@@ -34,7 +32,6 @@ static u32 log_next_idx;
 static u64 console_seq;
 static u32 console_idx;
 
-#define CONSOLE_LOGLEVEL_MIN 0
 #define LOG_LINE_MAX 80
 
 /* Record buffer */
@@ -177,7 +174,11 @@ static int log_output(int level, enum log_flags flags, const char *text,
 	r = log_store(level, flags, 0, text, text_len);
 	while (console_seq != log_next_seq) {
 		msg = (struct printk_log *)(log_buf + console_idx);
-		if (msg->len && (msg->level >= CONSOLE_LOGLEVEL_MIN))
+		if (!msg->len) {
+			console_idx = 0;
+			msg = (struct printk_log *)log_buf;
+		}
+		if (msg->level <= CONSOLE_LOGLEVEL_DEFAULT)
 			console_print_log(msg);
 		console_idx = log_next(console_idx);
 		console_seq++;
@@ -192,7 +193,7 @@ int vprintk(const char *format, va_list args)
 	char *text = textbuf;
 	int text_len;
 	enum log_flags flags = 0;
-	int level = LOGLEVEL_DEFAULT;
+	int level = MESSAGE_LOGLEVEL_DEFAULT;
 
 	text_len = vsnprintf(text, sizeof(textbuf), format, args);
 	if (text_len < 0)
