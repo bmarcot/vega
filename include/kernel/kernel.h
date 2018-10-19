@@ -8,6 +8,7 @@
 #define _KERNEL_KERNEL_H
 
 #include <kernel/compiler.h>
+#include <kernel/printk.h>
 #include <kernel/stddef.h>
 
 /* round-down to a power of 2 */
@@ -37,23 +38,6 @@
 #  define be16_to_cpu(val)  __REV16((val))
 #  define be32_to_cpu(val)  __REV((val))
 #endif
-
-/*
- * Formatting and printing
- */
-
-int printk(const char *fmt, ...);
-
-#define pr_fmt(fmt, ...)				   \
-	do {						   \
-		printk(fmt, __func__, ##__VA_ARGS__);	   \
-	} while (0)
-
-#define make_fmt(type, fmt) type": %s: "fmt"\n"
-
-#define pr_err(fmt, ...) pr_fmt(make_fmt("error", fmt), ##__VA_ARGS__)
-#define pr_warn(fmt, ...) pr_fmt(make_fmt("warning", fmt), ##__VA_ARGS__)
-#define pr_info(fmt, ...) pr_fmt(make_fmt("info", fmt), ##__VA_ARGS__)
 
 /*
  * Bug!
