@@ -23,6 +23,7 @@ CFLAGS += \
 	-DHRTIMER_DEVICE='"$(HRTIMER_DEVICE)"'	\
 	-Wno-main				\
 	-Wno-unused-parameter			\
+	-Wno-unused-function			\
 	-fdiagnostics-color			\
 	-ffunction-sections -fdata-sections -Os \
 	-I.					\
