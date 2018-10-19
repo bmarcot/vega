@@ -55,6 +55,8 @@ static char *log_text(const struct printk_log *msg)
 	return (char *)msg + sizeof(struct printk_log);
 }
 
+int printk(const char *format, ...);
+
 /* printk's without a loglevel use this */
 #define MESSAGE_LOGLEVEL_DEFAULT CONFIG_MESSAGE_LOGLEVEL_DEFAULT
 
