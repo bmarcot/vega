@@ -42,5 +42,6 @@
 #define SYS_TIMER_DELETE 35
 #define SYS_SIGPENDING 36
 #define SYS_UMOUNT 37
+#define SYS_SYSLOG 38
 
 #endif /* !_ASM_SYSCALLS_H */

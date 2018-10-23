@@ -52,6 +52,7 @@ xs = [
     'timer_delete',
     'sigpending',
     'umount',
+    'syslog',
 ]
 
 import datetime

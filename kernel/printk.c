@@ -7,11 +7,14 @@
 
 #include <kernel/errno-base.h>
 #include <kernel/ktime.h>
+#include <kernel/mm.h>
 #include <kernel/printk.h>
 #include <kernel/sched_clock.h>
 #include <kernel/stdarg.h>
 #include <kernel/stdio.h>
 #include <kernel/string.h>
+#include <kernel/syscalls.h>
+#include <kernel/syslog.h>
 #include <kernel/types.h>
 
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
@@ -19,6 +22,11 @@ int snprintf(char *str, size_t size, const char *format, ...);
 void __printk_putchar(char c);
 
 extern int sched_clock_registered;
+
+/* The next printk record to read by syslog(READ) or /proc/kmsg */
+static u64 syslog_seq;
+static u32 syslog_idx;
+static size_t syslog_partial;
 
 /* Index number of the first record stored in the buffer */
 static u64 log_first_seq;
@@ -28,10 +36,11 @@ static u32 log_first_idx;
 static u64 log_next_seq;
 static u32 log_next_idx;
 
-/* the next printk record to write to the console */
+/* The next printk record to write to the console */
 static u64 console_seq;
 static u32 console_idx;
 
+#define PREFIX_MAX 16
 #define LOG_LINE_MAX 80
 
 /* Record buffer */
@@ -41,21 +50,33 @@ static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
 static char *log_buf = __log_buf;
 static u32 log_buf_len = __LOG_BUF_LEN;
 
+static size_t msg_print_text(const struct printk_log *msg, char *buf, size_t size);
+
 static int console_print_log(struct printk_log *msg)
 {
-	static char buf[LOG_LINE_MAX + 14];
-	const char *str = log_text(msg);
+	int len;
+	static char buf[LOG_LINE_MAX + PREFIX_MAX];
 
-	struct timespec ts = ktime_to_timespec(msg->ts_nsec);
-	if (str[msg->text_len - 1] == '\n')
-		snprintf(buf, LOG_LINE_MAX + 14, "[% 4d.%06d] %s",
-			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, str);
-	else
-		snprintf(buf, LOG_LINE_MAX + 14, "[% 4d.%06d] %s\n",
-			(int)ts.tv_sec, (int)ts.tv_nsec / 1000, str);
+	len= msg_print_text(msg, buf, LOG_LINE_MAX + PREFIX_MAX);
+	buf[len] = '\0';
 	puts(buf);
 
 	return 0;
+}
+
+/* Get record by index; idx must point to valid msg */
+static struct printk_log *log_from_idx(u32 idx)
+{
+	struct printk_log *msg = (struct printk_log *)(log_buf + idx);
+
+	/*
+	 * A length == 0 record is the end of buffer marker. Wrap around and
+	 * read the message at the start of the buffer.
+	 */
+	if (!msg->len)
+		return (struct printk_log *)log_buf;
+
+	return msg;
 }
 
 /* Get next record; idx must point to valid msg */
@@ -199,6 +220,13 @@ int vprintk(const char *format, va_list args)
 	if (text_len < 0)
 		return -1;
 
+	/* Mark and strip a trailing newline */
+	if (text_len && text[text_len-1] == '\n') {
+		text_len--;
+		flags |= LOG_NEWLINE;
+	}
+
+	/* Strip kernel syslog prefix and extract log level or control flags */
 	int kern_level;
 	if ((kern_level = printk_get_level(text)) != 0) {
 		switch (kern_level) {
@@ -229,4 +257,106 @@ int printk(const char *format, ...)
 	va_end(args);
 
 	return r;
+}
+
+static size_t msg_print_text(const struct printk_log *msg, char *buf, size_t size)
+{
+	const char *text = log_text(msg);
+	struct timespec ts;
+	int prefix_len;
+
+	ts = ktime_to_timespec(msg->ts_nsec);
+	prefix_len = snprintf(buf, size, "[% 4d.%06d] ", (int)ts.tv_sec,
+			(int)ts.tv_nsec / 1000);
+	for (int i = 0; i < msg->text_len; i++)
+		buf[prefix_len + i] = text[i];
+	buf[prefix_len + msg->text_len] = '\n';
+
+	return prefix_len + msg->text_len + 1;
+}
+
+static int syslog_print(char *buf, int size)
+{
+	char *text;
+	struct printk_log *msg;
+	int len = 0;
+
+	text = kmalloc(LOG_LINE_MAX + PREFIX_MAX);
+	if (!text)
+		return -ENOMEM;
+
+	while (size > 0) {
+		size_t n;
+		size_t skip;
+
+		if (syslog_seq < log_first_seq) {
+			/* Messages are gone, move to first one */
+			syslog_seq = log_first_seq;
+			syslog_idx = log_first_idx;
+			syslog_partial = 0;
+		}
+		if (syslog_seq == log_next_seq)
+			break;
+
+		skip = syslog_partial;
+		msg = log_from_idx(syslog_idx);
+		n = msg_print_text(msg, text, LOG_LINE_MAX + PREFIX_MAX);
+		if (n - syslog_partial <= (size_t)size) {
+			/* Message fits into buffer, move forward */
+			syslog_idx = log_next(syslog_idx);
+			syslog_seq++;
+			n -= syslog_partial;
+			syslog_partial = 0;
+		} else if (!len) {
+			/* Partial read(), remember position */
+			n = size;
+			syslog_partial += n;
+		} else {
+			n = 0;
+		}
+
+		if (!n)
+			break;
+
+		//FIXME: copy_to_user(...)
+		memcpy(buf, text + skip, n);
+
+		len += n;
+		size -= n;
+		buf += n;
+	}
+
+	return len;
+}
+
+int do_syslog(int type, char *buf, int len)
+{
+	int error = 0;
+
+	switch (type) {
+	case SYSLOG_ACTION_READ:	/* Read from log */
+		if (!buf || len < 0)
+			return -EINVAL;
+		if (!len)
+			return 0;
+		/* error = wait_event_interruptible(log_wait, */
+		/* syslog_seq != log_next_seq); */
+		/* if (error) */
+		/* 	return error; */
+		error = syslog_print(buf, len);
+		break;
+	default:
+		error = -EINVAL;
+		break;
+	}
+
+	return error;
+}
+
+SYSCALL_DEFINE(syslog,
+	int		type,
+	char		*buf,
+	int		len)
+{
+	return do_syslog(type, buf, len);
 }
