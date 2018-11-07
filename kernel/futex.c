@@ -1,15 +1,16 @@
 /*
  * kernel/futex.c
  *
- * Copyright (c) 2017 Baruch Marcot
- *
+ * Copyright (c) 2017-2018 Benoit Marcot
  */
 
 #include <kernel/errno-base.h>
 #include <kernel/futex.h>
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <kernel/sched.h>
 #include <kernel/syscalls.h>
+#include <kernel/wait.h>
 
 #include <asm/current.h>
 
@@ -17,42 +18,51 @@
 
 static LIST_HEAD(futexes);
 
-int futex_wait(int *uaddr, int val)
+static struct futex *find_futex_by_lock_ptr(int *uaddr)
 {
-	if (*uaddr == val) {
-		struct futex futex = {
-			.lock_ptr = uaddr,
-			.task = current,
-		};
-		list_add(&futex.list, &futexes);
+	struct futex *futex;
 
-		set_current_state(TASK_UNINTERRUPTIBLE);
-
-		schedule();
+	list_for_each_entry(futex, &futexes, list) {
+		if (futex->lock_ptr == uaddr)
+			return futex;
 	}
 
-	return 0;
+	return NULL;
+}
+
+int futex_wait(int *uaddr, int val)
+{
+	struct futex *futex;
+	int retval;
+
+	if (*uaddr != val)
+		return 0;
+
+	futex = find_futex_by_lock_ptr(uaddr);
+	if (!futex) {
+		futex = kmalloc(sizeof(struct futex));
+		futex->lock_ptr = uaddr;
+		INIT_LIST_HEAD(&futex->wq_head);
+		list_add(&futex->list, &futexes);
+	}
+	retval = wait_event(&futex->wq_head, *uaddr != val);
+	if (list_empty(&futex->wq_head)) {
+		list_del(&futex->list);
+		kfree(futex);
+	}
+
+	return retval;
 }
 
 int futex_wake(int *uaddr, int val)
 {
-	struct futex *futex, *temp;
-	int wake_count = 0;
+	struct futex *futex;
 
 	if (!val)
 		return 0;
+	futex = find_futex_by_lock_ptr(uaddr);
 
-	list_for_each_entry_safe(futex, temp, &futexes, list) {
-		if (futex->lock_ptr == uaddr) {
-			list_del(&futex->list);
-			set_task_state(futex->task, TASK_RUNNING);
-			wake_count++;
-			if (--val == 0)
-				break;
-		}
-	}
-
-	return wake_count;
+	return wake_up(&futex->wq_head, val);
 }
 
 SYSCALL_DEFINE(futex,
