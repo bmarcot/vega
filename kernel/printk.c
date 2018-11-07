@@ -7,6 +7,7 @@
 
 #include <kernel/errno-base.h>
 #include <kernel/ktime.h>
+#include <kernel/list.h>
 #include <kernel/mm.h>
 #include <kernel/printk.h>
 #include <kernel/sched_clock.h>
@@ -16,12 +17,15 @@
 #include <kernel/syscalls.h>
 #include <kernel/syslog.h>
 #include <kernel/types.h>
+#include <kernel/wait.h>
 
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 int snprintf(char *str, size_t size, const char *format, ...);
 void __printk_putchar(char c);
 
 extern int sched_clock_registered;
+
+static LIST_HEAD(log_wait);
 
 /* The next printk record to read by syslog(READ) or /proc/kmsg */
 static u64 syslog_seq;
@@ -204,6 +208,7 @@ static int log_output(int level, enum log_flags flags, const char *text,
 		console_idx = log_next(console_idx);
 		console_seq++;
 	}
+	wake_up(&log_wait, 1);
 
 	return r;
 }
@@ -339,10 +344,9 @@ int do_syslog(int type, char *buf, int len)
 			return -EINVAL;
 		if (!len)
 			return 0;
-		/* error = wait_event_interruptible(log_wait, */
-		/* syslog_seq != log_next_seq); */
-		/* if (error) */
-		/* 	return error; */
+		error = wait_event(&log_wait, syslog_seq != log_next_seq);
+		if (error)
+			return error;
 		error = syslog_print(buf, len);
 		break;
 	default:
