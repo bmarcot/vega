@@ -10,30 +10,37 @@
 #include <kernel/list.h>
 #include <kernel/sched.h>
 
-// move to another function default_wake_up()..
-#include <asm/current.h>
+struct wait_queue_entry;
 
-struct wq_entry {
-	struct task_struct	*tsk;
+typedef int (*wait_queue_func_t)(struct wait_queue_entry *wq_entry);
+//int default_wake_function(struct wait_queue_entry *wq_entry);
+
+struct wait_queue_entry {
+	void			*private;
+	wait_queue_func_t	func;
 	struct list_head	list;
 };
 
+int wake_up(struct list_head *wq_head, int nr);
+
+void init_wait_queue_entry(struct wait_queue_entry *wq_entry);
+
 #define wait_event(wq_head, condition)				\
 	({							\
-		struct wq_entry __wq_entry;			\
-		list_add(&__wq_entry.list, wq_head);		\
+		struct wait_queue_entry __wq_entry;		\
+		long __ret = 0;					\
+		init_wait_queue_entry(&__wq_entry);		\
 		for (;;) {					\
+			/*list_add(&__wq_entry.list, wq_head);*/	\
+			prepare_to_wait_event(wq_head, &__wq_entry, 0);	\
 			if (condition)				\
 				break;				\
-			sched_dequeue(current);			\
-			current->state = TASK_UNINTERRUPTIBLE;	\
-			__wq_entry.tsk = current;		\
+			/*sched_dequeue(current);*/		\
+			/*current->state = TASK_UNINTERRUPTIBLE;*/	\
 			schedule();				\
 		}						\
-		list_del(&__wq_entry.list);			\
-		0;						\
+		finish_wait(&__wq_entry);			\
+		__ret;						\
 	})
-
-int wake_up(struct list_head *wq_head, int nr);
 
 #endif /* !_KERNEL_WAIT_H */
