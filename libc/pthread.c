@@ -150,8 +150,10 @@ void __pthread_exit(void *retval, struct pthread *pthread)
 	} else {
 		pthread->flags |= PF_EXITING;
 		pthread->retval = retval;
-		if (pthread->joiner)
+		if (pthread->joiner) {
+			pthread->lock = 1;
 			futex((int *)&pthread->lock, FUTEX_WAKE, 1);
+		}
 	}
 	syscall(1, retval, SYS_EXIT);
 
