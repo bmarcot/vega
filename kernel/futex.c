@@ -26,9 +26,7 @@ int futex_wait(int *uaddr, int val)
 		};
 		list_add(&futex.list, &futexes);
 
-		sched_dequeue(current);
-		//FIXME: Interrupting is possible; return EINTR
-		current->state = TASK_UNINTERRUPTIBLE;
+		set_current_state(TASK_UNINTERRUPTIBLE);
 
 		schedule();
 	}
@@ -47,7 +45,7 @@ int futex_wake(int *uaddr, int val)
 	list_for_each_entry_safe(futex, temp, &futexes, list) {
 		if (futex->lock_ptr == uaddr) {
 			list_del(&futex->list);
-			sched_enqueue(futex->task); // task_wake();
+			set_task_state(futex->task, TASK_RUNNING);
 			wake_count++;
 			if (--val == 0)
 				break;

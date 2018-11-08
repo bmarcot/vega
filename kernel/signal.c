@@ -307,7 +307,6 @@ SYSCALL_DEFINE(sigpending,
 SYSCALL_DEFINE(pause, void)
 {
 	while (!signal_pending(current)) {
-		sched_dequeue(current);
 		set_current_state(TASK_INTERRUPTIBLE);
 		schedule();
 	}

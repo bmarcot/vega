@@ -36,7 +36,7 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 
 	/* This is valid because we only support vfork(), and parent is not
 	 * running while child is running. */
-	sched_enqueue(tsk->parent); // ???  wake_up_process...
+	set_task_state(tsk->parent, TASK_RUNNING);
 
 	if (!sig_ignore(current, sig)) {
 		q.flags = SIGQUEUE_PREALLOC;
@@ -53,9 +53,11 @@ static int do_notify_parent(struct task_struct *tsk, int sig)
 static void exit_notify(struct task_struct *tsk)
 {
 	int autoreap;
+	int state;
 
 	autoreap = do_notify_parent(tsk, tsk->exit_signal);
-	tsk->state = autoreap ? EXIT_DEAD : EXIT_ZOMBIE;
+	state = autoreap ? EXIT_DEAD : EXIT_ZOMBIE;
+	set_task_state(tsk, state);
 
 	/* If the process is dead, release it - nobody will wait for it */
 	if (autoreap)
@@ -64,7 +66,6 @@ static void exit_notify(struct task_struct *tsk)
 
 void do_exit(int exit_code)
 {
-	sched_dequeue(current);
 	mm_release();
 	if (signal_group_exit(current->signal))
 		current->exit_code = current->signal->group_exit_code;
@@ -72,7 +73,7 @@ void do_exit(int exit_code)
 		current->exit_code = exit_code;
 	exit_notify(current);
 	if (current->state == EXIT_DEAD)
-		current->state = TASK_DEAD;
+		set_task_state(current, TASK_DEAD);
 
 	schedule();
 

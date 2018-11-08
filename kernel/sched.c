@@ -35,28 +35,6 @@ static struct task_struct *pick_next_task(void)
 	return list_first_entry(&pri_runq[max_pri], struct task_struct, rq);
 }
 
-int sched_enqueue(struct task_struct *task)
-{
-	/* idle task is never in the runqueue */
-	if (task == idle_task)
-		return 0;
-
-	task->state = TASK_RUNNING;
-	list_add_tail(&task->rq, &pri_runq[task->prio]);
-	bitmap_set_bit(&pri_bitmap, task->prio);
-
-	return 0;
-}
-
-int sched_dequeue(struct task_struct *task)
-{
-	list_del(&task->rq);
-	if (list_empty(&pri_runq[task->prio]))
-		bitmap_clear_bit(&pri_bitmap, task->prio);
-
-	return 0;
-}
-
 int schedule(void)
 {
 	struct task_struct *next = pick_next_task();
@@ -66,6 +44,21 @@ int schedule(void)
 
 	if (unlikely(prev->state == TASK_DEAD))
 		put_task_struct(prev);
+
+	return 0;
+}
+
+int set_task_state(struct task_struct *tsk, int state)
+{
+	if ((state == TASK_RUNNING) && (tsk->state != TASK_RUNNING)) {
+		list_add_tail(&tsk->rq, &pri_runq[tsk->prio]);
+		bitmap_set_bit(&pri_bitmap, tsk->prio);
+	} else if ((state != TASK_RUNNING) && (tsk->state == TASK_RUNNING)) {
+		list_del_init(&tsk->rq);
+		if (list_empty(&pri_runq[tsk->prio]))
+			bitmap_clear_bit(&pri_bitmap, tsk->prio);
+	}
+	tsk->state = state;
 
 	return 0;
 }
@@ -100,7 +93,7 @@ int wake_up_process(struct task_struct *tsk)
 
 	if (!pri_bitmap)
 		need_resched = 1;
-	sched_enqueue(tsk);
+	set_task_state(tsk, TASK_RUNNING);
 	if (need_resched)
 		return schedule();
 

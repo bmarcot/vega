@@ -26,7 +26,7 @@ static enum hrtimer_restart nanosleep_callback(struct hrtimer *timer)
 	struct hrtimer_sleeper *hs =
 		container_of(timer, struct hrtimer_sleeper, timer);
 
-	sched_enqueue(hs->task);
+	set_task_state(hs->task, TASK_RUNNING);
 
 	// set TIF_RESCHED if runqueue is empty? do sched_yield() from userland
 	//schedule();
@@ -49,8 +49,7 @@ SYSCALL_DEFINE(nanosleep,
 	hs.task = current;
 	hrtimer_start(timer, timespec_to_ktime(*req));
 
-	sched_dequeue(current);
-	current->state = TASK_INTERRUPTIBLE;
+	set_current_state(TASK_INTERRUPTIBLE);
 
 	schedule();
 

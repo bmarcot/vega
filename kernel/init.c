@@ -66,7 +66,7 @@ struct task_struct *alloc_init_task(void)
 	task_thread_info(init)->user.regs->r0 = (u32)main;
 
 	add_task(init);
-	sched_enqueue(init);
+	set_task_state(init, TASK_RUNNING);
 
 	return init;
 }

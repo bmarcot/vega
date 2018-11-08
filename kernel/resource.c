@@ -68,13 +68,8 @@ SYSCALL_DEFINE(setpriority,
 		current->prio = prio;
 		return 0;
 	} else {
-		return -1; // find task by pid
-		struct task_struct *tsk = 0;
-		tsk->prio = prio;
-		if (tsk->state == TASK_RUNNING) {
-			sched_dequeue(tsk);
-			sched_enqueue(tsk);
-		}
+		/* UNIMPLEMENTED */
+		return -1;
 	}
 
 	return 0;

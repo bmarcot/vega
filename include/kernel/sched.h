@@ -65,9 +65,11 @@ struct task_struct {
 	struct files_struct	*files;
 };
 
+int set_task_state(struct task_struct *tsk, int state);
+
 #define set_current_state(state_value)			\
 	do {						\
-		current->state = (state_value);		\
+		set_task_state(current, (state_value));	\
 	} while (0)
 
 #ifdef CONFIG_THREAD_INFO_IN_TASK
@@ -80,8 +82,6 @@ static inline struct thread_info *task_thread_info(struct task_struct *tsk)
 #endif
 
 int sched_init(void);
-int sched_enqueue(struct task_struct *task);
-int sched_dequeue(struct task_struct *task);
 int schedule(void);
 int wake_up_process(struct task_struct *tsk);
 

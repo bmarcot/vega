@@ -13,7 +13,7 @@
 
 void serialchar_callback(struct serial_info *serial)
 {
-	sched_enqueue(serial->owner);
+	set_task_state(serial->owner, TASK_RUNNING);
 	schedule();
 }
 
@@ -35,7 +35,7 @@ ssize_t serialchar_read(struct file *file, char *buf, size_t count, off_t offset
 	struct serial_info *serial = file->f_private;
 
 	while (serial->rx_count < count) {
-		sched_dequeue(current);
+		set_current_state(TASK_INTERRUPTIBLE);
 		schedule();
 	}
 	if (count == 1)

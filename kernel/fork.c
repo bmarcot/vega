@@ -40,9 +40,9 @@ SYSCALL_DEFINE(vfork, void)
 	child->thread_info.user.regs->r0 = 0; // arch_thread_set_retval(child, 0);
 
 	/* calling thread is suspended until the child terminates */
-	sched_dequeue(current);
-	set_current_state(TASK_UNINTERRUPTIBLE);
-	sched_enqueue(child);
+	set_task_state(current, TASK_UNINTERRUPTIBLE);
+	set_task_state(child, TASK_RUNNING);
+
 	schedule();
 
 	return child->tgid;
@@ -62,7 +62,7 @@ SYSCALL_DEFINE(clone,
 	tsk = do_clone(flags, child_stack, regs);
 	if (!tsk)
 		return -1;
-	sched_enqueue(tsk);
+	set_task_state(tsk, TASK_RUNNING);
 
 	return tsk->pid;
 }
