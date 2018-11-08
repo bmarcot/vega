@@ -1,7 +1,7 @@
 /*
  * include/kernel/list.h
  *
- * Copyright (c) 2017 Benoit Marcot
+ * Copyright (c) 2017 Linux
  */
 
 #ifndef _KERNEL_LIST_H
