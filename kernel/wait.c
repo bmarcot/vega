@@ -6,6 +6,7 @@
 
 #include <kernel/list.h>
 #include <kernel/sched.h>
+#include <kernel/signal.h>
 #include <kernel/wait.h>
 
 int default_wake_function(struct wait_queue_entry *wq_entry)
@@ -36,10 +37,17 @@ void init_wait_queue_entry(struct wait_queue_entry *wq_entry)
 int prepare_to_wait_event(struct list_head *wq_head,
 			struct wait_queue_entry *wq_entry, int state)
 {
-	set_current_state(TASK_UNINTERRUPTIBLE);
-	list_add(&wq_entry->list, wq_head);
+	int ret = 0;
 
-	return 0;
+	if (unlikely(signal_pending_state(state, current))) {
+		list_del_init(&wq_entry->list);
+		ret = -ERESTARTSYS;
+	} else {
+		list_add(&wq_entry->list, wq_head);
+		set_current_state(state);
+	}
+
+	return ret;
 }
 
 void finish_wait(struct wait_queue_entry *wq_entry)

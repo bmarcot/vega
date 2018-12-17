@@ -27,19 +27,44 @@ int prepare_to_wait_event(struct list_head *wq_head,
 			struct wait_queue_entry *wq_entry, int state);
 void finish_wait(struct wait_queue_entry *wq_entry);
 
-#define wait_event(wq_head, condition)				\
-	({							\
-		struct wait_queue_entry __wq_entry;		\
-		long __ret = 0;					\
-		init_wait_queue_entry(&__wq_entry);		\
-		for (;;) {					\
-			prepare_to_wait_event(wq_head, &__wq_entry, 0);	\
-			if (condition)				\
-				break;				\
-			schedule();				\
-		}						\
-		finish_wait(&__wq_entry);			\
-		__ret;						\
+#define ERESTARTSYS 1
+
+#define __wait_event(wq_head, condition, state)				\
+	({								\
+		struct wait_queue_entry __wq_entry;			\
+		long __ret = 0;						\
+		init_wait_queue_entry(&__wq_entry);			\
+		for (;;) {						\
+			long __int = prepare_to_wait_event(wq_head, &__wq_entry, state); \
+			if (condition)					\
+				break;					\
+			if (__int) {					\
+				__ret = __int;				\
+				goto __out;				\
+			}						\
+			schedule();					\
+		}							\
+		finish_wait(&__wq_entry);				\
+	__out:	__ret;							\
+	})
+
+
+#define wait_event_interruptible(wq_head, condition)			\
+	({								\
+		int __ret = 0;						\
+		/* might_sleep(); */					\
+		if (!(condition))					\
+			__ret = __wait_event(wq_head, condition, TASK_INTERRUPTIBLE); \
+		__ret;							\
+	})
+
+#define wait_event(wq_head, condition)					\
+	({								\
+		int __ret = 0;						\
+		/* might_sleep(); */					\
+		if (!(condition))					\
+			__ret = __wait_event(wq_head, condition, TASK_UNINTERRUPTIBLE); \
+		__ret;							\
 	})
 
 #endif /* !_KERNEL_WAIT_H */
