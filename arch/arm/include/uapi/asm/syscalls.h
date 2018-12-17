@@ -43,5 +43,8 @@
 #define SYS_SIGPENDING 36
 #define SYS_UMOUNT 37
 #define SYS_SYSLOG 38
+#define SYS_MQ_OPEN 39
+#define SYS_MQ_SEND 40
+#define SYS_MQ_RECEIVE 41
 
 #endif /* !_ASM_SYSCALLS_H */
