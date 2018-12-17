@@ -88,8 +88,12 @@ SYSCALL_DEFINE(mq_receive,
 	struct mqmsg *msg;
 	int len;
 
-	if (!(mqdes->flags & O_NONBLOCK))
-		wait_event(&mqdes->wq_head, !list_empty(&mqdes->msg_head));
+	if (!(mqdes->flags & O_NONBLOCK)) {
+		int retval = wait_event_interruptible(&mqdes->wq_head,
+						!list_empty(&mqdes->msg_head));
+		if (retval == -ERESTARTSYS)
+			return -EINTR;
+	}
 
 	msg = list_first_entry_or_null(&mqdes->msg_head, struct mqmsg, list);
 	if (!msg) {
