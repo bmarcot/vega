@@ -176,6 +176,16 @@ static inline int signal_pending(struct task_struct *p)
 	return test_tsk_thread_flag(p, TIF_SIGPENDING);
 }
 
+static inline int signal_pending_state(int state, struct task_struct *p)
+{
+	if (!(state & TASK_INTERRUPTIBLE))
+		return 0;
+	if (!signal_pending(p))
+		return 0;
+
+	return state & TASK_INTERRUPTIBLE /* || __fatal_signal_pending(p) */;
+}
+
 static inline void init_sigpending(struct sigpending *sig)
 {
 	sigemptyset(&sig->signal);
