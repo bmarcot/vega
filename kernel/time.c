@@ -7,18 +7,19 @@
 #include <kernel/errno-base.h>
 #include <kernel/hrtimer.h>
 #include <kernel/ktime.h>
-#include <kernel/sched.h>
 #include <kernel/signal.h>
 #include <kernel/syscalls.h>
 #include <kernel/time.h>
+#include <kernel/wait.h>
 
 #include <kernel/clockevents.h> // see comment below
 
 #include <asm/current.h>
 
 struct hrtimer_sleeper {
-	struct hrtimer timer;
-	struct task_struct *task;
+	struct hrtimer		timer;
+	int			expired;
+	struct list_head	wq_head;
 };
 
 static enum hrtimer_restart nanosleep_callback(struct hrtimer *timer)
@@ -26,7 +27,8 @@ static enum hrtimer_restart nanosleep_callback(struct hrtimer *timer)
 	struct hrtimer_sleeper *hs =
 		container_of(timer, struct hrtimer_sleeper, timer);
 
-	set_task_state(hs->task, TASK_RUNNING);
+	hs->expired = 1;
+	wake_up(&hs->wq_head, 1);
 
 	// set TIF_RESCHED if runqueue is empty? do sched_yield() from userland
 	//schedule();
@@ -46,14 +48,13 @@ SYSCALL_DEFINE(nanosleep,
 
 	hrtimer_init(timer);
 	timer->function = nanosleep_callback;
-	hs.task = current;
 	hrtimer_start(timer, timespec_to_ktime(*req));
+	hs.expired = 0;
+	INIT_LIST_HEAD(&hs.wq_head);
 
-	set_current_state(TASK_INTERRUPTIBLE);
-
-	schedule();
-
-	if (signal_pending(current)) {
+	int retval = wait_event_interruptible(&hs.wq_head, hs.expired == 1);
+	if (retval == -ERESTARTSYS) {
+		BUG_ON(hs.expired);
 		// does not work if more than one timer between head and this timer
 		ktime_t elapsed = clockevents_read_elapsed(timer->dev);
 		if (rem)
