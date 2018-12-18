@@ -8,6 +8,7 @@
 #include <kernel/list.h>
 #include <kernel/mqueue.h>
 #include <kernel/mm.h>
+#include <kernel/types.h>
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
 #include <kernel/wait.h>
@@ -30,9 +31,28 @@ static struct mqdes *find_mq_by_name(const char *name)
 	return NULL;
 }
 
+static void init_mq_attr(struct mq_attr *attr, const struct mq_attr *other,
+	int oflag)
+{
+	if (other) {
+		memcpy(attr, other, sizeof(*attr));
+	} else {
+		attr->mq_maxmsg = 10;
+		attr->mq_msgsize = 256;
+		attr->mq_curmsgs = 0;
+	}
+	attr->mq_flags = oflag & O_NONBLOCK; /* 0 or O_NONBLOCK */
+}
+
+/* mqd_t mq_open(const char *name, int oflag); */
+/* mqd_t mq_open(const char *name, int oflag, mode_t mode, */
+/* 	struct mq_attr *attr); */
+
 SYSCALL_DEFINE(mq_open,
 	const char	*name,
-	int		oflag)
+	int		oflag,
+	mode_t		mode,
+	struct mq_attr	*attr)
 {
 	struct mqdes *mqdes;
 
@@ -48,6 +68,7 @@ SYSCALL_DEFINE(mq_open,
 			mqdes = kmalloc(sizeof(struct mqdes));
 			strncpy(mqdes->name, name, 16);
 			mqdes->flags = oflag;
+			init_mq_attr(&mqdes->attr, attr, oflag);
 			list_add(&mqdes->list, &mq_head);
 			INIT_LIST_HEAD(&mqdes->msg_head);
 			INIT_LIST_HEAD(&mqdes->wq_head);
