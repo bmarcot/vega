@@ -63,8 +63,10 @@ static inline struct thread_info *current_thread_info(void)
 	return thread;
 }
 
-#define TIF_SIGPENDING	0	/* signal pending */
+#define TIF_SIGPENDING		0	/* signal pending */
+#define TIF_NEED_RESCHED	1	/* rescheduling necessary */
 
-#define _TIF_SIGPENDING	(1 << TIF_SIGPENDING)
+#define _TIF_SIGPENDING		(1 << TIF_SIGPENDING)
+#define _TIF_NEED_RESCHED	(1 << TIF_NEED_RESCHED)
 
 #endif /* !_ASM_THREAD_INFO_H */
