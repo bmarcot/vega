@@ -93,7 +93,13 @@ int wake_up_process(struct task_struct *tsk)
 
 	if (!pri_bitmap)
 		need_resched = 1;
+
+	struct task_struct *next = pick_next_task();
+	if (next->prio >= tsk->prio)
+		need_resched = 1;
+
 	set_task_state(tsk, TASK_RUNNING);
+
 	if (need_resched)
 		return schedule();
 
