@@ -40,8 +40,8 @@ int schedule(void)
 	struct task_struct *next = pick_next_task();
 	struct task_struct *prev = current;
 
+	clear_tsk_need_resched(prev);
 	switch_to(prev, next, prev);
-
 	if (unlikely(prev->state == TASK_DEAD))
 		put_task_struct(prev);
 
@@ -101,7 +101,7 @@ int wake_up_process(struct task_struct *tsk)
 	set_task_state(tsk, TASK_RUNNING);
 
 	if (need_resched)
-		return schedule();
+		set_tsk_need_resched(current);
 
 	return 0;
 }
