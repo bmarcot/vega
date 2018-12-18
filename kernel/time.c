@@ -16,6 +16,8 @@
 
 #include <asm/current.h>
 
+#include <errno.h> //FIXME
+
 struct hrtimer_sleeper {
 	struct hrtimer		timer;
 	int			expired;
@@ -54,12 +56,15 @@ SYSCALL_DEFINE(nanosleep,
 
 	int retval = wait_event_interruptible(&hs.wq_head, hs.expired == 1);
 	if (retval == -ERESTARTSYS) {
-		BUG_ON(hs.expired);
-		// does not work if more than one timer between head and this timer
+		hrtimer_cancel(timer);
+		errno = EINTR;
+
+		//FIXME: Does not work if more than one timer between head and this timer
 		ktime_t elapsed = clockevents_read_elapsed(timer->dev);
 		if (rem)
 			*rem = ktime_to_timespec(timer->expires - elapsed);
-		return -EINTR;
+
+		return -1;
 	}
 
 	if (rem) {
