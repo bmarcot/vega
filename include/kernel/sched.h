@@ -7,6 +7,7 @@
 #ifndef _KERNEL_SCHED_H
 #define _KERNEL_SCHED_H
 
+#include <kernel/compiler.h>
 #include <kernel/signal_types.h>
 #include <kernel/thread_info.h>
 #include <kernel/types.h>
@@ -114,9 +115,39 @@ static inline int thread_group_leader(struct task_struct *tsk)
 	return tsk->exit_signal >= 0;
 }
 
+/*
+ * Set thread flags in other task's structures.
+ * See asm/thread_info.h for TIF_xxxx flags available:
+ */
+
+static inline void set_tsk_thread_flag(struct task_struct *tsk, int flag)
+{
+	set_ti_thread_flag(task_thread_info(tsk), flag);
+}
+
+static inline void clear_tsk_thread_flag(struct task_struct *tsk, int flag)
+{
+	clear_ti_thread_flag(task_thread_info(tsk), flag);
+}
+
 static inline int test_tsk_thread_flag(struct task_struct *tsk, int flag)
 {
 	return test_ti_thread_flag(task_thread_info(tsk), flag);
+}
+
+static inline void set_tsk_need_resched(struct task_struct *tsk)
+{
+	set_tsk_thread_flag(tsk,TIF_NEED_RESCHED);
+}
+
+static inline void clear_tsk_need_resched(struct task_struct *tsk)
+{
+	clear_tsk_thread_flag(tsk,TIF_NEED_RESCHED);
+}
+
+static inline int test_tsk_need_resched(struct task_struct *tsk)
+{
+	return unlikely(test_tsk_thread_flag(tsk,TIF_NEED_RESCHED));
 }
 
 #endif /* !_KERNEL_SCHED_H */

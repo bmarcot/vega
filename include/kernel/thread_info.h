@@ -1,7 +1,7 @@
 /*
  * include/kernel/thread_info.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017 Benoit Marcot
  */
 
 #ifndef _KERNEL_THREAD_INFO_H
