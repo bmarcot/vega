@@ -91,8 +91,10 @@ SYSCALL_DEFINE(mq_receive,
 	if (!(mqdes->flags & O_NONBLOCK)) {
 		int retval = wait_event_interruptible(&mqdes->wq_head,
 						!list_empty(&mqdes->msg_head));
-		if (retval == -ERESTARTSYS)
-			return -EINTR;
+		if (retval == -ERESTARTSYS) {
+			errno = EINTR;
+			return -1;
+		}
 	}
 
 	msg = list_first_entry_or_null(&mqdes->msg_head, struct mqmsg, list);
