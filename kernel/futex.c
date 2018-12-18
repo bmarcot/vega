@@ -16,6 +16,8 @@
 
 #include <uapi/kernel/futex.h>
 
+#include <errno.h> //FIXME
+
 static LIST_HEAD(futexes);
 
 static struct futex *find_futex_by_lock_ptr(int *uaddr)
@@ -45,7 +47,13 @@ int futex_wait(int *uaddr, int val)
 		INIT_LIST_HEAD(&futex->wq_head);
 		list_add(&futex->list, &futexes);
 	}
-	retval = wait_event(&futex->wq_head, *uaddr != val);
+
+	retval = wait_event_interruptible(&futex->wq_head, *uaddr != val);
+	if (retval == -ERESTARTSYS) {
+		errno = EINTR;
+		retval = -1;
+	}
+
 	if (list_empty(&futex->wq_head)) {
 		list_del(&futex->list);
 		kfree(futex);
