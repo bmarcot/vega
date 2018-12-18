@@ -45,23 +45,23 @@ static void setup_sigframe(struct sigqueue *q, struct sigaction *sa)
 		regs->lr = 0;
 	regs->pc = (u32)v7m_clear_thumb_bit(sa->sa_handler);
 	regs->status = xPSR_T_Msk;
-
-	/* unset the TIF_SIGPENDING flags */
-	clear_thread_flag(TIF_SIGPENDING);
 }
 
 void __do_signal(int signo, struct sigqueue *sig)
 {
+	clear_thread_flag(TIF_SIGPENDING);
 	setup_sigframe(sig, &current->sighand->action[signo - 1]);
 }
 
 void do_notify_resume(int syscall_retval)
 {
-	/* save the return value that will be restored by sigreturn() */
+	/* Save the return value that will be restored by sigreturn() */
 	current_thread_info()->user.regs->r0 = syscall_retval;
 
 	if (test_thread_flag(TIF_SIGPENDING))
 		do_signal();
+	if (test_thread_flag(TIF_NEED_RESCHED))
+		schedule();
 }
 
 void do_notify(void)
