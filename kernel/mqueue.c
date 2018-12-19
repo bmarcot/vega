@@ -19,11 +19,6 @@
 
 static LIST_HEAD(mq_head);
 
-static inline int test_mq_attr_nonblock(struct mq_attr *attr)
-{
-	return attr->mq_flags & O_NONBLOCK;
-}
-
 static struct mqdes *find_mq_by_name(const char *name)
 {
 	struct mqdes *mq;
