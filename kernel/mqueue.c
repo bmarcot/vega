@@ -10,6 +10,7 @@
 #include <kernel/mm.h>
 #include <kernel/string.h>
 #include <kernel/syscalls.h>
+#include <kernel/types.h>
 #include <kernel/wait.h>
 
 #include <uapi/kernel/fcntl.h>
@@ -30,9 +31,24 @@ static struct mqdes *find_mq_by_name(const char *name)
 	return NULL;
 }
 
+static void init_mq_attr(struct mq_attr *attr, const struct mq_attr *other,
+	int oflag)
+{
+	if (other) {
+		memcpy(attr, other, sizeof(*attr));
+	} else {
+		attr->mq_maxmsg = 10;
+		attr->mq_msgsize = 256;
+		attr->mq_curmsgs = 0;
+	}
+	attr->mq_flags = oflag & O_NONBLOCK; /* 0 or O_NONBLOCK */
+}
+
 SYSCALL_DEFINE(mq_open,
 	const char	*name,
-	int		oflag)
+	int		oflag,
+	mode_t		mode,
+	struct mq_attr	*attr)
 {
 	struct mqdes *mqdes;
 
@@ -47,7 +63,7 @@ SYSCALL_DEFINE(mq_open,
 		if (!mqdes && (oflag & O_CREAT)) {
 			mqdes = kmalloc(sizeof(struct mqdes));
 			strncpy(mqdes->name, name, 16);
-			mqdes->flags = oflag;
+			init_mq_attr(&mqdes->attr, attr, oflag);
 			list_add(&mqdes->list, &mq_head);
 			INIT_LIST_HEAD(&mqdes->msg_head);
 			INIT_LIST_HEAD(&mqdes->wq_head);
@@ -67,13 +83,24 @@ SYSCALL_DEFINE(mq_send,
 {
 	struct mqmsg *new;
 
+	/* Test for empty message queue */
+	if (mqdes->attr.mq_curmsgs == mqdes->attr.mq_maxmsg) {
+		if (test_mq_attr_nonblock(&mqdes->attr)) {
+			errno = EAGAIN;
+			return -1;
+		} else {
+			/* Block until another thread pops a message */
+		}
+	}
+
 	new = kmalloc(sizeof(*new) + msg_len);
 	if (!new)
 		return -1;
 	new->len = msg_len;
 	memcpy(new->msg_ptr, msg_ptr, msg_len);
+	mqdes->attr.mq_curmsgs++;
 	list_add_tail(&new->list, &mqdes->msg_head);
-	if (!(mqdes->flags & O_NONBLOCK))
+	if (!test_mq_attr_nonblock(&mqdes->attr))
 		wake_up(&mqdes->wq_head, 1);
 
 	return 0;
@@ -88,7 +115,7 @@ SYSCALL_DEFINE(mq_receive,
 	struct mqmsg *msg;
 	int len;
 
-	if (!(mqdes->flags & O_NONBLOCK)) {
+	if (!test_mq_attr_nonblock(&mqdes->attr)) {
 		int retval = wait_event_interruptible(&mqdes->wq_head,
 						!list_empty(&mqdes->msg_head));
 		if (retval == -ERESTARTSYS) {
@@ -99,6 +126,10 @@ SYSCALL_DEFINE(mq_receive,
 
 	msg = list_first_entry_or_null(&mqdes->msg_head, struct mqmsg, list);
 	if (!msg) {
+		/* Woke up on new message, but empty message queue */
+		if (!test_mq_attr_nonblock(&mqdes->attr))
+			BUG();
+
 		errno = EAGAIN;
 		return -1;
 	}
