@@ -9,6 +9,7 @@
 
 #include <kernel/types.h>
 
+#include <uapi/kernel/fcntl.h>
 #include <uapi/kernel/mqueue.h>
 
 struct mqdes {
