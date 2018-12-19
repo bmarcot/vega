@@ -8,13 +8,7 @@
 #define _KERNEL_MQUEUE_H
 
 #include <kernel/types.h>
-
-struct mq_attr {
-	long	mq_flags;	/* Flags: 0 or O_NONBLOCK */
-	long	mq_maxmsg;	/* Max. # of messages on queue */
-	long	mq_msgsize;	/* Max. message size (bytes) */
-	long	mq_curmsgs;	/* # of messages currently in queue */
-};
+#include <uapi/kernel/mqueue.h>
 
 struct mqdes {
 	char			name[16]; //FIXME: This will be replaced by an inode in tmpfs
