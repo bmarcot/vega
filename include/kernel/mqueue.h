@@ -8,12 +8,13 @@
 #define _KERNEL_MQUEUE_H
 
 #include <kernel/types.h>
+
 #include <uapi/kernel/mqueue.h>
 
 struct mqdes {
-	char			name[16]; //FIXME: This will be replaced by an inode in tmpfs
+	char			name[16];  //FIXME: This will be replaced by an inode in tmpfs
 	struct mq_attr		attr;
-	int			flags; //XXX: Will die
+	int			flags;     //XXX: Will die
 	struct list_head	list;
 	struct list_head	msg_head;
 	struct list_head	wq_head;
@@ -24,5 +25,10 @@ struct mqmsg {
 	struct list_head	list;
 	char			msg_ptr[0];
 };
+
+static inline int test_mq_attr_nonblock(struct mq_attr *attr)
+{
+	return attr->mq_flags & O_NONBLOCK;
+}
 
 #endif /* !_KERNEL_MQUEUE_H */
