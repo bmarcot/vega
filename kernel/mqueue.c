@@ -19,6 +19,11 @@
 
 static LIST_HEAD(mq_head);
 
+static inline int test_mq_attr_nonblock(struct mq_attr *attr)
+{
+	return attr->mq_flags & O_NONBLOCK;
+}
+
 static struct mqdes *find_mq_by_name(const char *name)
 {
 	struct mqdes *mq;
@@ -43,10 +48,6 @@ static void init_mq_attr(struct mq_attr *attr, const struct mq_attr *other,
 	}
 	attr->mq_flags = oflag & O_NONBLOCK; /* 0 or O_NONBLOCK */
 }
-
-/* mqd_t mq_open(const char *name, int oflag); */
-/* mqd_t mq_open(const char *name, int oflag, mode_t mode, */
-/* 	struct mq_attr *attr); */
 
 SYSCALL_DEFINE(mq_open,
 	const char	*name,
@@ -88,11 +89,22 @@ SYSCALL_DEFINE(mq_send,
 {
 	struct mqmsg *new;
 
+	/* Test for empty message queue */
+	if (mqdes->attr.mq_curmsgs == mqdes->attr.mq_maxmsg) {
+		if (test_mq_attr_nonblock(&mqdes->attr)) {
+			errno = EAGAIN;
+			return -1;
+		} else {
+			// can block
+		}
+	}
+
 	new = kmalloc(sizeof(*new) + msg_len);
 	if (!new)
 		return -1;
 	new->len = msg_len;
 	memcpy(new->msg_ptr, msg_ptr, msg_len);
+	mqdes->attr.mq_curmsgs++;
 	list_add_tail(&new->list, &mqdes->msg_head);
 	if (!(mqdes->flags & O_NONBLOCK))
 		wake_up(&mqdes->wq_head, 1);
