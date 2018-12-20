@@ -15,7 +15,6 @@
 struct mqdes {
 	char			name[16];  //FIXME: This will be replaced by an inode in tmpfs
 	struct mq_attr		attr;
-	int			flags;     //XXX: Will die
 	struct list_head	list;
 	struct list_head	msg_head;
 	struct list_head	wq_head;
