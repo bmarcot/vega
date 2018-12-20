@@ -63,7 +63,6 @@ SYSCALL_DEFINE(mq_open,
 		if (!mqdes && (oflag & O_CREAT)) {
 			mqdes = kmalloc(sizeof(struct mqdes));
 			strncpy(mqdes->name, name, 16);
-			mqdes->flags = oflag;
 			init_mq_attr(&mqdes->attr, attr, oflag);
 			list_add(&mqdes->list, &mq_head);
 			INIT_LIST_HEAD(&mqdes->msg_head);
@@ -101,7 +100,7 @@ SYSCALL_DEFINE(mq_send,
 	memcpy(new->msg_ptr, msg_ptr, msg_len);
 	mqdes->attr.mq_curmsgs++;
 	list_add_tail(&new->list, &mqdes->msg_head);
-	if (!(mqdes->flags & O_NONBLOCK))
+	if (!test_mq_attr_nonblock(&mqdes->attr))
 		wake_up(&mqdes->wq_head, 1);
 
 	return 0;
@@ -116,7 +115,7 @@ SYSCALL_DEFINE(mq_receive,
 	struct mqmsg *msg;
 	int len;
 
-	if (!(mqdes->flags & O_NONBLOCK)) {
+	if (!test_mq_attr_nonblock(&mqdes->attr)) {
 		int retval = wait_event_interruptible(&mqdes->wq_head,
 						!list_empty(&mqdes->msg_head));
 		if (retval == -ERESTARTSYS) {
@@ -127,6 +126,10 @@ SYSCALL_DEFINE(mq_receive,
 
 	msg = list_first_entry_or_null(&mqdes->msg_head, struct mqmsg, list);
 	if (!msg) {
+		// woke up on new message, but no message in queue...
+		if (!test_mq_attr_nonblock(&mqdes->attr))
+			BUG();
+
 		errno = EAGAIN;
 		return -1;
 	}
