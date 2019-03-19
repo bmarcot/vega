@@ -11,5 +11,4 @@ run: $(NAME).elf
 		-machine lm3s6965evb	\
 		-d unimp		\
 		-D qemu.log		\
-		-icount 1		\
 		-kernel $^
