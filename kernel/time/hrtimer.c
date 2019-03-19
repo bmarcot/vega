@@ -1,7 +1,7 @@
 /*
  * kernel/time/hrtimer.c
  *
- * Copyright (c) 2017-2018 Benoit Marcot
+ * Copyright (c) 2017-2019 Benoit Marcot
  */
 
 #include <kernel/clockevents.h>
@@ -32,6 +32,10 @@ static void hrtimer_reprogram(void)
 	} else {
 		ktime_t expires = hrtimer_get_next_event();
 		struct hrtimer *timer = list_first_entry(&hrtimers, struct hrtimer, list);
+
+		/* hrtimer just emulates a periodic timer */
+		clockevents_switch_state(timer->dev, CLOCK_EVT_STATE_ONESHOT);
+
 		clockevents_program_event(timer->dev, expires);
 	}
 }
