@@ -46,5 +46,6 @@
 #define SYS_MQ_OPEN 39
 #define SYS_MQ_SEND 40
 #define SYS_MQ_RECEIVE 41
+#define SYS_IOCTL 42
 
 #endif /* !_ASM_SYSCALLS_H */
