@@ -95,6 +95,7 @@ struct file_operations {
 	ssize_t (*read) (struct file *file, char *buf, size_t count, off_t offset);
 	ssize_t (*write) (struct file *file, const char *buf, size_t count, off_t *offset);
 	int     (*iterate) (struct file *file, struct dir_context *ctx);
+	long    (*ioctl) (struct file *file, unsigned int cmd, unsigned long arg);
 	int     (*mmap) (struct file *file, off_t offset, void **addr); /* struct vm_area_struct *area */
 	int     (*open) (struct inode *inode, struct file *file);
 };
