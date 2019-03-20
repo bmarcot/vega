@@ -64,6 +64,7 @@ CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard system/*.c)		\
 	libc/vega/stubs.c		\
 	libc/vega/mman.c		\
+	libc/vega/ioctl.c		\
 	$(LIBVEGA_CSRC)			\
 
 OBJS += $(SSRC:.S=.o) $(CSRC:.c=.o)
