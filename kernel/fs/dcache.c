@@ -1,7 +1,7 @@
 /*
  * kernel/dcache.c
  *
- * Copyright (c) 2018 Benoit Marcot
+ * Copyright (c) 2018-2019 Benoit Marcot
  */
 
 #include <kernel/fs.h>
@@ -114,4 +114,10 @@ int dcache_init(void)
 	BUG_ON(!dentry_cache);
 
 	return 0;
+}
+
+/* will die */
+void set_sticky_dentry(struct dentry *dentry)
+{
+	dentry->d_count = -1;
 }

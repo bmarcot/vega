@@ -1,7 +1,7 @@
 /*
  * include/kernel/dcache.h
  *
- * Copyright (c) 2018 Benoit Marcot
+ * Copyright (c) 2018-2019 Benoit Marcot
  */
 
 #ifndef _KERNEL_DCACHE_H
@@ -36,7 +36,8 @@ void		d_put(struct dentry *dentry);
 void		d_instantiate(struct dentry *dentry, struct inode *inode);
 struct dentry	*d_lookup(const struct dentry *parent, const char *name);
 
-int		dcache_init(void); //dcache_init
+int		dcache_init(void);
+void		set_sticky_dentry(struct dentry *dentry); /* will die */
 
 #define D_INODE(dentry) ((dentry)->d_inode)
 
