@@ -1,14 +1,14 @@
 /*
  * kernel/fs/proc.c
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2019 Benoit Marcot
  */
 
-#include <string.h>
 #include <sys/param.h>
 
 #include <kernel/fs.h>
 #include <kernel/kernel.h>
+#include <kernel/string.h>
 
 // https://linux.die.net/lkmpg/x861.html
 // https://lwn.net/Articles/22355/
@@ -40,8 +40,6 @@ static int open_meminfo(__unused struct inode *inode,
 
 static ssize_t read_meminfo(struct file *file, char *buf, size_t count, off_t offset)
 {
-	(void)file;
-
 	memcpy(buf, (void *)offset, count);
 
 	return count;
@@ -68,16 +66,19 @@ void procfs_init(void)
 		pr_err("Cannot create /proc");
 		return;
 	}
+	set_sticky_dentry(proc->i_dentry);
 
 	/* create /proc/version */
 	inode = creat_file(proc, "version");
 	if (!inode)
 		pr_warn("Cannot create /proc/version");
 	inode->i_fop = &version_fops;
+	set_sticky_dentry(inode->i_dentry);
 
 	/* create /proc/meminfo */
 	inode = creat_file(proc, "meminfo");
 	if (!inode)
 		pr_warn("Cannot create /proc/meminfo");
 	inode->i_fop = &meminfo_fops;
+	set_sticky_dentry(inode->i_dentry);
 }
