@@ -46,6 +46,7 @@ int idle_init(void);
 void __printk_init(void);
 int minishell(void *options);
 void memdev_init(void);
+void clockchar_init(void);
 void kernel_heap_init(void *heap_start, size_t heap_size);
 int open(const char *pathname, int flags);
 
@@ -119,6 +120,7 @@ struct thread_info *start_kernel(void)
 	devfs_init();
 	memdev_init();
 	mtdchar_init();
+	clockchar_init();
 
 	pr_info("Mount /init filesystem");
 	do_filesystem_mount(NULL, "/init", "initfs", 0, &_binary_initrd_img_start);

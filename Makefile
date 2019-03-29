@@ -61,6 +61,7 @@ CSRC += $(wildcard kernel/*.c)		\
 	$(wildcard drivers/char/*.c)	\
 	$(wildcard drivers/mtd/*.c)	\
 	$(wildcard drivers/serial/serial*.c) \
+	$(wildcard drivers/clockevents/clockchar.c) \
 	$(wildcard system/*.c)		\
 	libc/vega/stubs.c		\
 	libc/vega/mman.c		\
