@@ -1,7 +1,7 @@
 /*
  * include/kernel/fs.h
  *
- * Copyright (c) 2016-2018 Benoit Marcot
+ * Copyright (c) 2016-2019 Benoit Marcot
  */
 
 #ifndef _KERNEL_FS_H
@@ -36,9 +36,9 @@ struct super_block {
 };
 
 struct super_operations {
-	struct inode	*(*alloc_inode)(struct super_block *sb);
-	void		(*destroy_inode)(struct inode *sb);
-	void		(*put_super) (struct super_block *);
+	struct inode	*(*alloc_inode) (struct super_block *sb);
+	void		(*destroy_inode) (struct inode *sb);
+	void		(*put_super) (struct super_block *sb);
 };
 
 /*
@@ -60,8 +60,8 @@ struct inode {
 	const struct file_operations  *i_fop;        /* default inode ops */
 	struct super_block            *i_sb;         /* associated superblock */
 	struct dentry                 *i_dentry;     /* 1-to-1 relation between inode and dentry */
+	struct cdev                   *i_cdev;       /* character device pointer */
 	void                          *i_private;    /* fs or device private pointer */
-	char                          i_data[0];
 };
 
 struct inode_operations {
