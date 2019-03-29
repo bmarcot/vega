@@ -1,12 +1,13 @@
 /*
  * include/kernel/clockevents.h
  *
- * Copyright (c) 2017-2018 Benoit Marcot
+ * Copyright (c) 2017-2019 Benoit Marcot
  */
 
 #ifndef _KERNEL_CLOCKEVENTS_H
 #define _KERNEL_CLOCKEVENTS_H
 
+#include <kernel/cdev.h>
 #include <kernel/types.h>
 
 #include <asm/ktime.h>
@@ -48,6 +49,9 @@ struct clock_event_device {
 	 * returns the number of micrtoseconds since last clockevent expired.
 	 */
 	ktime_t	(*read_elapsed) (struct clock_event_device *);
+
+	struct cdev		char_dev;
+	void			*private_data;
 };
 
 /* Helpers to verify state of a clockevent device */

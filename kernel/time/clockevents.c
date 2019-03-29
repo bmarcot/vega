@@ -36,6 +36,18 @@ struct clock_event_device *clockevents_get_device(const char *name)
 	return NULL;
 }
 
+struct clock_event_device *clockevents_get_device2(dev_t devt)
+{
+	struct clock_event_device *dev;
+
+	list_for_each_entry(dev, &clockevent_devices, list) {
+		if (dev->char_dev.dev == devt)
+			return dev;
+	}
+
+	return NULL;
+}
+
 void clockevents_list_devices(void)
 {
 	struct clock_event_device *dev;
