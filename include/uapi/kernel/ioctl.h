@@ -41,12 +41,12 @@
  * is reading. _IOR means userland is reading and kernel is writing.
  */
 #define _IO(type, nr)		  _IOC(_IOC_NONE, (type), (nr), 0)
-#define _IOR(type, nr, size)	  _IOC(_IOC_READ, (type), (nr), sizeof((size)))
-#define _IOW(type, nr, size)	  _IOC(_IOC_WRITE, (type), (nr), sizeof((size)))
-#define _IOWR(type, nr, size)	  _IOC(_IOC_READ|_IOC_WRITE, (type), (nr), sizeof((size)))
-#define _IOR_BAD(type, nr, size)  _IOC(_IOC_READ, (type), (nr), sizeof((size)))
-#define _IOW_BAD(type, nr, size)  _IOC(_IOC_WRITE, (type), (nr), sizeof((size)))
-#define _IOWR_BAD(type, nr, size) _IOC(_IOC_READ|_IOC_WRITE, (type), (nr), sizeof((size)))
+#define _IOR(type, nr, size)	  _IOC(_IOC_READ, (type), (nr), sizeof(size))
+#define _IOW(type, nr, size)	  _IOC(_IOC_WRITE, (type), (nr), sizeof(size))
+#define _IOWR(type, nr, size)	  _IOC(_IOC_READ|_IOC_WRITE, (type), (nr), sizeof(size))
+#define _IOR_BAD(type, nr, size)  _IOC(_IOC_READ, (type), (nr), sizeof(size))
+#define _IOW_BAD(type, nr, size)  _IOC(_IOC_WRITE, (type), (nr), sizeof(size))
+#define _IOWR_BAD(type, nr, size) _IOC(_IOC_READ|_IOC_WRITE, (type), (nr), sizeof(size))
 
 /* Used to decode ioctl numbers */
 #define _IOC_DIR(nr)	(((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
