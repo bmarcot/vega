@@ -1,7 +1,7 @@
 /*
  * drivers/clockevents/timer-lm3s.c
  *
- * Copyright (c) 2017-2018 Benoit Marcot
+ * Copyright (c) 2017-2019 Benoit Marcot
  */
 
 #include <kernel/clockevents.h>
@@ -109,7 +109,9 @@ static struct lm3s_clockevent lm3s_clockevent = {
 		.irq = Timer0A_IRQn,
 		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
 		.set_state_shutdown = lm3s_clkevt_set_state_shutdown,
+
 		.read_elapsed = lm3s_clkevt_read_elapsed,
+		.char_dev = {0},
 	},
 	.hw = TIMER0,
 };
@@ -128,6 +130,8 @@ void lm3s_timer_interrupt(void)
 		lm3s_clockevent.dev.event_handler(&lm3s_clockevent.dev);
 }
 
+int clockchar_dev_register(struct clock_event_device *, int);
+
 int lm3s_timer_init(/* struct device_node *node */)
 {
 	/*
@@ -141,6 +145,8 @@ int lm3s_timer_init(/* struct device_node *node */)
 	NVIC_EnableIRQ(lm3s_clockevent.dev.irq);
 	if (clockevents_register_device(&lm3s_clockevent.dev))
 		return -1;
+
+	clockchar_dev_register(&lm3s_clockevent.dev, 0);
 
 	return 0;
 }
