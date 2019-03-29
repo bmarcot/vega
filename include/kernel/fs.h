@@ -98,6 +98,7 @@ struct file_operations {
 	long    (*ioctl) (struct file *file, unsigned int cmd, unsigned long arg);
 	int     (*mmap) (struct file *file, off_t offset, void **addr); /* struct vm_area_struct *area */
 	int     (*open) (struct inode *inode, struct file *file);
+	int     (*release) (struct inode *inode, struct file *file);
 };
 
 /*
