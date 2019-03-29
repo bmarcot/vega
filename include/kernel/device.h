@@ -1,7 +1,7 @@
 /*
  * include/kernel/device.h
  *
- * Copyright (c) 2017 Baruch Marcot
+ * Copyright (c) 2017-2019 Benoit Marcot
  */
 
 #ifndef _KERNEL_DEVICE_H
@@ -63,5 +63,9 @@ static inline void dev_set_devt(struct device *dev, dev_t devt)
 int device_add(struct device *dev);
 struct device *device_get(dev_t devt);
 struct device *device_alloc(void);
+
+int register_chrdev(unsigned int major, unsigned int baseminor,
+		unsigned int count, const char *name,
+		const struct file_operations *fops);
 
 #endif /* !_KERNEL_DEVICE_H */
