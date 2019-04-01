@@ -57,14 +57,29 @@ static int lm3s_clkevt_set_next_ktime(ktime_t expires,
 	return 0;
 }
 
+static int lm3s_clkevt_set_state_periodic(struct clock_event_device *dev)
+{
+	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
+
+	/* Disable timer before making any changes */
+	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
+
+	/* Reconfigure as a 32-bit periodic timer */
+	hw->CFG = GPTM_GPTMCFG_GPTMCFG_32BitTimer;
+	hw->TAMR = GPTM_GPTMTAMR_TAMR_Periodic << GPTM_GPTMTAMR_TAMR_Pos;
+
+	return 0;
+}
+
 static int lm3s_clkevt_set_state_oneshot(struct clock_event_device *dev)
 {
 	TIMER_Type *hw = container_of(dev, struct lm3s_clockevent, dev)->hw;
 
-	/* Ensure the timer is disabled before making any changes */
+	/* Disable timer before making any changes */
 	hw->CTL &= ~GPTM_GPTMCTL_TAEN_Msk;
 
-	hw->CFG = 0;
+	/* Reconfigure as a 32-bit one-shot timer */
+	hw->CFG = GPTM_GPTMCFG_GPTMCFG_32BitTimer;
 	hw->TAMR = GPTM_GPTMTAMR_TAMR_OneShot << GPTM_GPTMTAMR_TAMR_Pos;
 
 	return 0;
@@ -105,8 +120,9 @@ static struct lm3s_clockevent lm3s_clockevent = {
 		.name = "lm3s-timer0",
 		.mult = 174762667,
 		.shift = 21,
-		.features = CLOCK_EVT_FEAT_ONESHOT,
+		.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 		.irq = Timer0A_IRQn,
+		.set_state_periodic = lm3s_clkevt_set_state_periodic,
 		.set_state_oneshot = lm3s_clkevt_set_state_oneshot,
 		.set_state_shutdown = lm3s_clkevt_set_state_shutdown,
 
