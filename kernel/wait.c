@@ -1,7 +1,7 @@
 /*
  * kernel/wait.c
  *
- * Copyright (c) 2018 Benoit Marcot
+ * Copyright (c) 2018-2019 Benoit Marcot
  */
 
 #include <kernel/list.h>
@@ -13,7 +13,7 @@ int default_wake_function(struct wait_queue_entry *wq_entry)
 {
 	set_task_state(wq_entry->private, TASK_RUNNING);
 
-	return 0;
+	return 1;
 }
 
 int autoremove_wake_function(struct wait_queue_entry *wq_entry)
